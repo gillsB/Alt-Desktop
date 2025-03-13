@@ -102,23 +102,28 @@ function SelectOption(props: {
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const devMode = process.env.NODE_ENV === "development";
   return (
     <header>
-      <div className="menu-container">
-        <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)}>
-          Devtools
-        </button>
-        {menuOpen && (
-          <div className="dropdown-menu">
-            <button
-              onClick={() => window.electron.sendFrameAction("SHOW_DEVTOOLS")}
-            >
-              Show Devtools
-            </button>
-          </div>
-        )}
-      </div>
+      {devMode && (
+        <div className="menu-container">
+          <button
+            className="menu-button"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            Devtools
+          </button>
+          {menuOpen && (
+            <div className="dropdown-menu">
+              <button
+                onClick={() => window.electron.sendFrameAction("SHOW_DEVTOOLS")}
+              >
+                Show Devtools
+              </button>
+            </div>
+          )}
+        </div>
+      )}
       <div className="window-controls">
         <button
           id="minimize"
@@ -142,7 +147,6 @@ function Header() {
     </header>
   );
 }
-
 function useStaticData() {
   const [staticData, setStaticData] = useState<StaticData | null>(null);
 
