@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "types": ["./types"],
+    "jsx": "react-jsx",
+    "target": "es5",
+    "lib": ["dom", "es6", "dom.iterable", "scripthost"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "incremental": true
+  },
+  "include": ["src", "tests", "e2e/example.spec.ts"],
+  "exclude": ["src/electron"],
+}
