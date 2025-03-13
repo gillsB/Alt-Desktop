@@ -1,6 +1,6 @@
 # Alt-Desktop
 
-An extremely customizable Desktop Alternative.
+An extremely customizable Desktop Alternative. Re-write from the ground up in Electron as opposed to the [python build](https://github.com/gillsB/Alternative-Desktop-Python).
 
 ## REQ:
 
