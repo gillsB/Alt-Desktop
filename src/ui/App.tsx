@@ -101,26 +101,44 @@ function SelectOption(props: {
 }
 
 function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header>
-      <button
-        id="minimize"
-        onClick={() => window.electron.sendFrameAction("MINIMIZE")}
-      >
-        ─
-      </button>
-      <button
-        id="maximize"
-        onClick={() => window.electron.sendFrameAction("MAXIMIZE")}
-      >
-        <span className="maximize-icon"></span>
-      </button>
-      <button
-        id="close"
-        onClick={() => window.electron.sendFrameAction("CLOSE")}
-      >
-        ✕
-      </button>
+      <div className="menu-container">
+        <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)}>
+          Devtools
+        </button>
+        {menuOpen && (
+          <div className="dropdown-menu">
+            <button
+              onClick={() => window.electron.sendFrameAction("SHOW_DEVTOOLS")}
+            >
+              Show Devtools
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="window-controls">
+        <button
+          id="minimize"
+          onClick={() => window.electron.sendFrameAction("MINIMIZE")}
+        >
+          ─
+        </button>
+        <button
+          id="maximize"
+          onClick={() => window.electron.sendFrameAction("MAXIMIZE")}
+        >
+          <span className="maximize-icon"></span>
+        </button>
+        <button
+          id="close"
+          onClick={() => window.electron.sendFrameAction("CLOSE")}
+        >
+          ✕
+        </button>
+      </div>
     </header>
   );
 }
