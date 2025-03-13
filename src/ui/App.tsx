@@ -23,13 +23,10 @@ function App() {
   const activeUsages = useMemo(() => {
     switch (activeView) {
       case "CPU":
-        console.log("cpu");
         return cpuUsages;
       case "RAM":
-        console.log("ram");
         return ramUsages;
       case "STORAGE":
-        console.log("storage");
         return storageUsages;
     }
   }, [activeView, cpuUsages, ramUsages, storageUsages]);

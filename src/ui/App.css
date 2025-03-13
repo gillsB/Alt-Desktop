@@ -61,6 +61,7 @@ header {
 .window-controls {
   display: flex;
   gap: 0;
+  margin-left: auto;
 }
 
 .window-controls button {
