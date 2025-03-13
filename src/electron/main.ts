@@ -65,6 +65,9 @@ app.on("ready", () => {
       case "CLOSE":
         mainWindow.close();
         break;
+      case "SHOW_DEVTOOLS":
+        mainWindow.webContents.openDevTools();
+        break;
     }
   });
 
