@@ -24,6 +24,7 @@ app.on("ready", () => {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
+    mainWindow.maximize();
   });
 
   pollResources(mainWindow);
