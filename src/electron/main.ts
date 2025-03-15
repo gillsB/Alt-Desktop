@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen } from "electron";
+import { app, BrowserWindow } from "electron";
 import { createMenu } from "./menu.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { getStaticData, pollResources } from "./resourceManager.js";
@@ -11,6 +11,7 @@ import { ipcMainHandle, ipcMainOn, isDev } from "./util.js";
 app.on("ready", () => {
   const mainWindow = new BrowserWindow({
     show: false,
+    backgroundColor: "#000000",
     webPreferences: {
       // preload function to allow only specific functions to communicate with from the ui.
       preload: getPreloadPath(),
@@ -23,25 +24,8 @@ app.on("ready", () => {
     mainWindow.loadFile(getUIPath());
   }
 
-  mainWindow.webContents.once("did-finish-load", async () => {
-    // Wait a bit to ensure layout is settled
-    setTimeout(async () => {
-      const { width, height } = await mainWindow.webContents.executeJavaScript(`
-        (function() {
-          const rect = document.documentElement.getBoundingClientRect();
-          return { width: Math.ceil(rect.width), height: Math.ceil(rect.height) };
-        })();
-      `);
-
-      // Ensure window doesn't exceed screen size
-      const { width: maxWidth, height: maxHeight } =
-        screen.getPrimaryDisplay().workAreaSize;
-      const newWidth = Math.min(width, maxWidth);
-      const newHeight = Math.min(height, maxHeight);
-
-      mainWindow.setSize(newWidth, newHeight);
-      mainWindow.show(); // Show after resizing
-    }, 100); // Small delay to ensure layout settles
+  mainWindow.once("ready-to-show", () => {
+    mainWindow.show();
   });
 
   pollResources(mainWindow);
