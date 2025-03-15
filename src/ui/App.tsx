@@ -117,7 +117,9 @@ function Header() {
           {menuOpen && (
             <div className="dropdown-menu">
               <button
-                onClick={() => window.electron.sendFrameAction("SHOW_DEVTOOLS")}
+                onClick={() =>
+                  window.electron.sendHeaderAction("SHOW_DEVTOOLS")
+                }
               >
                 Show Devtools
               </button>
@@ -128,19 +130,19 @@ function Header() {
       <div className="window-controls">
         <button
           id="minimize"
-          onClick={() => window.electron.sendFrameAction("MINIMIZE")}
+          onClick={() => window.electron.sendHeaderAction("MINIMIZE")}
         >
           ─
         </button>
         <button
           id="maximize"
-          onClick={() => window.electron.sendFrameAction("MAXIMIZE")}
+          onClick={() => window.electron.sendHeaderAction("MAXIMIZE")}
         >
           <span className="maximize-icon"></span>
         </button>
         <button
           id="close"
-          onClick={() => window.electron.sendFrameAction("CLOSE")}
+          onClick={() => window.electron.sendHeaderAction("CLOSE")}
         >
           ✕
         </button>

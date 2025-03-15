@@ -33,7 +33,7 @@ app.on("ready", () => {
     return getStaticData();
   });
 
-  ipcMainOn("sendFrameAction", (payload) => {
+  ipcMainOn("sendHeaderAction", (payload) => {
     switch (payload) {
       case "MINIMIZE":
         mainWindow.minimize();
