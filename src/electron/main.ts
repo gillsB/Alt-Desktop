@@ -1,5 +1,4 @@
 import { app, BrowserWindow } from "electron";
-import { createMenu } from "./menu.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { getStaticData, pollResources } from "./resourceManager.js";
 import { createTray } from "./tray.js";
@@ -56,7 +55,6 @@ app.on("ready", () => {
 
   createTray(mainWindow);
   handleCloseEvents(mainWindow);
-  createMenu(mainWindow);
 });
 
 function handleCloseEvents(mainWindow: BrowserWindow) {
