@@ -11,7 +11,6 @@ import { ipcMainHandle, ipcMainOn, isDev } from "./util.js";
 app.on("ready", () => {
   const mainWindow = new BrowserWindow({
     show: false,
-    backgroundColor: "#000000",
     webPreferences: {
       // preload function to allow only specific functions to communicate with from the ui.
       preload: getPreloadPath(),

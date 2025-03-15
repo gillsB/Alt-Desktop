@@ -40,6 +40,10 @@ function App() {
       <div className="App">
         <Header />
         <div className="main">
+          <video id="video-bg" autoPlay loop muted>
+            <source src="background.mp4" type="video/mp4" />
+            Browser does not support the video tag.
+          </video>
           <div>
             <SelectOption
               title="CPU"
