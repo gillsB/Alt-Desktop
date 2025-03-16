@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import { Chart } from "./Chart";
+import DesktopGrid from "./components/DesktopGrid";
 import { useStatistics } from "./useStatistics";
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
               maxDataPoints={10}
             ></Chart>
           </div>
+          <DesktopGrid />
         </div>
       </div>
     </>
