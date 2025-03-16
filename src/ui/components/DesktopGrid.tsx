@@ -21,19 +21,35 @@ const DesktopGrid: React.FC = () => {
         <div
           key={icon.id}
           style={{
-            width: icon.width,
-            height: icon.height,
             position: "absolute",
             left: icon.x,
             top: icon.y,
-            backgroundImage: `url(${icon.image})`,
-            backgroundSize: "contain",
-            backgroundRepeat: "no-repeat",
+            width: icon.width,
+            height: icon.height + 30,
             textAlign: "center",
-            cursor: "pointer",
           }}
         >
-          <p>{icon.name}</p>
+          {/* Icon */}
+          <div
+            style={{
+              width: icon.width,
+              height: icon.height,
+              backgroundImage: `url(${icon.image})`,
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              marginBottom: "10px",
+            }}
+          ></div>
+
+          {/* Icon Name */}
+
+          <p
+            style={{
+              margin: 0,
+            }}
+          >
+            {icon.name}
+          </p>
         </div>
       ))}
     </div>
