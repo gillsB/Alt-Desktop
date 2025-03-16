@@ -46,6 +46,9 @@ const DesktopGrid: React.FC = () => {
           <p
             style={{
               margin: 0,
+              color: "white",
+              textShadow:
+                "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
             }}
           >
             {icon.name}
