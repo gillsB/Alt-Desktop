@@ -1,11 +1,10 @@
 export interface DesktopIcon {
-  id: string;
+  row: number;
+  col: number;
   name: string;
   width: number;
   height: number;
   image: string;
-  x: number;
-  y: number;
   link?: string;
   fontColor?: string;
 }

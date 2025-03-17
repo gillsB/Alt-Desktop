@@ -2,27 +2,36 @@ import React, { useState } from "react";
 import "../App.css";
 import { DesktopIcon } from "../models/DesktopIcon";
 
+const ICON_SIZE = 100;
+
 const DesktopGrid: React.FC = () => {
-  // Testing with just a pre-defined icons.
   const [icons, setIcons] = useState<DesktopIcon[]>([
+    { row: 0, col: 0, name: "Icon 1", width: 64, height: 64, image: "alt.png" },
     {
-      id: "1",
-      name: "Desktop Icon",
-      width: 64,
-      height: 64,
-      image: "alt.png",
-      x: 50,
-      y: 50,
-    },
-    {
-      id: "2",
+      row: 0,
+      col: 1,
       name: "Special Icon",
       width: 64,
       height: 64,
       image: "alt.png",
-      x: 150,
-      y: 50,
+    },
+    {
+      row: 1,
+      col: 0,
+      name: "Icon 3",
+      width: 64,
+      height: 64,
+      image: "alt.png",
       fontColor: "red",
+    },
+    {
+      row: 1,
+      col: 1,
+      name: "Icon 3",
+      width: 64,
+      height: 64,
+      image: "alt.png",
+      fontColor: "green",
     },
   ]);
 
@@ -30,16 +39,15 @@ const DesktopGrid: React.FC = () => {
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       {icons.map((icon) => (
         <div
-          key={icon.id}
+          key={`${icon.row}-${icon.col}`}
           className="desktop-icon"
           style={{
-            left: icon.x,
-            top: icon.y,
+            left: icon.col * ICON_SIZE, // Column-based positioning
+            top: icon.row * ICON_SIZE, // Row-based positioning
             width: icon.width,
             height: icon.height + 30,
           }}
         >
-          {/* Icon */}
           <div
             className="desktop-icon-image"
             style={{
@@ -49,12 +57,9 @@ const DesktopGrid: React.FC = () => {
             }}
           ></div>
 
-          {/* Icon Name */}
           <p
             className="desktop-icon-name"
-            style={{
-              color: icon.fontColor || "white", // Override if icon has custom fontColor
-            }}
+            style={{ color: icon.fontColor || "white" }}
           >
             {icon.name}
           </p>
