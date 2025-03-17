@@ -37,14 +37,19 @@ const DesktopGrid: React.FC = () => {
 
   const handleClick = (row: number, col: number) => {
     setIcons((prevIcons) =>
-      prevIcons.map((icon) =>
-        icon.row === row && icon.col === col
-          ? {
-              ...icon,
-              fontColor: icon.fontColor === "yellow" ? "white" : "yellow",
-            }
-          : icon
-      )
+      prevIcons.map((icon) => {
+        if (icon.row === row && icon.col === col) {
+          return {
+            ...icon,
+            fontColor: icon.fontColor === "yellow" ? "white" : "yellow",
+            image:
+              icon.image === "src/assets/altTemplate@2x.png"
+                ? "alt.png"
+                : "src/assets/altTemplate@2x.png",
+          };
+        }
+        return icon;
+      })
     );
   };
 
