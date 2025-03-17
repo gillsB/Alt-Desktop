@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import "../App.css";
 import { DesktopIcon } from "../models/DesktopIcon";
 
 const DesktopGrid: React.FC = () => {
-  // Testing with just a pre-defined icon.
+  // Testing with just a pre-defined icons.
   const [icons, setIcons] = useState<DesktopIcon[]>([
     {
       id: "1",
@@ -13,6 +14,15 @@ const DesktopGrid: React.FC = () => {
       x: 50,
       y: 50,
     },
+    {
+      id: "2",
+      name: "Special Icon",
+      width: 64,
+      height: 64,
+      image: "alt.png",
+      x: 150,
+      y: 50,
+    },
   ]);
 
   return (
@@ -20,39 +30,26 @@ const DesktopGrid: React.FC = () => {
       {icons.map((icon) => (
         <div
           key={icon.id}
+          className="desktop-icon"
           style={{
-            position: "absolute",
             left: icon.x,
             top: icon.y,
             width: icon.width,
             height: icon.height + 30,
-            textAlign: "center",
           }}
         >
           {/* Icon */}
           <div
+            className="desktop-icon-image"
             style={{
               width: icon.width,
               height: icon.height,
               backgroundImage: `url(${icon.image})`,
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              marginBottom: "10px",
             }}
           ></div>
 
           {/* Icon Name */}
-
-          <p
-            style={{
-              margin: 0,
-              color: "white",
-              textShadow:
-                "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
-            }}
-          >
-            {icon.name}
-          </p>
+          <p className="desktop-icon-name">{icon.name}</p>
         </div>
       ))}
     </div>
