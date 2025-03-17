@@ -42,10 +42,20 @@ const DesktopGrid: React.FC = () => {
           return {
             ...icon,
             fontColor: icon.fontColor === "yellow" ? "white" : "yellow",
-            image:
-              icon.image === "src/assets/altTemplate@2x.png"
-                ? "alt.png"
-                : "src/assets/altTemplate@2x.png",
+          };
+        }
+        return icon;
+      })
+    );
+  };
+
+  const handleDoubleClick = (row: number, col: number) => {
+    setIcons((prevIcons) =>
+      prevIcons.map((icon) => {
+        if (icon.row === row && icon.col === col) {
+          return {
+            ...icon,
+            image: icon.image === "src/assets/altTemplate@2x.png" ? "alt.png" : "src/assets/altTemplate@2x.png",
           };
         }
         return icon;
@@ -66,6 +76,7 @@ const DesktopGrid: React.FC = () => {
             height: icon.height + 30,
           }}
           onClick={() => handleClick(icon.row, icon.col)}
+          onDoubleClick={() => handleDoubleClick(icon.row, icon.col)}
         >
           <div
             className="desktop-icon-image"
