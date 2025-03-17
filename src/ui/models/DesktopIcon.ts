@@ -7,4 +7,5 @@ export interface DesktopIcon {
   x: number;
   y: number;
   link?: string;
+  fontColor?: string;
 }

@@ -22,6 +22,7 @@ const DesktopGrid: React.FC = () => {
       image: "alt.png",
       x: 150,
       y: 50,
+      fontColor: "red",
     },
   ]);
 
@@ -49,7 +50,14 @@ const DesktopGrid: React.FC = () => {
           ></div>
 
           {/* Icon Name */}
-          <p className="desktop-icon-name">{icon.name}</p>
+          <p
+            className="desktop-icon-name"
+            style={{
+              color: icon.fontColor || "white", // Override if icon has custom fontColor
+            }}
+          >
+            {icon.name}
+          </p>
         </div>
       ))}
     </div>
