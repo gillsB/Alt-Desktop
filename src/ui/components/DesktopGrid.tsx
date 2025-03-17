@@ -1,39 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../App.css";
 import { DesktopIcon } from "../models/DesktopIcon";
 
 const ICON_SIZE = 100;
 
 const DesktopGrid: React.FC = () => {
-  const [icons, setIcons] = useState<DesktopIcon[]>([
-    { row: 0, col: 0, name: "Icon 1", width: 64, height: 64, image: "alt.png" },
-    {
-      row: 0,
-      col: 1,
-      name: "Special Icon",
-      width: 64,
-      height: 64,
-      image: "alt.png",
-    },
-    {
-      row: 1,
-      col: 0,
-      name: "Icon 3",
-      width: 64,
-      height: 64,
-      image: "alt.png",
-      fontColor: "red",
-    },
-    {
-      row: 1,
-      col: 1,
-      name: "Icon 3",
-      width: 64,
-      height: 64,
-      image: "alt.png",
-      fontColor: "green",
-    },
-  ]);
+  const [icons, setIcons] = useState<DesktopIcon[]>([]);
+
+  useEffect(() => {
+    fetch("/desktopIcons.json")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Fetched icons:", data);
+        setIcons(data);
+      })
+      .catch((error) => console.error("Error loading icons:", error));
+  }, []);
 
   const handleClick = (row: number, col: number) => {
     setIcons((prevIcons) =>
@@ -55,7 +37,10 @@ const DesktopGrid: React.FC = () => {
         if (icon.row === row && icon.col === col) {
           return {
             ...icon,
-            image: icon.image === "src/assets/altTemplate@2x.png" ? "alt.png" : "src/assets/altTemplate@2x.png",
+            image:
+              icon.image === "src/assets/altTemplate@2x.png"
+                ? "alt.png"
+                : "src/assets/altTemplate@2x.png",
           };
         }
         return icon;
@@ -64,38 +49,39 @@ const DesktopGrid: React.FC = () => {
   };
 
   return (
-    <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
-      {icons.map((icon) => (
-        <div
-          key={`${icon.row}-${icon.col}`}
-          className="desktop-icon"
-          style={{
-            left: icon.col * ICON_SIZE, // Column-based positioning
-            top: icon.row * ICON_SIZE, // Row-based positioning
-            width: icon.width,
-            height: icon.height + 30,
-          }}
-          onClick={() => handleClick(icon.row, icon.col)}
-          onDoubleClick={() => handleDoubleClick(icon.row, icon.col)}
-        >
+    <>
+      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        {icons.map((icon) => (
           <div
-            className="desktop-icon-image"
+            key={`${icon.row}-${icon.col}`}
+            className="desktop-icon"
             style={{
-              width: icon.width,
-              height: icon.height,
-              backgroundImage: `url(${icon.image})`,
+              left: icon.col * ICON_SIZE,
+              top: icon.row * ICON_SIZE,
+              width: icon.width || 64,
+              height: (icon.height || 64) + 30,
             }}
-          ></div>
-
-          <p
-            className="desktop-icon-name"
-            style={{ color: icon.fontColor || "white" }}
+            onClick={() => handleClick(icon.row, icon.col)}
+            onDoubleClick={() => handleDoubleClick(icon.row, icon.col)}
           >
-            {icon.name}
-          </p>
-        </div>
-      ))}
-    </div>
+            <div
+              className="desktop-icon-image"
+              style={{
+                width: icon.width || 64,
+                height: icon.height || 64,
+                backgroundImage: `url(${icon.image})`,
+              }}
+            ></div>
+            <p
+              className="desktop-icon-name"
+              style={{ color: icon.fontColor || "white" }}
+            >
+              {icon.name}
+            </p>
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 

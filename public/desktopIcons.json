@@ -1,0 +1,30 @@
+[
+  {
+    "row": 0,
+    "col": 0,
+    "image": "alt.png",
+    "name": "My Icon",
+    "fontColor": "white"
+  },
+  {
+    "row": 0,
+    "col": 1,
+    "image": "altTemplate@2x.png",
+    "name": "Another Icon",
+    "fontColor": "yellow"
+  },
+  {
+    "row": 1,
+    "col": 0,
+    "image": "alt.png",
+    "name": "My Icon",
+    "fontColor": "white"
+  },
+  {
+    "row": 1,
+    "col": 1,
+    "image": "alt.png",
+    "name": "Another Icon",
+    "fontColor": "yellow"
+  }
+]
