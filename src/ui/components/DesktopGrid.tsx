@@ -35,6 +35,19 @@ const DesktopGrid: React.FC = () => {
     },
   ]);
 
+  const handleClick = (row: number, col: number) => {
+    setIcons((prevIcons) =>
+      prevIcons.map((icon) =>
+        icon.row === row && icon.col === col
+          ? {
+              ...icon,
+              fontColor: icon.fontColor === "yellow" ? "white" : "yellow",
+            }
+          : icon
+      )
+    );
+  };
+
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       {icons.map((icon) => (
@@ -47,6 +60,7 @@ const DesktopGrid: React.FC = () => {
             width: icon.width,
             height: icon.height + 30,
           }}
+          onClick={() => handleClick(icon.row, icon.col)}
         >
           <div
             className="desktop-icon-image"
