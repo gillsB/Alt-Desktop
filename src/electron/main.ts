@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from "electron";
 import fs from "fs";
 import path from "path";
+import { ensureAppDataFiles, getAppDataPath } from "./filesetup.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { getStaticData, pollResources } from "./resourceManager.js";
 import { createTray } from "./tray.js";
@@ -10,6 +11,8 @@ import { ipcMainHandle, ipcMainOn, isDev } from "./util.js";
 //Menu.setApplicationMenu(null);
 
 app.on("ready", () => {
+  // Ensure AppData directories exist before any chance to use them.
+  ensureAppDataFiles();
   const mainWindow = new BrowserWindow({
     show: false,
     webPreferences: {
@@ -36,41 +39,12 @@ app.on("ready", () => {
   });
 
   ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {
-    const appDataPath = process.env.APPDATA;
-
-    if (!appDataPath) {
-      throw new Error("APPDATA environment variable is not set.");
-    }
-
-    const directoryPath = path.join(appDataPath, "AltDesktop", "desktop");
+    const directoryPath = path.join(getAppDataPath(), "desktop");
     const filePath = path.join(directoryPath, "desktopIcons.json");
 
     console.log("Resolved File Path:", filePath);
 
     try {
-      // Ensure directory exists
-      if (!fs.existsSync(directoryPath)) {
-        console.log("Directory does not exist, creating:", directoryPath);
-        fs.mkdirSync(directoryPath, { recursive: true });
-        console.log("Directory created successfully.");
-      } else {
-        console.log("Directory already exists:", directoryPath);
-      }
-
-      // Ensure file exists
-      if (!fs.existsSync(filePath)) {
-        console.log("File does not exist, creating:", filePath);
-        const defaultData: DesktopIconData = { icons: [] };
-        fs.writeFileSync(
-          filePath,
-          JSON.stringify(defaultData, null, 2),
-          "utf-8"
-        );
-        console.log("File created successfully.");
-      } else {
-        console.log("File already exists:", filePath);
-      }
-
       // Read JSON file
       const data = fs.readFileSync(filePath, "utf-8");
       console.log("Read file contents:", data);
