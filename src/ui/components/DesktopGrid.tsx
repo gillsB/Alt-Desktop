@@ -8,13 +8,17 @@ const DesktopGrid: React.FC = () => {
   const [icons, setIcons] = useState<DesktopIcon[]>([]);
 
   useEffect(() => {
-    fetch("/desktopIcons.json")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Fetched icons:", data);
-        setIcons(data);
-      })
-      .catch((error) => console.error("Error loading icons:", error));
+    const fetchIcons = async () => {
+      try {
+        const data = await window.electron.getDesktopIconData();
+        console.log("Fetched icons:", data.icons);
+        setIcons(data.icons);
+      } catch (error) {
+        console.error("Error loading icons:", error);
+      }
+    };
+
+    fetchIcons();
   }, []);
 
   const handleClick = (row: number, col: number) => {
