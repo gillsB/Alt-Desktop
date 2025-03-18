@@ -12,6 +12,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     }),
   getStaticData: () => ipcInvoke("getStaticData"),
   sendHeaderAction: (payload) => ipcSend("sendHeaderAction", payload),
+  getDesktopIconData: () => ipcInvoke("getDesktopIconData"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

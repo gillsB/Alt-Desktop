@@ -8,14 +8,15 @@ export function isDev(): boolean {
 
 export function ipcMainHandle<Key extends keyof EventPayloadMapping>(
   key: Key,
-  handler: () => EventPayloadMapping[Key]
+  handler: () => EventPayloadMapping[Key] | Promise<EventPayloadMapping[Key]> // Support both sync & async
 ) {
-  ipcMain.handle(key, (event) => {
+  ipcMain.handle(key, async (event) => {
+    // Async function ensures async support
     if (!event.senderFrame) {
       throw new Error("Event sender frame is null");
     }
     validateEventFrame(event.senderFrame);
-    return handler();
+    return handler(); // Works for both sync and async functions
   });
 }
 

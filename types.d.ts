@@ -14,11 +14,16 @@ type View = "CPU" | "RAM" | "STORAGE";
 
 type HeaderAction = "MINIMIZE" | "MAXIMIZE" | "CLOSE" | "SHOW_DEVTOOLS";
 
+type DesktopIconData = {
+  icons: DesktopIcon[];
+};
+
 type EventPayloadMapping = {
   statistics: Statistics;
   getStaticData: StaticData;
   changeView: View;
   sendHeaderAction: HeaderAction;
+  getDesktopIconData: DesktopIconData;
 };
 
 type UnsubscribeFunction = () => void;
@@ -33,5 +38,6 @@ interface Window {
       callback: (view: View) => void
     ) => UnsubscribeFunction;
     sendHeaderAction: (payload: HeaderAction) => void;
+    getDesktopIconData: () => Promise<DesktopIconData>;
   };
 }

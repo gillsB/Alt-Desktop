@@ -1,4 +1,6 @@
 import { app, BrowserWindow } from "electron";
+import fs from "fs";
+import path from "path";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { getStaticData, pollResources } from "./resourceManager.js";
 import { createTray } from "./tray.js";
@@ -31,6 +33,54 @@ app.on("ready", () => {
 
   ipcMainHandle("getStaticData", () => {
     return getStaticData();
+  });
+
+  ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {
+    const appDataPath = process.env.APPDATA;
+
+    if (!appDataPath) {
+      throw new Error("APPDATA environment variable is not set.");
+    }
+
+    const directoryPath = path.join(appDataPath, "AltDesktop", "desktop");
+    const filePath = path.join(directoryPath, "desktopIcons.json");
+
+    console.log("Resolved File Path:", filePath);
+
+    try {
+      // Ensure directory exists
+      if (!fs.existsSync(directoryPath)) {
+        console.log("Directory does not exist, creating:", directoryPath);
+        fs.mkdirSync(directoryPath, { recursive: true });
+        console.log("Directory created successfully.");
+      } else {
+        console.log("Directory already exists:", directoryPath);
+      }
+
+      // Ensure file exists
+      if (!fs.existsSync(filePath)) {
+        console.log("File does not exist, creating:", filePath);
+        const defaultData: DesktopIconData = { icons: [] };
+        fs.writeFileSync(
+          filePath,
+          JSON.stringify(defaultData, null, 2),
+          "utf-8"
+        );
+        console.log("File created successfully.");
+      } else {
+        console.log("File already exists:", filePath);
+      }
+
+      // Read JSON file
+      const data = fs.readFileSync(filePath, "utf-8");
+      console.log("Read file contents:", data);
+      const parsedData: DesktopIconData = JSON.parse(data);
+
+      return parsedData;
+    } catch (error) {
+      console.error("Error reading or creating JSON file:", error);
+      return { icons: [] }; // Return default if error
+    }
   });
 
   ipcMainOn("sendHeaderAction", (payload) => {
