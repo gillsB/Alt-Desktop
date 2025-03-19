@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
-import { DesktopIcon } from "../models/DesktopIcon";
 
 const ICON_SIZE = 100;
 
