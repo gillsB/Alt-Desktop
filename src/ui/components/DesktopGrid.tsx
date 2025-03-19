@@ -39,17 +39,35 @@ const DesktopGrid: React.FC = () => {
     setIcons((prevIcons) =>
       prevIcons.map((icon) => {
         if (icon.row === row && icon.col === col) {
+          // Use the appdata-file protocol for the alternate image
+          const newImage = (icon.image = "src/assets/altTemplate@2x.png");
+
           return {
             ...icon,
-            image:
-              icon.image === "src/assets/altTemplate@2x.png"
-                ? "alt.png"
-                : "src/assets/altTemplate@2x.png",
+            image: newImage,
           };
         }
         return icon;
       })
     );
+  };
+
+  const getImagePath = (imagePath: string) => {
+    // If it's already using our protocol or is a remote URL, use it as is
+    if (
+      imagePath.startsWith("appdata-file://") ||
+      imagePath.startsWith("http")
+    ) {
+      return imagePath;
+    }
+
+    // If it's a built-in asset, use it as is
+    if (imagePath.startsWith("src/assets/")) {
+      return imagePath;
+    }
+
+    // Otherwise, assume it's a local file that should use our protocol
+    return `appdata-file://icons/${imagePath}`;
   };
 
   return (
@@ -73,7 +91,7 @@ const DesktopGrid: React.FC = () => {
               style={{
                 width: icon.width || 64,
                 height: icon.height || 64,
-                backgroundImage: `url(${icon.image})`,
+                backgroundImage: `url(${getImagePath(icon.image)})`,
               }}
             ></div>
             <p

@@ -4,6 +4,7 @@ import path from "path";
 import { ensureAppDataFiles, getAppDataPath } from "./filesetup.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { getStaticData, pollResources } from "./resourceManager.js";
+import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { createTray } from "./tray.js";
 import { ipcMainHandle, ipcMainOn, isDev } from "./util.js";
 
@@ -13,11 +14,16 @@ import { ipcMainHandle, ipcMainOn, isDev } from "./util.js";
 app.on("ready", () => {
   // Ensure AppData directories exist before any chance to use them.
   ensureAppDataFiles();
+
+  // Register our safe file protocol for loading icons.
+  registerSafeFileProtocol("appdata-file");
+
   const mainWindow = new BrowserWindow({
     show: false,
     webPreferences: {
       // preload function to allow only specific functions to communicate with from the ui.
       preload: getPreloadPath(),
+      webSecurity: true, //default is True, but to be sure it remains such.
     },
     frame: false,
   });
@@ -49,6 +55,32 @@ app.on("ready", () => {
       const data = fs.readFileSync(filePath, "utf-8");
       console.log("Read file contents:", data);
       const parsedData: DesktopIconData = JSON.parse(data);
+
+      // Convert image paths to use the appdata-file protocol
+      if (parsedData.icons) {
+        parsedData.icons = parsedData.icons.map((icon) => {
+          // Only convert paths that are local and don't already use our protocol
+          if (
+            icon.image &&
+            !icon.image.startsWith("http") &&
+            !icon.image.startsWith("appdata-file://")
+          ) {
+            // Determine if it's a relative path to icons folder
+            if (!path.isAbsolute(icon.image) && !icon.image.includes("://")) {
+              console.log("falls into here", icon.image);
+              // TODO this does not currently return a valid path.
+              // instead of a valid path it only returns valid if "/icons/image.png"
+              // interestingly this requests URL: "appdata-file://icons/icons/image.png" and works...
+              return {
+                ...icon,
+                image: `appdata-file://${icon.image}`,
+              };
+            }
+          }
+          console.log(icon.image);
+          return icon;
+        });
+      }
 
       return parsedData;
     } catch (error) {

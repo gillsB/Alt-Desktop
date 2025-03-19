@@ -39,5 +39,6 @@ interface Window {
     ) => UnsubscribeFunction;
     sendHeaderAction: (payload: HeaderAction) => void;
     getDesktopIconData: () => Promise<DesktopIconData>;
+    getSafeFileUrl: (relativePath: string) => string;
   };
 }

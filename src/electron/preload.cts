@@ -13,6 +13,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getStaticData: () => ipcInvoke("getStaticData"),
   sendHeaderAction: (payload) => ipcSend("sendHeaderAction", payload),
   getDesktopIconData: () => ipcInvoke("getDesktopIconData"),
+  getSafeFileUrl: (relativePath: string) => getSafeFileUrl(relativePath),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
@@ -37,4 +38,10 @@ function ipcSend<Key extends keyof EventPayloadMapping>(
   payload: EventPayloadMapping[Key]
 ) {
   electron.ipcRenderer.send(key, payload);
+}
+
+function getSafeFileUrl(relativePath: string): string {
+  // Normalize path separators and ensure no leading slash
+  const normalizedPath = relativePath.replace(/\\/g, "/").replace(/^\//, "");
+  return `appdata-file://${normalizedPath}`;
 }
