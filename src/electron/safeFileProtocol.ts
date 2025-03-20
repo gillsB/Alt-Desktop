@@ -35,24 +35,23 @@ export function registerSafeFileProtocol(
   protocol.handle(protocolName, async (req) => {
     try {
       const requestedUrl = new URL(req.url);
+      // Security check: Ensure the requested path is within the AppData directory
+      if (requestedUrl.host != "") {
+        console.error(
+          "Security violation: Attempted to access file outside AppData directory:",
+          requestedUrl
+        );
+        return new Response("Forbidden", { status: 403 });
+      }
       const requestedPath = decodeURIComponent(requestedUrl.pathname).replace(
         /^\//,
         ""
       );
 
-      const appDataBasePath = path.join(getAppDataPath());
+      const appDataBasePath: string = path.join(getAppDataPath());
 
       // Resolve the full path, ensuring it stays within the AppData directory
-      let fullPath = path.resolve(appDataBasePath, requestedPath);
-
-      // Security check: Ensure the requested path is within the AppData directory
-      if (!fullPath.startsWith(appDataBasePath)) {
-        console.error(
-          "Security violation: Attempted to access file outside AppData directory:",
-          fullPath
-        );
-        return new Response("Forbidden", { status: 403 });
-      }
+      let fullPath: string = path.resolve(appDataBasePath, requestedPath);
 
       // Resolve .lnk files if applicable
       fullPath = resolveShortcut(fullPath);
