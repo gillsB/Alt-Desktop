@@ -32,15 +32,14 @@ function resolveShortcut(filePath: string): string {
 export function registerSafeFileProtocol(
   protocolName: string = "appdata-file"
 ) {
-  protocol.registerFileProtocol(protocolName, (request, callback) => {
+  protocol.handle(protocolName, async (req) => {
     try {
-      // Parse the URL
-      const url = new URL(request.url);
+      const requestedUrl = new URL(req.url);
+      const requestedPath = decodeURIComponent(requestedUrl.pathname).replace(
+        /^\//,
+        ""
+      );
 
-      // Remove leading slash and decode the pathname
-      const requestedPath = decodeURIComponent(url.pathname).replace(/^\//, "");
-
-      // Get the base AppData path
       const appDataBasePath = path.join(getAppDataPath());
 
       // Resolve the full path, ensuring it stays within the AppData directory
@@ -52,7 +51,7 @@ export function registerSafeFileProtocol(
           "Security violation: Attempted to access file outside AppData directory:",
           fullPath
         );
-        return callback({ error: 403 }); // Forbidden
+        return new Response("Forbidden", { status: 403 });
       }
 
       // Resolve .lnk files if applicable
@@ -61,14 +60,20 @@ export function registerSafeFileProtocol(
       // Check if the resolved file exists
       if (!fs.existsSync(fullPath)) {
         // File does not exist, use handler.
-        return fileNotExist(fullPath, callback);
+        return fileNotExist(fullPath);
       }
 
-      // Return the resolved file path
-      return callback({ path: fullPath });
+      // Read the file content for existing files
+      const fileContent = fs.readFileSync(fullPath);
+      return new Response(fileContent, {
+        status: 200,
+        headers: {
+          "Content-Type": mime.lookup(fullPath) || "application/octet-stream",
+        },
+      });
     } catch (error) {
       console.error("Error in safe file protocol:", error);
-      return callback({ error: 500 }); // Internal Server Error
+      return new Response("Internal Server Error", { status: 500 });
     }
   });
 
@@ -94,13 +99,9 @@ export function getSafeFileUrl(
  * Handles the case when a requested file doesn't exist.
  * Returns a fallback image path "src/assets/unknown.png" if it's an image file; otherwise, returns a 404 error.
  * @param fullPath The full path of the requested file.
- * @param callback The callback function to return the result.
+ * @returns The fallback response for a non-existent file.
  */
-function fileNotExist(
-  fullPath: string,
-  callback: (result: { path?: string; error?: number }) => void
-) {
-  // Get the file's MIME type based on extension
+function fileNotExist(fullPath: string) {
   const mimeType = mime.lookup(fullPath);
 
   // Check if the requested file is an image
@@ -108,12 +109,19 @@ function fileNotExist(
     console.error("File not found:", fullPath);
     console.error("Returning unknown.png instead.");
 
-    // Set the path to unknown.png for missing images
-    fullPath = path.join(getAssetPath(), "unknown.png");
-    return callback({ path: fullPath });
+    const fallbackImagePath = path.join(getAssetPath(), "unknown.png");
+
+    // Read the fallback image and return as a Response
+    const fileContent = fs.readFileSync(fallbackImagePath);
+    return new Response(fileContent, {
+      status: 200,
+      headers: {
+        "Content-Type":
+          mime.lookup(fallbackImagePath) || "application/octet-stream",
+      },
+    });
   } else {
-    // For non-image files, return a 404 error
     console.error("File not found:", fullPath);
-    return callback({ error: 404 });
+    return new Response("Not Found", { status: 404 });
   }
 }
