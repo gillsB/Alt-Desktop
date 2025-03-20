@@ -1,17 +1,35 @@
-import { protocol } from "electron";
+import { protocol, shell } from "electron";
 import fs from "fs";
 import path from "path";
 import { URL } from "url";
 import { getAppDataPath } from "./filesetup.js";
 
 /**
- * Registers a custom protocol that safely serves files only from the AppData directory
+ * Resolves a Windows shortcut (.lnk) to its actual target path.
+ * @param filePath The path to the .lnk file
+ * @returns The resolved target path or the original path if not a shortcut
+ */
+function resolveShortcut(filePath: string): string {
+  if (process.platform === "win32" && filePath.endsWith(".lnk")) {
+    try {
+      const shortcut = shell.readShortcutLink(filePath);
+      return shortcut.target;
+    } catch (error) {
+      console.error("Failed to resolve shortcut:", error);
+      return filePath; // Fall back to original path if resolution fails
+    }
+  }
+  return filePath;
+}
+
+/**
+ * Registers a custom protocol that safely serves files only from the AppData directory,
+ * resolving .lnk shortcuts if encountered.
  * @param protocolName The name of the protocol (e.g., 'appdata-file' for appdata-file://)
  */
 export function registerSafeFileProtocol(
   protocolName: string = "appdata-file"
 ) {
-  // Register the protocol
   protocol.registerFileProtocol(protocolName, (request, callback) => {
     try {
       // Parse the URL
@@ -24,7 +42,7 @@ export function registerSafeFileProtocol(
       const appDataBasePath = path.join(getAppDataPath());
 
       // Resolve the full path, ensuring it stays within the AppData directory
-      const fullPath = path.resolve(appDataBasePath, requestedPath);
+      let fullPath = path.resolve(appDataBasePath, requestedPath);
 
       // Security check: Ensure the requested path is within the AppData directory
       if (!fullPath.startsWith(appDataBasePath)) {
@@ -35,13 +53,16 @@ export function registerSafeFileProtocol(
         return callback({ error: 403 }); // Forbidden
       }
 
-      // Check if the file exists
+      // Resolve .lnk files if applicable
+      fullPath = resolveShortcut(fullPath);
+
+      // Check if the resolved file exists
       if (!fs.existsSync(fullPath)) {
         console.error("File not found:", fullPath);
         return callback({ error: 404 }); // Not Found
       }
 
-      // Return the file
+      // Return the resolved file path
       return callback({ path: fullPath });
     } catch (error) {
       console.error("Error in safe file protocol:", error);
@@ -49,7 +70,7 @@ export function registerSafeFileProtocol(
     }
   });
 
-  console.log(`Registered ${protocolName}:// protocol for safe file access`);
+  console.log(`Registered ${protocolName}:// protocol`);
 }
 
 /**
