@@ -3,28 +3,28 @@
     {
       "row": 0,
       "col": 0,
-      "image": "C:/Users/INSERT_USER_HERE/AppData/Roaming/AltDesktop/icons/image.png",
+      "image": "/icons/image.png",
       "name": "My Icon1",
       "fontColor": "white"
     },
     {
       "row": 0,
       "col": 1,
-      "image": "C:/Users/INSERT_USER_HERE/AppData/Roaming/AltDesktop/icons/image2.png",
+      "image": "/icons/image2.png",
       "name": "Another Icon2",
       "fontColor": "yellow"
     },
     {
       "row": 1,
       "col": 0,
-      "image": "C:/Users/INSERT_USER_HERE/AppData/Roaming/AltDesktop/icons/image3.png",
+      "image": "/icons/image3.png",
       "name": "My Icon3",
       "fontColor": "white"
     },
     {
       "row": 1,
       "col": 1,
-      "image": "icons/image.png",
+      "image": "/icons/image.png",
       "name": "Another4 Icon",
       "fontColor": "yellow"
     }
