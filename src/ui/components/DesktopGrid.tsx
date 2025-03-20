@@ -58,18 +58,15 @@ const DesktopGrid: React.FC = () => {
       imagePath.startsWith("appdata-file://") ||
       imagePath.startsWith("http")
     ) {
-      console.log("starts with protocol: ", imagePath);
       return imagePath;
     }
 
     // If it's a built-in asset, use it as is
     if (imagePath.startsWith("src/assets/")) {
-      console.log("starts with src/assets/: ", imagePath);
       return imagePath;
     }
 
     // Otherwise, assume it's a local file that should use our protocol
-    console.log("starts with nothing: ", imagePath);
     return `appdata-file://${imagePath}`;
   };
 

@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { URL } from "url";
 import { getAppDataPath } from "./filesetup.js";
+import { getAssetPath } from "./pathResolver.js";
 
 /**
  * Resolves a Windows shortcut (.lnk) to its actual target path.
@@ -58,8 +59,13 @@ export function registerSafeFileProtocol(
 
       // Check if the resolved file exists
       if (!fs.existsSync(fullPath)) {
-        console.error("File not found:", fullPath);
-        return callback({ error: 404 }); // Not Found
+        if (fullPath.endsWith(".png")) {
+          // File does not exist return with Unknown.png from src/assets folder (getAssetPath())
+          console.error("File not found:", fullPath);
+          console.error("Returning with unknown.png");
+          fullPath = path.join(getAssetPath(), "unknown.png");
+          return callback({ path: fullPath });
+        }
       }
 
       // Return the resolved file path
