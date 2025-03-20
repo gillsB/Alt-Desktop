@@ -1,5 +1,6 @@
 import { protocol, shell } from "electron";
 import fs from "fs";
+import mime from "mime-types";
 import path from "path";
 import { URL } from "url";
 import { getAppDataPath } from "./filesetup.js";
@@ -59,13 +60,8 @@ export function registerSafeFileProtocol(
 
       // Check if the resolved file exists
       if (!fs.existsSync(fullPath)) {
-        if (fullPath.endsWith(".png")) {
-          // File does not exist return with Unknown.png from src/assets folder (getAssetPath())
-          console.error("File not found:", fullPath);
-          console.error("Returning with unknown.png");
-          fullPath = path.join(getAssetPath(), "unknown.png");
-          return callback({ path: fullPath });
-        }
+        // File does not exist, use handler.
+        return fileNotExist(fullPath, callback);
       }
 
       // Return the resolved file path
@@ -92,4 +88,32 @@ export function getSafeFileUrl(
   // Normalize path separators and ensure no leading slash
   const normalizedPath = relativePath.replace(/\\/g, "/").replace(/^\//, "");
   return `${protocolName}://${normalizedPath}`;
+}
+
+/**
+ * Handles the case when a requested file doesn't exist.
+ * Returns a fallback image path "src/assets/unknown.png" if it's an image file; otherwise, returns a 404 error.
+ * @param fullPath The full path of the requested file.
+ * @param callback The callback function to return the result.
+ */
+function fileNotExist(
+  fullPath: string,
+  callback: (result: { path?: string; error?: number }) => void
+) {
+  // Get the file's MIME type based on extension
+  const mimeType = mime.lookup(fullPath);
+
+  // Check if the requested file is an image
+  if (mimeType && mimeType.startsWith("image/")) {
+    console.error("File not found:", fullPath);
+    console.error("Returning unknown.png instead.");
+
+    // Set the path to unknown.png for missing images
+    fullPath = path.join(getAssetPath(), "unknown.png");
+    return callback({ path: fullPath });
+  } else {
+    // For non-image files, return a 404 error
+    console.error("File not found:", fullPath);
+    return callback({ error: 404 });
+  }
 }
