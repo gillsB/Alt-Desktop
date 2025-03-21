@@ -16,7 +16,18 @@ const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
 
-  /**
+/** JSDoc
+ * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
+ *
+ * @param {number} row - The row position of the icon in the grid.
+ * @param {number} col - The column position of the icon in the grid.
+ * @returns {DesktopIcon | undefined} The `DesktopIcon` object at the specified position, or `undefined` if the icon doesn't exist.
+ */
+  const getIcon = (row: number, col: number): DesktopIcon | undefined => {
+    return iconsMap.get(`${row},${col}`);
+  };
+
+  /** JSDoc
    * Updates a specific field of a `DesktopIcon` at the given position.
    *
    * @param { [number, number] } position - A tuple representing the [row, col] position of the icon.
@@ -81,7 +92,7 @@ const DesktopGrid: React.FC = () => {
   }, [contextMenu]);
 
   const handleIconClick = (row: number, col: number) => {
-    const icon = iconsMap.get(`${row},${col}`);
+    const icon = getIcon(row, col);
     if (!icon) return iconsMap; // No update if icon doesn't exist
     const newColor = icon.fontColor === "yellow" ? "white" : "yellow";
     updateIconField([row, col], "fontColor", newColor);
@@ -104,7 +115,10 @@ const DesktopGrid: React.FC = () => {
       x,
       y,
       type,
-      icon: type === "icon" ? iconsMap.get(`${row},${col}`) || null : null,
+      icon:
+        type === "icon" && row !== undefined && col !== undefined
+          ? getIcon(row, col) || null
+          : null,
     });
   };
 
