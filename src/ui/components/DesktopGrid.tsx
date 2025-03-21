@@ -3,17 +3,19 @@ import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 
 const ICON_SIZE = 100;
-const GRID_PADDING = 20; //padding top and left of DesktopGrid
+const GRID_PADDING = 20;
 
 interface ContextMenu {
   x: number;
   y: number;
-  type: "desktop" | "icon"; // To differentiate desktop and icon context menus
-  icon?: DesktopIcon | null; // Only exists if the type is "icon"
+  type: "desktop" | "icon";
+  icon?: DesktopIcon | null;
 }
 
 const DesktopGrid: React.FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [icons, setIcons] = useState<DesktopIcon[]>([]);
+  const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
 
   useEffect(() => {
@@ -21,7 +23,14 @@ const DesktopGrid: React.FC = () => {
       try {
         const data = await window.electron.getDesktopIconData();
         console.log("Fetched icons:", data.icons);
-        setIcons(data.icons);
+
+        setIcons(data.icons); // Keep array version
+        const newMap = new Map<string, DesktopIcon>();
+        data.icons.forEach((icon: DesktopIcon) => {
+          newMap.set(`${icon.row},${icon.col}`, icon);
+        });
+        setIconsMap(newMap);
+        console.log(newMap);
       } catch (error) {
         console.error("Error loading icons:", error);
       }
@@ -51,33 +60,49 @@ const DesktopGrid: React.FC = () => {
   }, [contextMenu]);
 
   const handleIconClick = (row: number, col: number) => {
+    setIconsMap((prevMap) => {
+      const newMap = new Map(prevMap);
+      const key = `${row},${col}`;
+      const icon = newMap.get(key);
+      if (icon) {
+        newMap.set(key, {
+          ...icon,
+          fontColor: icon.fontColor === "yellow" ? "white" : "yellow",
+        });
+      }
+      return newMap;
+    });
+
+    // Sync state with `icons` array
     setIcons((prevIcons) =>
-      prevIcons.map((icon) => {
-        if (icon.row === row && icon.col === col) {
-          return {
-            ...icon,
-            fontColor: icon.fontColor === "yellow" ? "white" : "yellow",
-          };
-        }
-        return icon;
-      })
+      prevIcons.map((icon) =>
+        icon.row === row && icon.col === col
+          ? {
+              ...icon,
+              fontColor: icon.fontColor === "yellow" ? "white" : "yellow",
+            }
+          : icon
+      )
     );
   };
 
   const handleIconDoubleClick = (row: number, col: number) => {
-    setIcons((prevIcons) =>
-      prevIcons.map((icon) => {
-        if (icon.row === row && icon.col === col) {
-          // Use the appdata-file protocol for the alternate image
-          const newImage = (icon.image = "src/assets/altTemplate@2x.png");
+    setIconsMap((prevMap) => {
+      const newMap = new Map(prevMap);
+      const key = `${row},${col}`;
+      const icon = newMap.get(key);
+      if (icon) {
+        newMap.set(key, { ...icon, image: "src/assets/altTemplate@2x.png" });
+      }
+      return newMap;
+    });
 
-          return {
-            ...icon,
-            image: newImage,
-          };
-        }
-        return icon;
-      })
+    setIcons((prevIcons) =>
+      prevIcons.map((icon) =>
+        icon.row === row && icon.col === col
+          ? { ...icon, image: "src/assets/altTemplate@2x.png" }
+          : icon
+      )
     );
   };
 
@@ -87,17 +112,14 @@ const DesktopGrid: React.FC = () => {
     row?: number,
     col?: number
   ) => {
-    e.preventDefault(); // Prevent default context menu
+    e.preventDefault();
     const { clientX: x, clientY: y } = e;
 
     setContextMenu({
       x,
       y,
       type,
-      icon:
-        type === "icon"
-          ? icons.find((icon) => icon.row === row && icon.col === col)
-          : null,
+      icon: type === "icon" ? iconsMap.get(`${row},${col}`) || null : null,
     });
   };
 
@@ -110,7 +132,7 @@ const DesktopGrid: React.FC = () => {
     row: number,
     col: number
   ) => {
-    e.stopPropagation(); // Prevent event from bubbling up to the desktop level
+    e.stopPropagation();
     handleRightClick(e, "icon", row, col);
   };
 
@@ -133,38 +155,42 @@ const DesktopGrid: React.FC = () => {
     <>
       <div
         style={{ position: "relative", width: "100vw", height: "100vh" }}
-        onContextMenu={handleDesktopRightClick} // Handle right-click on the desktop grid
+        onContextMenu={handleDesktopRightClick}
       >
-        {icons.map((icon) => (
-          <div
-            key={`${icon.row}-${icon.col}`}
-            className="desktop-icon"
-            style={{
-              left: icon.col * ICON_SIZE + GRID_PADDING,
-              top: icon.row * ICON_SIZE + GRID_PADDING,
-              width: icon.width || 64,
-              height: (icon.height || 64) + 30,
-            }}
-            onClick={() => handleIconClick(icon.row, icon.col)}
-            onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
-            onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)} // Handle right-click on an icon
-          >
+        {Array.from(iconsMap.values()).map(
+          (
+            icon // Convert Map.values() to array
+          ) => (
             <div
-              className="desktop-icon-image"
+              key={`${icon.row}-${icon.col}`}
+              className="desktop-icon"
               style={{
+                left: icon.col * ICON_SIZE + GRID_PADDING,
+                top: icon.row * ICON_SIZE + GRID_PADDING,
                 width: icon.width || 64,
-                height: icon.height || 64,
-                backgroundImage: `url(${getImagePath(icon.image)})`,
+                height: (icon.height || 64) + 30,
               }}
-            ></div>
-            <p
-              className="desktop-icon-name"
-              style={{ color: icon.fontColor || "white" }}
+              onClick={() => handleIconClick(icon.row, icon.col)}
+              onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
+              onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)}
             >
-              {icon.name}
-            </p>
-          </div>
-        ))}
+              <div
+                className="desktop-icon-image"
+                style={{
+                  width: icon.width || 64,
+                  height: icon.height || 64,
+                  backgroundImage: `url(${getImagePath(icon.image)})`,
+                }}
+              ></div>
+              <p
+                className="desktop-icon-name"
+                style={{ color: icon.fontColor || "white" }}
+              >
+                {icon.name}
+              </p>
+            </div>
+          )
+        )}
       </div>
 
       {contextMenu && (
