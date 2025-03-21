@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import { ensureAppDataFiles, getAppDataPath } from "./appDataSetup.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
-import { getStaticData, pollResources } from "./resourceManager.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { createTray } from "./tray.js";
 import { ipcMainHandle, ipcMainOn, isDev } from "./util.js";
@@ -36,12 +35,6 @@ app.on("ready", () => {
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
     mainWindow.maximize();
-  });
-
-  pollResources(mainWindow);
-
-  ipcMainHandle("getStaticData", () => {
-    return getStaticData();
   });
 
   ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {

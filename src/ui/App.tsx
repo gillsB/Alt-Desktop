@@ -1,41 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import "./App.css";
-import { Chart } from "./Chart";
 import DesktopGrid from "./components/DesktopGrid";
-import { useStatistics } from "./useStatistics";
 
 function App() {
-  const staticData = useStaticData();
-  const statistics = useStatistics(10);
-  const [activeView, setActiveView] = useState<View>("CPU");
-  const cpuUsages = useMemo(
-    () => statistics.map((stat) => stat.cpuUsage),
-    [statistics]
-  );
-  const ramUsages = useMemo(
-    () => statistics.map((stat) => stat.ramUsage),
-    [statistics]
-  );
-  const storageUsages = useMemo(
-    () => statistics.map((stat) => stat.storageUsage),
-    [statistics]
-  );
-
-  const activeUsages = useMemo(() => {
-    switch (activeView) {
-      case "CPU":
-        return cpuUsages;
-      case "RAM":
-        return ramUsages;
-      case "STORAGE":
-        return storageUsages;
-    }
-  }, [activeView, cpuUsages, ramUsages, storageUsages]);
-
-  useEffect(() => {
-    return window.electron.subscribeChangeView((view) => setActiveView(view));
-  }, []);
-
   return (
     <>
       <div className="App">
@@ -49,27 +16,6 @@ function App() {
         </div>
       </div>
     </>
-  );
-}
-
-function SelectOption(props: {
-  title: string;
-  view: View;
-  subTitle: string;
-  data: number[];
-  onClick: () => void;
-}) {
-  return (
-    <button className="selectOption" onClick={props.onClick}>
-      <div className="selectOptionTitle">
-        <div>{props.title}</div>
-        <div>{props.subTitle}</div>
-      </div>
-      <div className="selectOptionChart">
-        {" "}
-        <Chart selectedView={props.view} data={props.data} maxDataPoints={10} />
-      </div>
-    </button>
   );
 }
 
@@ -121,17 +67,6 @@ function Header() {
       </div>
     </header>
   );
-}
-function useStaticData() {
-  const [staticData, setStaticData] = useState<StaticData | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      setStaticData(await window.electron.getStaticData());
-    })();
-  }, []);
-
-  return staticData;
 }
 
 export default App;
