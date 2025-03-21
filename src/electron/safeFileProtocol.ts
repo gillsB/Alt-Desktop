@@ -3,7 +3,7 @@ import fs from "fs";
 import mime from "mime-types";
 import path from "path";
 import { URL } from "url";
-import { getAppDataPath } from "./filesetup.js";
+import { getAppDataPath } from "./appDataSetup.js";
 import { getAssetPath } from "./pathResolver.js";
 
 /**

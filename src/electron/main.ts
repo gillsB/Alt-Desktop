@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from "electron";
 import fs from "fs";
 import path from "path";
-import { ensureAppDataFiles, getAppDataPath } from "./filesetup.js";
+import { ensureAppDataFiles, getAppDataPath } from "./appDataSetup.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { getStaticData, pollResources } from "./resourceManager.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
