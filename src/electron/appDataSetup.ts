@@ -1,6 +1,22 @@
 import fs from "fs";
 import path from "path";
 
+/** JSDoc
+ * Retrieves the appData path for "AltDesktop" within the user's AppData/Roaming directory.
+ *
+ * @returns {string} The full path ..../AppData/Roaming/AltDesktop
+ * @throws {Error} If the APPDATA environment variable is not in process.env.APPDATA
+ *
+ * @example
+ * ```ts
+ * try {
+ *   const appDataPath = getAppDataPath();
+ *   console.log(appDataPath); // Outputs: C:\Users\Username\AppData\Roaming\AltDesktop
+ * } catch (error) {
+ *   console.error(error.message);
+ * }
+ * ```
+ */
 export const getAppDataPath = (): string => {
   const appDataPath = process.env.APPDATA;
   if (!appDataPath) {
@@ -19,6 +35,16 @@ const ensureFileExists = (filePath: string, defaultData: object) => {
   }
 };
 
+/** JSDoc
+ * Ensures that necessary AppData directories and files exist in .../AppData/Roaming/AltDesktop/
+ *
+ * @throws {Error} If there is an issue retrieving the AppData path or creating files/directories.
+ *
+ * @example
+ * ```ts
+ * ensureAppDataFiles();
+ * ```
+ */
 export const ensureAppDataFiles = () => {
   try {
     const basePath = getAppDataPath();
