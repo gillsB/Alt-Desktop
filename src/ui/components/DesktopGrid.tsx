@@ -5,9 +5,16 @@ import "../App.css";
 const ICON_SIZE = 100;
 const GRID_PADDING = 20; //padding top and left of DesktopGrid
 
+interface ContextMenu {
+  x: number;
+  y: number;
+  type: "desktop" | "icon"; // To differentiate desktop and icon context menus
+  icon?: DesktopIcon | null; // Only exists if the type is "icon"
+}
+
 const DesktopGrid: React.FC = () => {
   const [icons, setIcons] = useState<DesktopIcon[]>([]);
-  const [contextMenu, setContextMenu] = useState<any | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
 
   useEffect(() => {
     const fetchIcons = async () => {
@@ -124,41 +131,41 @@ const DesktopGrid: React.FC = () => {
 
   return (
     <>
-    <div
-      style={{ position: "relative", width: "100vw", height: "100vh" }}
-      onContextMenu={handleDesktopRightClick} // Handle right-click on the desktop grid
-    >
-      {icons.map((icon) => (
-        <div
-          key={`${icon.row}-${icon.col}`}
-          className="desktop-icon"
-          style={{
-            left: icon.col * ICON_SIZE + GRID_PADDING,
-            top: icon.row * ICON_SIZE + GRID_PADDING,
-            width: icon.width || 64,
-            height: (icon.height || 64) + 30,
-          }}
-          onClick={() => handleIconClick(icon.row, icon.col)}
-          onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
-          onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)} // Handle right-click on an icon
-        >
+      <div
+        style={{ position: "relative", width: "100vw", height: "100vh" }}
+        onContextMenu={handleDesktopRightClick} // Handle right-click on the desktop grid
+      >
+        {icons.map((icon) => (
           <div
-            className="desktop-icon-image"
+            key={`${icon.row}-${icon.col}`}
+            className="desktop-icon"
             style={{
+              left: icon.col * ICON_SIZE + GRID_PADDING,
+              top: icon.row * ICON_SIZE + GRID_PADDING,
               width: icon.width || 64,
-              height: icon.height || 64,
-              backgroundImage: `url(${getImagePath(icon.image)})`,
+              height: (icon.height || 64) + 30,
             }}
-          ></div>
-          <p
-            className="desktop-icon-name"
-            style={{ color: icon.fontColor || "white" }}
+            onClick={() => handleIconClick(icon.row, icon.col)}
+            onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
+            onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)} // Handle right-click on an icon
           >
-            {icon.name}
-          </p>
-        </div>
-      ))}
-    </div>
+            <div
+              className="desktop-icon-image"
+              style={{
+                width: icon.width || 64,
+                height: icon.height || 64,
+                backgroundImage: `url(${getImagePath(icon.image)})`,
+              }}
+            ></div>
+            <p
+              className="desktop-icon-name"
+              style={{ color: icon.fontColor || "white" }}
+            >
+              {icon.name}
+            </p>
+          </div>
+        ))}
+      </div>
 
       {contextMenu && (
         <div
