@@ -13,10 +13,32 @@ interface ContextMenu {
 }
 
 const DesktopGrid: React.FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [icons, setIcons] = useState<DesktopIcon[]>([]);
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+
+  /**
+   * Updates a specific field of a `DesktopIcon` at the given position.
+   *
+   * @param { [number, number] } position - A tuple representing the [row, col] position of the icon.
+   * @param { keyof DesktopIcon } field - The field of the `DesktopIcon` to update.
+   * @param { DesktopIcon[keyof DesktopIcon] } value - The new value to set for the specified field.
+   */
+  const updateIconField = <K extends keyof DesktopIcon>(
+    position: [number, number],
+    field: K,
+    value: DesktopIcon[K]
+  ) => {
+    setIconsMap((prevMap) => {
+      const key = `${position[0]},${position[1]}`; // Convert tuple to key
+      const icon = prevMap.get(key);
+      if (!icon) return prevMap; // No update if icon doesn't exist
+
+      const newMap = new Map(prevMap);
+      newMap.set(key, { ...icon, [field]: value });
+
+      return newMap;
+    });
+  };
 
   useEffect(() => {
     const fetchIcons = async () => {
@@ -24,13 +46,12 @@ const DesktopGrid: React.FC = () => {
         const data = await window.electron.getDesktopIconData();
         console.log("Fetched icons:", data.icons);
 
-        setIcons(data.icons); // Keep array version
         const newMap = new Map<string, DesktopIcon>();
         data.icons.forEach((icon: DesktopIcon) => {
           newMap.set(`${icon.row},${icon.col}`, icon);
         });
+
         setIconsMap(newMap);
-        console.log(newMap);
       } catch (error) {
         console.error("Error loading icons:", error);
       }
@@ -60,50 +81,14 @@ const DesktopGrid: React.FC = () => {
   }, [contextMenu]);
 
   const handleIconClick = (row: number, col: number) => {
-    setIconsMap((prevMap) => {
-      const newMap = new Map(prevMap);
-      const key = `${row},${col}`;
-      const icon = newMap.get(key);
-      if (icon) {
-        newMap.set(key, {
-          ...icon,
-          fontColor: icon.fontColor === "yellow" ? "white" : "yellow",
-        });
-      }
-      return newMap;
-    });
-
-    // Sync state with `icons` array
-    setIcons((prevIcons) =>
-      prevIcons.map((icon) =>
-        icon.row === row && icon.col === col
-          ? {
-              ...icon,
-              fontColor: icon.fontColor === "yellow" ? "white" : "yellow",
-            }
-          : icon
-      )
-    );
+    const icon = iconsMap.get(`${row},${col}`);
+    if (!icon) return iconsMap; // No update if icon doesn't exist
+    const newColor = icon.fontColor === "yellow" ? "white" : "yellow";
+    updateIconField([row, col], "fontColor", newColor);
   };
 
   const handleIconDoubleClick = (row: number, col: number) => {
-    setIconsMap((prevMap) => {
-      const newMap = new Map(prevMap);
-      const key = `${row},${col}`;
-      const icon = newMap.get(key);
-      if (icon) {
-        newMap.set(key, { ...icon, image: "src/assets/altTemplate@2x.png" });
-      }
-      return newMap;
-    });
-
-    setIcons((prevIcons) =>
-      prevIcons.map((icon) =>
-        icon.row === row && icon.col === col
-          ? { ...icon, image: "src/assets/altTemplate@2x.png" }
-          : icon
-      )
-    );
+    updateIconField([row, col], "image", "src/assets/altTemplate@2x.png");
   };
 
   const handleRightClick = (
@@ -157,40 +142,36 @@ const DesktopGrid: React.FC = () => {
         style={{ position: "relative", width: "100vw", height: "100vh" }}
         onContextMenu={handleDesktopRightClick}
       >
-        {Array.from(iconsMap.values()).map(
-          (
-            icon // Convert Map.values() to array
-          ) => (
+        {Array.from(iconsMap.values()).map((icon) => (
+          <div
+            key={`${icon.row}-${icon.col}`}
+            className="desktop-icon"
+            style={{
+              left: icon.col * ICON_SIZE + GRID_PADDING,
+              top: icon.row * ICON_SIZE + GRID_PADDING,
+              width: icon.width || 64,
+              height: (icon.height || 64) + 30,
+            }}
+            onClick={() => handleIconClick(icon.row, icon.col)}
+            onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
+            onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)}
+          >
             <div
-              key={`${icon.row}-${icon.col}`}
-              className="desktop-icon"
+              className="desktop-icon-image"
               style={{
-                left: icon.col * ICON_SIZE + GRID_PADDING,
-                top: icon.row * ICON_SIZE + GRID_PADDING,
                 width: icon.width || 64,
-                height: (icon.height || 64) + 30,
+                height: icon.height || 64,
+                backgroundImage: `url(${getImagePath(icon.image)})`,
               }}
-              onClick={() => handleIconClick(icon.row, icon.col)}
-              onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
-              onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)}
+            ></div>
+            <p
+              className="desktop-icon-name"
+              style={{ color: icon.fontColor || "white" }}
             >
-              <div
-                className="desktop-icon-image"
-                style={{
-                  width: icon.width || 64,
-                  height: icon.height || 64,
-                  backgroundImage: `url(${getImagePath(icon.image)})`,
-                }}
-              ></div>
-              <p
-                className="desktop-icon-name"
-                style={{ color: icon.fontColor || "white" }}
-              >
-                {icon.name}
-              </p>
-            </div>
-          )
-        )}
+              {icon.name}
+            </p>
+          </div>
+        ))}
       </div>
 
       {contextMenu && (
