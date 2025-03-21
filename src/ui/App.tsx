@@ -45,36 +45,6 @@ function App() {
             <source src="background.mp4" type="video/mp4" />
             Browser does not support the video tag.
           </video>
-          <div>
-            <SelectOption
-              title="CPU"
-              subTitle={staticData?.cpuModel ?? ""}
-              data={cpuUsages}
-              view="CPU"
-              onClick={() => setActiveView("CPU")}
-            />
-            <SelectOption
-              title="RAM"
-              subTitle={staticData?.totalMemoryGB.toString() + " GB"}
-              data={ramUsages}
-              view="RAM"
-              onClick={() => setActiveView("RAM")}
-            />
-            <SelectOption
-              title="STORAGE"
-              subTitle={staticData?.totalStorage.toString() + " GB"}
-              data={storageUsages}
-              view="STORAGE"
-              onClick={() => setActiveView("STORAGE")}
-            />
-          </div>
-          <div className="mainGrid">
-            <Chart
-              selectedView={activeView}
-              data={activeUsages}
-              maxDataPoints={10}
-            ></Chart>
-          </div>
           <DesktopGrid />
         </div>
       </div>
