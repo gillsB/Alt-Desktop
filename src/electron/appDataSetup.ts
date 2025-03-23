@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { ensureFileExists } from "./util.js";
 
 /** JSDoc
  * Retrieves the appData path for "AltDesktop" within the user's AppData/Roaming directory.
@@ -23,16 +24,6 @@ export const getAppDataPath = (): string => {
     throw new Error("APPDATA environment variable is not set.");
   }
   return path.join(appDataPath, "AltDesktop");
-};
-
-const ensureFileExists = (filePath: string, defaultData: object) => {
-  if (!fs.existsSync(filePath)) {
-    console.log("File does not exist, creating:", filePath);
-    fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2), "utf-8");
-    console.log("File created successfully.");
-  } else {
-    console.log("File already exists:", filePath);
-  }
 };
 
 /** JSDoc
@@ -71,7 +62,6 @@ export const ensureAppDataFiles = () => {
 
     // Ensure desktopIcons.json exists
     ensureFileExists(desktopIconsFilePath, { icons: [] });
-    ensureDataFolder(0, 0);
   } catch (error) {
     console.error("Error ensuring AppData files:", error);
   }
@@ -95,8 +85,9 @@ export const ensureDataFolder = (row: number, col: number) => {
     }
 
     // Ensure Data file exists
-    ensureFileExists(fullPath, { icons: [] });
+    return ensureFileExists(fullPath, { icons: [] });
   } catch (error) {
     console.error("Error ensuring Data folder [${row}, ${col}]:", error);
+    return false;
   }
 };

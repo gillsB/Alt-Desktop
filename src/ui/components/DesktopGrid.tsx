@@ -16,13 +16,13 @@ const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
 
-/** JSDoc
- * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
- *
- * @param {number} row - The row position of the icon in the grid.
- * @param {number} col - The column position of the icon in the grid.
- * @returns {DesktopIcon | undefined} The `DesktopIcon` object at the specified position, or `undefined` if the icon doesn't exist.
- */
+  /** JSDoc
+   * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
+   *
+   * @param {number} row - The row position of the icon in the grid.
+   * @param {number} col - The column position of the icon in the grid.
+   * @returns {DesktopIcon | undefined} The `DesktopIcon` object at the specified position, or `undefined` if the icon doesn't exist.
+   */
   const getIcon = (row: number, col: number): DesktopIcon | undefined => {
     return iconsMap.get(`${row},${col}`);
   };

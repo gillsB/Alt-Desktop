@@ -5,7 +5,7 @@ import { ensureAppDataFiles, getAppDataPath } from "./appDataSetup.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { createTray } from "./tray.js";
-import { ipcMainHandle, ipcMainOn, isDev } from "./util.js";
+import { ensureFileExists, ipcMainHandle, ipcMainOn, isDev } from "./util.js";
 
 // This disables the menu completely. Must be done before "ready" or gets more complicated.
 //Menu.setApplicationMenu(null);
@@ -102,6 +102,34 @@ app.on("ready", () => {
         break;
     }
   });
+
+  ipcMainHandle(
+    "ensureDataFolder",
+    async (row: number, col: number): Promise<boolean> => {
+      try {
+        const basePath = getAppDataPath();
+        const dataFolderPath = path.join(basePath, "data");
+        const fullPath = path.join(dataFolderPath, `[${row}, ${col}]`);
+
+        if (!fs.existsSync(fullPath)) {
+          console.log(
+            "Data folder [${row}, ${col}] does not exist, creating:",
+            fullPath
+          );
+          fs.mkdirSync(fullPath, { recursive: true });
+          console.log("Data folder [${row}, ${col}] created successfully.");
+        } else {
+          console.log("Data folder [${row}, ${col}] already exists:", fullPath);
+        }
+
+        // Ensure Data file exists
+        return ensureFileExists(fullPath, { icons: [] });
+      } catch (error) {
+        console.error("Error ensuring Data folder [${row}, ${col}]:", error);
+        return false;
+      }
+    }
+  );
 
   createTray(mainWindow);
   handleCloseEvents(mainWindow);

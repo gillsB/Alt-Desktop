@@ -14,12 +14,15 @@ electron.contextBridge.exposeInMainWorld("electron", {
   sendHeaderAction: (payload) => ipcSend("sendHeaderAction", payload),
   getDesktopIconData: () => ipcInvoke("getDesktopIconData"),
   getSafeFileUrl: (relativePath: string) => getSafeFileUrl(relativePath),
+  ensureDataFolder: (row: number, col: number) =>
+    ipcInvoke("ensureDataFolder", row, col),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
-  key: Key
+  key: Key,
+  ...args: Key extends keyof EventParamMapping ? EventParamMapping[Key] : []
 ): Promise<EventPayloadMapping[Key]> {
-  return electron.ipcRenderer.invoke(key);
+  return electron.ipcRenderer.invoke(key, ...args);
 }
 function ipcOn<Key extends keyof EventPayloadMapping>(
   key: Key,

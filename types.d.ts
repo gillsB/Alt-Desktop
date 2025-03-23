@@ -18,12 +18,22 @@ type DesktopIconData = {
   icons: DesktopIcon[];
 };
 
+interface EventParamMapping {
+  statistics: [];
+  getStaticData: [];
+  changeView: [];
+  sendHeaderAction: [HeaderAction];
+  getDesktopIconData: [];
+  ensureDataFolder: [number, number];
+}
+
 type EventPayloadMapping = {
   statistics: Statistics;
   getStaticData: StaticData;
   changeView: View;
   sendHeaderAction: HeaderAction;
   getDesktopIconData: DesktopIconData;
+  ensureDataFolder: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -40,5 +50,6 @@ interface Window {
     sendHeaderAction: (payload: HeaderAction) => void;
     getDesktopIconData: () => Promise<DesktopIconData>;
     getSafeFileUrl: (relativePath: string) => string;
+    ensureDataFolder: (row: number, col: number) => Promise<boolean>;
   };
 }

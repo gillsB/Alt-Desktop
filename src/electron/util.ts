@@ -1,4 +1,5 @@
 import { ipcMain, WebContents, WebFrameMain } from "electron";
+import fs from "fs";
 import { pathToFileURL } from "url";
 import { getUIPath } from "./pathResolver.js";
 
@@ -9,12 +10,14 @@ export function isDev(): boolean {
  * Registers an IPC event handler for the specified key.
  *
  * This function wraps `ipcMain.handle` to enforce validation and support both synchronous
- * and asynchronous handlers.
+ * and asynchronous handlers and parameters.
  *
- * @template Key - A key of `EventPayloadMapping`, representing the IPC event name.
- * @param {Key} key - The name of the IPC event to handle.
- * @param {() => EventPayloadMapping[Key] | Promise<EventPayloadMapping[Key]>} handler -
- *        A function that returns the event payload, supporting both synchronous and asynchronous responses.
+ * @template Key - The key representing the IPC event type, mapped to a specific payload in `EventPayloadMapping`.
+ * @template Args - The argument types for the handler function (default is an empty array).
+ *
+ * @param {Key} key - The IPC event key.
+ * @param {function(...Args): EventPayloadMapping[Key] | Promise<EventPayloadMapping[Key]>} handler
+ * - The handler function that processes the event and returns a response.
  *
  * @throws {Error} If the event sender frame is null. Or from an unknown non-validated source.
  *
@@ -25,17 +28,21 @@ export function isDev(): boolean {
  * });
  * ```
  */
-export function ipcMainHandle<Key extends keyof EventPayloadMapping>(
+export function ipcMainHandle<
+  Key extends keyof EventPayloadMapping,
+  Args extends unknown[] = [],
+>(
   key: Key,
-  handler: () => EventPayloadMapping[Key] | Promise<EventPayloadMapping[Key]> // Support both sync & async
+  handler: (
+    ...args: Args
+  ) => EventPayloadMapping[Key] | Promise<EventPayloadMapping[Key]>
 ) {
-  ipcMain.handle(key, async (event) => {
-    // Async function ensures async support
+  ipcMain.handle(key, async (event, ...args: Args) => {
     if (!event.senderFrame) {
       throw new Error("Event sender frame is null");
     }
     validateEventFrame(event.senderFrame);
-    return handler(); // Works for both sync and async functions
+    return handler(...args);
   });
 }
 
@@ -102,3 +109,30 @@ export function validateEventFrame(frame: WebFrameMain) {
     throw new Error("Malicious event");
   }
 }
+
+export const ensureFileExists = (
+  filePath: string,
+  defaultData: object
+): boolean => {
+  try {
+    if (!fs.existsSync(filePath)) {
+      /** All files should be created properly in other functions before this check is called
+       *  We should not rely on this as a go-to for creating files.
+       *  So display an error when filepath does not exist to identify how/when this is called
+       *  before a file is created.
+       */
+      console.error(
+        "Error: file does not exist, When it should, fallback creating:",
+        filePath
+      );
+      fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2), "utf-8");
+      console.log("File created successfully.");
+    } else {
+      console.log("File already exists:", filePath);
+    }
+    return true;
+  } catch (error) {
+    console.error("Failed to create file:", filePath, error);
+    return false;
+  }
+};
