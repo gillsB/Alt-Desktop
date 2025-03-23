@@ -57,8 +57,26 @@ const DesktopGrid: React.FC = () => {
         const data = await window.electron.getDesktopIconData();
         console.log("Fetched icons:", data.icons);
 
+        // Create an array of promises for ensuring folders
+        const folderPromises = data.icons.map(async (icon: DesktopIcon) => {
+          // Ensure data folder exists for each icon
+          const success = await window.electron.ensureDataFolder(
+            icon.row,
+            icon.col
+          );
+          if (!success) {
+            console.warn(
+              `Failed to create data folder for icon at [${icon.row}, ${icon.col}]`
+            );
+          }
+          return icon;
+        });
+
+        // Wait for all folder creation promises to resolve
+        const processedIcons = await Promise.all(folderPromises);
+
         const newMap = new Map<string, DesktopIcon>();
-        data.icons.forEach((icon: DesktopIcon) => {
+        processedIcons.forEach((icon: DesktopIcon) => {
           newMap.set(`${icon.row},${icon.col}`, icon);
         });
 

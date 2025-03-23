@@ -113,19 +113,19 @@ app.on("ready", () => {
 
         if (!fs.existsSync(fullPath)) {
           console.log(
-            "Data folder [${row}, ${col}] does not exist, creating:",
+            `Data folder [${row}, ${col}] does not exist, creating:`,
             fullPath
           );
           fs.mkdirSync(fullPath, { recursive: true });
-          console.log("Data folder [${row}, ${col}] created successfully.");
+          console.log(`Data folder [${row}, ${col}] created successfully.`);
         } else {
-          console.log("Data folder [${row}, ${col}] already exists:", fullPath);
+          console.log(`Data folder [${row}, ${col}] already exists:`, fullPath);
         }
 
         // Ensure Data file exists
         return ensureFileExists(fullPath, { icons: [] });
       } catch (error) {
-        console.error("Error ensuring Data folder [${row}, ${col}]:", error);
+        console.error(`Error ensuring Data folder [${row}, ${col}]:`, error);
         return false;
       }
     }
