@@ -109,23 +109,23 @@ app.on("ready", () => {
       try {
         const basePath = getAppDataPath();
         const dataFolderPath = path.join(basePath, "data");
-        const fullPath = path.join(dataFolderPath, `[${row}, ${col}]`);
+        const fullPath = path.join(dataFolderPath, `[${row},${col}]`);
 
         if (!fs.existsSync(fullPath)) {
           console.log(
-            `Data folder [${row}, ${col}] does not exist, creating:`,
+            `Data folder [${row},${col}] does not exist, creating:`,
             fullPath
           );
           fs.mkdirSync(fullPath, { recursive: true });
-          console.log(`Data folder [${row}, ${col}] created successfully.`);
+          console.log(`Data folder [${row},${col}] created successfully.`);
         } else {
-          console.log(`Data folder [${row}, ${col}] already exists:`, fullPath);
+          console.log(`Data folder [${row},${col}] already exists:`, fullPath);
         }
 
         // Ensure Data file exists
         return ensureFileExists(fullPath, { icons: [] });
       } catch (error) {
-        console.error(`Error ensuring Data folder [${row}, ${col}]:`, error);
+        console.error(`Error ensuring Data folder [${row},${col}]:`, error);
         return false;
       }
     }

@@ -153,7 +153,7 @@ const DesktopGrid: React.FC = () => {
     handleRightClick(e, "icon", row, col);
   };
 
-  const getImagePath = (imagePath: string) => {
+  const getImagePath = (row: number, col: number, imagePath: string) => {
     if (
       imagePath.startsWith("appdata-file://") ||
       imagePath.startsWith("http")
@@ -164,8 +164,9 @@ const DesktopGrid: React.FC = () => {
     if (imagePath.startsWith("src/assets/")) {
       return imagePath;
     }
+    const folderPath = `/data/[${row},${col}]`;
 
-    return `appdata-file://${imagePath}`;
+    return `appdata-file://${folderPath}/${imagePath}`;
   };
 
   return (
@@ -193,7 +194,7 @@ const DesktopGrid: React.FC = () => {
               style={{
                 width: icon.width || 64,
                 height: icon.height || 64,
-                backgroundImage: `url(${getImagePath(icon.image)})`,
+                backgroundImage: `url(${getImagePath(icon.row, icon.col, icon.image)})`,
               }}
             ></div>
             <p

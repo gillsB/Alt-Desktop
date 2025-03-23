@@ -66,28 +66,3 @@ export const ensureAppDataFiles = () => {
     console.error("Error ensuring AppData files:", error);
   }
 };
-
-export const ensureDataFolder = (row: number, col: number) => {
-  try {
-    const basePath = getAppDataPath();
-    const dataFolderPath = path.join(basePath, "data");
-    const fullPath = path.join(dataFolderPath, `[${row}, ${col}]`);
-
-    if (!fs.existsSync(fullPath)) {
-      console.log(
-        "Data folder [${row}, ${col}] does not exist, creating:",
-        fullPath
-      );
-      fs.mkdirSync(fullPath, { recursive: true });
-      console.log("Data folder [${row}, ${col}] created successfully.");
-    } else {
-      console.log("Data folder [${row}, ${col}] already exists:", fullPath);
-    }
-
-    // Ensure Data file exists
-    return ensureFileExists(fullPath, { icons: [] });
-  } catch (error) {
-    console.error("Error ensuring Data folder [${row}, ${col}]:", error);
-    return false;
-  }
-};
