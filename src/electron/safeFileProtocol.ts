@@ -6,7 +6,7 @@ import { URL } from "url";
 import { getAppDataPath } from "./appDataSetup.js";
 import { getAssetPath } from "./pathResolver.js";
 
-/**
+/** JSDoc
  * Resolves a Windows shortcut (.lnk) to its actual target path.
  * @param filePath The path to the .lnk file
  * @returns The resolved target path or the original path if not a shortcut
@@ -24,7 +24,7 @@ function resolveShortcut(filePath: string): string {
   return filePath;
 }
 
-/**
+/** JSDoc
  * Registers a custom protocol that safely serves files only from the AppData directory,
  * resolving .lnk shortcuts if encountered.
  * @param protocolName The name of the protocol (e.g., 'appdata-file' for appdata-file://)
@@ -79,7 +79,7 @@ export function registerSafeFileProtocol(
   console.log(`Registered ${protocolName}:// protocol`);
 }
 
-/**
+/** JSDoc
  * Converts a relative path to a safe file URL
  * @param relativePath Path relative to the AppData directory
  * @param protocolName The protocol name (should match what was registered)
@@ -94,7 +94,7 @@ export function getSafeFileUrl(
   return `${protocolName}://${normalizedPath}`;
 }
 
-/**
+/** JSDoc
  * Handles the case when a requested file doesn't exist.
  * Returns a fallback image path "src/assets/unknown.png" if it's an image file; otherwise, returns a 404 error.
  * @param fullPath The full path of the requested file.
