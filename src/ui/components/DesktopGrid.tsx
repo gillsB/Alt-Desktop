@@ -154,14 +154,11 @@ const DesktopGrid: React.FC = () => {
   };
 
   const getImagePath = (row: number, col: number, imagePath: string) => {
+    // If path already matches valid protocols return it.
     if (
       imagePath.startsWith("appdata-file://") ||
-      imagePath.startsWith("http")
+      imagePath.startsWith("src/assets/")
     ) {
-      return imagePath;
-    }
-
-    if (imagePath.startsWith("src/assets/")) {
       return imagePath;
     }
     const folderPath = `/data/[${row},${col}]`;
