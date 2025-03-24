@@ -49,27 +49,8 @@ app.on("ready", () => {
       console.log("Read file contents:", data);
       const parsedData: DesktopIconData = JSON.parse(data);
 
-      // Convert image paths to use the appdata-file protocol
       if (parsedData.icons) {
         parsedData.icons = parsedData.icons.map((icon) => {
-          // Only convert paths that are local and don't already use our protocol
-          if (
-            icon.image &&
-            !icon.image.startsWith("http") &&
-            !icon.image.startsWith("appdata-file://")
-          ) {
-            // Determine if it's a relative path to icons folder
-            if (!path.isAbsolute(icon.image) && !icon.image.includes("://")) {
-              console.log("falls into here", icon.image);
-              // TODO this does not currently return a valid path.
-              // instead of a valid path it only returns valid if "/icons/image.png"
-              // interestingly this requests URL: "appdata-file://icons/icons/image.png" and works...
-              return {
-                ...icon,
-                image: `appdata-file://${icon.image}`,
-              };
-            }
-          }
           console.log(icon.image);
           return icon;
         });
