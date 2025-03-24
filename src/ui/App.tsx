@@ -3,15 +3,31 @@ import "./App.css";
 import DesktopGrid from "./components/DesktopGrid";
 
 function App() {
+  // State to track if video is enabled (starts disabled)
+  const [isVideoEnabled, setIsVideoEnabled] = useState(false);
+
+  // Toggle video state
+  const toggleVideo = () => {
+    setIsVideoEnabled((prev) => !prev);
+  };
+
   return (
     <>
       <div className="App">
         <Header />
         <div className="main">
-          <video id="video-bg" autoPlay loop muted>
-            <source src="background.mp4" type="video/mp4" />
-            Browser does not support the video tag.
-          </video>
+          {/* Toggle button */}
+          <button className="video-toggle" onClick={toggleVideo}>
+            {isVideoEnabled ? "Disable" : "Enable"} Video Background
+          </button>
+
+          {/* Video element only rendered when enabled */}
+          {isVideoEnabled && (
+            <video id="video-bg" autoPlay loop muted>
+              <source src="background.mp4" type="video/mp4" />
+              Browser does not support the video tag.
+            </video>
+          )}
           <DesktopGrid />
         </div>
       </div>
