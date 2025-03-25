@@ -5,7 +5,7 @@ interface VideoBackgroundProps {
   opacity?: number;
 }
 
-/** JSDoc
+/**
  * A React component that renders a video background.
  * - In normal mode, it displays a single looping background video. (background.mp4 in root folder)
  * - In test mode, it provides a toggle button to enable/disable the video and cycle through different the different backgrounds:

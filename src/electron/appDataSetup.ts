@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { ensureFileExists } from "./util.js";
 
-/** JSDoc
+/**
  * Retrieves the appData path for "AltDesktop" within the user's AppData/Roaming directory.
  *
  * @returns {string} The full path ..../AppData/Roaming/AltDesktop
@@ -26,7 +26,7 @@ export const getAppDataPath = (): string => {
   return path.join(appDataPath, "AltDesktop");
 };
 
-/** JSDoc
+/**
  * Ensures that necessary AppData directories and files exist in .../AppData/Roaming/AltDesktop/
  *
  * @throws {Error} If there is an issue retrieving the AppData path or creating files/directories.

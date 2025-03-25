@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
+import { SafeImage } from "./SafeImage";
 
 const ICON_SIZE = 100;
 const GRID_PADDING = 20;
@@ -16,7 +17,7 @@ const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
 
-  /** JSDoc
+  /**
    * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
    *
    * @param {number} row - The row position of the icon in the grid.
@@ -27,7 +28,7 @@ const DesktopGrid: React.FC = () => {
     return iconsMap.get(`${row},${col}`);
   };
 
-  /** JSDoc
+  /**
    * Updates a specific field of a `DesktopIcon` at the given position.
    *
    * @param { [number, number] } position - A tuple representing the [row, col] position of the icon.
@@ -151,74 +152,6 @@ const DesktopGrid: React.FC = () => {
   ) => {
     e.stopPropagation();
     handleRightClick(e, "icon", row, col);
-  };
-
-  const getImagePath = (row: number, col: number, imagePath: string) => {
-    // If path already matches valid protocols return it.
-    if (
-      imagePath.startsWith("appdata-file://") ||
-      imagePath.startsWith("src/assets/")
-    ) {
-      return imagePath;
-    }
-
-    const folderPath = `/data/[${row},${col}]`;
-    const safeFilePath = `appdata-file://${folderPath}/${imagePath}`;
-
-    // Check if the path ends with a typical image extension
-    const isImageExtension = /\.(png|jpg|jpeg|gif|bmp|svg|webp|lnk)$/i.test(
-      imagePath
-    );
-
-    // If no image extension or we want to always use fallback
-    if (!isImageExtension) {
-      return "src/assets/unknown.png";
-    }
-
-    return safeFilePath;
-  };
-
-  const SafeImage: React.FC<{
-    row: number;
-    col: number;
-    originalImage: string;
-    width?: number;
-    height?: number;
-  }> = ({ row, col, originalImage, width = 64, height = 64 }) => {
-    const [imageSrc, setImageSrc] = useState<string>(() =>
-      getImagePath(row, col, originalImage)
-    );
-
-    useEffect(() => {
-      const img = new Image();
-      img.src = imageSrc;
-
-      img.onerror = () => {
-        console.error(
-          `Failed to load image: ${imageSrc}. Falling back to unknown.png`
-        );
-        setImageSrc("src/assets/unknown.png");
-      };
-
-      return () => {
-        img.onload = null;
-        img.onerror = null;
-      };
-    }, [imageSrc, row, col]);
-
-    return (
-      <div
-        className="desktop-icon-image"
-        style={{
-          width,
-          height,
-          backgroundImage: `url(${imageSrc})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      />
-    );
   };
 
   return (

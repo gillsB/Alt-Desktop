@@ -6,7 +6,7 @@ import { getUIPath } from "./pathResolver.js";
 export function isDev(): boolean {
   return process.env.NODE_ENV === "development";
 }
-/** JSDoc
+/**
  * Registers an IPC event handler for the specified key.
  *
  * This function wraps `ipcMain.handle` to enforce validation and support both synchronous
@@ -46,7 +46,7 @@ export function ipcMainHandle<
   });
 }
 
-/** JSDoc
+/**
  * Registers an IPC event listener for the specified key.
  *
  * This function processes events sent from the renderer process without expecting a response.
@@ -76,7 +76,7 @@ export function ipcMainOn<Key extends keyof EventPayloadMapping>(
   });
 }
 
-/** JSDoc
+/**
  * Sends an IPC message from the main process to the renderer process.
  *
  * This function sends an event with a payload to a specific WebContents instance,
