@@ -161,9 +161,64 @@ const DesktopGrid: React.FC = () => {
     ) {
       return imagePath;
     }
-    const folderPath = `/data/[${row},${col}]`;
 
-    return `appdata-file://${folderPath}/${imagePath}`;
+    const folderPath = `/data/[${row},${col}]`;
+    const safeFilePath = `appdata-file://${folderPath}/${imagePath}`;
+
+    // Check if the path ends with a typical image extension
+    const isImageExtension = /\.(png|jpg|jpeg|gif|bmp|svg|webp|lnk)$/i.test(
+      imagePath
+    );
+
+    // If no image extension or we want to always use fallback
+    if (!isImageExtension) {
+      return "src/assets/unknown.png";
+    }
+
+    return safeFilePath;
+  };
+
+  const SafeImage: React.FC<{
+    row: number;
+    col: number;
+    originalImage: string;
+    width?: number;
+    height?: number;
+  }> = ({ row, col, originalImage, width = 64, height = 64 }) => {
+    const [imageSrc, setImageSrc] = useState<string>(() =>
+      getImagePath(row, col, originalImage)
+    );
+
+    useEffect(() => {
+      const img = new Image();
+      img.src = imageSrc;
+
+      img.onerror = () => {
+        console.error(
+          `Failed to load image: ${imageSrc}. Falling back to unknown.png`
+        );
+        setImageSrc("src/assets/unknown.png");
+      };
+
+      return () => {
+        img.onload = null;
+        img.onerror = null;
+      };
+    }, [imageSrc, row, col]);
+
+    return (
+      <div
+        className="desktop-icon-image"
+        style={{
+          width,
+          height,
+          backgroundImage: `url(${imageSrc})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+    );
   };
 
   return (
@@ -178,7 +233,7 @@ const DesktopGrid: React.FC = () => {
             className="desktop-icon"
             style={{
               left: icon.col * ICON_SIZE + GRID_PADDING,
-              top: icon.row * ICON_SIZE + GRID_PADDING,
+              top: icon.row * ICON_SIZE,
               width: icon.width || 64,
               height: (icon.height || 64) + 30,
             }}
@@ -186,14 +241,13 @@ const DesktopGrid: React.FC = () => {
             onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
             onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)}
           >
-            <div
-              className="desktop-icon-image"
-              style={{
-                width: icon.width || 64,
-                height: icon.height || 64,
-                backgroundImage: `url(${getImagePath(icon.row, icon.col, icon.image)})`,
-              }}
-            ></div>
+            <SafeImage
+              row={icon.row}
+              col={icon.col}
+              originalImage={icon.image}
+              width={icon.width || 64}
+              height={icon.height || 64}
+            />
             <p
               className="desktop-icon-name"
               style={{ color: icon.fontColor || "white" }}
