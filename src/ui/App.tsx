@@ -9,7 +9,7 @@ function App() {
       <div className="App">
         <Header />
         <div className="main">
-          <VideoBackground testMode={false} />
+          <VideoBackground testMode={false} opacity={0.8} />
           <DesktopGrid />
         </div>
       </div>

@@ -19,6 +19,9 @@ app.on("ready", () => {
 
   const mainWindow = new BrowserWindow({
     show: false,
+    transparent: true, // Enables full transparency
+    backgroundColor: "#00000000", // Ensures no default background color
+    hasShadow: false,
     webPreferences: {
       // preload function to allow only specific functions to communicate with from the ui.
       preload: getPreloadPath(),

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 interface VideoBackgroundProps {
   testMode?: boolean;
+  opacity?: number;
 }
 
 /** JSDoc
@@ -16,6 +17,7 @@ interface VideoBackgroundProps {
  */
 const VideoBackground: React.FC<VideoBackgroundProps> = ({
   testMode = false,
+  opacity = 1, // Default fully visible
 }) => {
   // State for test mode functionality
   const [isVideoEnabled, setIsVideoEnabled] = useState(!testMode); // Enabled by default if not in test mode
@@ -39,6 +41,18 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     }
   };
 
+  const videoStyle: React.CSSProperties = {
+    opacity,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    pointerEvents: "none", // Prevent interaction with the video
+    background: "transparent",
+  };
+
   // Get current video source based on mode
   const currentVideoSource = testMode
     ? videoSources[videoIndex - 1]
@@ -55,7 +69,14 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
         </button>
 
         {isVideoEnabled && (
-          <video id="video-bg" autoPlay loop muted key={currentVideoSource}>
+          <video
+            id="video-bg"
+            autoPlay
+            loop
+            muted
+            key={currentVideoSource}
+            style={videoStyle}
+          >
             <source src={currentVideoSource} type="video/mp4" />
             Browser does not support the video tag.
           </video>
@@ -66,7 +87,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
 
   // In normal mode, just return the video without any container or button
   return (
-    <video id="video-bg" autoPlay loop muted>
+    <video id="video-bg" autoPlay loop muted style={videoStyle}>
       <source src="background.mp4" type="video/mp4" />
       Browser does not support the video tag.
     </video>
