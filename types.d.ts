@@ -14,6 +14,8 @@ type View = "CPU" | "RAM" | "STORAGE";
 
 type HeaderAction = "MINIMIZE" | "MAXIMIZE" | "CLOSE" | "SHOW_DEVTOOLS";
 
+type HoverAction = "OPACITY";
+
 type DesktopIconData = {
   icons: DesktopIcon[];
 };
@@ -25,6 +27,7 @@ interface EventParamMapping {
   sendHeaderAction: [HeaderAction];
   getDesktopIconData: [];
   ensureDataFolder: [number, number];
+  sendHoverAction: [HoverAction];
 }
 
 type EventPayloadMapping = {
@@ -34,6 +37,7 @@ type EventPayloadMapping = {
   sendHeaderAction: HeaderAction;
   getDesktopIconData: DesktopIconData;
   ensureDataFolder: boolean;
+  sendHoverAction: HoverAction;
 };
 
 type UnsubscribeFunction = () => void;
@@ -51,5 +55,6 @@ interface Window {
     getDesktopIconData: () => Promise<DesktopIconData>;
     getSafeFileUrl: (relativePath: string) => string;
     ensureDataFolder: (row: number, col: number) => Promise<boolean>;
+    sendHoverAction: (payload: HoverAction) => void;
   };
 }

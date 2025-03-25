@@ -11,7 +11,7 @@ function App() {
         <Header />
         <div className="main">
           <HoverOpacityItem />
-          <VideoBackground testMode={false} opacity={0.8} />
+          <VideoBackground testMode={false} opacity={1} />
           <DesktopGrid />
         </div>
       </div>

@@ -87,6 +87,14 @@ app.on("ready", () => {
     }
   });
 
+  ipcMainOn("sendHoverAction", (payload) => {
+    switch (payload) {
+      case "OPACITY":
+        console.log("opacity called");
+        break;
+    }
+  });
+
   ipcMainHandle(
     "ensureDataFolder",
     async (row: number, col: number): Promise<boolean> => {
