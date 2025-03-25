@@ -9,7 +9,7 @@ function App() {
       <div className="App">
         <Header />
         <div className="main">
-          <VideoBackground />
+          <VideoBackground testMode={false} />
           <DesktopGrid />
         </div>
       </div>
