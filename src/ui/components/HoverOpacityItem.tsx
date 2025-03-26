@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 
 interface HoverOpacityItemProps {
   setVideoOpacity: (opacity: number) => void;
@@ -7,12 +7,20 @@ interface HoverOpacityItemProps {
 const HoverOpacityItem: React.FC<HoverOpacityItemProps> = ({
   setVideoOpacity,
 }) => {
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null); // Track the timeout
+
   const handleHover = () => {
-    window.electron.sendHoverAction("OPACITY"); // Notify backend
-    setVideoOpacity(0); // Update opacity
+    hoverTimeout.current = setTimeout(() => {
+      window.electron.sendHoverAction("OPACITY"); // Notify backend
+      setVideoOpacity(0); // Update opacity
+    }, 150); // short delay to avoid dragging mouse across it accidentally triggering it.
   };
 
   const handleLeave = () => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current); // Cancel opacity change if hover ends early
+      hoverTimeout.current = null;
+    }
     setVideoOpacity(1); // Restore opacity
   };
 
