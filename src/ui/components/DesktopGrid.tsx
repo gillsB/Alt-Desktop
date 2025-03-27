@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
+import EditIcon from "./EditIcon";
 import { SafeImage } from "./SafeImage";
 
 const ICON_SIZE = 100;
@@ -16,6 +17,8 @@ interface ContextMenu {
 const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  // "opened" refers to icon being opened in EditIcon subwindow. Not launching etc.
+  const [openedIcon, setOpenedIcon] = useState<DesktopIcon | null>(null);
 
   /**
    * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
@@ -154,6 +157,13 @@ const DesktopGrid: React.FC = () => {
     handleRightClick(e, "icon", row, col);
   };
 
+  const handleOpenIcon = () => {
+    if (contextMenu?.icon) {
+      setOpenedIcon(contextMenu.icon);
+      setContextMenu(null); // Close context menu
+    }
+  };
+
   return (
     <>
       <div
@@ -194,10 +204,7 @@ const DesktopGrid: React.FC = () => {
       {contextMenu && (
         <div
           className="context-menu"
-          style={{
-            left: contextMenu.x,
-            top: contextMenu.y,
-          }}
+          style={{ left: contextMenu.x, top: contextMenu.y }}
         >
           {contextMenu.type === "desktop" ? (
             <>
@@ -207,12 +214,19 @@ const DesktopGrid: React.FC = () => {
             </>
           ) : (
             <>
-              <p>Open {contextMenu.icon?.name}</p>
+              <p onClick={handleOpenIcon}>Open {contextMenu.icon?.name}</p>
               <p>Rename</p>
               <p>Delete</p>
             </>
           )}
         </div>
+      )}
+
+      {openedIcon && (
+        <EditIcon
+          iconName={openedIcon.name}
+          onClose={() => setOpenedIcon(null)}
+        />
       )}
     </>
   );
