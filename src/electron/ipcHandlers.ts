@@ -82,13 +82,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "setIconData",
-    async (row: number, col: number, icon: DesktopIcon): Promise<boolean> => {
+    async (icon: DesktopIcon): Promise<boolean> => {
       try {
+        const { row, col } = icon; // Extract row and col from the icon object
         const directoryPath = path.join(getAppDataPath(), "desktop");
         const filePath = path.join(directoryPath, "desktopIcons.json");
 
         console.log(`Updating icon at [${row},${col}] in ${filePath}`);
-
         let desktopData: DesktopIconData = { icons: [] };
 
         // Ensure file exists
@@ -116,7 +116,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         console.log(`Successfully updated icon at [${row},${col}]`);
         return true;
       } catch (error) {
-        console.error(`Error updating icon at [${row},${col}]:`, error);
+        console.error(`Error updating icon at [${icon.row},${icon.col}]:`, error);
         return false;
       }
     }
