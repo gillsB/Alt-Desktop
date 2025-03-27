@@ -23,11 +23,13 @@
     "os-utils": "^0.0.14",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-router-dom": "^7.4.0",
     "recharts": "^2.15.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
     "@playwright/test": "^1.51.0",
+    "@types/electron": "^1.4.38",
     "@types/fs-extra": "^11.0.4",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^22.13.8",

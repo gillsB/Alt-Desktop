@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Menu } from "electron";
 import { ensureAppDataFiles } from "./appDataSetup.js";
 import { registerIpcHandlers } from "./ipcHandlers.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
@@ -6,8 +6,10 @@ import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { createTray } from "./tray.js";
 import { isDev } from "./util.js";
 
-// This disables the menu completely. Must be done before "ready" or gets more complicated.
-//Menu.setApplicationMenu(null);
+let editIconWindow: BrowserWindow | null = null;
+
+// This disables the menu completely for all windows (including the sub windows).
+Menu.setApplicationMenu(null);
 
 app.on("ready", () => {
   // Ensure AppData directories exist before any chance to use them.
@@ -43,7 +45,32 @@ app.on("ready", () => {
 
   createTray(mainWindow);
   handleCloseEvents(mainWindow);
+
+  // TODO remove this and call via ipc
+  openEditIconWindow();
 });
+
+function openEditIconWindow() {
+  editIconWindow = new BrowserWindow({
+    width: 260,
+    height: 370,
+    webPreferences: {
+      preload: getPreloadPath(),
+      webSecurity: true,
+    },
+    title: "Edit Icon",
+  });
+
+  if (isDev()) {
+    editIconWindow.loadURL("http://localhost:5123/#/edit-icon");
+  } else {
+    editIconWindow.loadFile(getUIPath(), { hash: "edit-icon" });
+  }
+
+  editIconWindow.on("closed", () => {
+    editIconWindow = null;
+  });
+}
 
 function handleCloseEvents(mainWindow: BrowserWindow) {
   let willClose = false;
