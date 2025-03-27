@@ -211,7 +211,7 @@ body,
   cursor: pointer;
 }
 .hover-opacity-item {
-  height: 20px;
+  height: 50px;
   width: 100%;
   border: 1px solid black;
   position: absolute;

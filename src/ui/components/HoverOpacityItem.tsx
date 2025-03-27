@@ -13,7 +13,6 @@ const HoverOpacityItem: React.FC<HoverOpacityItemProps> = ({
   const handleHover = () => {
     setIsHovered(true);
     hoverTimeout.current = setTimeout(() => {
-      window.electron.sendHoverAction("OPACITY"); // Notify backend
       setVideoOpacity(0); // Update opacity
     }, 150); // short delay to avoid dragging mouse across it accidentally triggering it.
   };
@@ -22,7 +21,6 @@ const HoverOpacityItem: React.FC<HoverOpacityItemProps> = ({
     if (hoverTimeout.current) {
       clearTimeout(hoverTimeout.current); // Reset the timer on mouse move
       hoverTimeout.current = setTimeout(() => {
-        window.electron.sendHoverAction("OPACITY"); // Notify backend
         setVideoOpacity(0); // Update opacity
       }, 150); // short delay to avoid dragging mouse across it accidentally triggering it.
     }

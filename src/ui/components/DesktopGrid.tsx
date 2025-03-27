@@ -166,7 +166,7 @@ const DesktopGrid: React.FC = () => {
             className="desktop-icon"
             style={{
               left: icon.col * ICON_SIZE + GRID_PADDING,
-              top: icon.row * ICON_SIZE,
+              top: icon.row * ICON_SIZE + GRID_PADDING,
               width: icon.width || 64,
               height: (icon.height || 64) + 30,
             }}
