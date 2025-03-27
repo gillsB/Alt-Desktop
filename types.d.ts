@@ -25,6 +25,7 @@ interface EventParamMapping {
   sendHeaderAction: [HeaderAction];
   getDesktopIconData: [];
   ensureDataFolder: [number, number];
+  setIconData: [number, number, DesktopIcon];
 }
 
 type EventPayloadMapping = {
@@ -34,6 +35,7 @@ type EventPayloadMapping = {
   sendHeaderAction: HeaderAction;
   getDesktopIconData: DesktopIconData;
   ensureDataFolder: boolean;
+  setIconData: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -51,5 +53,10 @@ interface Window {
     getDesktopIconData: () => Promise<DesktopIconData>;
     getSafeFileUrl: (relativePath: string) => string;
     ensureDataFolder: (row: number, col: number) => Promise<boolean>;
+    setIconData: (
+      row: number,
+      col: number,
+      icon: DesktopIcon
+    ) => Promise<boolean>;
   };
 }

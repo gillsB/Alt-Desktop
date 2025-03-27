@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
 import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
+import { DesktopIcon } from "./DesktopIcon.js";
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {
@@ -74,6 +75,48 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return ensureFileExists(fullPath, { icons: [] });
       } catch (error) {
         console.error(`Error ensuring Data folder [${row},${col}]:`, error);
+        return false;
+      }
+    }
+  );
+
+  ipcMainHandle(
+    "setIconData",
+    async (row: number, col: number, icon: DesktopIcon): Promise<boolean> => {
+      try {
+        const directoryPath = path.join(getAppDataPath(), "desktop");
+        const filePath = path.join(directoryPath, "desktopIcons.json");
+
+        console.log(`Updating icon at [${row},${col}] in ${filePath}`);
+
+        let desktopData: DesktopIconData = { icons: [] };
+
+        // Ensure file exists
+        if (fs.existsSync(filePath)) {
+          const data = fs.readFileSync(filePath, "utf-8");
+          desktopData = JSON.parse(data);
+        }
+
+        // Find existing icon or add new one
+        const existingIndex = desktopData.icons.findIndex(
+          (i) => i.row === row && i.col === col
+        );
+
+        if (existingIndex !== -1) {
+          // Update existing icon
+          desktopData.icons[existingIndex] = icon;
+        } else {
+          // Add new icon
+          desktopData.icons.push(icon);
+        }
+
+        // Write back updated JSON
+        fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+
+        console.log(`Successfully updated icon at [${row},${col}]`);
+        return true;
+      } catch (error) {
+        console.error(`Error updating icon at [${row},${col}]:`, error);
         return false;
       }
     }

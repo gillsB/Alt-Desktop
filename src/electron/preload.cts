@@ -16,6 +16,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getSafeFileUrl: (relativePath: string) => getSafeFileUrl(relativePath),
   ensureDataFolder: (row: number, col: number) =>
     ipcInvoke("ensureDataFolder", row, col),
+  setIconData: (row, col, icon) => ipcInvoke("setIconData", row, col, icon),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
