@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
-import EditIcon from "./EditIcon";
 import { SafeImage } from "./SafeImage";
 
 const ICON_SIZE = 100;
@@ -17,8 +16,6 @@ interface ContextMenu {
 const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
-  // "opened" refers to icon being opened in EditIcon subwindow. Not launching etc.
-  const [openedIcon, setOpenedIcon] = useState<DesktopIcon | null>(null);
 
   /**
    * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
@@ -159,8 +156,9 @@ const DesktopGrid: React.FC = () => {
 
   const handleOpenIcon = () => {
     if (contextMenu?.icon) {
-      setOpenedIcon(contextMenu.icon);
-      setContextMenu(null); // Close context menu
+      // Send the action to the main process via Electron's IPC
+      window.electron.sendSubWindowAction("EDIT_ICON", contextMenu.icon);
+      setContextMenu(null); // Close the context menu
     }
   };
 
@@ -220,13 +218,6 @@ const DesktopGrid: React.FC = () => {
             </>
           )}
         </div>
-      )}
-
-      {openedIcon && (
-        <EditIcon
-          iconName={openedIcon.name}
-          onClose={() => setOpenedIcon(null)}
-        />
       )}
     </>
   );

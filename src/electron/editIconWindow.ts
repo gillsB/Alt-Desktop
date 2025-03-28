@@ -19,9 +19,9 @@ export function openEditIconWindow(icon: DesktopIcon) {
   console.log(icon);
 
   if (isDev()) {
-    editIconWindow.loadURL("http://localhost:5123/#/edit-icon");
+    editIconWindow.loadURL(`http://localhost:5123/#/edit-icon?row=${icon.row}&col=${icon.col}`);
   } else {
-    editIconWindow.loadFile(getUIPath(), { hash: "edit-icon" });
+    editIconWindow.loadFile(getUIPath(), { hash: `edit-icon?row=${icon.row}&col=${icon.col}` });
   }
 
   editIconWindow.on("closed", () => {
