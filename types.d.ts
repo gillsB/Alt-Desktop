@@ -14,6 +14,8 @@ type View = "CPU" | "RAM" | "STORAGE";
 
 type HeaderAction = "MINIMIZE" | "MAXIMIZE" | "CLOSE" | "SHOW_DEVTOOLS";
 
+type SubWindowAction = "EDIT_ICON";
+
 type DesktopIconData = {
   icons: DesktopIcon[];
 };
@@ -26,6 +28,7 @@ interface EventParamMapping {
   getDesktopIconData: [];
   ensureDataFolder: [number, number];
   setIconData: [DesktopIcon];
+  sendSubWindowAction: [SubWindowAction, DesktopIcon];
 }
 
 type EventPayloadMapping = {
@@ -36,6 +39,7 @@ type EventPayloadMapping = {
   getDesktopIconData: DesktopIconData;
   ensureDataFolder: boolean;
   setIconData: boolean;
+  sendSubWindowAction: { action: SubWindowAction; icon: DesktopIcon };
 };
 
 type UnsubscribeFunction = () => void;
@@ -54,5 +58,6 @@ interface Window {
     getSafeFileUrl: (relativePath: string) => string;
     ensureDataFolder: (row: number, col: number) => Promise<boolean>;
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
+    sendSubWindowAction: (action: SubWindowAction, icon: DesktopIcon) => void;
   };
 }

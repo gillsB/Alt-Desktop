@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
-import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
 import { DesktopIcon } from "./DesktopIcon.js";
+import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {
@@ -52,6 +52,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
 
+  ipcMainOn(
+    "sendSubWindowAction",
+    (payload: { action: "EDIT_ICON"; icon: DesktopIcon }) => {
+      switch (payload.action) {
+        case "EDIT_ICON":
+          console.log(payload.icon);
+          break;
+      }
+    }
+  );
+
   ipcMainHandle(
     "ensureDataFolder",
     async (row: number, col: number): Promise<boolean> => {
@@ -80,45 +91,42 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
-  ipcMainHandle(
-    "setIconData",
-    async (icon: DesktopIcon): Promise<boolean> => {
-      try {
-        const { row, col } = icon; // Extract row and col from the icon object
-        const directoryPath = path.join(getAppDataPath(), "desktop");
-        const filePath = path.join(directoryPath, "desktopIcons.json");
+  ipcMainHandle("setIconData", async (icon: DesktopIcon): Promise<boolean> => {
+    try {
+      const { row, col } = icon; // Extract row and col from the icon object
+      const directoryPath = path.join(getAppDataPath(), "desktop");
+      const filePath = path.join(directoryPath, "desktopIcons.json");
 
-        console.log(`Updating icon at [${row},${col}] in ${filePath}`);
-        let desktopData: DesktopIconData = { icons: [] };
+      console.log(`Updating icon at [${row},${col}] in ${filePath}`);
+      let desktopData: DesktopIconData = { icons: [] };
 
-        // Ensure file exists
-        if (fs.existsSync(filePath)) {
-          const data = fs.readFileSync(filePath, "utf-8");
-          desktopData = JSON.parse(data);
-        }
-
-        // Find existing icon or add new one
-        const existingIndex = desktopData.icons.findIndex(
-          (i) => i.row === row && i.col === col
-        );
-
-        if (existingIndex !== -1) {
-          // Update existing icon
-          desktopData.icons[existingIndex] = icon;
-        } else {
-          // Add new icon
-          desktopData.icons.push(icon);
-        }
-
-        // Write back updated JSON
-        fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
-
-        console.log(`Successfully updated icon at [${row},${col}]`);
-        return true;
-      } catch (error) {
-        console.error(`Error updating icon at [${icon.row},${icon.col}]:`, error);
-        return false;
+      // Ensure file exists
+      if (fs.existsSync(filePath)) {
+        const data = fs.readFileSync(filePath, "utf-8");
+        desktopData = JSON.parse(data);
       }
+
+      // Find existing icon or add new one
+      const existingIndex = desktopData.icons.findIndex(
+        (i) => i.row === row && i.col === col
+      );
+
+      if (existingIndex !== -1) {
+        // Update existing icon
+        desktopData.icons[existingIndex] = icon;
+      } else {
+        // Add new icon
+        desktopData.icons.push(icon);
+      }
+
+      // Write back updated JSON
+      fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+
+      console.log(`Successfully updated icon at [${row},${col}]`);
+      return true;
+    } catch (error) {
+      console.error(`Error updating icon at [${icon.row},${icon.col}]:`, error);
+      return false;
     }
-  );
+  });
 }
