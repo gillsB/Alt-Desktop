@@ -1,10 +1,11 @@
 import { BrowserWindow } from "electron";
+import { DesktopIcon } from "./DesktopIcon.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { isDev } from "./util.js";
 
 let editIconWindow: BrowserWindow | null = null;
 
-export function openEditIconWindow() {
+export function openEditIconWindow(icon: DesktopIcon) {
   editIconWindow = new BrowserWindow({
     width: 260,
     height: 370,
@@ -14,6 +15,8 @@ export function openEditIconWindow() {
     },
     title: "Edit Icon",
   });
+
+  console.log(icon);
 
   if (isDev()) {
     editIconWindow.loadURL("http://localhost:5123/#/edit-icon");

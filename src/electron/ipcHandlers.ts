@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
 import { DesktopIcon } from "./DesktopIcon.js";
+import { openEditIconWindow } from "./editIconWindow.js";
 import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
@@ -57,7 +58,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     (payload: { action: "EDIT_ICON"; icon: DesktopIcon }) => {
       switch (payload.action) {
         case "EDIT_ICON":
-          console.log(payload.icon);
+          openEditIconWindow(payload.icon);
           break;
       }
     }

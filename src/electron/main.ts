@@ -5,9 +5,6 @@ import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { createTray } from "./tray.js";
 import { isDev } from "./util.js";
-import { openEditIconWindow } from "./editIconWindow.js";
-
-
 
 // This disables the menu completely for all windows (including the sub windows).
 Menu.setApplicationMenu(null);
@@ -46,11 +43,7 @@ app.on("ready", () => {
 
   createTray(mainWindow);
   handleCloseEvents(mainWindow);
-
-  // TODO remove this and call via ipc
-  openEditIconWindow();
 });
-
 
 function handleCloseEvents(mainWindow: BrowserWindow) {
   let willClose = false;
