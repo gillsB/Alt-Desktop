@@ -218,7 +218,7 @@ body,
   top: 0;
   left: 0;
   background-color: transparent;
-  z-index: 9999;
+  z-index: 0;
 }
 .edit-icon-container {
   position: fixed;

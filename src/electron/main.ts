@@ -5,8 +5,9 @@ import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { createTray } from "./tray.js";
 import { isDev } from "./util.js";
+import { openEditIconWindow } from "./editIconWindow.js";
 
-let editIconWindow: BrowserWindow | null = null;
+
 
 // This disables the menu completely for all windows (including the sub windows).
 Menu.setApplicationMenu(null);
@@ -50,27 +51,6 @@ app.on("ready", () => {
   openEditIconWindow();
 });
 
-function openEditIconWindow() {
-  editIconWindow = new BrowserWindow({
-    width: 260,
-    height: 370,
-    webPreferences: {
-      preload: getPreloadPath(),
-      webSecurity: true,
-    },
-    title: "Edit Icon",
-  });
-
-  if (isDev()) {
-    editIconWindow.loadURL("http://localhost:5123/#/edit-icon");
-  } else {
-    editIconWindow.loadFile(getUIPath(), { hash: "edit-icon" });
-  }
-
-  editIconWindow.on("closed", () => {
-    editIconWindow = null;
-  });
-}
 
 function handleCloseEvents(mainWindow: BrowserWindow) {
   let willClose = false;
