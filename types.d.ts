@@ -20,6 +20,7 @@ type DesktopIconData = {
   icons: DesktopIcon[];
 };
 
+// Items/objects being sent from the renderer to the main process
 interface EventParamMapping {
   statistics: [];
   getStaticData: [];
@@ -29,8 +30,10 @@ interface EventParamMapping {
   ensureDataFolder: [number, number];
   setIconData: [DesktopIcon];
   sendSubWindowAction: [SubWindowAction, DesktopIcon];
+  getDesktopIcon: [number, number];
 }
 
+// The returns from the main process to the renderer
 type EventPayloadMapping = {
   statistics: Statistics;
   getStaticData: StaticData;
@@ -40,6 +43,7 @@ type EventPayloadMapping = {
   ensureDataFolder: boolean;
   setIconData: boolean;
   sendSubWindowAction: { action: SubWindowAction; icon: DesktopIcon };
+  getDesktopIcon: DesktopIcon | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -59,5 +63,6 @@ interface Window {
     ensureDataFolder: (row: number, col: number) => Promise<boolean>;
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, icon: DesktopIcon) => void;
+    getDesktopIcon: (row: number, col: number) => Promise<DesktopIcon>;
   };
 }

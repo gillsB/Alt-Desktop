@@ -32,6 +32,44 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
 
+  ipcMainHandle(
+    "getDesktopIcon",
+    async (row: number, col: number): Promise<DesktopIcon | null> => {
+      const directoryPath = path.join(getAppDataPath(), "desktop");
+      const filePath = path.join(directoryPath, "desktopIcons.json");
+
+      console.log("Resolved File Path:", filePath);
+
+      try {
+        // Read JSON file
+        const data = fs.readFileSync(filePath, "utf-8");
+        console.log("Read file contents:", data);
+        const parsedData: DesktopIconData = JSON.parse(data);
+
+        if (parsedData.icons) {
+          // Find the icon with the specified row and col
+          const icon = parsedData.icons.find(
+            (icon) => icon.row === row && icon.col === col
+          );
+
+          if (icon) {
+            console.log(`Found icon at [${row}, ${col}]:`, icon);
+            return icon;
+          } else {
+            console.warn(`No icon found at [${row}, ${col}]`);
+            return null; // Return null if no matching icon is found
+          }
+        }
+
+        console.warn("No icons found in the data file.");
+        return null; // Return null if no icons exist
+      } catch (error) {
+        console.error("Error reading or parsing JSON file:", error);
+        return null; // Return null if an error occurs
+      }
+    }
+  );
+
   ipcMainOn("sendHeaderAction", (payload) => {
     switch (payload) {
       case "MINIMIZE":
