@@ -1,33 +1,73 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 
 interface EditIconProps {
-  iconName: string;
   onClose: () => void;
 }
 
-const EditIcon: React.FC<EditIconProps> = ({ iconName, onClose }) => {
-  // Get the row and column from the URL query parameters
+const EditIcon: React.FC<EditIconProps> = ({ onClose }) => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const row = queryParams.get("row");
   const col = queryParams.get("col");
 
+  const [icon, setIcon] = useState<DesktopIcon | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchIcon = async () => {
+      if (!row || !col) {
+        setError("Row and column parameters are missing.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const iconData = await window.electron.getDesktopIcon(
+          parseInt(row, 10),
+          parseInt(col, 10)
+        );
+        if (iconData) {
+          setIcon(iconData);
+        } else {
+          setError(`No icon found at row ${row}, column ${col}.`);
+        }
+      } catch (err) {
+        console.error("Error fetching icon:", err);
+        setError("Failed to fetch icon data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIcon();
+  }, [row, col]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!icon) {
+    return <div>No icon data available.</div>;
+  }
 
   return (
     <div className="edit-icon-container">
       <div className="edit-icon-header">
-        <span>{iconName}</span>
+        <span>Desktop Icon Data</span>
         <button onClick={onClose} className="edit-icon-close">
           ✖
         </button>
       </div>
       <div className="edit-icon-content">
-        <p>
-          Editing icon at row {row}, column {col}
-        </p>
+        <pre>{JSON.stringify(icon, null, 2)}</pre>
       </div>
     </div>
   );
