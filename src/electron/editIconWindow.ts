@@ -7,7 +7,7 @@ let editIconWindow: BrowserWindow | null = null;
 
 export function openEditIconWindow(icon: DesktopIcon) {
   editIconWindow = new BrowserWindow({
-    width: 350,
+    width: 400,
     height: 460,
     webPreferences: {
       preload: getPreloadPath(),

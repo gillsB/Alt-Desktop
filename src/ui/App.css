@@ -260,7 +260,32 @@ body,
   padding: 10px;
   overflow: auto; /* Allow scrolling if content overflows */
   display: flex;
-  justify-content: center;
-  align-items: left;
+  flex-direction: column; /* Arrange fields vertically */
+  justify-content: flex-start; /* Align fields to the top */
+  align-items: flex-start; /* Align fields to the left */
   text-align: left;
+  gap: 15px; /* Add spacing between fields */
+}
+
+.edit-icon-field {
+  display: flex;
+  flex-direction: row; /* Arrange label and input horizontally */
+  align-items: center; /* Align label and input vertically */
+  gap: 10px; /* Add spacing between the label and input */
+  width: 100%; /* Make the field take up full width */
+}
+
+.edit-icon-field label {
+  font-weight: bold;
+  color: white;
+  flex: 0 0 150px; /* Set a fixed width for the label */
+}
+
+.edit-icon-field input {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex: 1; /* Allow the input to take up the remaining space */
+  box-sizing: border-box;
 }

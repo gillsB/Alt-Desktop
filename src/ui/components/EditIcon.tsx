@@ -61,13 +61,36 @@ const EditIcon: React.FC<EditIconProps> = ({ onClose }) => {
   return (
     <div className="edit-icon-container">
       <div className="edit-icon-header">
-        <span>Desktop Icon Data</span>
+        <span>Edit Desktop Icon</span>
         <button onClick={onClose} className="edit-icon-close">
           ✖
         </button>
       </div>
       <div className="edit-icon-content">
-        <pre>{JSON.stringify(icon, null, 2)}</pre>
+        <div className="edit-icon-field">
+          <label htmlFor="icon-name">Icon Name</label>
+          <input
+            id="icon-name"
+            type="text"
+            value={icon.name}
+          />
+        </div>
+        <div className="edit-icon-field">
+          <label htmlFor="image-path">Image Path</label>
+          <input
+            id="image-path"
+            type="text"
+            value={icon.image}
+          />
+        </div>
+        <div className="edit-icon-field">
+          <label htmlFor="font-color">Font Color</label>
+          <input
+            id="font-color"
+            type="text"
+            value={icon.fontColor}
+          />
+        </div>
       </div>
     </div>
   );
