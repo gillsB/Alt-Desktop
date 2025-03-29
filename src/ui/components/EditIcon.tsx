@@ -47,34 +47,28 @@ const EditIcon: React.FC<EditIconProps> = ({ onClose }) => {
     fetchIcon();
   }, [row, col]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!icon) {
-    return <div>No icon data available.</div>;
-  }
-
   return (
     <div className="edit-icon-container">
       <SubWindowHeader onClose={onClose} />
       <div className="edit-icon-content">
-        <div className="edit-icon-field">
-          <label htmlFor="icon-name">Icon Name</label>
-          <input id="icon-name" type="text" value={icon.name} />
-        </div>
-        <div className="edit-icon-field">
-          <label htmlFor="image-path">Image Path</label>
-          <input id="image-path" type="text" value={icon.image} />
-        </div>
-        <div className="edit-icon-field">
-          <label htmlFor="font-color">Font Color</label>
-          <input id="font-color" type="text" value={icon.fontColor} />
-        </div>
+        {loading && <div>Loading...</div>}
+        {error && <div>Error: {error}</div>}
+        {!loading && !error && icon && (
+          <>
+            <div className="edit-icon-field">
+              <label htmlFor="icon-name">Icon Name</label>
+              <input id="icon-name" type="text" value={icon.name} />
+            </div>
+            <div className="edit-icon-field">
+              <label htmlFor="image-path">Image Path</label>
+              <input id="image-path" type="text" value={icon.image} />
+            </div>
+            <div className="edit-icon-field">
+              <label htmlFor="font-color">Font Color</label>
+              <input id="font-color" type="text" value={icon.fontColor} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
