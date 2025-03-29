@@ -13,6 +13,7 @@ export function openEditIconWindow(icon: DesktopIcon) {
       preload: getPreloadPath(),
       webSecurity: true,
     },
+    frame: false,
     title: "Edit Icon",
   });
 

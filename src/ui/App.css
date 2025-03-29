@@ -236,49 +236,30 @@ body,
   flex-direction: column;
 }
 
-.edit-icon-header {
-  background-color: #444;
-  color: white;
-  padding: 8px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: grab;
-}
-
-.edit-icon-close {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
-
 .edit-icon-content {
   flex-grow: 1;
   padding: 10px;
-  overflow: auto; /* Allow scrolling if content overflows */
+  overflow: auto;
   display: flex;
-  flex-direction: column; /* Arrange fields vertically */
-  justify-content: flex-start; /* Align fields to the top */
-  align-items: flex-start; /* Align fields to the left */
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
   text-align: left;
-  gap: 15px; /* Add spacing between fields */
+  gap: 15px;
 }
 
 .edit-icon-field {
   display: flex;
-  flex-direction: row; /* Arrange label and input horizontally */
-  align-items: center; /* Align label and input vertically */
-  gap: 10px; /* Add spacing between the label and input */
-  width: 100%; /* Make the field take up full width */
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
 .edit-icon-field label {
   font-weight: bold;
   color: white;
-  flex: 0 0 150px; /* Set a fixed width for the label */
+  flex: 0 0 150px;
 }
 
 .edit-icon-field input {
@@ -286,6 +267,6 @@ body,
   font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  flex: 1; /* Allow the input to take up the remaining space */
+  flex: 1;
   box-sizing: border-box;
 }

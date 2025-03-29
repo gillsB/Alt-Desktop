@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
+import { SubWindowHeader } from "./SubWindowHeader";
 
 interface EditIconProps {
   onClose: () => void;
@@ -60,36 +61,19 @@ const EditIcon: React.FC<EditIconProps> = ({ onClose }) => {
 
   return (
     <div className="edit-icon-container">
-      <div className="edit-icon-header">
-        <span>Edit Desktop Icon</span>
-        <button onClick={onClose} className="edit-icon-close">
-          ✖
-        </button>
-      </div>
+      <SubWindowHeader onClose={onClose} />
       <div className="edit-icon-content">
         <div className="edit-icon-field">
           <label htmlFor="icon-name">Icon Name</label>
-          <input
-            id="icon-name"
-            type="text"
-            value={icon.name}
-          />
+          <input id="icon-name" type="text" value={icon.name} />
         </div>
         <div className="edit-icon-field">
           <label htmlFor="image-path">Image Path</label>
-          <input
-            id="image-path"
-            type="text"
-            value={icon.image}
-          />
+          <input id="image-path" type="text" value={icon.image} />
         </div>
         <div className="edit-icon-field">
           <label htmlFor="font-color">Font Color</label>
-          <input
-            id="font-color"
-            type="text"
-            value={icon.fontColor}
-          />
+          <input id="font-color" type="text" value={icon.fontColor} />
         </div>
       </div>
     </div>
