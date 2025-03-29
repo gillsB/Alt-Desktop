@@ -31,7 +31,7 @@ const App: React.FC = () => {
         <Route
           path="/edit-icon"
           element={
-            <EditIcon iconName="Sample Icon" onClose={() => window.close()} />
+            <EditIcon onClose={() => window.close()} />
           }
         />
       </Routes>

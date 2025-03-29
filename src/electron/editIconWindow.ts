@@ -7,8 +7,8 @@ let editIconWindow: BrowserWindow | null = null;
 
 export function openEditIconWindow(icon: DesktopIcon) {
   editIconWindow = new BrowserWindow({
-    width: 260,
-    height: 370,
+    width: 350,
+    height: 460,
     webPreferences: {
       preload: getPreloadPath(),
       webSecurity: true,
@@ -19,9 +19,13 @@ export function openEditIconWindow(icon: DesktopIcon) {
   console.log(icon);
 
   if (isDev()) {
-    editIconWindow.loadURL(`http://localhost:5123/#/edit-icon?row=${icon.row}&col=${icon.col}`);
+    editIconWindow.loadURL(
+      `http://localhost:5123/#/edit-icon?row=${icon.row}&col=${icon.col}`
+    );
   } else {
-    editIconWindow.loadFile(getUIPath(), { hash: `edit-icon?row=${icon.row}&col=${icon.col}` });
+    editIconWindow.loadFile(getUIPath(), {
+      hash: `edit-icon?row=${icon.row}&col=${icon.col}`,
+    });
   }
 
   editIconWindow.on("closed", () => {
