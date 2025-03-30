@@ -28,10 +28,7 @@ const App: React.FC = () => {
           }
         />
         {/* Route for the EditIcon component only */}
-        <Route
-          path="/edit-icon"
-          element={<EditIcon onClose={() => window.close()} />}
-        />
+        <Route path="/edit-icon" element={<EditIcon />} />
       </Routes>
     </Router>
   );

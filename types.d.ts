@@ -14,7 +14,7 @@ type View = "CPU" | "RAM" | "STORAGE";
 
 type HeaderAction = "MINIMIZE" | "MAXIMIZE" | "CLOSE" | "SHOW_DEVTOOLS";
 
-type SubWindowAction = "EDIT_ICON";
+type SubWindowAction = "EDIT_ICON" | "CLOSE_SUBWINDOW";
 
 type DesktopIconData = {
   icons: DesktopIcon[];
@@ -29,8 +29,9 @@ interface EventParamMapping {
   getDesktopIconData: [];
   ensureDataFolder: [number, number];
   setIconData: [DesktopIcon];
-  sendSubWindowAction: [SubWindowAction, DesktopIcon];
+  sendSubWindowAction: [SubWindowAction, DesktopIcon?];
   getDesktopIcon: [number, number];
+  getSubWindowState: [];
 }
 
 // The returns from the main process to the renderer
@@ -42,8 +43,9 @@ type EventPayloadMapping = {
   getDesktopIconData: DesktopIconData;
   ensureDataFolder: boolean;
   setIconData: boolean;
-  sendSubWindowAction: { action: SubWindowAction; icon: DesktopIcon };
+  sendSubWindowAction: { action: SubWindowAction; icon?: DesktopIcon };
   getDesktopIcon: DesktopIcon | null;
+  getSubWindowState: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -62,7 +64,8 @@ interface Window {
     getSafeFileUrl: (relativePath: string) => string;
     ensureDataFolder: (row: number, col: number) => Promise<boolean>;
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
-    sendSubWindowAction: (action: SubWindowAction, icon: DesktopIcon) => void;
-    getDesktopIcon: (row: number, col: number) => Promise<DesktopIcon>;
+    sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
+    getDesktopIcon: (row: number, col: number) => Promise<DesktopIcon | null>;
+    isSubWindowActive: () => Promise<boolean>;
   };
 }

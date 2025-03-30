@@ -4,11 +4,7 @@ import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 import { SubWindowHeader } from "./SubWindowHeader";
 
-interface EditIconProps {
-  onClose: () => void;
-}
-
-const EditIcon: React.FC<EditIconProps> = ({ onClose }) => {
+const EditIcon: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const row = queryParams.get("row");
@@ -53,7 +49,7 @@ const EditIcon: React.FC<EditIconProps> = ({ onClose }) => {
 
   return (
     <div className="edit-icon-container">
-      <SubWindowHeader onClose={onClose} />
+      <SubWindowHeader />
       <div className="edit-icon-content">
         {loading && <div>Loading...</div>}
         {error && <div>Error: {error}</div>}

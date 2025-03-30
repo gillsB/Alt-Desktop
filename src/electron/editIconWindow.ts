@@ -1,12 +1,10 @@
-import { BrowserWindow } from "electron";
+import { createSubWindow } from "./subWindowManager.js";
 import { DesktopIcon } from "./DesktopIcon.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { isDev } from "./util.js";
 
-let editIconWindow: BrowserWindow | null = null;
-
 export function openEditIconWindow(icon: DesktopIcon) {
-  editIconWindow = new BrowserWindow({
+  const editIconWindow = createSubWindow({
     width: 400,
     height: 460,
     webPreferences: {
@@ -28,8 +26,4 @@ export function openEditIconWindow(icon: DesktopIcon) {
       hash: `edit-icon?row=${icon.row}&col=${icon.col}`,
     });
   }
-
-  editIconWindow.on("closed", () => {
-    editIconWindow = null;
-  });
 }

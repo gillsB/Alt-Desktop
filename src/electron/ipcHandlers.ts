@@ -3,6 +3,10 @@ import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
 import { DesktopIcon } from "./DesktopIcon.js";
 import { openEditIconWindow } from "./editIconWindow.js";
+import {
+  closeActiveSubWindow,
+  getActiveSubWindow,
+} from "./subWindowManager.js";
 import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
@@ -93,10 +97,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainOn(
     "sendSubWindowAction",
-    (payload: { action: "EDIT_ICON"; icon: DesktopIcon }) => {
+    (payload: { action: SubWindowAction; icon?: DesktopIcon }) => {
       switch (payload.action) {
         case "EDIT_ICON":
-          openEditIconWindow(payload.icon);
+          if (payload.icon) {
+            openEditIconWindow(payload.icon);
+          } else {
+            console.error("Payload icon is undefined.");
+          }
+          break;
+        case "CLOSE_SUBWINDOW":
+          closeActiveSubWindow();
           break;
       }
     }
@@ -167,5 +178,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       console.error(`Error updating icon at [${icon.row},${icon.col}]:`, error);
       return false;
     }
+  });
+
+  ipcMainHandle("getSubWindowState", async (): Promise<boolean> => {
+    const subWindow = getActiveSubWindow();
+    return subWindow !== null; // Return true if a subwindow is active
   });
 }
