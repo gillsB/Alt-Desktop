@@ -107,6 +107,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           }
           break;
         case "CLOSE_SUBWINDOW":
+          console.log("Closing subwindow...");
           closeActiveSubWindow();
           break;
       }

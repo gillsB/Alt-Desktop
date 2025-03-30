@@ -7,6 +7,7 @@ export function createSubWindow(
 ): BrowserWindow {
   // Close any existing subwindow
   if (activeSubWindow) {
+    activeSubWindow.removeAllListeners("closed");
     activeSubWindow.close();
   }
 
@@ -15,7 +16,10 @@ export function createSubWindow(
 
   // When the subwindow is closed, clear the reference
   activeSubWindow.on("closed", () => {
-    activeSubWindow = null;
+    // Only clear the reference if this is still the active subwindow
+    if (activeSubWindow === BrowserWindow.getFocusedWindow()) {
+      activeSubWindow = null;
+    }
   });
 
   return activeSubWindow;
@@ -27,6 +31,7 @@ export function getActiveSubWindow(): BrowserWindow | null {
 
 export function closeActiveSubWindow(): void {
   if (activeSubWindow) {
+    activeSubWindow.removeAllListeners("closed");
     activeSubWindow.close();
     activeSubWindow = null;
   }

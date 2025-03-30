@@ -1,6 +1,6 @@
-import { createSubWindow } from "./subWindowManager.js";
 import { DesktopIcon } from "./DesktopIcon.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
+import { createSubWindow } from "./subWindowManager.js";
 import { isDev } from "./util.js";
 
 export function openEditIconWindow(icon: DesktopIcon) {
