@@ -47,6 +47,10 @@ const EditIcon: React.FC<EditIconProps> = ({ onClose }) => {
     fetchIcon();
   }, [row, col]);
 
+  const handleSave = () => {
+    console.log("Save button clicked", icon);
+  };
+
   return (
     <div className="edit-icon-container">
       <SubWindowHeader onClose={onClose} />
@@ -57,18 +61,40 @@ const EditIcon: React.FC<EditIconProps> = ({ onClose }) => {
           <>
             <div className="edit-icon-field">
               <label htmlFor="icon-name">Icon Name</label>
-              <input id="icon-name" type="text" value={icon.name} />
+              <input
+                id="icon-name"
+                type="text"
+                value={icon.name}
+                onChange={(e) => setIcon({ ...icon, name: e.target.value })}
+              />
             </div>
             <div className="edit-icon-field">
               <label htmlFor="image-path">Image Path</label>
-              <input id="image-path" type="text" value={icon.image} />
+              <input
+                id="image-path"
+                type="text"
+                value={icon.image}
+                onChange={(e) => setIcon({ ...icon, image: e.target.value })}
+              />
             </div>
             <div className="edit-icon-field">
               <label htmlFor="font-color">Font Color</label>
-              <input id="font-color" type="text" value={icon.fontColor} />
+              <input
+                id="font-color"
+                type="text"
+                value={icon.fontColor}
+                onChange={(e) =>
+                  setIcon({ ...icon, fontColor: e.target.value })
+                }
+              />
             </div>
           </>
         )}
+      </div>
+      <div className="edit-icon-footer">
+        <button className="save-button" onClick={handleSave}>
+          Save
+        </button>
       </div>
     </div>
   );
