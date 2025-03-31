@@ -43,8 +43,12 @@ const EditIcon: React.FC = () => {
     fetchIcon();
   }, [row, col]);
 
-  const handleSave = () => {
-    console.log("Save button clicked", icon);
+  const handleSave = async () => {
+    if (await window.electron.setIconData(icon)) {
+      window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+    } else {
+      console.log("Failed to save icon");
+    }
   };
 
   return (
