@@ -56,6 +56,10 @@ export const SafeImage: React.FC<{
   );
 
   useEffect(() => {
+    setImageSrc(getImagePath(row, col, originalImage));
+  }, [originalImage, row, col]);
+
+  useEffect(() => {
     const img = new Image();
     img.src = imageSrc;
 
@@ -70,7 +74,7 @@ export const SafeImage: React.FC<{
       img.onload = null;
       img.onerror = null;
     };
-  }, [imageSrc, row, col]);
+  }, [imageSrc]);
 
   return (
     <div
