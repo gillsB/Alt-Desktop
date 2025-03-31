@@ -146,7 +146,7 @@ const DesktopGrid: React.FC = () => {
   const handleIconClick = (row: number, col: number) => {
     const icon = getIcon(row, col);
     if (!icon) return iconsMap; // No update if icon doesn't exist
-    const newColor = icon.fontColor === "yellow" ? "white" : "yellow";
+    const newColor = icon.fontColor === "red" ? "white" : "red";
     updateIconField([row, col], "fontColor", newColor);
   };
 
@@ -163,9 +163,12 @@ const DesktopGrid: React.FC = () => {
     e.preventDefault();
     const { clientX: x, clientY: y } = e;
 
+    // Subtract the header height
+    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
+
     setContextMenu({
       x,
-      y,
+      y: y - headerHeight,
       type,
       icon:
         type === "icon" && row !== undefined && col !== undefined
