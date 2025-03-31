@@ -210,9 +210,9 @@ const DesktopGrid: React.FC = () => {
             className="desktop-icon"
             style={{
               left: icon.col * ICON_SIZE + GRID_PADDING,
-              top: icon.row * ICON_SIZE + GRID_PADDING,
+              top: icon.row * (ICON_SIZE + 30) + GRID_PADDING, // Adjust vertical spacing
               width: icon.width || 64,
-              height: (icon.height || 64) + 30,
+              height: icon.height || 64,
             }}
             onClick={() => handleIconClick(icon.row, icon.col)}
             onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
