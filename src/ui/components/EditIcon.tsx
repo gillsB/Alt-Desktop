@@ -44,7 +44,18 @@ const EditIcon: React.FC = () => {
   }, [row, col]);
 
   const handleSave = async () => {
-    if (await window.electron.setIconData(icon)) {
+    // Ensure valid icon
+    if (!icon) {
+      console.error("Icon data is missing.");
+      return;
+    } // Try to set Icon data
+    else if (await window.electron.setIconData(icon)) {
+      // Reload Icon data
+      if (await window.electron.reloadIcon(icon.row, icon.col)) {
+        console.log("Icon reloaded successfully");
+      } else {
+        console.error("Failed to reload icon");
+      }
       window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
     } else {
       console.log("Failed to save icon");

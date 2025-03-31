@@ -185,4 +185,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     const subWindow = getActiveSubWindow();
     return subWindow !== null; // Return true if a subwindow is active
   });
+
+  ipcMainHandle(
+    "reloadIcon",
+    async (row: number, col: number): Promise<boolean> => {
+      console.log("IPC HANDLE Reloading icon at [", row, ",", col, "]");
+      return true;
+    }
+  );
 }
