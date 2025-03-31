@@ -70,5 +70,7 @@ interface Window {
     getDesktopIcon: (row: number, col: number) => Promise<DesktopIcon | null>;
     isSubWindowActive: () => Promise<boolean>;
     reloadIcon: (row: number, col: number) => Promise<boolean>;
+    on: (channel: string, callback: (...args: unknown[]) => void) => void;
+    off: (channel: string, callback: (...args: unknown[]) => void) => void;
   };
 }

@@ -22,6 +22,12 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getDesktopIcon: (row, col) => ipcInvoke("getDesktopIcon", row, col),
   isSubWindowActive: () => ipcInvoke("getSubWindowState"),
   reloadIcon: (row, col) => ipcInvoke("reloadIcon", row, col),
+  on: (channel: string, callback: (...args: unknown[]) => void) => {
+    electron.ipcRenderer.on(channel, callback);
+  },
+  off: (channel: string, callback: (...args: unknown[]) => void) => {
+    electron.ipcRenderer.off(channel, callback);
+  },
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

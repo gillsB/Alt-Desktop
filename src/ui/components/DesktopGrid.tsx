@@ -52,6 +52,17 @@ const DesktopGrid: React.FC = () => {
     });
   };
 
+  // Function to reload a specific icon
+  const reloadIcon = (row: number, col: number, updatedIcon: DesktopIcon) => {
+    setIconsMap((prevMap) => {
+      const key = `${row},${col}`;
+      const newMap = new Map(prevMap);
+      newMap.set(key, updatedIcon); // Update the specific icon
+      return newMap;
+    });
+    console.log(`Reloaded icon at [${row}, ${col}]`);
+  };
+
   useEffect(() => {
     const fetchIcons = async () => {
       try {
@@ -109,6 +120,28 @@ const DesktopGrid: React.FC = () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, [contextMenu]);
+
+  useEffect(() => {
+    // Listen for the reload-icon event from the main process
+    const handleReloadIcon = (
+      _: Electron.IpcRendererEvent,
+      { row, col, icon }: { row: number; col: number; icon: DesktopIcon }
+    ) => {
+      reloadIcon(row, col, icon);
+    };
+
+    window.electron.on(
+      "reload-icon",
+      handleReloadIcon as (...args: unknown[]) => void
+    );
+
+    return () => {
+      window.electron.off(
+        "reload-icon",
+        handleReloadIcon as (...args: unknown[]) => void
+      );
+    };
+  }, []);
 
   const handleIconClick = (row: number, col: number) => {
     const icon = getIcon(row, col);

@@ -189,8 +189,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "reloadIcon",
     async (row: number, col: number): Promise<boolean> => {
-      console.log("IPC HANDLE Reloading icon at [", row, ",", col, "]");
-      return true;
+      const directoryPath = path.join(getAppDataPath(), "desktop");
+      const filePath = path.join(directoryPath, "desktopIcons.json");
+
+      try {
+        // Read JSON file
+        const data = fs.readFileSync(filePath, "utf-8");
+        const parsedData: DesktopIconData = JSON.parse(data);
+
+        // Find the icon with the specified row and col
+        const icon = parsedData.icons.find(
+          (icon) => icon.row === row && icon.col === col
+        );
+
+        if (icon) {
+          console.log(`Reloaded icon at [${row}, ${col}]:`, icon);
+
+          // Notify the renderer process to reload the icon
+          if (mainWindow) {
+            mainWindow.webContents.send("reload-icon", { row, col, icon });
+          }
+
+          return true; 
+        } else {
+          console.warn(`No icon found at [${row}, ${col}] to reload.`);
+          return false; // Icon not found
+        }
+      } catch (error) {
+        console.error(`Error reloading icon at [${row}, ${col}]:`, error);
+        return false; // Error occurred
+      }
     }
   );
 }
