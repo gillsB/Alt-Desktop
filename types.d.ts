@@ -33,6 +33,7 @@ interface EventParamMapping {
   getDesktopIcon: [number, number];
   getSubWindowState: [];
   reloadIcon: [number, number];
+  reloadWindow: [];
 }
 
 // The returns from the main process to the renderer
@@ -48,6 +49,7 @@ type EventPayloadMapping = {
   getDesktopIcon: DesktopIcon | null;
   getSubWindowState: boolean;
   reloadIcon: boolean;
+  reloadWindow: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -72,5 +74,6 @@ interface Window {
     reloadIcon: (row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;
+    reloadWindow: () => Promise<boolean>;
   };
 }

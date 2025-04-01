@@ -237,6 +237,16 @@ const DesktopGrid: React.FC = () => {
       setContextMenu(null); // Close the context menu
     }
   };
+  const handleReloadDesktop = async () => {
+    try {
+      // Call the Electron API to reload the icon
+      await window.electron.reloadWindow();
+    } catch (error) {
+      console.error(`Failed to reload window`, error);
+    }
+
+    setContextMenu(null); // Close the context menu
+  };
   return (
     <>
       <div
@@ -317,7 +327,7 @@ const DesktopGrid: React.FC = () => {
         >
           {contextMenu.type === "desktop" ? (
             <>
-              <p>Refresh Desktop</p>
+              <p onClick={handleReloadDesktop}>Reload Desktop</p>
               <p>Settings</p>
               <p>New Icon</p>
               <p onClick={toggleGrid}>{showGrid ? "✔ " : ""}Show Grid</p>

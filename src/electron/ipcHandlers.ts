@@ -210,7 +210,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             mainWindow.webContents.send("reload-icon", { row, col, icon });
           }
 
-          return true; 
+          return true;
         } else {
           console.warn(`No icon found at [${row}, ${col}] to reload.`);
           return false; // Icon not found
@@ -221,4 +221,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle("reloadWindow", async (): Promise<boolean> => {
+    if (mainWindow) {
+      mainWindow.reload();
+      return true;
+    } else {
+      return false;
+    }
+  });
 }

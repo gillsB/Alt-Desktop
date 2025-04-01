@@ -28,6 +28,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   off: (channel: string, callback: (...args: unknown[]) => void) => {
     electron.ipcRenderer.off(channel, callback);
   },
+  reloadWindow: () => ipcInvoke("reloadWindow"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
