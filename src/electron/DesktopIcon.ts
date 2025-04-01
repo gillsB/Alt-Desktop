@@ -4,6 +4,8 @@ export interface DesktopIcon {
   name: string;
   width: number;
   height: number;
+  offsetX: number;
+  offsetY: number;
   image: string;
   link?: string;
   fontColor?: string;

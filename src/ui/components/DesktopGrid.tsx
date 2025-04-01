@@ -252,8 +252,11 @@ const DesktopGrid: React.FC = () => {
             key={`${icon.row}-${icon.col}`}
             className="desktop-icon"
             style={{
-              left: icon.col * ICON_SIZE + GRID_PADDING,
-              top: icon.row * (ICON_SIZE + 30) + GRID_PADDING, // Adjust vertical spacing
+              left: icon.col * ICON_SIZE + GRID_PADDING + (icon.offsetX || 0), // Default to 0 if offsetX is undefined
+              top:
+                icon.row * (ICON_SIZE + 30) +
+                GRID_PADDING +
+                (icon.offsetY || 0), // Default to 0 if offsetY is undefined
               width: icon.width || 64,
               height: icon.height || 64,
             }}
