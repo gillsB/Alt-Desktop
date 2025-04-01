@@ -62,8 +62,22 @@ const DesktopGrid: React.FC = () => {
     });
   };
 
-  // Function to reload a specific icon
-  const reloadIcon = (row: number, col: number, updatedIcon: DesktopIcon) => {
+  /**
+   * Handles the "reload-icon" IPC event from the Electron main process.
+   * This function updates the `iconsMap` state with the new icon data received via IPC.
+   *
+   * **Note:** This function is intended to be used exclusively as a callback for the
+   * "reloadIcon" IPC event and should not be called directly.
+   *
+   * @param {number} row - The row position of the icon in the grid.
+   * @param {number} col - The column position of the icon in the grid.
+   * @param {DesktopIcon} updatedIcon - The updated `DesktopIcon` object received from the IPC event.
+   */
+  const handleIpcReloadIcon = (
+    row: number,
+    col: number,
+    updatedIcon: DesktopIcon
+  ) => {
     setIconsMap((prevMap) => {
       const key = `${row},${col}`;
       const newMap = new Map(prevMap);
@@ -137,7 +151,7 @@ const DesktopGrid: React.FC = () => {
       _: Electron.IpcRendererEvent,
       { row, col, icon }: { row: number; col: number; icon: DesktopIcon }
     ) => {
-      reloadIcon(row, col, icon);
+      handleIpcReloadIcon(row, col, icon);
     };
 
     window.electron.on(
@@ -208,6 +222,21 @@ const DesktopGrid: React.FC = () => {
     }
   };
 
+  const handleReloadIcon = async () => {
+    if (contextMenu?.icon) {
+      const { row, col } = contextMenu.icon;
+
+      try {
+        // Call the Electron API to reload the icon
+        await window.electron.reloadIcon(row, col);
+        console.log(`Reloaded icon at [${row}, ${col}] via Electron API`);
+      } catch (error) {
+        console.error(`Failed to reload icon at [${row}, ${col}]:`, error);
+      }
+
+      setContextMenu(null); // Close the context menu
+    }
+  };
   return (
     <>
       <div
@@ -296,6 +325,7 @@ const DesktopGrid: React.FC = () => {
           ) : (
             <>
               <p onClick={handleOpenIcon}>Open {contextMenu.icon?.name}</p>
+              <p onClick={handleReloadIcon}>Reload Icon</p>
               <p>Rename</p>
               <p>Delete</p>
             </>
