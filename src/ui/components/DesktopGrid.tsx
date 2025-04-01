@@ -3,12 +3,6 @@ import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 import { SafeImage } from "./SafeImage";
 
-const ICON_SIZE = 100;
-const GRID_PADDING = 20;
-
-const numRows = 20;
-const numCols = 50;
-
 interface ContextMenu {
   x: number;
   y: number;
@@ -19,6 +13,19 @@ interface ContextMenu {
 const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
+
+  const ICON_SIZE = 100;
+  const GRID_PADDING = 20;
+
+  const numRows = 20;
+  const numCols = 50;
+
+  // Function to toggle grid visibility
+  const toggleGrid = () => {
+    setShowGrid((prev) => !prev);
+    setContextMenu(null); // Close the context menu after toggling
+  };
 
   /**
    * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
@@ -203,39 +210,47 @@ const DesktopGrid: React.FC = () => {
 
   return (
     <>
+      <button
+        onClick={toggleGrid}
+        style={{ position: "absolute", top: 10, left: 10, zIndex: 1000 }}
+      >
+        Toggle Grid
+      </button>
       <div
         style={{ position: "relative", width: "100vw", height: "100vh" }}
         onContextMenu={handleDesktopRightClick}
       >
-        {/* Render horizontal grid lines */}
-        {Array.from({ length: numRows + 1 }).map((_, rowIndex) => (
-          <div
-            key={`h-line-${rowIndex}`}
-            style={{
-              position: "absolute",
-              top: rowIndex * (ICON_SIZE + 30) + GRID_PADDING, // Match icon row spacing
-              left: 0,
-              width: "100%",
-              height: "1px",
-              backgroundColor: "red",
-            }}
-          />
-        ))}
+        {/* Conditionally render horizontal grid lines */}
+        {showGrid &&
+          Array.from({ length: numRows + 1 }).map((_, rowIndex) => (
+            <div
+              key={`h-line-${rowIndex}`}
+              style={{
+                position: "absolute",
+                top: rowIndex * (ICON_SIZE + 30) + GRID_PADDING, // Match icon row spacing
+                left: 0,
+                width: "100%",
+                height: "1px",
+                backgroundColor: "red",
+              }}
+            />
+          ))}
 
-        {/* Render vertical grid lines */}
-        {Array.from({ length: numCols + 1 }).map((_, colIndex) => (
-          <div
-            key={`v-line-${colIndex}`}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: GRID_PADDING + colIndex * ICON_SIZE, // Match icon column spacing
-              width: "1px",
-              height: "100%",
-              backgroundColor: "red",
-            }}
-          />
-        ))}
+        {/* Conditionally render vertical grid lines */}
+        {showGrid &&
+          Array.from({ length: numCols + 1 }).map((_, colIndex) => (
+            <div
+              key={`v-line-${colIndex}`}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: GRID_PADDING + colIndex * ICON_SIZE, // Match icon column spacing
+                width: "1px",
+                height: "100%",
+                backgroundColor: "red",
+              }}
+            />
+          ))}
 
         {/* Render desktop icons */}
         {Array.from(iconsMap.values()).map((icon) => (
@@ -279,6 +294,7 @@ const DesktopGrid: React.FC = () => {
               <p>Refresh Desktop</p>
               <p>Settings</p>
               <p>New Icon</p>
+              <p onClick={toggleGrid}>{showGrid ? "✔ " : ""}Show Grid</p>
             </>
           ) : (
             <>
