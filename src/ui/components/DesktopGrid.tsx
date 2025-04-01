@@ -210,12 +210,6 @@ const DesktopGrid: React.FC = () => {
 
   return (
     <>
-      <button
-        onClick={toggleGrid}
-        style={{ position: "absolute", top: 10, left: 10, zIndex: 1000 }}
-      >
-        Toggle Grid
-      </button>
       <div
         style={{ position: "relative", width: "100vw", height: "100vh" }}
         onContextMenu={handleDesktopRightClick}
