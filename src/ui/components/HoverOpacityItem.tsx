@@ -26,6 +26,10 @@ const HoverOpacityItem: React.FC<HoverOpacityItemProps> = ({
     }
   };
 
+  const handleDoubleClick = () => {
+    window.electron.sendHeaderAction("MINIMIZE");
+  };
+
   const handleLeave = () => {
     if (hoverTimeout.current) {
       clearTimeout(hoverTimeout.current); // Cancel opacity change if hover ends early
@@ -41,6 +45,7 @@ const HoverOpacityItem: React.FC<HoverOpacityItemProps> = ({
       onMouseEnter={handleHover}
       onMouseLeave={handleLeave}
       onMouseMove={handleMouseMove} // Reset timer on mouse move
+      onDoubleClick={handleDoubleClick}
     ></div>
   );
 };
