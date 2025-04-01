@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, globalShortcut, Menu } from "electron";
 import { ensureAppDataFiles } from "./appDataSetup.js";
 import { registerIpcHandlers } from "./ipcHandlers.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
@@ -38,6 +38,18 @@ app.on("ready", () => {
     mainWindow.show();
     mainWindow.maximize();
   });
+
+  const toggleOverlayKeybind = globalShortcut.register("Alt+D", () => {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    } else {
+      mainWindow.minimize();
+    }
+  });
+
+  if (!toggleOverlayKeybind) {
+    console.log("keybind binding failed");
+  }
 
   registerIpcHandlers(mainWindow);
 
