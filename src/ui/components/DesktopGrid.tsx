@@ -6,6 +6,9 @@ import { SafeImage } from "./SafeImage";
 const ICON_SIZE = 100;
 const GRID_PADDING = 20;
 
+const numRows = 20;
+const numCols = 50;
+
 interface ContextMenu {
   x: number;
   y: number;
@@ -204,6 +207,37 @@ const DesktopGrid: React.FC = () => {
         style={{ position: "relative", width: "100vw", height: "100vh" }}
         onContextMenu={handleDesktopRightClick}
       >
+        {/* Render horizontal grid lines */}
+        {Array.from({ length: numRows + 1 }).map((_, rowIndex) => (
+          <div
+            key={`h-line-${rowIndex}`}
+            style={{
+              position: "absolute",
+              top: rowIndex * (ICON_SIZE + 30) + GRID_PADDING, // Match icon row spacing
+              left: 0,
+              width: "100%",
+              height: "1px",
+              backgroundColor: "red",
+            }}
+          />
+        ))}
+
+        {/* Render vertical grid lines */}
+        {Array.from({ length: numCols + 1 }).map((_, colIndex) => (
+          <div
+            key={`v-line-${colIndex}`}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: GRID_PADDING + colIndex * ICON_SIZE, // Match icon column spacing
+              width: "1px",
+              height: "100%",
+              backgroundColor: "red",
+            }}
+          />
+        ))}
+
+        {/* Render desktop icons */}
         {Array.from(iconsMap.values()).map((icon) => (
           <div
             key={`${icon.row}-${icon.col}`}
