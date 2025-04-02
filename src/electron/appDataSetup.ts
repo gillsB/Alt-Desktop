@@ -41,6 +41,7 @@ export const ensureAppDataFiles = () => {
     const basePath = getAppDataPath();
     const desktopPath = path.join(basePath, "desktop");
     const dataFolderPath = path.join(basePath, "data");
+    const logsFolderPath = path.join(basePath, "logs");
     const desktopIconsFilePath = path.join(desktopPath, "desktopIcons.json");
 
     // Ensure directories exist
@@ -53,11 +54,18 @@ export const ensureAppDataFiles = () => {
     }
 
     if (!fs.existsSync(dataFolderPath)) {
-      console.log("Icons folder does not exist, creating:", dataFolderPath);
+      console.log("Data folder does not exist, creating:", dataFolderPath);
       fs.mkdirSync(dataFolderPath, { recursive: true });
-      console.log("Icons folder created successfully.");
+      console.log("Data folder created successfully.");
     } else {
-      console.log("Icons folder already exists:", dataFolderPath);
+      console.log("Data folder already exists:", dataFolderPath);
+    }
+    if (!fs.existsSync(logsFolderPath)) {
+      console.log("Logs folder does not exist, creating:", logsFolderPath);
+      fs.mkdirSync(logsFolderPath, { recursive: true });
+      console.log("Logs folder created successfully.");
+    } else {
+      console.log("Logs folder already exists:", logsFolderPath);
     }
 
     // Ensure desktopIcons.json exists

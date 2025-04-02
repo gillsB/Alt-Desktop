@@ -104,9 +104,6 @@ function fileNotExist(fullPath: string) {
   const mimeType = mime.lookup(fullPath);
 
   // Check if the requested file is an image
-  // TODO this works for images, but need a fallback if the path itself is just bad.
-  // example: no .png returns nothing because it is not a image mimetype.
-  // probably don't fix this here, fix it wherever the UI communicates to get filepath through safeFileProtocol
   if (mimeType && mimeType.startsWith("image/")) {
     console.error("File not found:", fullPath);
     console.error("Returning unknown.png instead.");
