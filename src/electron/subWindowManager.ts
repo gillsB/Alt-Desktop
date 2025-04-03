@@ -45,11 +45,6 @@ export function createSubWindow(
   // Log the creation of the subwindow
   logger.info(`Created subwindow with URL: ${subWindowUrl}`);
 
-  // When the subwindow is closed, clear the reference
-  activeSubWindow.on("closed", () => {
-    activeSubWindow = null;
-  });
-
   return activeSubWindow;
 }
 
@@ -59,6 +54,14 @@ export function getActiveSubWindow(): BrowserWindow | null {
 
 export function closeActiveSubWindow(): void {
   if (activeSubWindow) {
+    // Get the URL of the active subwindow
+    const subWindowUrl = activeSubWindow.webContents.getURL();
+    logger.info(`Closing active subwindow with URL: ${subWindowUrl}`);
+
+    // Remove the URL from the allowed list
+    removeAllowedUrl(subWindowUrl);
+
+    // Remove all listeners and close the subwindow
     activeSubWindow.removeAllListeners("closed");
     activeSubWindow.close();
     activeSubWindow = null;
@@ -69,6 +72,14 @@ export function addAllowedUrl(url: string): void {
   if (!allowedUrls.includes(url)) {
     allowedUrls.push(url);
     logger.info(`Added allowed URL: ${url}`);
+  }
+}
+
+export function removeAllowedUrl(url: string): void {
+  const index = allowedUrls.indexOf(url);
+  if (index !== -1) {
+    allowedUrls.splice(index, 1);
+    logger.info(`Removed allowed URL: ${url}`);
   }
 }
 
