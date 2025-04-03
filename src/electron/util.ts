@@ -1,8 +1,7 @@
 import { ipcMain, WebContents, WebFrameMain } from "electron";
 import fs from "fs";
-import { pathToFileURL } from "url";
 import { createLoggerForFile } from "./logging.js";
-import { getUIPath } from "./pathResolver.js";
+import { getAllowedUrls } from "./subWindowManager.js";
 
 const logger = createLoggerForFile("util.ts");
 
@@ -105,10 +104,12 @@ export function ipcWebContentsSend<Key extends keyof EventPayloadMapping>(
 }
 
 export function validateEventFrame(frame: WebFrameMain) {
-  if (isDev() && new URL(frame.url).host === "localhost:5123") {
-    return;
-  }
-  if (frame.url !== pathToFileURL(getUIPath()).toString()) {
+  const allowedUrls = getAllowedUrls();
+
+  logger.info(`Validating frame URL: ${frame.url}`);
+  logger.info(`Allowed URLs: ${JSON.stringify(allowedUrls)}`);
+
+  if (!allowedUrls.some((url) => frame.url.startsWith(url))) {
     logger.error(`Malicious event from unknown source: ${frame.url}`);
     throw new Error("Malicious event");
   }
@@ -140,4 +141,3 @@ export const ensureFileExists = (
     return false;
   }
 };
-
