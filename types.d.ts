@@ -75,5 +75,6 @@ interface Window {
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;
     reloadWindow: () => Promise<boolean>;
+    logMessage: (level: string, file: string, message: string) => void;
   };
 }

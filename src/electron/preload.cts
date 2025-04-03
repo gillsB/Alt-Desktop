@@ -1,4 +1,4 @@
-import electron from "electron";
+import electron, { ipcRenderer } from "electron";
 
 // builds the bridge for communicating with ui
 electron.contextBridge.exposeInMainWorld("electron", {
@@ -29,6 +29,9 @@ electron.contextBridge.exposeInMainWorld("electron", {
     electron.ipcRenderer.off(channel, callback);
   },
   reloadWindow: () => ipcInvoke("reloadWindow"),
+  logMessage: (level: string, file: string, message: string) => {
+    ipcRenderer.send("log-message", { level, file, message });
+  },
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

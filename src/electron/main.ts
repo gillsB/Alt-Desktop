@@ -61,6 +61,9 @@ app.on("ready", () => {
 
   createTray(mainWindow);
   handleCloseEvents(mainWindow);
+
+  // TODO remove, leaving this for debugging dist:win builds.
+  mainWindow.webContents.openDevTools();
 });
 
 function handleCloseEvents(mainWindow: BrowserWindow) {

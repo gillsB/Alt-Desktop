@@ -1,3 +1,4 @@
+import { ipcMain } from "electron";
 import fs from "fs";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
@@ -104,7 +105,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       switch (payload.action) {
         case "EDIT_ICON":
           if (payload.icon) {
-            logger.info(`SubWindowAction EDIT_ICON with ${payload.icon}`);
+            logger.info(
+              `SubWindowAction EDIT_ICON with ${JSON.stringify(payload.icon)}`
+            );
             openEditIconWindow(payload.icon);
           } else {
             logger.error(`Payload icon is undefined.`);
@@ -233,6 +236,26 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return true;
     } else {
       return false;
+    }
+  });
+
+  // Handle log messages from the renderer process
+  ipcMain.on("log-message", (event, { level, file, message }) => {
+    switch (level) {
+      case "info":
+        logger.info(`[${file}] ${message}`);
+        break;
+      case "warn":
+        logger.warn(`[${file}] ${message}`);
+        break;
+      case "error":
+        logger.error(`[${file}] ${message}`);
+        break;
+      case "debug":
+        logger.debug(`[${file}] ${message}`);
+        break;
+      default:
+        logger.info(`[${file}] ${message}`);
     }
   });
 }

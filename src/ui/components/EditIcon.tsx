@@ -29,12 +29,23 @@ const EditIcon: React.FC = () => {
         );
         if (iconData) {
           setIcon(iconData);
+          window.electron.logMessage(
+            "info",
+            "EditIcon.tsx",
+            "Fetched icon data successfully."
+          );
         } else {
           setError(`No icon found at row ${row}, column ${col}.`);
+          window.electron.logMessage("warn", "EditIcon.tsx", "No icon found.");
         }
       } catch (err) {
         console.error("Error fetching icon:", err);
         setError("Failed to fetch icon data.");
+        window.electron.logMessage(
+          "error",
+          "EditIcon.tsx",
+          `Error fetching icon: ${err}`
+        );
       } finally {
         setLoading(false);
       }
