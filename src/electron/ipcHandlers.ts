@@ -40,10 +40,18 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "getDesktopIcon",
     async (row: number, col: number): Promise<DesktopIcon | null> => {
+      logger.info("ipcMainHandle getDesktopIcon called");
       const directoryPath = path.join(getAppDataPath(), "desktop");
+      logger.info(`Directory path: ${directoryPath}`);
       const filePath = path.join(directoryPath, "desktopIcons.json");
 
       try {
+        logger.info(
+          `Received request for getDesktopIcon with row: ${row}, col: ${col}`
+        );
+        logger.info(`Directory path: ${directoryPath}`);
+        logger.info(`File path: ${filePath}`);
+
         // Read JSON file
         const data = fs.readFileSync(filePath, "utf-8");
         logger.info(`Read file contents: ${filePath}`);
@@ -56,7 +64,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           );
 
           if (icon) {
-            logger.info(`Found icon at [${row}, ${col}]:`);
+            logger.info(
+              `Found icon at [${row}, ${col}]: ${JSON.stringify(icon)}`
+            );
             return icon;
           } else {
             logger.warn(`No icon found at [${row}, ${col}]`);

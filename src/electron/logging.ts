@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import winston from "winston";
-import { getAppDataPath } from "./appDataSetup.js";
 
 // Configure the log file path
 const logDir = path.join(getAppDataPath(), "logs");
@@ -69,6 +68,14 @@ function cleanupOldLogFiles() {
   } catch (err) {
     baseLogger.error("Error cleaning up old log files:", err);
   }
+}
+
+function getAppDataPath() {
+  const appDataPath = process.env.APPDATA;
+  if (!appDataPath) {
+    throw new Error("APPDATA environment variable is not set.");
+  }
+  return path.join(appDataPath, "AltDesktop");
 }
 
 cleanupOldLogFiles();

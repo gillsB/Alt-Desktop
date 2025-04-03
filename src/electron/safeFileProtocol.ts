@@ -4,7 +4,10 @@ import mime from "mime-types";
 import path from "path";
 import { URL } from "url";
 import { getAppDataPath } from "./appDataSetup.js";
+import { createLoggerForFile } from "./logging.js";
 import { getAssetPath } from "./pathResolver.js";
+
+const logger = createLoggerForFile("safeFileProtocol.ts");
 
 /**
  * Resolves a Windows shortcut (.lnk) to its actual target path.
@@ -35,23 +38,28 @@ export function registerSafeFileProtocol(
   protocol.handle(protocolName, async (req) => {
     try {
       const requestedUrl = new URL(req.url);
+      logger.info(`Received request: ${req.url}`);
+
       // Security check: Ensure the requested path is within the AppData directory
-      if (requestedUrl.host != "") {
-        console.error(
-          "Security violation: Attempted to access file outside AppData directory:",
-          requestedUrl
+      if (requestedUrl.host !== "") {
+        logger.error(
+          `Security violation: Attempted to access file outside AppData directory: ${requestedUrl.host}`
         );
         return new Response("Forbidden", { status: 403 });
       }
+
       const requestedPath = decodeURIComponent(requestedUrl.pathname).replace(
         /^\//,
         ""
       );
+      logger.info(`Decoded requested path: ${requestedPath}`);
 
       const appDataBasePath: string = path.join(getAppDataPath());
+      logger.info(`AppData base path: ${appDataBasePath}`);
 
       // Resolve the full path, ensuring it stays within the AppData directory
       let fullPath: string = path.resolve(appDataBasePath, requestedPath);
+      logger.info(`Resolved full path: ${fullPath}`);
 
       // Resolve .lnk files if applicable
       fullPath = resolveShortcut(fullPath);
@@ -64,6 +72,7 @@ export function registerSafeFileProtocol(
 
       // Read the file content for existing files
       const fileContent = fs.readFileSync(fullPath);
+      logger.info(`Successfully read file: ${fullPath}`);
       return new Response(fileContent, {
         status: 200,
         headers: {
@@ -71,12 +80,12 @@ export function registerSafeFileProtocol(
         },
       });
     } catch (error) {
-      console.error("Error in safe file protocol:", error);
+      logger.error(`Error handling request: ${error}`);
       return new Response("Internal Server Error", { status: 500 });
     }
   });
 
-  console.log(`Registered ${protocolName}:// protocol`);
+  logger.info(`Registered ${protocolName}:// protocol`);
 }
 
 /**

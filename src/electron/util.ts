@@ -1,7 +1,10 @@
 import { ipcMain, WebContents, WebFrameMain } from "electron";
 import fs from "fs";
 import { pathToFileURL } from "url";
+import { createLoggerForFile } from "./logging.js";
 import { getUIPath } from "./pathResolver.js";
+
+const logger = createLoggerForFile("util.ts");
 
 export function isDev(): boolean {
   return process.env.NODE_ENV === "development";
@@ -106,6 +109,7 @@ export function validateEventFrame(frame: WebFrameMain) {
     return;
   }
   if (frame.url !== pathToFileURL(getUIPath()).toString()) {
+    logger.error(`Malicious event from unknown source: ${frame.url}`);
     throw new Error("Malicious event");
   }
 }
@@ -136,3 +140,4 @@ export const ensureFileExists = (
     return false;
   }
 };
+
