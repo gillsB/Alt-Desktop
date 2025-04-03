@@ -4,7 +4,7 @@ import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
 import { DesktopIcon } from "./DesktopIcon.js";
 import { openEditIconWindow } from "./editIconWindow.js";
-import { createLoggerForFile } from "./logging.js";
+import { baseLogger, createLoggerForFile } from "./logging.js"; // Import the baseLogger directly
 import {
   closeActiveSubWindow,
   getActiveSubWindow,
@@ -243,19 +243,19 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMain.on("log-message", (event, { level, file, message }) => {
     switch (level) {
       case "info":
-        logger.info(`[${file}] ${message}`);
+        baseLogger.info({ message, file });
         break;
       case "warn":
-        logger.warn(`[${file}] ${message}`);
+        baseLogger.warn({ message, file });
         break;
       case "error":
-        logger.error(`[${file}] ${message}`);
+        baseLogger.error({ message, file });
         break;
       case "debug":
-        logger.debug(`[${file}] ${message}`);
+        baseLogger.debug({ message, file });
         break;
       default:
-        logger.info(`[${file}] ${message}`);
+        baseLogger.info({ message, file });
     }
   });
 }

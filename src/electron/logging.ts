@@ -19,7 +19,7 @@ const customFormat = winston.format.printf((info) => {
 });
 
 // Create a Winston logger instance
-const baseLogger = winston.createLogger({
+export const baseLogger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
