@@ -3,35 +3,35 @@ import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
 import { DesktopIcon } from "./DesktopIcon.js";
 import { openEditIconWindow } from "./editIconWindow.js";
+import { createLoggerForFile } from "./logging.js";
 import {
   closeActiveSubWindow,
   getActiveSubWindow,
 } from "./subWindowManager.js";
 import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
 
+const logger = createLoggerForFile("ipcHandlers.ts");
+
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {
     const directoryPath = path.join(getAppDataPath(), "desktop");
     const filePath = path.join(directoryPath, "desktopIcons.json");
 
-    console.log("Resolved File Path:", filePath);
-
     try {
       // Read JSON file
       const data = fs.readFileSync(filePath, "utf-8");
-      console.log("Read file contents:", data);
+      logger.info(`Read file contents from ${filePath}`);
       const parsedData: DesktopIconData = JSON.parse(data);
 
       if (parsedData.icons) {
         parsedData.icons = parsedData.icons.map((icon) => {
-          console.log(icon.image);
           return icon;
         });
       }
 
       return parsedData;
     } catch (error) {
-      console.error("Error reading or creating JSON file:", error);
+      logger.error(`Error reading or creating JSON file. ${error}`);
       return { icons: [] }; // Return default if error
     }
   });
@@ -42,12 +42,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const directoryPath = path.join(getAppDataPath(), "desktop");
       const filePath = path.join(directoryPath, "desktopIcons.json");
 
-      console.log("Resolved File Path:", filePath);
-
       try {
         // Read JSON file
         const data = fs.readFileSync(filePath, "utf-8");
-        console.log("Read file contents:", data);
+        logger.info(`Read file contents: ${filePath}`);
         const parsedData: DesktopIconData = JSON.parse(data);
 
         if (parsedData.icons) {
@@ -57,18 +55,18 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           );
 
           if (icon) {
-            console.log(`Found icon at [${row}, ${col}]:`, icon);
+            logger.info(`Found icon at [${row}, ${col}]:`);
             return icon;
           } else {
-            console.warn(`No icon found at [${row}, ${col}]`);
+            logger.warn(`No icon found at [${row}, ${col}]`);
             return null; // Return null if no matching icon is found
           }
         }
 
-        console.warn("No icons found in the data file.");
+        logger.warn("No icons found in the data file.");
         return null; // Return null if no icons exist
       } catch (error) {
-        console.error("Error reading or parsing JSON file:", error);
+        logger.error(`Error reading or parsing JSON file: ${error}`);
         return null; // Return null if an error occurs
       }
     }
@@ -77,19 +75,24 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainOn("sendHeaderAction", (payload) => {
     switch (payload) {
       case "MINIMIZE":
+        logger.info(`HeaderAction MINIMIZE`);
         mainWindow.minimize();
         break;
       case "MAXIMIZE":
         if (mainWindow.isMaximized()) {
+          logger.info(`HeaderAction MAXIMIZE -> UNMAXIMIZE`);
           mainWindow.unmaximize();
         } else {
+          logger.info(`HeaderAction MAXIMIZE -> MAXIMIZE`);
           mainWindow.maximize();
         }
         break;
       case "CLOSE":
+        logger.info(`HeaderAction CLOSE`);
         mainWindow.close();
         break;
       case "SHOW_DEVTOOLS":
+        logger.info(`HeaderAction SHOW_DEVTOOLS`);
         mainWindow.webContents.openDevTools();
         break;
     }
@@ -101,13 +104,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       switch (payload.action) {
         case "EDIT_ICON":
           if (payload.icon) {
+            logger.info(`SubWindowAction EDIT_ICON with ${payload.icon}`);
             openEditIconWindow(payload.icon);
           } else {
-            console.error("Payload icon is undefined.");
+            logger.error(`Payload icon is undefined.`);
           }
           break;
         case "CLOSE_SUBWINDOW":
-          console.log("Closing subwindow...");
+          logger.info(`SubWindowAction CLOSE_SUBWINDOW`);
           closeActiveSubWindow();
           break;
       }
@@ -123,20 +127,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         const fullPath = path.join(dataFolderPath, `[${row},${col}]`);
 
         if (!fs.existsSync(fullPath)) {
-          console.log(
-            `Data folder [${row},${col}] does not exist, creating:`,
-            fullPath
+          logger.info(
+            `Data folder [${row},${col}] does not exist, creating: ${fullPath}`
           );
           fs.mkdirSync(fullPath, { recursive: true });
-          console.log(`Data folder [${row},${col}] created successfully.`);
-        } else {
-          console.log(`Data folder [${row},${col}] already exists:`, fullPath);
+          logger.info(`Data folder [${row},${col}] created successfully.`);
         }
 
         // Ensure Data file exists
         return ensureFileExists(fullPath, { icons: [] });
       } catch (error) {
-        console.error(`Error ensuring Data folder [${row},${col}]:`, error);
+        logger.error(`Error ensuring Data folder [${row},${col}]: ${error}`);
         return false;
       }
     }
@@ -148,7 +149,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const directoryPath = path.join(getAppDataPath(), "desktop");
       const filePath = path.join(directoryPath, "desktopIcons.json");
 
-      console.log(`Updating icon at [${row},${col}] in ${filePath}`);
+      logger.info(`Updating icon at [${row},${col}] in ${filePath}`);
       let desktopData: DesktopIconData = { icons: [] };
 
       // Ensure file exists
@@ -173,10 +174,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       // Write back updated JSON
       fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
 
-      console.log(`Successfully updated icon at [${row},${col}]`);
+      logger.info(`Successfully updated icon at [${row},${col}]`);
       return true;
     } catch (error) {
-      console.error(`Error updating icon at [${icon.row},${icon.col}]:`, error);
+      logger.error(
+        `Error updating icon at [${icon.row},${icon.col}]: ${error}`
+      );
       return false;
     }
   });
@@ -203,20 +206,23 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         );
 
         if (icon) {
-          console.log(`Reloaded icon at [${row}, ${col}]:`, icon);
+          logger.info(`Reloaded icon at [${row}, ${col}]: ${icon}`);
 
           // Notify the renderer process to reload the icon
           if (mainWindow) {
+            logger.info(
+              `Sending reload request to renderer for icon at [${row}, ${col}]`
+            );
             mainWindow.webContents.send("reload-icon", { row, col, icon });
           }
 
           return true;
         } else {
-          console.warn(`No icon found at [${row}, ${col}] to reload.`);
+          logger.warn(`No icon found at [${row}, ${col}] to reload.`);
           return false; // Icon not found
         }
       } catch (error) {
-        console.error(`Error reloading icon at [${row}, ${col}]:`, error);
+        logger.error(`Error reloading icon at [${row}, ${col}]: ${error}`);
         return false; // Error occurred
       }
     }
