@@ -1,6 +1,6 @@
-import log from "electron-log";
 import fs from "fs";
 import path from "path";
+import winston from "winston";
 import { getAppDataPath } from "./appDataSetup.js";
 
 // Configure the log file path
@@ -13,16 +13,39 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
 
-// Configure electron-log to use the specified log file
-log.transports.file.resolvePathFn = () => logFile;
+// Custom format to include timestamp, log level, and source file
+const customFormat = winston.format.printf((info) => {
+  return `[${info.timestamp}] [${info.level.toUpperCase()}] [${info.file}] ${info.message}`;
+});
 
-// Set the maximum log file size (e.g., 8MB)
-log.transports.file.maxSize = 8 * 1024 * 1024; // 8MB
+// Create a Winston logger instance
+const baseLogger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+    customFormat
+  ),
+  transports: [
+    new winston.transports.File({
+      filename: logFile,
+      maxsize: 8 * 1024 * 1024, // 8MB
+      maxFiles: 3, // Keep only the last 3 log files
+      tailable: false, // Rotate logs by appending to the end
+    }),
+    new winston.transports.Console(), // Log to console as well
+  ],
+});
 
-// Set the log format
-log.transports.file.format = "[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}] {text}";
+// Utility to create a logger for a specific file
+export function createLoggerForFile(file: string) {
+  return {
+    info: (message: string) => baseLogger.info({ message, file }),
+    warn: (message: string) => baseLogger.warn({ message, file }),
+    error: (message: string) => baseLogger.error({ message, file }),
+    debug: (message: string) => baseLogger.debug({ message, file }),
+  };
+}
 
-// Keep only the last 3 log files
 function cleanupOldLogFiles() {
   try {
     const files = fs
@@ -35,25 +58,17 @@ function cleanupOldLogFiles() {
       }))
       .sort((a, b) => b.ctime.getTime() - a.ctime.getTime());
 
-    // Keep only the most recent 3 files + the current log file
+    // Keep only the most recent 3 files
     if (files.length > 3) {
       files.slice(3).forEach((file) => {
+        baseLogger.info(`Deleting old log file: ${file.name}`);
         fs.unlinkSync(file.path);
       });
     }
+    baseLogger.info("Old log files cleaned up successfully.");
   } catch (err) {
-    log.error("Error cleaning up old log files:", err);
+    baseLogger.error("Error cleaning up old log files:", err);
   }
 }
 
-// Run cleanup on startup
 cleanupOldLogFiles();
-
-// Additional electron-log configuration
-log.transports.console.level = "info";
-log.transports.file.level = "info";
-
-// Test if electron-log is writing to the log file
-log.info("Logging initialized. Logs will be saved to:", logFile);
-
-export default log;

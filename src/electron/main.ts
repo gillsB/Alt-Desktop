@@ -1,18 +1,20 @@
 import { app, BrowserWindow, globalShortcut, Menu } from "electron";
 import { ensureAppDataFiles } from "./appDataSetup.js";
 import { registerIpcHandlers } from "./ipcHandlers.js";
-import log from "./logging.js";
+import { createLoggerForFile } from "./logging.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { createTray } from "./tray.js";
 import { isDev } from "./util.js";
+
+const logger = createLoggerForFile("main.ts");
 
 // This disables the menu completely for all windows (including the sub windows).
 Menu.setApplicationMenu(null);
 
 app.on("ready", () => {
   ensureAppDataFiles();
-  log.info("App is starting...");
+  logger.info("App is starting...");
 
   // Register our safe file protocol for loading icons.
   registerSafeFileProtocol("appdata-file");
@@ -36,23 +38,23 @@ app.on("ready", () => {
   }
 
   mainWindow.once("ready-to-show", () => {
-    log.info("Main window is ready to show");
+    logger.info("Main window is ready to show");
     mainWindow.show();
     mainWindow.maximize();
   });
 
   const toggleOverlayKeybind = globalShortcut.register("Alt+D", () => {
     if (mainWindow.isMinimized()) {
-      log.info("Restoring main window");
+      logger.info("Restoring main window");
       mainWindow.restore();
     } else {
-      log.info("Minimizing main window");
+      logger.info("Minimizing main window");
       mainWindow.minimize();
     }
   });
 
   if (!toggleOverlayKeybind) {
-    log.error("Keybind binding failed");
+    logger.error("Keybind binding failed");
   }
 
   registerIpcHandlers(mainWindow);
