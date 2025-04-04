@@ -114,8 +114,8 @@ function fileNotExist(fullPath: string) {
 
   // Check if the requested file is an image
   if (mimeType && mimeType.startsWith("image/")) {
-    console.error("File not found:", fullPath);
-    console.error("Returning unknown.png instead.");
+    logger.error("File not found:", fullPath);
+    logger.error("Returning unknown.png instead.");
 
     const fallbackImagePath = path.join(getAssetPath(), "unknown.png");
 
@@ -129,7 +129,7 @@ function fileNotExist(fullPath: string) {
       },
     });
   } else {
-    console.error("File not found:", fullPath);
+    logger.error("File not found:", fullPath);
     return new Response("Not Found", { status: 404 });
   }
 }

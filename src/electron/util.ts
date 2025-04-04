@@ -126,18 +126,18 @@ export const ensureFileExists = (
        *  So display an error when filepath does not exist to identify how/when this is called
        *  before a file is created.
        */
-      console.error(
+      logger.error(
         "Error: file does not exist, When it should, fallback creating:",
         filePath
       );
       fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2), "utf-8");
-      console.log("File created successfully.");
+      logger.info("File created successfully.");
     } else {
-      console.log("File already exists:", filePath);
+      logger.info("File already exists:", filePath);
     }
     return true;
   } catch (error) {
-    console.error("Failed to create file:", filePath, error);
+    logger.error("Failed to create file:", filePath, error);
     return false;
   }
 };
