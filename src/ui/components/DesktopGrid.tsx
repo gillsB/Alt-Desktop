@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
+import { createLogger } from "../util/uiLogger";
 import { SafeImage } from "./SafeImage";
+
+const logger = createLogger("DesktopGrid.tsx");
 
 interface ContextMenu {
   x: number;
@@ -84,14 +87,14 @@ const DesktopGrid: React.FC = () => {
       newMap.set(key, updatedIcon); // Update the specific icon
       return newMap;
     });
-    console.log(`Reloaded icon at [${row}, ${col}]`);
+    logger.info(`Reloaded icon at [${row}, ${col}]`);
   };
 
   useEffect(() => {
     const fetchIcons = async () => {
       try {
         const data = await window.electron.getDesktopIconData();
-        console.log("Fetched icons:", data.icons);
+        logger.info("Fetched icons:", data.icons);
 
         // Create an array of promises for ensuring folders
         const folderPromises = data.icons.map(async (icon: DesktopIcon) => {
@@ -101,7 +104,7 @@ const DesktopGrid: React.FC = () => {
             icon.col
           );
           if (!success) {
-            console.warn(
+            logger.warn(
               `Failed to create data folder for icon at [${icon.row}, ${icon.col}]`
             );
           }
@@ -118,7 +121,7 @@ const DesktopGrid: React.FC = () => {
 
         setIconsMap(newMap);
       } catch (error) {
-        console.error("Error loading icons:", error);
+        logger.error("Error loading icons:", error);
       }
     };
 
@@ -229,9 +232,9 @@ const DesktopGrid: React.FC = () => {
       try {
         // Call the Electron API to reload the icon
         await window.electron.reloadIcon(row, col);
-        console.log(`Reloaded icon at [${row}, ${col}] via Electron API`);
+        logger.info(`Reloaded icon at [${row}, ${col}] via Electron API`);
       } catch (error) {
-        console.error(`Failed to reload icon at [${row}, ${col}]:`, error);
+        logger.error(`Failed to reload icon at [${row}, ${col}]:`, error);
       }
 
       setContextMenu(null); // Close the context menu
@@ -242,7 +245,7 @@ const DesktopGrid: React.FC = () => {
       // Call the Electron API to reload the icon
       await window.electron.reloadWindow();
     } catch (error) {
-      console.error(`Failed to reload window`, error);
+      logger.error(`Failed to reload window`, error);
     }
 
     setContextMenu(null); // Close the context menu

@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
+import { createLogger } from "../util/uiLogger";
 import { SubWindowHeader } from "./SubWindowHeader";
+
+const logger = createLogger("EditIcon.tsx");
 
 const EditIcon: React.FC = () => {
   const location = useLocation();
@@ -29,23 +32,15 @@ const EditIcon: React.FC = () => {
         );
         if (iconData) {
           setIcon(iconData);
-          window.electron.logMessage(
-            "info",
-            "EditIcon.tsx",
-            "Fetched icon data successfully."
-          );
+          logger.info("Fetched icon data successfully.");
         } else {
           setError(`No icon found at row ${row}, column ${col}.`);
-          window.electron.logMessage("warn", "EditIcon.tsx", "No icon found.");
+          logger.warn("No icon found.");
         }
       } catch (err) {
         console.error("Error fetching icon:", err);
         setError("Failed to fetch icon data.");
-        window.electron.logMessage(
-          "error",
-          "EditIcon.tsx",
-          `Error fetching icon: ${err}`
-        );
+        logger.error("Error fetching icon:", err);
       } finally {
         setLoading(false);
       }
@@ -55,21 +50,24 @@ const EditIcon: React.FC = () => {
   }, [row, col]);
 
   const handleSave = async () => {
-    // Ensure valid icon
     if (!icon) {
       console.error("Icon data is missing.");
+      logger.error("Icon data is missing.");
       return;
-    } // Try to set Icon data
-    else if (await window.electron.setIconData(icon)) {
-      // Reload Icon data
+    }
+
+    if (await window.electron.setIconData(icon)) {
       if (await window.electron.reloadIcon(icon.row, icon.col)) {
         console.log("Icon reloaded successfully");
+        logger.info("Icon reloaded successfully.");
       } else {
         console.error("Failed to reload icon");
+        logger.error("Failed to reload icon.");
       }
       window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
     } else {
       console.log("Failed to save icon");
+      logger.warn("Failed to save icon.");
     }
   };
 
