@@ -1,6 +1,9 @@
 import fs from "fs";
 import path from "path";
+import { createLoggerForFile } from "./logging.js";
 import { ensureFileExists } from "./util.js";
+
+const logger = createLoggerForFile("appDataSetup.ts");
 
 /**
  * Retrieves the appData path for "AltDesktop" within the user's AppData/Roaming directory.
@@ -21,6 +24,7 @@ import { ensureFileExists } from "./util.js";
 export const getAppDataPath = (): string => {
   const appDataPath = process.env.APPDATA;
   if (!appDataPath) {
+    logger.error("APPDATA environment variable is not set.");
     throw new Error("APPDATA environment variable is not set.");
   }
   return path.join(appDataPath, "AltDesktop");
@@ -46,31 +50,31 @@ export const ensureAppDataFiles = () => {
 
     // Ensure directories exist
     if (!fs.existsSync(desktopPath)) {
-      console.log("Directory does not exist, creating:", desktopPath);
+      logger.info("Directory does not exist, creating:", desktopPath);
       fs.mkdirSync(desktopPath, { recursive: true });
-      console.log("Directory created successfully.");
+      logger.info("Directory created successfully.");
     } else {
-      console.log("Directory already exists:", desktopPath);
+      logger.info("Directory already exists:", desktopPath);
     }
 
     if (!fs.existsSync(dataFolderPath)) {
-      console.log("Data folder does not exist, creating:", dataFolderPath);
+      logger.info("Data folder does not exist, creating:", dataFolderPath);
       fs.mkdirSync(dataFolderPath, { recursive: true });
-      console.log("Data folder created successfully.");
+      logger.info("Data folder created successfully.");
     } else {
-      console.log("Data folder already exists:", dataFolderPath);
+      logger.info("Data folder already exists:", dataFolderPath);
     }
     if (!fs.existsSync(logsFolderPath)) {
-      console.log("Logs folder does not exist, creating:", logsFolderPath);
+      logger.info("Logs folder does not exist, creating:", logsFolderPath);
       fs.mkdirSync(logsFolderPath, { recursive: true });
-      console.log("Logs folder created successfully.");
+      logger.info("Logs folder created successfully.");
     } else {
-      console.log("Logs folder already exists:", logsFolderPath);
+      logger.info("Logs folder already exists:", logsFolderPath);
     }
 
     // Ensure desktopIcons.json exists
     ensureFileExists(desktopIconsFilePath, { icons: [] });
   } catch (error) {
-    console.error("Error ensuring AppData files:", error);
+    logger.error("Error ensuring AppData files:", error);
   }
 };
