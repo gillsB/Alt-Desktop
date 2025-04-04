@@ -37,11 +37,17 @@ export const baseLogger = winston.createLogger({
 
 // Utility to create a logger for a specific file
 export function createLoggerForFile(file: string) {
+  const formatArgs = (...args: unknown[]): string => args.map(String).join(" ");
+
   return {
-    info: (message: string) => baseLogger.info({ message, file }),
-    warn: (message: string) => baseLogger.warn({ message, file }),
-    error: (message: string) => baseLogger.error({ message, file }),
-    debug: (message: string) => baseLogger.debug({ message, file }),
+    info: (...args: unknown[]) =>
+      baseLogger.info({ message: formatArgs(...args), file }),
+    warn: (...args: unknown[]) =>
+      baseLogger.warn({ message: formatArgs(...args), file }),
+    error: (...args: unknown[]) =>
+      baseLogger.error({ message: formatArgs(...args), file }),
+    debug: (...args: unknown[]) =>
+      baseLogger.debug({ message: formatArgs(...args), file }),
   };
 }
 
