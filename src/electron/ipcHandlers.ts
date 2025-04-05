@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
 import { DesktopIcon } from "./DesktopIcon.js";
-import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile } from "./logging.js"; // Import the baseLogger directly
 import {
   closeActiveSubWindow,
@@ -113,16 +112,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "sendSubWindowAction",
     (payload: { action: SubWindowAction; icon?: DesktopIcon }) => {
       switch (payload.action) {
-        case "EDIT_ICON":
-          if (payload.icon) {
-            logger.info(
-              `SubWindowAction EDIT_ICON with ${JSON.stringify(payload.icon)}`
-            );
-            openEditIconWindow(payload.icon);
-          } else {
-            logger.error(`Payload icon is undefined.`);
-          }
-          break;
         case "CLOSE_SUBWINDOW":
           logger.info(`SubWindowAction CLOSE_SUBWINDOW`);
           closeActiveSubWindow();
@@ -240,6 +229,15 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+
+  ipcMainHandle(
+    "editIcon",
+    async (row: number, col: number): Promise<boolean> => {
+      logger.info(`ipcMainHandle editIcon called with ${row}, ${col}`);
+      return false;
+    }
+  );
+
   ipcMainHandle("reloadWindow", async (): Promise<boolean> => {
     if (mainWindow) {
       mainWindow.reload();
