@@ -23,8 +23,12 @@ const DesktopGrid: React.FC = () => {
 
   // These padding values affect essentially only the root position of the icons
   // This is not padding between icons
-  const ICON_PAD_TOP = 40;
-  const ICON_PAD_LEFT = 40;
+  const ICON_ROOT_OFFSET_TOP = 40;
+  const ICON_ROOT_OFFSET_LEFT = 40;
+
+  // Padding between icons
+  const ICON_VERTICAL_PADDING = 30;
+  const ICON_HORIZONTAL_PADDING = 0;
 
   const numRows = 20;
   const numCols = 50;
@@ -268,7 +272,9 @@ const DesktopGrid: React.FC = () => {
               key={`h-line-${rowIndex}`}
               style={{
                 position: "absolute",
-                top: rowIndex * (ICON_SIZE + 30) + ICON_PAD_TOP, // Match icon row spacing
+                top:
+                  rowIndex * (ICON_SIZE + ICON_VERTICAL_PADDING) +
+                  ICON_ROOT_OFFSET_TOP,
                 left: 0,
                 width: "100%",
                 height: "1px",
@@ -285,7 +291,9 @@ const DesktopGrid: React.FC = () => {
               style={{
                 position: "absolute",
                 top: 0,
-                left: ICON_PAD_LEFT + colIndex * ICON_SIZE, // Match icon column spacing
+                left:
+                  colIndex * (ICON_SIZE + ICON_HORIZONTAL_PADDING) +
+                  ICON_ROOT_OFFSET_LEFT,
                 width: "1px",
                 height: "100%",
                 backgroundColor: "red",
@@ -300,13 +308,13 @@ const DesktopGrid: React.FC = () => {
             className="desktop-icon"
             style={{
               left:
-                icon.col * ICON_SIZE +
+                icon.col * (ICON_SIZE + ICON_HORIZONTAL_PADDING) +
                 (icon.offsetX || 0) + // Default to 0 if offsetX is undefined
-                ICON_PAD_LEFT,
+                ICON_ROOT_OFFSET_LEFT,
               top:
-                icon.row * (ICON_SIZE + 30) +
+                icon.row * (ICON_SIZE + ICON_VERTICAL_PADDING) +
                 (icon.offsetY || 0) + // Default to 0 if offsetY is undefined
-                ICON_PAD_TOP,
+                ICON_ROOT_OFFSET_TOP,
               width: icon.width || 64,
               height: icon.height || 64,
             }}
