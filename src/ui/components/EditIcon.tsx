@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { DesktopIcon } from "../../electron/DesktopIcon";
+import { DesktopIcon, getDefaultDesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
 import { SubWindowHeader } from "./SubWindowHeader";
@@ -30,12 +30,16 @@ const EditIcon: React.FC = () => {
           parseInt(row, 10),
           parseInt(col, 10)
         );
+
         if (iconData) {
           setIcon(iconData);
           logger.info("Fetched icon data successfully.");
         } else {
-          setError(`No icon found at row ${row}, column ${col}.`);
-          logger.warn("No icon found.");
+          // Use the default DesktopIcon values
+          setIcon(getDefaultDesktopIcon(parseInt(row, 10), parseInt(col, 10)));
+          logger.warn(
+            `No icon found at row ${row}, column ${col}. Initialized with default values.`
+          );
         }
       } catch (err) {
         console.error("Error fetching icon:", err);
