@@ -9,6 +9,7 @@ import {
   getActiveSubWindow,
 } from "./subWindowManager.js";
 import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
+import { openEditIconWindow } from "./editIconWindow.js";
 
 const logger = createLoggerForFile("ipcHandlers.ts");
 
@@ -234,6 +235,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "editIcon",
     async (row: number, col: number): Promise<boolean> => {
       logger.info(`ipcMainHandle editIcon called with ${row}, ${col}`);
+      openEditIconWindow(row, col);
       return false;
     }
   );

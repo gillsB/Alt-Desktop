@@ -1,8 +1,7 @@
-import { DesktopIcon } from "./DesktopIcon.js";
 import { getPreloadPath } from "./pathResolver.js";
 import { createSubWindow } from "./subWindowManager.js";
 
-export function openEditIconWindow(icon: DesktopIcon) {
+export function openEditIconWindow(row: number, col: number) {
   const options = {
     width: 400,
     height: 460,
@@ -14,6 +13,6 @@ export function openEditIconWindow(icon: DesktopIcon) {
     title: "Edit Icon",
   };
 
-  const subWindowHash = `edit-icon?row=${icon.row}&col=${icon.col}`;
+  const subWindowHash = `edit-icon?row=${row}&col=${col}`;
   createSubWindow(options, subWindowHash);
 }

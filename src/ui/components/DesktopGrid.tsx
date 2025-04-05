@@ -202,6 +202,8 @@ const DesktopGrid: React.FC = () => {
     // Subtract the header height
     const headerHeight = document.querySelector("header")?.offsetHeight || 0;
 
+    const [validRow, validCol] = getRowColFromXY(x, y);
+
     setContextMenu({
       x,
       y: y - headerHeight,
@@ -211,6 +213,8 @@ const DesktopGrid: React.FC = () => {
           ? getIcon(row, col) || null
           : null,
     });
+
+    logger.info(`Right-clicked at row: ${validRow}, col: ${validCol}`);
   };
 
   const handleDesktopRightClick = (e: React.MouseEvent) => {
@@ -227,14 +231,15 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleOpenIcon = () => {
-    if (contextMenu?.icon) {
+    if (contextMenu) {
+      const { x, y } = contextMenu;
+      const [validRow, validCol] = getRowColFromXY(x, y);
+
       // Send the action to the main process via Electron's IPC
-      window.electron.editIcon(contextMenu.icon.row, contextMenu.icon.col);
+      window.electron.editIcon(validRow, validCol);
       setContextMenu(null); // Close the context menu
     } else {
-      logger.info(
-        "Tried to open icon, but contextMenu was null or icon was undefined."
-      );
+      logger.error("Tried to open an icon, but contextMenu was null.");
       setContextMenu(null);
     }
   };
@@ -371,6 +376,27 @@ const DesktopGrid: React.FC = () => {
       )}
     </>
   );
+
+  /**
+   * Gets the row and column positions from the X and Y coordinates.
+   *
+   * @param {x: number} x - The X coordinate of the click event.
+   * @param {y: number} y - The Y coordinate of the click event.
+   * @returns {[number, number]} - A tuple representing the valid row and column positions.
+   */
+  function getRowColFromXY(x: number, y: number): [number, number] {
+    // Calculate the row and column based on the X,Y coordinates
+    const calculatedRow = Math.floor(
+      (y - ICON_ROOT_OFFSET_TOP) / (ICON_SIZE + ICON_VERTICAL_PADDING)
+    );
+    const calculatedCol = Math.floor(
+      (x - ICON_ROOT_OFFSET_LEFT) / (ICON_SIZE + ICON_HORIZONTAL_PADDING)
+    );
+
+    const validRow = Math.max(0, Math.min(calculatedRow, numRows - 1));
+    const validCol = Math.max(0, Math.min(calculatedCol, numCols - 1));
+    return [validRow, validCol];
+  }
 };
 
 function contextMenuPosition(y: number): number {
