@@ -18,8 +18,13 @@ const DesktopGrid: React.FC = () => {
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
 
+  // Refers to a square size of the icon box, not the icon's size in pixels.
   const ICON_SIZE = 100;
-  const GRID_PADDING = 20;
+
+  // These padding values affect essentially only the root position of the icons
+  // This is not padding between icons
+  const ICON_PAD_TOP = 40;
+  const ICON_PAD_LEFT = 40;
 
   const numRows = 20;
   const numCols = 50;
@@ -263,7 +268,7 @@ const DesktopGrid: React.FC = () => {
               key={`h-line-${rowIndex}`}
               style={{
                 position: "absolute",
-                top: rowIndex * (ICON_SIZE + 30) + GRID_PADDING, // Match icon row spacing
+                top: rowIndex * (ICON_SIZE + 30) + ICON_PAD_TOP, // Match icon row spacing
                 left: 0,
                 width: "100%",
                 height: "1px",
@@ -280,7 +285,7 @@ const DesktopGrid: React.FC = () => {
               style={{
                 position: "absolute",
                 top: 0,
-                left: GRID_PADDING + colIndex * ICON_SIZE, // Match icon column spacing
+                left: ICON_PAD_LEFT + colIndex * ICON_SIZE, // Match icon column spacing
                 width: "1px",
                 height: "100%",
                 backgroundColor: "red",
@@ -294,11 +299,14 @@ const DesktopGrid: React.FC = () => {
             key={`${icon.row}-${icon.col}`}
             className="desktop-icon"
             style={{
-              left: icon.col * ICON_SIZE + GRID_PADDING + (icon.offsetX || 0), // Default to 0 if offsetX is undefined
+              left:
+                icon.col * ICON_SIZE +
+                (icon.offsetX || 0) + // Default to 0 if offsetX is undefined
+                ICON_PAD_LEFT,
               top:
                 icon.row * (ICON_SIZE + 30) +
-                GRID_PADDING +
-                (icon.offsetY || 0), // Default to 0 if offsetY is undefined
+                (icon.offsetY || 0) + // Default to 0 if offsetY is undefined
+                ICON_PAD_TOP,
               width: icon.width || 64,
               height: icon.height || 64,
             }}
