@@ -202,8 +202,6 @@ const DesktopGrid: React.FC = () => {
     // Subtract the header height
     const headerHeight = document.querySelector("header")?.offsetHeight || 0;
 
-    const [validRow, validCol] = getRowColFromXY(x, y);
-
     setContextMenu({
       x,
       y: y - headerHeight,
@@ -213,12 +211,43 @@ const DesktopGrid: React.FC = () => {
           ? getIcon(row, col) || null
           : null,
     });
-
-    logger.info(`Right-clicked at row: ${validRow}, col: ${validCol}`);
   };
 
   const handleDesktopRightClick = (e: React.MouseEvent) => {
-    handleRightClick(e, "desktop");
+    e.preventDefault();
+    const { clientX: x, clientY: y } = e;
+
+    // Calculate the nearest grid slot
+    const [validRow, validCol] = getRowColFromXY(x, y);
+
+    // Check if an icon exists at the calculated row and column
+    const existingIcon = getIcon(validRow, validCol);
+
+    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
+
+    if (existingIcon) {
+      // If an icon exists, set the context menu to "icon" type
+      setContextMenu({
+        x,
+        y: y - headerHeight,
+        type: "icon",
+        icon: existingIcon,
+      });
+      logger.info(
+        `Desktop right click nearest icon exists at row: ${validRow}, col: ${validCol}`
+      );
+    } else {
+      // Otherwise, set the context menu to "desktop" type
+      setContextMenu({
+        x,
+        y: y - headerHeight,
+        type: "desktop",
+        icon: null,
+      });
+      logger.info(
+        `Desktop right click empty icon slot at row: ${validRow}, col: ${validCol}`
+      );
+    }
   };
 
   const handleIconRightClick = (
@@ -228,6 +257,9 @@ const DesktopGrid: React.FC = () => {
   ) => {
     e.stopPropagation();
     handleRightClick(e, "icon", row, col);
+    logger.info(
+      `Icon right click at row: ${row}, col: ${col} with icon name: ${iconsMap.get(`${row},${col}`)?.name}`
+    );
   };
 
   const handleOpenIcon = () => {
