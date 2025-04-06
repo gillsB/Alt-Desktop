@@ -417,9 +417,11 @@ const DesktopGrid: React.FC = () => {
    * @returns {[number, number]} - A tuple representing the valid row and column positions.
    */
   function getRowColFromXY(x: number, y: number): [number, number] {
+    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
     // Calculate the row and column based on the X,Y coordinates
     const calculatedRow = Math.floor(
-      (y - ICON_ROOT_OFFSET_TOP) / (ICON_SIZE + ICON_VERTICAL_PADDING)
+      (y - ICON_ROOT_OFFSET_TOP - headerHeight) /
+        (ICON_SIZE + ICON_VERTICAL_PADDING)
     );
     const calculatedCol = Math.floor(
       (x - ICON_ROOT_OFFSET_LEFT) / (ICON_SIZE + ICON_HORIZONTAL_PADDING)
