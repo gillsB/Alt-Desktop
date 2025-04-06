@@ -199,12 +199,9 @@ const DesktopGrid: React.FC = () => {
     e.preventDefault();
     const { clientX: x, clientY: y } = e;
 
-    // Subtract the header height
-    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-
     setContextMenu({
       x,
-      y: y - headerHeight,
+      y: headerAdjustY(y),
       type,
       icon:
         type === "icon" && row !== undefined && col !== undefined
@@ -223,13 +220,11 @@ const DesktopGrid: React.FC = () => {
     // Check if an icon exists at the calculated row and column
     const existingIcon = getIcon(validRow, validCol);
 
-    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-
     if (existingIcon) {
       // If an icon exists, set the context menu to "icon" type
       setContextMenu({
         x,
-        y: y - headerHeight,
+        y: headerAdjustY(y),
         type: "icon",
         icon: existingIcon,
       });
@@ -240,7 +235,7 @@ const DesktopGrid: React.FC = () => {
       // Otherwise, set the context menu to "desktop" type
       setContextMenu({
         x,
-        y: y - headerHeight,
+        y: headerAdjustY(y),
         type: "desktop",
         icon: null,
       });
@@ -417,11 +412,9 @@ const DesktopGrid: React.FC = () => {
    * @returns {[number, number]} - A tuple representing the valid row and column positions.
    */
   function getRowColFromXY(x: number, y: number): [number, number] {
-    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
     // Calculate the row and column based on the X,Y coordinates
     const calculatedRow = Math.floor(
-      (y - ICON_ROOT_OFFSET_TOP - headerHeight) /
-        (ICON_SIZE + ICON_VERTICAL_PADDING)
+      gridAdjustY(y) / (ICON_SIZE + ICON_VERTICAL_PADDING)
     );
     const calculatedCol = Math.floor(
       (x - ICON_ROOT_OFFSET_LEFT) / (ICON_SIZE + ICON_HORIZONTAL_PADDING)
@@ -431,19 +424,45 @@ const DesktopGrid: React.FC = () => {
     const validCol = Math.max(0, Math.min(calculatedCol, numCols - 1));
     return [validRow, validCol];
   }
-};
 
-function contextMenuPosition(y: number): number {
-  const menuHeight = 150; // Approximate height of the context menu
-  const viewportHeight = window.innerHeight - 32; // 32 ~= 2rem for header height
-
-  // If the menu would overflow off the bottom, position it upwards
-  if (y + menuHeight > viewportHeight) {
-    return y - menuHeight;
+  /**
+   * Adjusts the Y coordinate based on the header height only.
+   * Use this for global coordinate conversion to to desktop coordinates.
+   *
+   * @param {number} Y - The original Y coordinate.
+   * @returns {number} - The adjusted Y coordinate adjusted for header height.
+   */
+  function headerAdjustY(Y: number): number {
+    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
+    return Y - headerHeight;
   }
+  /**
+   * Adjusts the Y coordinate based on the header height AND grid root offset.
+   *
+   * Use this to get coordinates relative to the root of the Grid object.
+   *
+   * Like finding which grid icon is clicked.
+   *
+   * @param {number} Y - The original Y coordinate.
+   * @returns {number} - The adjusted Y coordinate.
+   */
+  function gridAdjustY(Y: number): number {
+    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
+    return Y - headerHeight - ICON_ROOT_OFFSET_TOP;
+  }
+  function contextMenuPosition(y: number): number {
+    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
+    const menuHeight = 150; // Approximate height of the context menu
+    const viewportHeight = window.innerHeight - headerHeight;
 
-  // Otherwise, position it normally
-  return y;
-}
+    // If the menu would overflow off the bottom, position it upwards
+    if (y + menuHeight > viewportHeight) {
+      return y - menuHeight;
+    }
+
+    // Otherwise, position it normally
+    return y;
+  }
+};
 
 export default DesktopGrid;
