@@ -257,16 +257,17 @@ const DesktopGrid: React.FC = () => {
     );
   };
 
-  const handleOpenIcon = () => {
+  const handleEditIcon = () => {
     if (contextMenu) {
       const { x, y } = contextMenu;
       const [validRow, validCol] = getRowColFromXY(x, y);
 
       // Send the action to the main process via Electron's IPC
+      window.electron.ensureDataFolder(validRow, validCol);
       window.electron.editIcon(validRow, validCol);
       setContextMenu(null); // Close the context menu
     } else {
-      logger.error("Tried to open an icon, but contextMenu was null.");
+      logger.error("Tried to edit an icon, but contextMenu was null.");
       setContextMenu(null);
     }
   };
@@ -386,14 +387,14 @@ const DesktopGrid: React.FC = () => {
         >
           {contextMenu.type === "desktop" ? (
             <>
-              <p onClick={handleOpenIcon}>New Icon</p>
+              <p onClick={handleEditIcon}>New Icon</p>
               <p>Settings</p>
               <p onClick={handleReloadDesktop}>Reload Desktop</p>
               <p onClick={toggleGrid}>{showGrid ? "✔ " : ""}Show Grid</p>
             </>
           ) : (
             <>
-              <p onClick={handleOpenIcon}>Open {contextMenu.icon?.name}</p>
+              <p onClick={handleEditIcon}>Edit {contextMenu.icon?.name}</p>
               <p onClick={handleReloadIcon}>Reload Icon</p>
               <p>Rename</p>
               <p>Delete</p>
