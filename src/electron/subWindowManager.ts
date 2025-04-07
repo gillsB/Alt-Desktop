@@ -41,6 +41,7 @@ export function openSubWindow(
     modal: true, // Make the subwindow modal
     skipTaskbar: true, // Hide the subwindow from the taskbar
     alwaysOnTop: true, // Ensure the subwindow is always on top
+    backgroundColor: "#00000000", // Fully transparent this must be set or windows will flash white on restore.
     webPreferences: {
       preload: getPreloadPath(),
       webSecurity: true,

@@ -20,6 +20,7 @@ app.on("ready", () => {
   // Register our safe file protocol for loading icons.
   registerSafeFileProtocol("appdata-file");
 
+  app.commandLine.appendSwitch("enable-transparent-visuals");
   const mainWindow = new BrowserWindow({
     show: false,
     transparent: true, // Enables full transparency
