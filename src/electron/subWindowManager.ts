@@ -20,11 +20,8 @@ export function createSubWindow(
   options: Electron.BrowserWindowConstructorOptions,
   subWindowHash: string
 ): BrowserWindow {
-  // Close any existing subwindow
-  if (activeSubWindow) {
-    activeSubWindow.removeAllListeners("closed");
-    activeSubWindow.close();
-  }
+  // Properly close any existing subwindow
+  closeActiveSubWindow();
 
   // Create a new subwindow
   activeSubWindow = new BrowserWindow(options);
