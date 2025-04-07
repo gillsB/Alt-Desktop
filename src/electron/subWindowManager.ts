@@ -40,6 +40,7 @@ export function openSubWindow(
       undefined, // Set the parent to the main window
     modal: true, // Make the subwindow modal
     skipTaskbar: true, // Hide the subwindow from the taskbar
+    alwaysOnTop: true, // Ensure the subwindow is always on top
     webPreferences: {
       preload: getPreloadPath(),
       webSecurity: true,

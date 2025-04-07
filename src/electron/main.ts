@@ -4,6 +4,7 @@ import { registerIpcHandlers } from "./ipcHandlers.js";
 import { createLoggerForFile } from "./logging.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
+import { getActiveSubWindow } from "./subWindowManager.js";
 import { createTray } from "./tray.js";
 import { isDev } from "./util.js";
 
@@ -44,6 +45,21 @@ app.on("ready", () => {
     mainWindow.maximize();
   });
 
+  // Synchronize minimize/restore actions with the subwindow
+  mainWindow.on("minimize", () => {
+    const activeSubWindow = getActiveSubWindow();
+    if (activeSubWindow) {
+      activeSubWindow.hide(); // Minimizing the subWindow adds a goofy animation. so .hide()
+    }
+  });
+
+  mainWindow.on("restore", () => {
+    const activeSubWindow = getActiveSubWindow();
+    if (activeSubWindow) {
+      activeSubWindow.show(); // Restoring the subWindow adds a goofy animation. so .show()
+    }
+  });
+
   const toggleOverlayKeybind = globalShortcut.register("Alt+D", () => {
     if (mainWindow.isMinimized()) {
       logger.info("Restoring main window");
@@ -62,9 +78,6 @@ app.on("ready", () => {
 
   createTray(mainWindow);
   handleCloseEvents(mainWindow);
-
-  // TODO remove, leaving this for debugging dist:win builds.
-  mainWindow.webContents.openDevTools();
 });
 
 function handleCloseEvents(mainWindow: BrowserWindow) {
