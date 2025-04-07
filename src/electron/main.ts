@@ -30,6 +30,7 @@ app.on("ready", () => {
       webSecurity: true, //default is True, but to be sure it remains such.
     },
     frame: false,
+    title: "AltDesktop",
   });
   if (isDev()) {
     mainWindow.loadURL("http://localhost:5123");
