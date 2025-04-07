@@ -1,7 +1,7 @@
 import { BrowserWindow } from "electron";
 import { pathToFileURL } from "url";
 import { createLoggerForFile } from "./logging.js";
-import { getUIPath } from "./pathResolver.js";
+import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { isDev } from "./util.js";
 
 const logger = createLoggerForFile("subWindowManager.ts");
@@ -16,15 +16,36 @@ const mainWindowUrl = isDev()
 allowedUrls.push(mainWindowUrl);
 logger.info(`Added main window URL to allowed list: ${mainWindowUrl}`);
 
-export function createSubWindow(
+/**
+ * Opens a subwindow with the specified options and hash.
+ *
+ * @param {Electron.BrowserWindowConstructorOptions} options - The options for the subwindow.
+ * @param {string} subWindowHash - The hash to append to the subwindow URL.
+ * @param {string} [title="SubWindow"] - The title of the subwindow.
+ */
+export function openSubWindow(
   options: Electron.BrowserWindowConstructorOptions,
-  subWindowHash: string
+  subWindowHash: string,
+  title: string = "SubWindow"
 ): BrowserWindow {
   // Properly close any existing subwindow
   closeActiveSubWindow();
 
   // Create a new subwindow
-  activeSubWindow = new BrowserWindow(options);
+  activeSubWindow = new BrowserWindow({
+    ...options,
+    title, // Set the title of the subwindow
+    parent:
+      BrowserWindow.getAllWindows().find((win) => win.title === "AltDesktop") ||
+      undefined, // Set the parent to the main window
+    modal: true, // Make the subwindow modal
+    skipTaskbar: true, // Hide the subwindow from the taskbar
+    webPreferences: {
+      preload: getPreloadPath(),
+      webSecurity: true,
+      ...options.webPreferences, // Allow overriding webPreferences
+    },
+  });
 
   // Generate the subwindow URL
   let subWindowUrl: string;
