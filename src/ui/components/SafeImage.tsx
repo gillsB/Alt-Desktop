@@ -18,7 +18,11 @@ export const getImagePath = (row: number, col: number, imagePath: string) => {
   }
 
   const folderPath = `/data/[${row},${col}]`;
-  const safeFilePath = `appdata-file://${folderPath}/${imagePath}`;
+
+  // Encode the image path to handle spaces and special characters
+  const encodedImagePath = encodeURIComponent(imagePath);
+
+  const safeFilePath = `appdata-file://${folderPath}/${encodedImagePath}`;
 
   // Check if the path ends with a typical image extension
   const isImageExtension = /\.(png|jpg|jpeg|gif|bmp|svg|webp|lnk)$/i.test(
