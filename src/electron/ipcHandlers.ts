@@ -267,7 +267,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     async (sourcePath: string, row: number, col: number): Promise<string> => {
       const basePath = getAppDataPath();
       const targetDir = path.join(basePath, "data", `[${row},${col}]`);
-      const targetPath = path.join(targetDir, path.basename(sourcePath));
+      const targetPath = path.join(targetDir, path.basename(sourcePath)); // Full path to save the file
+      const localPath = path.basename(sourcePath); // Extract just the file name
 
       try {
         if (!fs.existsSync(targetDir)) {
@@ -276,7 +277,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         fs.copyFileSync(sourcePath, targetPath);
         logger.info(`Image saved to: ${targetPath}`);
-        return targetPath;
+        logger.info(`Local path: ${localPath}`);
+
+        return localPath; // Return only the file name
       } catch (error) {
         logger.error("Failed to save image:", error);
         throw error;
