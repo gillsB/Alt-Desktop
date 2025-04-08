@@ -306,4 +306,38 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         baseLogger.info({ message, file });
     }
   });
+
+  ipcMainHandle(
+    "launchIcon",
+    async (row: number, col: number): Promise<boolean> => {
+      const directoryPath = path.join(getAppDataPath(), "desktop");
+      const filePath = path.join(directoryPath, "desktopIcons.json");
+
+      try {
+        // Read the JSON file
+        const data = fs.readFileSync(filePath, "utf-8");
+        const parsedData: DesktopIconData = JSON.parse(data);
+
+        // Find the icon with the specified row and col
+        const icon = parsedData.icons.find(
+          (icon) => icon.row === row && icon.col === col
+        );
+
+        if (icon) {
+          if (icon.link) {
+            logger.info(`Launching program with link: ${icon.link}`);
+          } else {
+            logger.warn(`No link found for icon at [${row}, ${col}]`);
+          }
+          return true;
+        } else {
+          logger.warn(`No icon found at [${row}, ${col}]`);
+          return false;
+        }
+      } catch (error) {
+        logger.error(`Error reading or parsing JSON file: ${error}`);
+        return false;
+      }
+    }
+  );
 }

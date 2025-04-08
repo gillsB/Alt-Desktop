@@ -186,8 +186,9 @@ const DesktopGrid: React.FC = () => {
     updateIconField([row, col], "fontColor", newColor);
   };
 
-  const handleIconDoubleClick = (row: number, col: number) => {
-    updateIconField([row, col], "image", "src/assets/altTemplate@2x.png");
+  const handleIconDoubleClick = async (row: number, col: number) => {
+    logger.info("double clicked icon", row, col);
+    await window.electron.launchIcon(row, col);
   };
 
   const handleRightClick = (
