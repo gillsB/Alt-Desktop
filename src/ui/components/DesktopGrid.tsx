@@ -213,9 +213,11 @@ const DesktopGrid: React.FC = () => {
   const handleDesktopRightClick = (e: React.MouseEvent) => {
     e.preventDefault();
     const { clientX: x, clientY: y } = e;
+    // React.MouseEvent returns global coordinates, so we need to adjust them to local coordinates
+    const adjustedY = headerAdjustY(y);
 
     // Calculate the nearest grid slot
-    const [validRow, validCol] = getRowColFromXY(x, y);
+    const [validRow, validCol] = getRowColFromXY(x, adjustedY);
 
     // Check if an icon exists at the calculated row and column
     const existingIcon = getIcon(validRow, validCol);
@@ -260,6 +262,7 @@ const DesktopGrid: React.FC = () => {
   const handleEditIcon = () => {
     if (contextMenu) {
       const { x, y } = contextMenu;
+      // contextMenu returns local coordinates. Which getRowColFromXY expects.
       const [validRow, validCol] = getRowColFromXY(x, y);
 
       // Send the action to the main process via Electron's IPC
@@ -405,20 +408,23 @@ const DesktopGrid: React.FC = () => {
     </>
   );
 
+  // Visually, clicking the grid lines returns:
+  // Vertical: Left ICON
+  // Horizontal: Top ICON
   /**
-   * Gets the row and column positions from the X and Y coordinates.
+   * Gets the row and column positions from the LOCAL to DesktopGrid (X, Y) coordinates.
    *
-   * @param {x: number} x - The X coordinate of the click event.
-   * @param {y: number} y - The Y coordinate of the click event.
+   * @param {x: number} x - The LOCAL to DesktopGrid X coordinate.
+   * @param {y: number} y - The LOCAL to DesktopGrid Y coordinate.
    * @returns {[number, number]} - A tuple representing the valid row and column positions.
    */
   function getRowColFromXY(x: number, y: number): [number, number] {
     // Calculate the row and column based on the X,Y coordinates
     const calculatedRow = Math.floor(
-      gridAdjustY(y) / (ICON_SIZE + ICON_VERTICAL_PADDING)
+      (y - ICON_ROOT_OFFSET_TOP - 1) / (ICON_SIZE + ICON_VERTICAL_PADDING)
     );
     const calculatedCol = Math.floor(
-      (x - ICON_ROOT_OFFSET_LEFT) / (ICON_SIZE + ICON_HORIZONTAL_PADDING)
+      (x - ICON_ROOT_OFFSET_LEFT - 1) / (ICON_SIZE + ICON_HORIZONTAL_PADDING)
     );
 
     const validRow = Math.max(0, Math.min(calculatedRow, numRows - 1));
@@ -437,20 +443,7 @@ const DesktopGrid: React.FC = () => {
     const headerHeight = document.querySelector("header")?.offsetHeight || 0;
     return Y - headerHeight;
   }
-  /**
-   * Adjusts the Y coordinate based on the header height AND grid root offset.
-   *
-   * Use this to get coordinates relative to the root of the Grid object.
-   *
-   * Like finding which grid icon is clicked.
-   *
-   * @param {number} Y - The original Y coordinate.
-   * @returns {number} - The adjusted Y coordinate.
-   */
-  function gridAdjustY(Y: number): number {
-    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-    return Y - headerHeight - ICON_ROOT_OFFSET_TOP;
-  }
+
   function contextMenuPosition(y: number): number {
     const headerHeight = document.querySelector("header")?.offsetHeight || 0;
     const menuHeight = 150; // Approximate height of the context menu
