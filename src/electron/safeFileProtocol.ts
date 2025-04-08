@@ -40,17 +40,9 @@ export function registerSafeFileProtocol(
       const requestedUrl = new URL(req.url);
       logger.info(`Received request: ${req.url}`);
 
-      // Security check: Ensure the requested path is within the AppData directory
-      if (requestedUrl.host !== "") {
-        logger.error(
-          `Security violation: Attempted to access file outside AppData directory: ${requestedUrl.host}`
-        );
-        return new Response("Forbidden", { status: 403 });
-      }
-
       const requestedPath = decodeURIComponent(requestedUrl.pathname).replace(
-        /^\//,
-        ""
+        /^\/+/,
+        "" // Remove any leading slashes
       );
       logger.info(`Decoded requested path: ${requestedPath}`);
 
@@ -99,7 +91,7 @@ export function getSafeFileUrl(
   protocolName: string = "appdata-file"
 ): string {
   // Normalize path separators and ensure no leading slash
-  const normalizedPath = relativePath.replace(/\\/g, "/").replace(/^\//, "");
+  const normalizedPath = relativePath.replace(/\\/g, "/");
   return `${protocolName}://${normalizedPath}`;
 }
 
