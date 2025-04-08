@@ -1,15 +1,15 @@
-import { ipcMain } from "electron";
+import { dialog, ipcMain } from "electron";
 import fs from "fs";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
 import { DesktopIcon } from "./DesktopIcon.js";
+import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile } from "./logging.js"; // Import the baseLogger directly
 import {
   closeActiveSubWindow,
   getActiveSubWindow,
 } from "./subWindowManager.js";
 import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
-import { openEditIconWindow } from "./editIconWindow.js";
 
 const logger = createLoggerForFile("ipcHandlers.ts");
 
@@ -248,6 +248,41 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+
+  ipcMainHandle("openFileDialog", async (): Promise<string | null> => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openFile"],
+      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "gif"] }],
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return null; // No file selected
+    }
+
+    return result.filePaths[0]; // Return the selected file path
+  });
+
+  ipcMainHandle(
+    "saveIconImage",
+    async (sourcePath: string, row: number, col: number): Promise<string> => {
+      const basePath = getAppDataPath();
+      const targetDir = path.join(basePath, "data", `[${row},${col}]`);
+      const targetPath = path.join(targetDir, path.basename(sourcePath));
+
+      try {
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        fs.copyFileSync(sourcePath, targetPath);
+        logger.info(`Image saved to: ${targetPath}`);
+        return targetPath;
+      } catch (error) {
+        logger.error("Failed to save image:", error);
+        throw error;
+      }
+    }
+  );
 
   // Handle log messages from the renderer process
   ipcMain.on("log-message", (event, { level, file, message }) => {

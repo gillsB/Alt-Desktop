@@ -2,6 +2,7 @@ import electron, { ipcRenderer } from "electron";
 
 // builds the bridge for communicating with ui
 electron.contextBridge.exposeInMainWorld("electron", {
+  ...window.electron,
   subscribeStatistics: (callback) =>
     ipcOn("statistics", (stats) => {
       callback(stats);
@@ -33,6 +34,9 @@ electron.contextBridge.exposeInMainWorld("electron", {
   logMessage: (level: string, file: string, message: string) => {
     ipcRenderer.send("log-message", { level, file, message });
   },
+  openFileDialog: () => ipcInvoke("openFileDialog"),
+  saveIconImage: (sourcePath: string, row: number, col: number) =>
+    ipcInvoke("saveIconImage", sourcePath, row, col),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

@@ -75,6 +75,31 @@ const EditIcon: React.FC = () => {
     }
   };
 
+  const handleFileSelect = async () => {
+    if (!icon) return;
+
+    try {
+      // Open a file dialog to select an image
+      const filePath = await window.electron.openFileDialog();
+      if (filePath) {
+        // Save the file to the appropriate folder
+        const savedFilePath = await window.electron.saveIconImage(
+          filePath,
+          icon.row,
+          icon.col
+        );
+
+        // Update the icon's image path
+        setIcon((prevIcon) =>
+          prevIcon ? { ...prevIcon, image: savedFilePath } : null
+        );
+        logger.info(`Image saved to: ${savedFilePath}`);
+      }
+    } catch (error) {
+      logger.error("Failed to select or save image:", error);
+    }
+  };
+
   return (
     <div className="edit-icon-container">
       <SubWindowHeader />
@@ -94,12 +119,8 @@ const EditIcon: React.FC = () => {
             </div>
             <div className="edit-icon-field">
               <label htmlFor="image-path">Image Path</label>
-              <input
-                id="image-path"
-                type="text"
-                value={icon.image}
-                onChange={(e) => setIcon({ ...icon, image: e.target.value })}
-              />
+              <input id="image-path" type="text" value={icon.image} readOnly />
+              <button onClick={handleFileSelect}>Select Image</button>
             </div>
             <div className="edit-icon-field">
               <label htmlFor="font-color">Font Color</label>

@@ -35,6 +35,8 @@ interface EventParamMapping {
   reloadIcon: [number, number];
   editIcon: [number, number];
   reloadWindow: [];
+  openFileDialog: [];
+  saveIconImage: [string, number, number];
 }
 
 // The returns from the main process to the renderer
@@ -52,6 +54,8 @@ type EventPayloadMapping = {
   reloadIcon: boolean;
   editIcon: boolean;
   reloadWindow: boolean;
+  openFileDialog: string | null;
+  saveIconImage: string;
 };
 
 type UnsubscribeFunction = () => void;
@@ -79,5 +83,11 @@ interface Window {
     off: (channel: string, callback: (...args: unknown[]) => void) => void;
     reloadWindow: () => Promise<boolean>;
     logMessage: (level: string, file: string, message: string) => void;
+    openFileDialog: () => Promise<string | null>;
+    saveIconImage: (
+      sourcePath: string,
+      row: number,
+      col: number
+    ) => Promise<string>;
   };
 }
