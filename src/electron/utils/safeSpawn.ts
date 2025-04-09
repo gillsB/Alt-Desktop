@@ -30,7 +30,8 @@ export function safeSpawn(
       );
       return false;
     }
-    // this blocks any common system executables that could cause harm on accident
+
+    // Block common system executables that could cause harm
     const blockedExecutables = [
       "cmd.exe",
       "powershell.exe",
@@ -57,7 +58,17 @@ export function safeSpawn(
       return true;
     }
 
-    // Otherwise spawn directly
+    // Handle non-executable files (e.g., .mp4, .txt, etc.)
+    const fileExtension = executablePath.split(".").pop()?.toLowerCase();
+    if (fileExtension && fileExtension !== "exe") {
+      logger.info(
+        `Launching non-executable file with default program: ${executablePath}`
+      );
+      shell.openPath(executablePath);
+      return true;
+    }
+
+    // Otherwise, spawn executables directly
     spawn(executablePath, args, {
       detached: true,
       stdio: "ignore",
