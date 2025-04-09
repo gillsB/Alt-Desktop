@@ -21,6 +21,34 @@ export function safeSpawn(
       return false;
     }
 
+    // TODO add a setting to ignore These two checks for advanced users to use at their own risk.
+    // This blocks any args with characters that could be used for command injection
+    const suspiciousChars = /[;&|><$]/;
+    if (args.some((arg) => suspiciousChars.test(arg))) {
+      logger.warn(
+        `safeSpawn: Suspicious characters in args for ${executablePath}`
+      );
+      return false;
+    }
+    // this blocks any common system executables that could cause harm on accident
+    const blockedExecutables = [
+      "cmd.exe",
+      "powershell.exe",
+      "shutdown.exe",
+      "regedit.exe",
+      "taskkill.exe",
+      "format.com",
+    ];
+
+    if (
+      blockedExecutables.some((bad) =>
+        executablePath.toLowerCase().endsWith(bad)
+      )
+    ) {
+      logger.warn(`safeSpawn: Blocked executable ${executablePath}`);
+      return false;
+    }
+
     logger.info(`Launching ${executablePath} ${args.join(" ")}`);
 
     // Handle .lnk files differently (Windows shortcuts)
