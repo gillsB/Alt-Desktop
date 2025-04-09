@@ -1,4 +1,5 @@
-import { dialog, ipcMain } from "electron";
+import { spawn } from "child_process";
+import { dialog, ipcMain, shell } from "electron";
 import fs from "fs";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
@@ -314,28 +315,46 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const filePath = path.join(directoryPath, "desktopIcons.json");
 
       try {
-        // Read the JSON file
         const data = fs.readFileSync(filePath, "utf-8");
         const parsedData: DesktopIconData = JSON.parse(data);
 
-        // Find the icon with the specified row and col
         const icon = parsedData.icons.find(
           (icon) => icon.row === row && icon.col === col
         );
 
-        if (icon) {
-          if (icon.link) {
-            logger.info(`Launching program with link: ${icon.link}`);
-          } else {
-            logger.warn(`No link found for icon at [${row}, ${col}]`);
-          }
-          return true;
-        } else {
+        if (!icon) {
           logger.warn(`No icon found at [${row}, ${col}]`);
           return false;
         }
+
+        if (!icon.link) {
+          logger.warn(`No link found for icon at [${row}, ${col}]`);
+          return false;
+        }
+
+        const launchPath = icon.link;
+
+        if (!fs.existsSync(launchPath)) {
+          logger.warn(`Launch path does not exist: ${launchPath}`);
+          return false;
+        }
+
+        logger.info(`Launching program: ${launchPath}`);
+
+        if (launchPath.endsWith(".lnk")) {
+          logger.info("launching shortcut file");
+          await shell.openPath(launchPath);
+        } else {
+          logger.info("Launching executable directly");
+          spawn(launchPath, [], {
+            detached: true,
+            stdio: "ignore",
+          }).unref();
+        }
+
+        return true;
       } catch (error) {
-        logger.error(`Error reading or parsing JSON file: ${error}`);
+        logger.error(`Error in launchIcon: ${error}`);
         return false;
       }
     }
