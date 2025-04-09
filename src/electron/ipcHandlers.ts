@@ -1,5 +1,4 @@
-import { spawn } from "child_process";
-import { dialog, ipcMain, shell } from "electron";
+import { dialog, ipcMain } from "electron";
 import fs from "fs";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
@@ -11,6 +10,7 @@ import {
   getActiveSubWindow,
 } from "./subWindowManager.js";
 import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
+import { safeSpawn } from "./utils/safeSpawn.js";
 
 const logger = createLoggerForFile("ipcHandlers.ts");
 
@@ -341,18 +341,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         logger.info(`Launching program: ${launchPath}`);
 
-        if (launchPath.endsWith(".lnk")) {
-          logger.info("launching shortcut file");
-          await shell.openPath(launchPath);
-        } else {
-          logger.info("Launching executable directly");
-          spawn(launchPath, [], {
-            detached: true,
-            stdio: "ignore",
-          }).unref();
-        }
-
-        return true;
+        return safeSpawn(icon.link, icon.args || []);
       } catch (error) {
         logger.error(`Error in launchIcon: ${error}`);
         return false;

@@ -8,6 +8,7 @@ export interface DesktopIcon {
   offsetY: number;
   image: string;
   link?: string;
+  args?: string[];
   fontColor?: string;
 }
 
