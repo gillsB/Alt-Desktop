@@ -327,12 +327,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           return false;
         }
 
-        if (!icon.link) {
-          logger.warn(`No link found for icon at [${row}, ${col}]`);
+        if (!icon.programLink) {
+          logger.warn(`No programLink found for icon at [${row}, ${col}]`);
           return false;
         }
 
-        const launchPath = icon.link;
+        const launchPath = icon.programLink;
 
         if (!fs.existsSync(launchPath)) {
           logger.warn(`Launch path does not exist: ${launchPath}`);
@@ -341,7 +341,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         logger.info(`Launching program: ${launchPath}`);
 
-        return safeSpawn(icon.link, icon.args || []);
+        return safeSpawn(icon.programLink, icon.args || []);
       } catch (error) {
         logger.error(`Error in launchIcon: ${error}`);
         return false;
