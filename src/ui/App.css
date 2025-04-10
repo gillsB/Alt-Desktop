@@ -311,3 +311,43 @@ body,
 .save-button:hover {
   background-color: #0056b3;
 }
+
+.submenu {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background-color: #333;
+  color: white;
+  border: 1px solid #666;
+  z-index: 1001;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.submenu p {
+  margin: 0;
+  padding: 8px 10px;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.submenu p:hover {
+  background-color: #555;
+  cursor: pointer;
+}
+
+.context-menu-open {
+  position: relative;
+}
+.context-menu-open .submenu-arrow {
+  margin-left: auto;
+  padding-left: 10px;
+  color: white;
+  font-size: 0.6rem;
+}
+.context-menu-open:hover .submenu-arrow {
+  content: "▶";
+}

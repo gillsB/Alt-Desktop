@@ -17,6 +17,7 @@ const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
+  const [showOpenSubmenu, setShowOpenSubmenu] = useState(false); // State for submenu visibility
 
   // Refers to a square size of the icon box, not the icon's size in pixels.
   const ICON_SIZE = 100;
@@ -301,6 +302,28 @@ const DesktopGrid: React.FC = () => {
 
     setContextMenu(null); // Close the context menu
   };
+
+  const handleOpenSubmenuClick = (option: string) => {
+    if (contextMenu?.icon) {
+      const { name } = contextMenu.icon;
+
+      switch (option) {
+        case "Website":
+          logger.info(`Opening website for icon: ${name}`);
+          break;
+        case "Image folder":
+          logger.info(`Opening image folder for icon: ${name}`);
+          break;
+        case "Program folder":
+          logger.info(`Opening program folder for icon: ${name}`);
+          break;
+        default:
+          logger.warn(`Unknown submenu option: ${option}`);
+      }
+    }
+    setShowOpenSubmenu(false);
+  };
+
   return (
     <>
       <div
@@ -399,8 +422,34 @@ const DesktopGrid: React.FC = () => {
           ) : (
             <>
               <p onClick={handleEditIcon}>Edit {contextMenu.icon?.name}</p>
+              <p>Run program</p>
+              <p
+                className="context-menu-open"
+                onMouseEnter={() => setShowOpenSubmenu(true)}
+                onMouseLeave={() => setShowOpenSubmenu(false)}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                Open
+                <span className="submenu-arrow">▶</span>
+                {showOpenSubmenu && (
+                  <div className="submenu">
+                    <p onClick={() => handleOpenSubmenuClick("Website")}>
+                      Website
+                    </p>
+                    <p onClick={() => handleOpenSubmenuClick("Image folder")}>
+                      Image folder
+                    </p>
+                    <p onClick={() => handleOpenSubmenuClick("Program folder")}>
+                      Program folder
+                    </p>
+                  </div>
+                )}
+              </p>
               <p onClick={handleReloadIcon}>Reload Icon</p>
-              <p>Rename</p>
               <p>Delete</p>
             </>
           )}
@@ -447,7 +496,7 @@ const DesktopGrid: React.FC = () => {
 
   function contextMenuPosition(y: number): number {
     const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-    const menuHeight = 150; // Approximate height of the context menu
+    const menuHeight = 180; // Approximate height of the context menu
     const viewportHeight = window.innerHeight - headerHeight;
 
     // If the menu would overflow off the bottom, position it upwards
