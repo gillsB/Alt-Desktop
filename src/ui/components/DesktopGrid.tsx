@@ -190,7 +190,7 @@ const DesktopGrid: React.FC = () => {
 
   const handleIconDoubleClick = async (row: number, col: number) => {
     logger.info("double clicked icon", row, col);
-    await window.electron.launchIcon(row, col);
+    await window.electron.launchProgram(row, col);
   };
 
   const handleRightClick = (

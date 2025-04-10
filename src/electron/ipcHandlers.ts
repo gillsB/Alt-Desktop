@@ -309,7 +309,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
 
   ipcMainHandle(
-    "launchIcon",
+    "launchProgram",
     async (row: number, col: number): Promise<boolean> => {
       const directoryPath = path.join(getAppDataPath(), "desktop");
       const filePath = path.join(directoryPath, "desktopIcons.json");
