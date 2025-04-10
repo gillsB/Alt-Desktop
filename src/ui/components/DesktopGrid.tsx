@@ -304,12 +304,14 @@ const DesktopGrid: React.FC = () => {
     setContextMenu(null); // Close the context menu
   };
 
-  const handleLaunchSubmenuClick = (option: string) => {
-    if (contextMenu?.icon) {
+  const handleLaunchSubmenuClick = async (option: string) => {
+    if (contextMenu && contextMenu?.icon) {
       const { name } = contextMenu.icon;
+      const { row, col } = contextMenu.icon;
       switch (option) {
         case "Program":
           logger.info(`Running program for icon: ${name}`);
+          await window.electron.launchProgram(row, col);
           break;
         case "Website":
           logger.info(`Opening website for icon: ${name}`);
