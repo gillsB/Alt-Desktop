@@ -39,6 +39,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("saveIconImage", sourcePath, row, col),
   launchProgram: (row: number, col: number) =>
     ipcInvoke("launchProgram", row, col),
+  launchWebsite: (row: number, col: number) =>
+    ipcInvoke("launchWebsite", row, col),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

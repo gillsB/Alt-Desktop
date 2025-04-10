@@ -315,6 +315,7 @@ const DesktopGrid: React.FC = () => {
           break;
         case "Website":
           logger.info(`Opening website for icon: ${name}`);
+          await window.electron.launchWebsite(row, col);
           break;
         default:
           logger.warn(`Unknown submenu option: ${option}`);

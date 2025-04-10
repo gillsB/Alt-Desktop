@@ -348,4 +348,16 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle(
+    "launchWebsite",
+    async (row: number, col: number): Promise<boolean> => {
+      logger.info(
+        "ipcMainHandle launchWebsite called for row:",
+        row,
+        "col:",
+        col
+      );
+      return false;
+    }
+  );
 }

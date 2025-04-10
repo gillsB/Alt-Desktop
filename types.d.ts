@@ -38,6 +38,7 @@ interface EventParamMapping {
   openFileDialog: [];
   saveIconImage: [string, number, number];
   launchProgram: [number, number];
+  launchWebsite: [number, number];
 }
 
 // The returns from the main process to the renderer
@@ -58,6 +59,7 @@ type EventPayloadMapping = {
   openFileDialog: string | null;
   saveIconImage: string;
   launchProgram: boolean;
+  launchWebsite: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -92,5 +94,6 @@ interface Window {
       col: number
     ) => Promise<string>;
     launchProgram: (row: number, col: number) => Promise<boolean>;
+    launchWebsite: (row: number, col: number) => Promise<boolean>;
   };
 }
