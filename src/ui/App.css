@@ -339,15 +339,15 @@ body,
   cursor: pointer;
 }
 
-.context-menu-open {
+.has-submenu {
   position: relative;
 }
-.context-menu-open .submenu-arrow {
+.has-submenu .submenu-arrow {
   margin-left: auto;
   padding-left: 10px;
   color: white;
-  font-size: 0.6rem;
+  font-size: 0.5rem;
 }
-.context-menu-open:hover .submenu-arrow {
+.has-submenu:hover .submenu-arrow {
   content: "▶";
 }

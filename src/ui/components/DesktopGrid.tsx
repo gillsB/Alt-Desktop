@@ -17,6 +17,7 @@ const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
+  const [showLaunchSubmenu, setShowLaunchSubmenu] = useState(false); // State for submenu visibility
   const [showOpenSubmenu, setShowOpenSubmenu] = useState(false); // State for submenu visibility
 
   // Refers to a square size of the icon box, not the icon's size in pixels.
@@ -303,14 +304,28 @@ const DesktopGrid: React.FC = () => {
     setContextMenu(null); // Close the context menu
   };
 
+  const handleLaunchSubmenuClick = (option: string) => {
+    if (contextMenu?.icon) {
+      const { name } = contextMenu.icon;
+      switch (option) {
+        case "Program":
+          logger.info(`Running program for icon: ${name}`);
+          break;
+        case "Website":
+          logger.info(`Opening website for icon: ${name}`);
+          break;
+        default:
+          logger.warn(`Unknown submenu option: ${option}`);
+      }
+    }
+    setShowLaunchSubmenu(false);
+  };
+
   const handleOpenSubmenuClick = (option: string) => {
     if (contextMenu?.icon) {
       const { name } = contextMenu.icon;
 
       switch (option) {
-        case "Website":
-          logger.info(`Opening website for icon: ${name}`);
-          break;
         case "Image folder":
           logger.info(`Opening image folder for icon: ${name}`);
           break;
@@ -422,9 +437,31 @@ const DesktopGrid: React.FC = () => {
           ) : (
             <>
               <p onClick={handleEditIcon}>Edit {contextMenu.icon?.name}</p>
-              <p>Run program</p>
               <p
-                className="context-menu-open"
+                className="has-submenu"
+                onMouseEnter={() => setShowLaunchSubmenu(true)}
+                onMouseLeave={() => setShowLaunchSubmenu(false)}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                Launch
+                <span className="submenu-arrow">▶</span>
+                {showLaunchSubmenu && (
+                  <div className="submenu">
+                    <p onClick={() => handleLaunchSubmenuClick("Program")}>
+                      Program
+                    </p>
+                    <p onClick={() => handleLaunchSubmenuClick("Website")}>
+                      Website
+                    </p>
+                  </div>
+                )}
+              </p>
+              <p
+                className="has-submenu"
                 onMouseEnter={() => setShowOpenSubmenu(true)}
                 onMouseLeave={() => setShowOpenSubmenu(false)}
                 style={{
@@ -437,9 +474,6 @@ const DesktopGrid: React.FC = () => {
                 <span className="submenu-arrow">▶</span>
                 {showOpenSubmenu && (
                   <div className="submenu">
-                    <p onClick={() => handleOpenSubmenuClick("Website")}>
-                      Website
-                    </p>
                     <p onClick={() => handleOpenSubmenuClick("Image folder")}>
                       Image folder
                     </p>
