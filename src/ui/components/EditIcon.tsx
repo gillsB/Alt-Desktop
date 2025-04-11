@@ -147,6 +147,21 @@ const EditIcon: React.FC = () => {
               />
             </div>
             <div className="edit-icon-field">
+              <label htmlFor="website-path">Website Link</label>
+              <input
+                id="website-link"
+                type="text"
+                value={icon.websiteLink}
+                onChange={(e) =>
+                  setIcon((prevIcon) =>
+                    prevIcon
+                      ? { ...prevIcon, websiteLink: e.target.value }
+                      : null
+                  )
+                }
+              />
+            </div>
+            <div className="edit-icon-field">
               <label htmlFor="font-color">Font Color</label>
               <input
                 id="font-color"
