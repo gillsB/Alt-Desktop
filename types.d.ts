@@ -40,6 +40,7 @@ interface EventParamMapping {
   launchProgram: [number, number];
   launchWebsite: [number, number];
   getFilePath: [File];
+  getFileType: [string];
 }
 
 // The returns from the main process to the renderer
@@ -62,6 +63,7 @@ type EventPayloadMapping = {
   launchProgram: boolean;
   launchWebsite: boolean;
   getFilePath: string;
+  getFileType: string;
 };
 
 type UnsubscribeFunction = () => void;
@@ -98,5 +100,6 @@ interface Window {
     launchProgram: (row: number, col: number) => Promise<boolean>;
     launchWebsite: (row: number, col: number) => Promise<boolean>;
     getFilePath: (file: File) => string;
+    getFileType: (filepath: string) => Promise<string>;
   };
 }

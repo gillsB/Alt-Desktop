@@ -1,5 +1,6 @@
 import { dialog, ipcMain, shell } from "electron";
 import fs from "fs";
+import mime from "mime-types";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
 import { DesktopIcon } from "./DesktopIcon.js";
@@ -391,4 +392,24 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+
+  ipcMainHandle("getFileType", async (filePath: string): Promise<string> => {
+    try {
+      if (!fs.existsSync(filePath)) {
+        logger.warn(`File does not exist: ${filePath}`);
+        return "";
+      }
+
+      const mimeType = mime.lookup(filePath);
+      if (!mimeType) {
+        logger.warn(`Could not determine file type for: ${filePath}`);
+        return "";
+      }
+
+      return mimeType;
+    } catch (error) {
+      logger.error(`Error in getFileType for ${filePath}: ${error}`);
+      return "";
+    }
+  });
 }

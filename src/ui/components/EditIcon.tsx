@@ -106,7 +106,9 @@ const EditIcon: React.FC = () => {
 
     const files = event.dataTransfer.files[0];
     const filePath = window.electron.getFilePath(files);
+    const fileType = await window.electron.getFileType(filePath);
     logger.info(filePath);
+    logger.info(fileType);
   };
 
   return (
