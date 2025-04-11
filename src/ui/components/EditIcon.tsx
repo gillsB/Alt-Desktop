@@ -132,6 +132,21 @@ const EditIcon: React.FC = () => {
               <button onClick={handleFileSelect}>Select Image</button>
             </div>
             <div className="edit-icon-field">
+              <label htmlFor="program-path">Program Path</label>
+              <input
+                id="program-path"
+                type="text"
+                value={icon.programLink}
+                onChange={(e) =>
+                  setIcon((prevIcon) =>
+                    prevIcon
+                      ? { ...prevIcon, programLink: e.target.value }
+                      : null
+                  )
+                }
+              />
+            </div>
+            <div className="edit-icon-field">
               <label htmlFor="font-color">Font Color</label>
               <input
                 id="font-color"
