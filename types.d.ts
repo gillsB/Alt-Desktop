@@ -39,6 +39,7 @@ interface EventParamMapping {
   saveIconImage: [string, number, number];
   launchProgram: [number, number];
   launchWebsite: [number, number];
+  getFilePath: [File];
 }
 
 // The returns from the main process to the renderer
@@ -60,6 +61,7 @@ type EventPayloadMapping = {
   saveIconImage: string;
   launchProgram: boolean;
   launchWebsite: boolean;
+  getFilePath: string;
 };
 
 type UnsubscribeFunction = () => void;
@@ -95,5 +97,6 @@ interface Window {
     ) => Promise<string>;
     launchProgram: (row: number, col: number) => Promise<boolean>;
     launchWebsite: (row: number, col: number) => Promise<boolean>;
+    getFilePath: (file: File) => string;
   };
 }

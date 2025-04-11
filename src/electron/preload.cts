@@ -1,4 +1,4 @@
-import electron, { ipcRenderer } from "electron";
+import electron, { ipcRenderer, webUtils } from "electron";
 
 // builds the bridge for communicating with ui
 electron.contextBridge.exposeInMainWorld("electron", {
@@ -41,6 +41,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("launchProgram", row, col),
   launchWebsite: (row: number, col: number) =>
     ipcInvoke("launchWebsite", row, col),
+  getFilePath: (file: File) => webUtils.getPathForFile(file),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

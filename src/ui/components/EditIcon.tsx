@@ -100,8 +100,21 @@ const EditIcon: React.FC = () => {
     }
   };
 
+  const handleFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (!icon) return;
+
+    const files = event.dataTransfer.files[0];
+    const filePath = window.electron.getFilePath(files);
+    logger.info(filePath);
+  };
+
   return (
-    <div className="edit-icon-container">
+    <div
+      className="edit-icon-container"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleFileDrop}
+    >
       <SubWindowHeader />
       <div className="edit-icon-content">
         {loading && <div>Loading...</div>}
