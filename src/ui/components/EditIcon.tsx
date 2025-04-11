@@ -107,8 +107,29 @@ const EditIcon: React.FC = () => {
     const files = event.dataTransfer.files[0];
     const filePath = window.electron.getFilePath(files);
     const fileType = await window.electron.getFileType(filePath);
-    logger.info(filePath);
-    logger.info(fileType);
+    logger.info("Returned filePath from dropped file: ", filePath);
+    if (fileType.startsWith("image/")) {
+      try {
+        logger.info("Dropped file is an image:");
+        const savedFilePath = await window.electron.saveIconImage(
+          filePath,
+          icon.row,
+          icon.col
+        );
+
+        setIcon((prevIcon) =>
+          prevIcon ? { ...prevIcon, image: savedFilePath } : null
+        );
+        logger.info(`Image saved to: ${savedFilePath}`);
+      } catch (error) {
+        logger.error("Failed to save image:", error);
+      }
+    } else {
+      logger.info("Dropped file is not an image:");
+      setIcon((prevIcon) =>
+        prevIcon ? { ...prevIcon, programLink: filePath } : null
+      );
+    }
   };
 
   return (
