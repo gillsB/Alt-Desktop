@@ -1,4 +1,4 @@
-import { dialog, ipcMain } from "electron";
+import { dialog, ipcMain, shell } from "electron";
 import fs from "fs";
 import path from "path";
 import { getAppDataPath } from "./appDataSetup.js";
@@ -351,13 +351,44 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "launchWebsite",
     async (row: number, col: number): Promise<boolean> => {
-      logger.info(
-        "ipcMainHandle launchWebsite called for row:",
-        row,
-        "col:",
-        col
-      );
-      return false;
+      const directoryPath = path.join(getAppDataPath(), "desktop");
+      const filePath = path.join(directoryPath, "desktopIcons.json");
+
+      try {
+        const data = fs.readFileSync(filePath, "utf-8");
+        const parsedData: DesktopIconData = JSON.parse(data);
+
+        const icon = parsedData.icons.find(
+          (icon) => icon.row === row && icon.col === col
+        );
+
+        if (!icon) {
+          logger.warn(`No icon found at [${row}, ${col}]`);
+          return false;
+        }
+
+        if (!icon.websiteLink) {
+          logger.warn(`No websiteLink found for icon at [${row}, ${col}]`);
+          return false;
+        }
+
+        let websiteLink = icon.websiteLink.trim();
+
+        // Ensure the link starts with a valid protocol
+        if (!/^https?:\/\//i.test(websiteLink)) {
+          websiteLink = `https://${websiteLink}`;
+          logger.info(`Formatted website link to: ${websiteLink}`);
+        }
+
+        // Open the website link in the default web browser
+        logger.info(`Opening website: ${websiteLink}`);
+        await shell.openExternal(websiteLink);
+
+        return true;
+      } catch (error) {
+        logger.error(`Error in launchWebsite: ${error}`);
+        return false;
+      }
     }
   );
 }
