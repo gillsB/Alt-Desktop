@@ -47,6 +47,7 @@ export const SafeImage: React.FC<{
   width?: number;
   height?: number;
   className?: string;
+  highlighted?: boolean;
 }> = ({
   row,
   col,
@@ -54,6 +55,7 @@ export const SafeImage: React.FC<{
   width = 64,
   height = 64,
   className = "desktop-icon-image",
+  highlighted = false,
 }) => {
   const [imageSrc, setImageSrc] = useState<string>(() =>
     getImagePath(row, col, originalImage)
@@ -82,7 +84,7 @@ export const SafeImage: React.FC<{
 
   return (
     <div
-      className={className}
+      className={`${className} ${highlighted ? "highlighted-icon" : ""}`}
       style={{
         width,
         height,

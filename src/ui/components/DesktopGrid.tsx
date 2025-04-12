@@ -383,6 +383,14 @@ const DesktopGrid: React.FC = () => {
     setShowOpenSubmenu(false);
   };
 
+  const isIconHighlighted = (row: number, col: number): boolean => {
+    return (
+      highlightBox.visible &&
+      highlightBox.row === row &&
+      highlightBox.col === col
+    );
+  };
+
   return (
     <>
       <div
@@ -470,6 +478,7 @@ const DesktopGrid: React.FC = () => {
               originalImage={icon.image}
               width={icon.width || 64}
               height={icon.height || 64}
+              highlighted={isIconHighlighted(icon.row, icon.col)}
             />
             <p
               className="desktop-icon-name"

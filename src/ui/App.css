@@ -422,3 +422,24 @@ body,
     box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
   }
 }
+
+.highlighted-icon {
+  position: relative;
+  box-sizing: border-box;
+  border: 2px solid #00ff00;
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+  animation: highlight-pulse 2s infinite;
+  overflow: hidden;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(0, 255, 0, 1);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+  }
+}
