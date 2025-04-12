@@ -13,12 +13,23 @@ interface ContextMenu {
   icon?: DesktopIcon | null;
 }
 
+interface HighlightPosition {
+  row: number;
+  col: number;
+  visible: boolean;
+}
+
 const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
   const [showLaunchSubmenu, setShowLaunchSubmenu] = useState(false); // State for submenu visibility
   const [showOpenSubmenu, setShowOpenSubmenu] = useState(false); // State for submenu visibility
+  const [highlightBox, setHighlightBox] = useState<HighlightPosition>({
+    row: 0,
+    col: 0,
+    visible: false,
+  });
 
   // Refers to a square size of the icon box, not the icon's size in pixels.
   const ICON_SIZE = 100;
@@ -39,6 +50,30 @@ const DesktopGrid: React.FC = () => {
   const toggleGrid = () => {
     setShowGrid((prev) => !prev);
     setContextMenu(null); // Close the context menu after toggling
+  };
+
+  /**
+   * Shows a highlight box at the specified row and column position.
+   *
+   * @param {number} row - The row position for the highlight box.
+   * @param {number} col - The column position for the highlight box.
+   */
+  const showHighlightAt = (row: number, col: number) => {
+    setHighlightBox({
+      row,
+      col,
+      visible: true,
+    });
+  };
+
+  /**
+   * Hides the currently visible highlight box.
+   */
+  const hideHighlightBox = () => {
+    setHighlightBox((prev) => ({
+      ...prev,
+      visible: false,
+    }));
   };
 
   /**
@@ -149,6 +184,7 @@ const DesktopGrid: React.FC = () => {
         contextMenuElement &&
         !e.composedPath().includes(contextMenuElement)
       ) {
+        hideHighlightBox();
         setContextMenu(null); // Hide the context menu when clicking outside
       }
     };
@@ -186,6 +222,7 @@ const DesktopGrid: React.FC = () => {
     if (!icon) return iconsMap; // No update if icon doesn't exist
     const newColor = icon.fontColor === "red" ? "white" : "red";
     updateIconField([row, col], "fontColor", newColor);
+    hideHighlightBox();
   };
 
   const handleIconDoubleClick = async (row: number, col: number) => {
@@ -221,6 +258,7 @@ const DesktopGrid: React.FC = () => {
 
     // Calculate the nearest grid slot
     const [validRow, validCol] = getRowColFromXY(x, adjustedY);
+    showHighlightAt(validRow, validCol);
 
     // Check if an icon exists at the calculated row and column
     const existingIcon = getIcon(validRow, validCol);
@@ -257,6 +295,8 @@ const DesktopGrid: React.FC = () => {
   ) => {
     e.stopPropagation();
     handleRightClick(e, "icon", row, col);
+    showHighlightAt(row, col);
+
     logger.info(
       `Icon right click at row: ${row}, col: ${col} with icon name: ${iconsMap.get(`${row},${col}`)?.name}`
     );
@@ -291,6 +331,7 @@ const DesktopGrid: React.FC = () => {
       }
 
       setContextMenu(null); // Close the context menu
+      hideHighlightBox();
     }
   };
   const handleReloadDesktop = async () => {
@@ -383,6 +424,24 @@ const DesktopGrid: React.FC = () => {
               }}
             />
           ))}
+
+        {/* Render highlight box if visible */}
+        {highlightBox.visible && (
+          <div
+            className="highlight-box"
+            style={{
+              position: "absolute",
+              left:
+                highlightBox.col * (ICON_SIZE + ICON_HORIZONTAL_PADDING) +
+                ICON_ROOT_OFFSET_LEFT,
+              top:
+                highlightBox.row * (ICON_SIZE + ICON_VERTICAL_PADDING) +
+                ICON_ROOT_OFFSET_TOP,
+              width: ICON_SIZE,
+              height: ICON_SIZE + ICON_VERTICAL_PADDING,
+            }}
+          />
+        )}
 
         {/* Render desktop icons */}
         {Array.from(iconsMap.values()).map((icon) => (
