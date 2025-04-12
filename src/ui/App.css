@@ -351,3 +351,54 @@ body,
 .has-submenu:hover .submenu-arrow {
   content: "▶";
 }
+
+.drag-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(44, 44, 44, 0.8);
+  z-index: 1100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.drag-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 3px dashed #7a7a7a;
+  border-radius: 8px;
+  padding: 40px;
+  background-color: rgba(60, 60, 60, 0.7);
+  width: 70%;
+  max-width: 400px;
+  height: 200px;
+}
+
+.drag-icon {
+  font-size: 50px;
+  color: #007bff;
+  margin-bottom: 15px;
+}
+
+.drag-text {
+  font-size: 24px;
+  color: white;
+  font-weight: bold;
+  margin-bottom: 10px;
+}

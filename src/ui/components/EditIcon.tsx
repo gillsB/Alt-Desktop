@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { DesktopIcon, getDefaultDesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
@@ -16,6 +16,9 @@ const EditIcon: React.FC = () => {
   const [icon, setIcon] = useState<DesktopIcon | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const dragCounter = useRef(0);
 
   useEffect(() => {
     const fetchIcon = async () => {
@@ -100,8 +103,39 @@ const EditIcon: React.FC = () => {
     }
   };
 
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounter.current++;
+
+    if (dragCounter.current === 1) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounter.current--;
+
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
   const handleFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    event.stopPropagation();
+
+    // Reset counter and state
+    dragCounter.current = 0;
+    setIsDragging(false);
+
     if (!icon) return;
 
     const files = event.dataTransfer.files[0];
@@ -135,7 +169,9 @@ const EditIcon: React.FC = () => {
   return (
     <div
       className="edit-icon-container"
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
       onDrop={handleFileDrop}
     >
       <SubWindowHeader />
@@ -211,6 +247,14 @@ const EditIcon: React.FC = () => {
           </>
         )}
       </div>
+      {isDragging && (
+        <div className="drag-overlay">
+          <div className="drag-content">
+            <div className="drag-icon">+</div>
+            <div className="drag-text">Drop image or program file here.</div>
+          </div>
+        </div>
+      )}
       <div className="edit-icon-footer">
         <button className="save-button" onClick={handleSave}>
           Save
