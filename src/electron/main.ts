@@ -61,15 +61,28 @@ app.on("ready", () => {
     }
   });
 
-  const toggleOverlayKeybind = globalShortcut.register("Alt+D", () => {
-    if (mainWindow.isMinimized()) {
-      logger.info("Restoring main window");
-      mainWindow.restore();
-    } else {
-      logger.info("Minimizing main window");
-      mainWindow.minimize();
-    }
-  });
+  const toggleOverlayKeybind = (() => {
+    let isKeyPressed = false;
+
+    return globalShortcut.register("Alt+D", () => {
+      if (isKeyPressed) return;
+
+      isKeyPressed = true;
+
+      if (mainWindow.isMinimized()) {
+        logger.info("Restoring main window");
+        mainWindow.restore();
+      } else {
+        logger.info("Minimizing main window");
+        mainWindow.minimize();
+      }
+
+      // Reset the key state after a short delay to allow for key release
+      setTimeout(() => {
+        isKeyPressed = false;
+      }, 50);
+    });
+  })();
 
   if (!toggleOverlayKeybind) {
     logger.error("Keybind binding failed");
