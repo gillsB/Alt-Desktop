@@ -61,7 +61,7 @@ export const SafeImage: React.FC<{
   const [imageSrc, setImageSrc] = useState<string>(() =>
     getImagePath(row, col, originalImage)
   );
-  const [dimensions, setDimensions] = useState<{
+  const [imageDimensions, setImageDimensions] = useState<{
     width: number;
     height: number;
   }>({
@@ -74,35 +74,34 @@ export const SafeImage: React.FC<{
   }, [originalImage, row, col]);
 
   useEffect(() => {
-    // If width and height are explicitly provided, use them directly
-    if (width && height) {
-      setDimensions({ width, height });
-      return;
-    }
-
     const img = new Image();
     img.src = imageSrc;
 
     img.onload = () => {
+      // Case 1: Both width and height are explicitly provided
+      if (width && height) {
+        setImageDimensions({ width, height });
+        return;
+      }
+
+      // Case 2: Calculate aspect ratio dimensions within DEFAULT_MAX_SIZE
       const aspectRatio = img.width / img.height;
 
-      // Clamp the dimensions based on the max size
-      let clampedWidth = DEFAULT_MAX_SIZE;
-      let clampedHeight = DEFAULT_MAX_SIZE;
+      let imageWidth, imageHeight;
 
       if (aspectRatio > 1) {
         // Landscape image: width is the limiting factor
-        clampedWidth = Math.min(clampedWidth, DEFAULT_MAX_SIZE);
-        clampedHeight = clampedWidth / aspectRatio;
+        imageWidth = DEFAULT_MAX_SIZE;
+        imageHeight = imageWidth / aspectRatio;
       } else {
         // Portrait or square image: height is the limiting factor
-        clampedHeight = Math.min(clampedHeight, DEFAULT_MAX_SIZE);
-        clampedWidth = clampedHeight * aspectRatio;
+        imageHeight = DEFAULT_MAX_SIZE;
+        imageWidth = imageHeight * aspectRatio;
       }
 
-      setDimensions({
-        width: Math.round(clampedWidth),
-        height: Math.round(clampedHeight),
+      setImageDimensions({
+        width: Math.round(imageWidth),
+        height: Math.round(imageHeight),
       });
     };
 
@@ -123,13 +122,24 @@ export const SafeImage: React.FC<{
     <div
       className={`${className} ${highlighted ? "highlighted-icon" : ""}`}
       style={{
-        width: dimensions.width,
-        height: dimensions.height,
-        backgroundImage: `url(${imageSrc})`,
-        backgroundSize: width && height ? "100% 100%" : "contain", // Stretch if width/height provided
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
+        // Container is always fixed size when no width/height provided
+        width: width || DEFAULT_MAX_SIZE,
+        height: height || DEFAULT_MAX_SIZE,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
       }}
-    />
+    >
+      <div
+        style={{
+          width: imageDimensions.width,
+          height: imageDimensions.height,
+          backgroundImage: `url(${imageSrc})`,
+          backgroundSize: width && height ? "100% 100%" : "contain",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+    </div>
   );
 };
