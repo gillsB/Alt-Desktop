@@ -2,10 +2,10 @@ export interface DesktopIcon {
   row: number;
   col: number;
   name: string;
-  width: number;
-  height: number;
-  offsetX: number;
-  offsetY: number;
+  width?: number;
+  height?: number;
+  offsetX?: number;
+  offsetY?: number;
   image: string;
   programLink?: string;
   args?: string[];
@@ -18,10 +18,6 @@ export const DEFAULT_DESKTOP_ICON: DesktopIcon = {
   row: -1,
   col: -1,
   name: "",
-  width: 64, //Needs to use Settings global default. (when settings are implemented)
-  height: 64,
-  offsetX: 0,
-  offsetY: 0,
   image: "",
   fontColor: "white",
 };

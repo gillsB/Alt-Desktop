@@ -473,8 +473,6 @@ const DesktopGrid: React.FC = () => {
                 icon.row * (ICON_SIZE + ICON_VERTICAL_PADDING) +
                 (icon.offsetY || 0) + // Default to 0 if offsetY is undefined
                 ICON_ROOT_OFFSET_TOP,
-              width: icon.width || 64,
-              height: icon.height || 64,
             }}
             onClick={() => handleIconClick(icon.row, icon.col)}
             onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
@@ -484,8 +482,8 @@ const DesktopGrid: React.FC = () => {
               row={icon.row}
               col={icon.col}
               originalImage={icon.image}
-              width={icon.width || 64}
-              height={icon.height || 64}
+              width={icon.width || 64} //needed for overrides of default
+              height={icon.height || 64} // ^
               highlighted={isIconHighlighted(icon.row, icon.col)}
             />
             <p
