@@ -52,14 +52,19 @@ export const SafeImage: React.FC<{
   row,
   col,
   originalImage,
-  width = 64,
-  height = 64,
+  width,
+  height,
   className = "desktop-icon-image",
   highlighted = false,
 }) => {
+  const DEFAULT_MAX_SIZE = 64; // Default maximum width/height for the image
   const [imageSrc, setImageSrc] = useState<string>(() =>
     getImagePath(row, col, originalImage)
   );
+  const [clampedDimensions, setClampedDimensions] = useState<{
+    width: number;
+    height: number;
+  }>({ width: DEFAULT_MAX_SIZE, height: DEFAULT_MAX_SIZE });
 
   useEffect(() => {
     setImageSrc(getImagePath(row, col, originalImage));
@@ -68,6 +73,29 @@ export const SafeImage: React.FC<{
   useEffect(() => {
     const img = new Image();
     img.src = imageSrc;
+
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+
+      // Clamp the dimensions based on the max size
+      let clampedWidth = width || DEFAULT_MAX_SIZE;
+      let clampedHeight = height || DEFAULT_MAX_SIZE;
+
+      if (aspectRatio > 1) {
+        // Landscape image: width is the limiting factor
+        clampedWidth = Math.min(clampedWidth, DEFAULT_MAX_SIZE);
+        clampedHeight = clampedWidth / aspectRatio;
+      } else {
+        // Portrait or square image: height is the limiting factor
+        clampedHeight = Math.min(clampedHeight, DEFAULT_MAX_SIZE);
+        clampedWidth = clampedHeight * aspectRatio;
+      }
+
+      setClampedDimensions({
+        width: Math.round(clampedWidth),
+        height: Math.round(clampedHeight),
+      });
+    };
 
     img.onerror = () => {
       console.error(
@@ -80,16 +108,16 @@ export const SafeImage: React.FC<{
       img.onload = null;
       img.onerror = null;
     };
-  }, [imageSrc]);
+  }, [imageSrc, width, height]);
 
   return (
     <div
       className={`${className} ${highlighted ? "highlighted-icon" : ""}`}
       style={{
-        width,
-        height,
+        width: clampedDimensions.width,
+        height: clampedDimensions.height,
         backgroundImage: `url(${imageSrc})`,
-        backgroundSize: "cover",
+        backgroundSize: "contain",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
