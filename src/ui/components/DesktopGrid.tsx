@@ -302,16 +302,24 @@ const DesktopGrid: React.FC = () => {
     );
   };
 
-  const handleEditIcon = () => {
+  const handleEditIcon = (row?: number, col?: number) => {
+    if (row !== undefined && col !== undefined) {
+      // If row and col are provided, directly call editIcon
+      window.electron.ensureDataFolder(row, col);
+      window.electron.editIcon(row, col);
+      setContextMenu(null);
+      return;
+    }
+
+    // Fallback to contextMenu logic if row and col are not provided
     if (contextMenu) {
       const { x, y } = contextMenu;
       // contextMenu returns local coordinates. Which getRowColFromXY expects.
       const [validRow, validCol] = getRowColFromXY(x, y);
 
-      // Send the action to the main process via Electron's IPC
       window.electron.ensureDataFolder(validRow, validCol);
       window.electron.editIcon(validRow, validCol);
-      setContextMenu(null); // Close the context menu
+      setContextMenu(null);
     } else {
       logger.error("Tried to edit an icon, but contextMenu was null.");
       setContextMenu(null);
@@ -500,14 +508,20 @@ const DesktopGrid: React.FC = () => {
         >
           {contextMenu.type === "desktop" ? (
             <>
-              <p onClick={handleEditIcon}>New Icon</p>
+              <p onClick={() => handleEditIcon()}>New Icon</p>
               <p>Settings</p>
               <p onClick={handleReloadDesktop}>Reload Desktop</p>
               <p onClick={toggleGrid}>{showGrid ? "✔ " : ""}Show Grid</p>
             </>
           ) : (
             <>
-              <p onClick={handleEditIcon}>Edit {contextMenu.icon?.name}</p>
+              <p
+                onClick={() =>
+                  handleEditIcon(contextMenu.icon?.row, contextMenu.icon?.col)
+                }
+              >
+                Edit {contextMenu.icon?.name}
+              </p>
               <p
                 className="has-submenu"
                 onMouseEnter={() => setShowLaunchSubmenu(true)}
