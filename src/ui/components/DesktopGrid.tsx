@@ -482,8 +482,8 @@ const DesktopGrid: React.FC = () => {
               row={icon.row}
               col={icon.col}
               originalImage={icon.image}
-              width={icon.width || 64} //needed for overrides of default
-              height={icon.height || 64} // ^
+              width={icon.width} //needed for overrides of default
+              height={icon.height} // ^
               highlighted={isIconHighlighted(icon.row, icon.col)}
             />
             <p
