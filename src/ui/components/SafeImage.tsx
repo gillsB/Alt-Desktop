@@ -29,11 +29,16 @@ export const getImagePath = (row: number, col: number, imagePath: string) => {
     imagePath
   );
 
-  // If no image extension or we want to always use fallback
+  // TODO really not happy with this implementation.
   if (!isImageExtension) {
-    return "src/assets/unknown.png";
+    return getUnknownAssetPath();
   }
 
+  return safeFilePath;
+};
+
+const getUnknownAssetPath = () => {
+  const safeFilePath = `appdata-file:///assets/unknown.png`;
   return safeFilePath;
 };
 
@@ -107,9 +112,9 @@ export const SafeImage: React.FC<{
 
     img.onerror = () => {
       console.error(
-        `Failed to load image: ${imageSrc}. Falling back to unknown.png`
+        `File does not exist: ${imageSrc}. Falling back to unknown.png`
       );
-      setImageSrc("src/assets/unknown.png");
+      setImageSrc(getUnknownAssetPath());
     };
 
     return () => {
