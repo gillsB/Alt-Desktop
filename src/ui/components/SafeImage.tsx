@@ -12,7 +12,9 @@ export const getImagePath = (row: number, col: number, imagePath: string) => {
   // If path already matches valid protocols return it.
   if (
     imagePath.startsWith("appdata-file://") ||
-    imagePath.startsWith("src/assets/")
+    imagePath.startsWith("src/assets/") ||
+    imagePath === " " || // This is special case for no icon image.
+    imagePath.toLowerCase() === "none"
   ) {
     return imagePath;
   }
@@ -38,7 +40,7 @@ export const getImagePath = (row: number, col: number, imagePath: string) => {
 };
 
 const getUnknownAssetPath = () => {
-  const safeFilePath = `appdata-file:///assets/unknown.png`;
+  const safeFilePath = `appdata-file:///unknown`;
   return safeFilePath;
 };
 
@@ -111,10 +113,14 @@ export const SafeImage: React.FC<{
     };
 
     img.onerror = () => {
-      console.error(
-        `File does not exist: ${imageSrc}. Falling back to unknown.png`
-      );
-      setImageSrc(getUnknownAssetPath());
+      if (imageSrc === " " || imageSrc.toLowerCase() === "none") {
+        console.log("Image path is a special case, user wants an empty image.");
+      } else {
+        console.error(
+          `File does not exist: ${imageSrc}. Falling back to unknown.png`
+        );
+        setImageSrc(getUnknownAssetPath());
+      }
     };
 
     return () => {
