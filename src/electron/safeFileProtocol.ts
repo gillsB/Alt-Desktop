@@ -57,7 +57,15 @@ export function registerSafeFileProtocol(
       // Resolve the full path, ensuring it stays within the AppData directory
       let fullPath: string = path.resolve(appDataBasePath, requestedPath);
       logger.info(`Resolved full path: ${fullPath}`);
-
+      if (!fullPath.startsWith(appDataBasePath)) {
+        //TODO possibly notify the user about this through an error message popup.
+        logger.warn(`Blocked path traversal attempt:
+          Raw request: ${req.url}
+          Decoded path: ${requestedPath}
+          Resolved path: ${fullPath}
+        `);
+        return fileNotExist(fullPath, "Blocked path traversal attempt");
+      }
       // Resolve .lnk files if applicable
       fullPath = resolveShortcut(fullPath);
 
@@ -106,14 +114,16 @@ export function getSafeFileUrl(
  * @param fullPath The full path of the requested file.
  * @returns The fallback response for a non-existent file.
  */
-function fileNotExist(fullPath: string) {
-  const mimeType = mime.lookup(fullPath);
+function fileNotExist(fullPath: string, reason?: string) {
+  if (reason) {
+    logger.warn("Returning as: File not Found due to reason: ", reason);
+  } else {
+    logger.warn("File not found:", fullPath);
+  }
 
+  const mimeType = mime.lookup(fullPath);
   // Check if the requested file is an image
   if (mimeType && mimeType.startsWith("image/")) {
-    logger.error("File not found:", fullPath);
-    logger.error("Returning unknown.png instead.");
-
     return getUnknownImageResponse();
   } else {
     logger.error("File not found:", fullPath);
@@ -127,7 +137,7 @@ function fileNotExist(fullPath: string) {
  */
 export function getUnknownImageResponse(): Response {
   const fallbackImagePath = path.join(getAssetPath(), "unknown.png");
-
+  logger.info("Returning unknown.png from:", fallbackImagePath);
   try {
     const fileContent = fs.readFileSync(fallbackImagePath);
     return new Response(fileContent, {

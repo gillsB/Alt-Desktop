@@ -31,7 +31,8 @@ export const getImagePath = (row: number, col: number, imagePath: string) => {
     imagePath
   );
 
-  // TODO really not happy with this implementation.
+  // Icon file is not an image, return unknown image path.
+  // Do not even attempt to load files that are not images.
   if (!isImageExtension) {
     return getUnknownAssetPath();
   }
@@ -40,8 +41,7 @@ export const getImagePath = (row: number, col: number, imagePath: string) => {
 };
 
 const getUnknownAssetPath = () => {
-  const safeFilePath = `appdata-file:///unknown`;
-  return safeFilePath;
+  return `appdata-file:///unknown`;
 };
 
 /**
