@@ -102,6 +102,10 @@ const SafeImageComponent: React.FC<{
 
   useEffect(() => {
     logger.info("useEffect triggered");
+    if (originalImage === " " || originalImage.toLowerCase() === "none") {
+      logger.info("Image path is a special case, user wants an empty image.");
+      return;
+    }
 
     const newImageSrc = getImagePath(
       row,
@@ -139,13 +143,6 @@ const SafeImageComponent: React.FC<{
 
     img.onerror = () => {
       logger.error(`Failed to load image: ${newImageSrc}`);
-      if (imageSrc === " " || imageSrc.toLowerCase() === "none") {
-        console.log("Image path is a special case, user wants an empty image.");
-      } else {
-        console.error(
-          `File ${imageSrc} returned with error (check logs). Falling back to unknown.png`
-        );
-      }
     };
 
     return () => {
