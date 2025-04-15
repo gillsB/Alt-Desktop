@@ -19,6 +19,10 @@ interface HighlightPosition {
   visible: boolean;
 }
 
+interface IconReloadTimestamps {
+  [key: string]: number;
+}
+
 const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
@@ -30,6 +34,8 @@ const DesktopGrid: React.FC = () => {
     col: 0,
     visible: false,
   });
+  const [reloadTimestamps, setReloadTimestamps] =
+    useState<IconReloadTimestamps>({});
 
   // Refers to a square size of the icon box, not the icon's size in pixels.
   const ICON_SIZE = 100;
@@ -127,12 +133,20 @@ const DesktopGrid: React.FC = () => {
     col: number,
     updatedIcon: DesktopIcon
   ) => {
+    const iconKey = `${row},${col}`;
+
+    // Create a new timestamp for this icon to force image reload
+    setReloadTimestamps((prev) => ({
+      ...prev,
+      [iconKey]: Date.now(),
+    }));
+
     setIconsMap((prevMap) => {
-      const key = `${row},${col}`;
       const newMap = new Map(prevMap);
-      newMap.set(key, updatedIcon); // Update the specific icon
+      newMap.set(iconKey, updatedIcon); // Update the specific icon
       return newMap;
     });
+
     logger.info(`Reloaded icon at [${row}, ${col}]`);
   };
 
@@ -329,11 +343,22 @@ const DesktopGrid: React.FC = () => {
   const handleReloadIcon = async () => {
     if (contextMenu?.icon) {
       const { row, col } = contextMenu.icon;
+      const iconKey = `${row},${col}`;
 
       try {
         // Call the Electron API to reload the icon
         await window.electron.reloadIcon(row, col);
-        logger.info(`Reloaded icon at [${row}, ${col}] via Electron API`);
+
+        // Create a new timestamp for this icon to force image reload
+        const newTimestamp = Date.now();
+        setReloadTimestamps((prev) => ({
+          ...prev,
+          [iconKey]: newTimestamp,
+        }));
+
+        logger.info(
+          `Reloaded icon at [${row}, ${col}] via Electron API with timestamp ${newTimestamp}`
+        );
       } catch (error) {
         logger.error(`Failed to reload icon at [${row}, ${col}]:`, error);
       }
@@ -460,42 +485,48 @@ const DesktopGrid: React.FC = () => {
         )}
 
         {/* Render desktop icons */}
-        {Array.from(iconsMap.values()).map((icon) => (
-          <div
-            key={`${icon.row}-${icon.col}`}
-            className="desktop-icon"
-            style={{
-              left:
-                icon.col * (ICON_SIZE + ICON_HORIZONTAL_PADDING) +
-                (icon.offsetX || 0) + // Default to 0 if offsetX is undefined
-                ICON_ROOT_OFFSET_LEFT,
-              top:
-                icon.row * (ICON_SIZE + ICON_VERTICAL_PADDING) +
-                (icon.offsetY || 0) + // Default to 0 if offsetY is undefined
-                ICON_ROOT_OFFSET_TOP,
-              width: icon.width || 64,
-              height: icon.height || 64,
-            }}
-            onClick={() => handleIconClick(icon.row, icon.col)}
-            onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
-            onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)}
-          >
-            <SafeImage
-              row={icon.row}
-              col={icon.col}
-              originalImage={icon.image}
-              width={icon.width} //needed for overrides of default
-              height={icon.height} // ^
-              highlighted={isIconHighlighted(icon.row, icon.col)}
-            />
-            <p
-              className="desktop-icon-name"
-              style={{ color: icon.fontColor || "white" }}
+        {Array.from(iconsMap.values()).map((icon) => {
+          const iconKey = `${icon.row},${icon.col}`;
+          const reloadTimestamp = reloadTimestamps[iconKey] || 0;
+
+          return (
+            <div
+              key={`${icon.row}-${icon.col}`}
+              className="desktop-icon"
+              style={{
+                left:
+                  icon.col * (ICON_SIZE + ICON_HORIZONTAL_PADDING) +
+                  (icon.offsetX || 0) +
+                  ICON_ROOT_OFFSET_LEFT,
+                top:
+                  icon.row * (ICON_SIZE + ICON_VERTICAL_PADDING) +
+                  (icon.offsetY || 0) +
+                  ICON_ROOT_OFFSET_TOP,
+                width: icon.width || 64,
+                height: icon.height || 64,
+              }}
+              onClick={() => handleIconClick(icon.row, icon.col)}
+              onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
+              onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)}
             >
-              {icon.name}
-            </p>
-          </div>
-        ))}
+              <SafeImage
+                row={icon.row}
+                col={icon.col}
+                originalImage={icon.image}
+                width={icon.width}
+                height={icon.height}
+                highlighted={isIconHighlighted(icon.row, icon.col)}
+                forceReload={reloadTimestamp} // Pass the reload timestamp
+              />
+              <p
+                className="desktop-icon-name"
+                style={{ color: icon.fontColor || "white" }}
+              >
+                {icon.name}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
       {contextMenu && (

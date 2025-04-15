@@ -6,9 +6,15 @@ import React, { useEffect, useState } from "react";
  * @param row - The row position of the icon
  * @param col - The column position of the icon
  * @param imagePath - The original image path
+ * @param timestamp - Optional timestamp for cache busting
  * @returns A safe file URL or fallback image path
  */
-export const getImagePath = (row: number, col: number, imagePath: string) => {
+const getImagePath = (
+  row: number,
+  col: number,
+  imagePath: string,
+  timestamp?: number
+) => {
   // If path already matches valid protocols return it.
   if (
     imagePath.startsWith("appdata-file://") ||
@@ -16,6 +22,10 @@ export const getImagePath = (row: number, col: number, imagePath: string) => {
     imagePath === " " || // This is special case for no icon image.
     imagePath.toLowerCase() === "none"
   ) {
+    // Add cache-busting timestamp if provided
+    if (timestamp && !imagePath.includes("?t=")) {
+      return `${imagePath}?t=${timestamp}`;
+    }
     return imagePath;
   }
 
@@ -24,7 +34,12 @@ export const getImagePath = (row: number, col: number, imagePath: string) => {
   // Encode the image path to handle spaces and special characters
   const encodedImagePath = encodeURIComponent(imagePath);
 
-  const safeFilePath = `appdata-file://${folderPath}/${encodedImagePath}`;
+  let safeFilePath = `appdata-file://${folderPath}/${encodedImagePath}`;
+
+  // Add cache-busting timestamp if provided
+  if (timestamp) {
+    safeFilePath += `?t=${timestamp}`;
+  }
 
   // Check if the path ends with a typical image extension
   const isImageExtension = /\.(png|jpg|jpeg|gif|bmp|svg|webp|lnk)$/i.test(
@@ -34,14 +49,18 @@ export const getImagePath = (row: number, col: number, imagePath: string) => {
   // Icon file is not an image, return unknown image path.
   // Do not even attempt to load files that are not images.
   if (!isImageExtension) {
-    return getUnknownAssetPath();
+    return getUnknownAssetPath(timestamp);
   }
 
   return safeFilePath;
 };
 
-const getUnknownAssetPath = () => {
-  return `appdata-file:///unknown`;
+const getUnknownAssetPath = (timestamp?: number) => {
+  let path = `appdata-file:///unknown`;
+  if (timestamp) {
+    path += `?t=${timestamp}`;
+  }
+  return path;
 };
 
 /**
@@ -55,6 +74,7 @@ export const SafeImage: React.FC<{
   height?: number;
   className?: string;
   highlighted?: boolean;
+  forceReload?: number; // New prop to force reload - timestamp value
 }> = ({
   row,
   col,
@@ -63,10 +83,11 @@ export const SafeImage: React.FC<{
   height,
   className = "desktop-icon-image",
   highlighted = false,
+  forceReload = 0,
 }) => {
   const DEFAULT_MAX_SIZE = 64; // Default maximum width/height for the image
   const [imageSrc, setImageSrc] = useState<string>(() =>
-    getImagePath(row, col, originalImage)
+    getImagePath(row, col, originalImage, forceReload || undefined)
   );
   const [imageDimensions, setImageDimensions] = useState<{
     width: number;
@@ -76,9 +97,12 @@ export const SafeImage: React.FC<{
     height: height || DEFAULT_MAX_SIZE,
   });
 
+  // Update image source when originalImage, row, col, or forceReload changes
   useEffect(() => {
-    setImageSrc(getImagePath(row, col, originalImage));
-  }, [originalImage, row, col]);
+    setImageSrc(
+      getImagePath(row, col, originalImage, forceReload || undefined)
+    );
+  }, [originalImage, row, col, forceReload]);
 
   useEffect(() => {
     const img = new Image();
@@ -117,9 +141,9 @@ export const SafeImage: React.FC<{
         console.log("Image path is a special case, user wants an empty image.");
       } else {
         console.error(
-          `File does not exist: ${imageSrc}. Falling back to unknown.png`
+          `File ${imageSrc} returned with error (check logs). Falling back to unknown.png`
         );
-        setImageSrc(getUnknownAssetPath());
+        setImageSrc(getUnknownAssetPath(forceReload || undefined));
       }
     };
 
@@ -127,7 +151,7 @@ export const SafeImage: React.FC<{
       img.onload = null;
       img.onerror = null;
     };
-  }, [imageSrc, width, height]);
+  }, [imageSrc, width, height, forceReload]);
 
   return (
     <div
