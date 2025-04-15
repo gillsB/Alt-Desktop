@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { createLogger } from "../util/uiLogger";
+
+const logger = createLogger("safeImage.tsx");
 
 /**
  * Converts a relative path to a safe file URL or fallback image
@@ -66,7 +69,7 @@ const getUnknownAssetPath = (timestamp?: number) => {
 /**
  * SafeImage component that handles image loading with fallback
  */
-export const SafeImage: React.FC<{
+const SafeImageComponent: React.FC<{
   row: number;
   col: number;
   originalImage: string;
@@ -97,38 +100,36 @@ export const SafeImage: React.FC<{
     height: height || DEFAULT_MAX_SIZE,
   });
 
-  // Update image source when originalImage, row, col, or forceReload changes
   useEffect(() => {
-    setImageSrc(
-      getImagePath(row, col, originalImage, forceReload || undefined)
-    );
-  }, [originalImage, row, col, forceReload]);
+    logger.info("useEffect triggered");
 
-  useEffect(() => {
+    const newImageSrc = getImagePath(
+      row,
+      col,
+      originalImage,
+      forceReload || undefined
+    );
+
+    if (newImageSrc !== imageSrc) {
+      logger.info(`Updating imageSrc to: ${newImageSrc}`);
+      setImageSrc(newImageSrc);
+    }
+
     const img = new Image();
-    img.src = imageSrc;
+    img.src = newImageSrc;
 
     img.onload = () => {
-      // Case 1: Both width and height are explicitly provided
+      logger.info(`Image loaded successfully: ${newImageSrc}`);
       if (width && height) {
         setImageDimensions({ width, height });
         return;
       }
 
-      // Case 2: Calculate aspect ratio dimensions within DEFAULT_MAX_SIZE
       const aspectRatio = img.width / img.height;
-
-      let imageWidth, imageHeight;
-
-      if (aspectRatio > 1) {
-        // Landscape image: width is the limiting factor
-        imageWidth = DEFAULT_MAX_SIZE;
-        imageHeight = imageWidth / aspectRatio;
-      } else {
-        // Portrait or square image: height is the limiting factor
-        imageHeight = DEFAULT_MAX_SIZE;
-        imageWidth = imageHeight * aspectRatio;
-      }
+      const imageWidth =
+        aspectRatio > 1 ? DEFAULT_MAX_SIZE : DEFAULT_MAX_SIZE * aspectRatio;
+      const imageHeight =
+        aspectRatio > 1 ? DEFAULT_MAX_SIZE / aspectRatio : DEFAULT_MAX_SIZE;
 
       setImageDimensions({
         width: Math.round(imageWidth),
@@ -137,13 +138,13 @@ export const SafeImage: React.FC<{
     };
 
     img.onerror = () => {
+      logger.error(`Failed to load image: ${newImageSrc}`);
       if (imageSrc === " " || imageSrc.toLowerCase() === "none") {
         console.log("Image path is a special case, user wants an empty image.");
       } else {
         console.error(
           `File ${imageSrc} returned with error (check logs). Falling back to unknown.png`
         );
-        setImageSrc(getUnknownAssetPath(forceReload || undefined));
       }
     };
 
@@ -151,7 +152,7 @@ export const SafeImage: React.FC<{
       img.onload = null;
       img.onerror = null;
     };
-  }, [imageSrc, width, height, forceReload]);
+  }, [row, col, originalImage, forceReload, width, height]);
 
   return (
     <div
@@ -178,3 +179,6 @@ export const SafeImage: React.FC<{
     </div>
   );
 };
+
+// Wrap the component with React.memo
+export const SafeImage = React.memo(SafeImageComponent);
