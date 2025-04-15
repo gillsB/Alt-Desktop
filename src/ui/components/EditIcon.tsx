@@ -174,7 +174,7 @@ const EditIcon: React.FC = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleFileDrop}
     >
-      <SubWindowHeader />
+      <SubWindowHeader title={`Editing [${row},${col}]`} />
       <div className="edit-icon-content">
         {loading && <div>Loading...</div>}
         {error && <div>Error: {error}</div>}

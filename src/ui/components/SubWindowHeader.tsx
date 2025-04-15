@@ -1,6 +1,11 @@
-export function SubWindowHeader() {
+interface SubWindowHeaderProps {
+  title: string;
+}
+
+export function SubWindowHeader({ title }: SubWindowHeaderProps) {
   return (
-    <header>
+    <header className="subwindow-header">
+      <div className="header-title">{title}</div>
       <div className="window-controls">
         <button
           id="close"
