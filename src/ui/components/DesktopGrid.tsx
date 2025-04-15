@@ -135,19 +135,22 @@ const DesktopGrid: React.FC = () => {
   ) => {
     const iconKey = `${row},${col}`;
 
-    // Create a new timestamp for this icon to force image reload
+    // Force image reload with new timestamp
     setReloadTimestamps((prev) => ({
       ...prev,
       [iconKey]: Date.now(),
     }));
 
-    setIconsMap((prevMap) => {
-      const newMap = new Map(prevMap);
-      newMap.set(iconKey, updatedIcon); // Update the specific icon
-      return newMap;
-    });
+    // If an updated icon was provided, update the state
+    if (updatedIcon) {
+      setIconsMap((prevMap) => {
+        const newMap = new Map(prevMap);
+        newMap.set(iconKey, updatedIcon);
+        return newMap;
+      });
+    }
 
-    logger.info(`Reloaded icon at [${row}, ${col}]`);
+    logger.info(`Updated icon UI at [${row}, ${col}]`);
   };
 
   useEffect(() => {
@@ -343,27 +346,15 @@ const DesktopGrid: React.FC = () => {
   const handleReloadIcon = async () => {
     if (contextMenu?.icon) {
       const { row, col } = contextMenu.icon;
-      const iconKey = `${row},${col}`;
 
       try {
         // Call the Electron API to reload the icon
         await window.electron.reloadIcon(row, col);
-
-        // Create a new timestamp for this icon to force image reload
-        const newTimestamp = Date.now();
-        setReloadTimestamps((prev) => ({
-          ...prev,
-          [iconKey]: newTimestamp,
-        }));
-
-        logger.info(
-          `Reloaded icon at [${row}, ${col}] via Electron API with timestamp ${newTimestamp}`
-        );
       } catch (error) {
         logger.error(`Failed to reload icon at [${row}, ${col}]:`, error);
       }
 
-      setContextMenu(null); // Close the context menu
+      setContextMenu(null);
       hideHighlightBox();
     }
   };
