@@ -210,17 +210,18 @@ body,
   min-width: 120px;
   display: inline-block;
 }
-.context-menu p {
+.context-menu .menu-item {
   margin: 0;
   padding: 8px 10px;
   display: block;
   width: 100%;
   box-sizing: border-box;
 }
-.context-menu p:hover {
+.context-menu .menu-item:hover {
   background-color: #555;
   cursor: pointer;
 }
+
 .hover-opacity-item {
   height: 50px;
   width: 100%;
@@ -326,19 +327,17 @@ body,
   min-width: 120px;
 }
 
-.submenu p {
+.submenu .menu-item {
   margin: 0;
   padding: 8px 10px;
   display: block;
   width: 100%;
   box-sizing: border-box;
 }
-
-.submenu p:hover {
+.submenu .menu-item:hover {
   background-color: #555;
   cursor: pointer;
 }
-
 .has-submenu {
   position: relative;
 }

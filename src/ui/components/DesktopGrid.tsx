@@ -509,12 +509,12 @@ const DesktopGrid: React.FC = () => {
                 highlighted={isIconHighlighted(icon.row, icon.col)}
                 forceReload={reloadTimestamp} // Pass the reload timestamp
               />
-              <p
+              <div
                 className="desktop-icon-name"
                 style={{ color: icon.fontColor || "white" }}
               >
                 {icon.name}
-              </p>
+              </div>
             </div>
           );
         })}
@@ -530,22 +530,29 @@ const DesktopGrid: React.FC = () => {
         >
           {contextMenu.type === "desktop" ? (
             <>
-              <p onClick={() => handleEditIcon()}>New Icon</p>
-              <p>Settings</p>
-              <p onClick={handleReloadDesktop}>Reload Desktop</p>
-              <p onClick={toggleGrid}>{showGrid ? "✔ " : ""}Show Grid</p>
+              <div className="menu-item" onClick={() => handleEditIcon()}>
+                New Icon
+              </div>
+              <div className="menu-item">Settings</div>
+              <div className="menu-item" onClick={handleReloadDesktop}>
+                Reload Desktop
+              </div>
+              <div className="menu-item" onClick={toggleGrid}>
+                {showGrid ? "✔ " : ""}Show Grid
+              </div>
             </>
           ) : (
             <>
-              <p
+              <div
+                className="menu-item"
                 onClick={() =>
                   handleEditIcon(contextMenu.icon?.row, contextMenu.icon?.col)
                 }
               >
                 Edit {contextMenu.icon?.name}
-              </p>
-              <p
-                className="has-submenu"
+              </div>
+              <div
+                className="menu-item has-submenu"
                 onMouseEnter={() => setShowLaunchSubmenu(true)}
                 onMouseLeave={() => setShowLaunchSubmenu(false)}
                 style={{
@@ -558,17 +565,23 @@ const DesktopGrid: React.FC = () => {
                 <span className="submenu-arrow">▶</span>
                 {showLaunchSubmenu && (
                   <div className="submenu">
-                    <p onClick={() => handleLaunchSubmenuClick("Program")}>
+                    <div
+                      className="menu-item"
+                      onClick={() => handleLaunchSubmenuClick("Program")}
+                    >
                       Program
-                    </p>
-                    <p onClick={() => handleLaunchSubmenuClick("Website")}>
+                    </div>
+                    <div
+                      className="menu-item"
+                      onClick={() => handleLaunchSubmenuClick("Website")}
+                    >
                       Website
-                    </p>
+                    </div>
                   </div>
                 )}
-              </p>
-              <p
-                className="has-submenu"
+              </div>
+              <div
+                className="menu-item has-submenu"
                 onMouseEnter={() => setShowOpenSubmenu(true)}
                 onMouseLeave={() => setShowOpenSubmenu(false)}
                 style={{
@@ -581,17 +594,25 @@ const DesktopGrid: React.FC = () => {
                 <span className="submenu-arrow">▶</span>
                 {showOpenSubmenu && (
                   <div className="submenu">
-                    <p onClick={() => handleOpenSubmenuClick("Image folder")}>
+                    <div
+                      className="menu-item"
+                      onClick={() => handleOpenSubmenuClick("Image folder")}
+                    >
                       Image folder
-                    </p>
-                    <p onClick={() => handleOpenSubmenuClick("Program folder")}>
+                    </div>
+                    <div
+                      className="menu-item"
+                      onClick={() => handleOpenSubmenuClick("Program folder")}
+                    >
                       Program folder
-                    </p>
+                    </div>
                   </div>
                 )}
-              </p>
-              <p onClick={handleReloadIcon}>Reload Icon</p>
-              <p>Delete</p>
+              </div>
+              <div className="menu-item" onClick={handleReloadIcon}>
+                Reload Icon
+              </div>
+              <div className="menu-item">Delete</div>
             </>
           )}
         </div>
