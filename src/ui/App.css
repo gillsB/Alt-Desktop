@@ -442,3 +442,19 @@ body,
     box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
   }
 }
+
+.header-title {
+  font-size: 1rem;
+  color: white;
+  margin-left: 0.5rem;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.custom-folder-icon {
+  width: 24px;
+  height: 100%;
+  color: yellow;
+  display: flex;
+  justify-content: center;
+}

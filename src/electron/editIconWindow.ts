@@ -2,7 +2,7 @@ import { openSubWindow } from "./subWindowManager.js";
 
 export function openEditIconWindow(row: number, col: number) {
   const options = {
-    width: 400,
+    width: 500,
     height: 460,
     frame: false,
   };

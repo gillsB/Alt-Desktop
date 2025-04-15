@@ -1,3 +1,4 @@
+import { FolderIcon } from "@heroicons/react/24/solid";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { DesktopIcon, getDefaultDesktopIcon } from "../../electron/DesktopIcon";
@@ -201,7 +202,12 @@ const EditIcon: React.FC = () => {
                   )
                 }
               />
-              <button onClick={handleFileSelect}>Select Image</button>
+              <button
+                className="file-select-button flex items-center gap-2"
+                onClick={handleFileSelect}
+              >
+                <FolderIcon className="custom-folder-icon" />
+              </button>
             </div>
             <div className="edit-icon-field">
               <label htmlFor="program-path">Program Path</label>
