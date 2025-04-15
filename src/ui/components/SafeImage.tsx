@@ -35,7 +35,10 @@ const getImagePath = (
   const folderPath = `/data/[${row},${col}]`;
 
   // Encode the image path to handle spaces and special characters
-  const encodedImagePath = encodeURIComponent(imagePath);
+  const encodedImagePath = encodeURIComponent(imagePath).replace(
+    /[()]/g,
+    (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
+  );
 
   let safeFilePath = `appdata-file://${folderPath}/${encodedImagePath}`;
 
