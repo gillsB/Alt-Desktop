@@ -254,7 +254,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("openFileDialog", async (): Promise<string | null> => {
     const result = await dialog.showOpenDialog({
       properties: ["openFile"],
-      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "gif"] }],
+      filters: [
+        {
+          name: "Images",
+          extensions: ["png", "jpg", "jpeg", "gif", "bmp", "svg", "webp"],
+        },
+      ],
     });
 
     if (result.canceled || result.filePaths.length === 0) {

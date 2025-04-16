@@ -31,17 +31,28 @@ export function openSubWindow(
   // Properly close any existing subwindow
   closeActiveSubWindow();
 
+  // Find the main window - get the first window if there's no specific "AltDesktop" titled window
+  const allWindows = BrowserWindow.getAllWindows();
+  const mainWindow =
+    allWindows.find((win) => win.title === "AltDesktop") ||
+    (allWindows.length > 0 ? allWindows[0] : null);
+
+  if (!mainWindow) {
+    logger.error("No windows found when trying to create subwindow");
+    throw new Error("No main window found");
+  }
+
+  logger.info(`Found main window with title: ${mainWindow.title}`);
+
   // Create a new subwindow
   activeSubWindow = new BrowserWindow({
     ...options,
     title, // Set the title of the subwindow
-    parent:
-      BrowserWindow.getAllWindows().find((win) => win.title === "AltDesktop") ||
-      undefined, // Set the parent to the main window
-    modal: true, // Make the subwindow modal
+    parent: mainWindow, // Set the parent to the main window
+    modal: false,
     skipTaskbar: true, // Hide the subwindow from the taskbar
-    alwaysOnTop: true, // Ensure the subwindow is always on top
     backgroundColor: "#00000000", // Fully transparent this must be set or windows will flash white on restore.
+    show: false, // Don't show the window initially to prevent flashing
     webPreferences: {
       preload: getPreloadPath(),
       webSecurity: true,
@@ -62,6 +73,15 @@ export function openSubWindow(
   // Add the subwindow URL to the allow-list
   addAllowedUrl(subWindowUrl);
 
+  // Only show the window once it's ready to prevent flashing
+  activeSubWindow.once("ready-to-show", () => {
+    if (activeSubWindow) {
+
+      activeSubWindow.show();
+      activeSubWindow.focus();
+    }
+  });
+
   // Log the creation of the subwindow
   logger.info(`Created subwindow with URL: ${subWindowUrl}`);
 
@@ -81,10 +101,20 @@ export function closeActiveSubWindow(): void {
     // Remove the URL from the allowed list
     removeAllowedUrl(subWindowUrl);
 
-    // Remove all listeners and close the subwindow
-    activeSubWindow.removeAllListeners("closed");
-    activeSubWindow.close();
-    activeSubWindow = null;
+    // To prevent flashing, hide the window first before closing it
+    if (!activeSubWindow.isDestroyed()) {
+      activeSubWindow.hide();
+
+      // Use a small timeout to ensure the window is hidden before destroying
+      setTimeout(() => {
+        if (activeSubWindow && !activeSubWindow.isDestroyed()) {
+          activeSubWindow.destroy(); // Use destroy instead of close for cleaner removal
+        }
+        activeSubWindow = null;
+      }, 50);
+    } else {
+      activeSubWindow = null;
+    }
   }
 }
 
