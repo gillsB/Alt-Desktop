@@ -251,23 +251,39 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
 
-  ipcMainHandle("openFileDialog", async (): Promise<string | null> => {
-    const result = await dialog.showOpenDialog({
-      properties: ["openFile"],
-      filters: [
-        {
-          name: "Images",
-          extensions: ["png", "jpg", "jpeg", "gif", "bmp", "svg", "webp"],
-        },
-      ],
-    });
+  ipcMainHandle(
+    "openFileDialog",
+    async (type: string): Promise<string | null> => {
+      let result: Electron.OpenDialogReturnValue;
+      if (type === "image") {
+        result = await dialog.showOpenDialog({
+          properties: ["openFile"],
+          filters: [
+            {
+              name: "Images",
+              extensions: ["png", "jpg", "jpeg", "gif", "bmp", "svg", "webp"],
+            },
+          ],
+        });
+      } else {
+        result = await dialog.showOpenDialog({
+          properties: ["openFile"],
+          filters: [
+            {
+              name: type,
+              extensions: ["*"],
+            },
+          ],
+        });
+      }
 
-    if (result.canceled || result.filePaths.length === 0) {
-      return null; // No file selected
+      if (result.canceled || result.filePaths.length === 0) {
+        return null; // No file selected
+      }
+
+      return result.filePaths[0]; // Return the selected file path
     }
-
-    return result.filePaths[0]; // Return the selected file path
-  });
+  );
 
   ipcMainHandle(
     "saveIconImage",

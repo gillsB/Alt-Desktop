@@ -35,7 +35,7 @@ interface EventParamMapping {
   reloadIcon: [number, number];
   editIcon: [number, number];
   reloadWindow: [];
-  openFileDialog: [];
+  openFileDialog: [string];
   saveIconImage: [string, number, number];
   launchProgram: [number, number];
   launchWebsite: [number, number];
@@ -91,7 +91,7 @@ interface Window {
     off: (channel: string, callback: (...args: unknown[]) => void) => void;
     reloadWindow: () => Promise<boolean>;
     logMessage: (level: string, file: string, message: string) => void;
-    openFileDialog: () => Promise<string | null>;
+    openFileDialog: (string) => Promise<string | null>;
     saveIconImage: (
       sourcePath: string,
       row: number,

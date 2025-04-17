@@ -85,7 +85,7 @@ const EditIcon: React.FC = () => {
 
     try {
       // Open a file dialog to select an image
-      const filePath = await window.electron.openFileDialog();
+      const filePath = await window.electron.openFileDialog("image");
       if (filePath) {
         // Save the file to the appropriate folder
         const savedFilePath = await window.electron.saveIconImage(

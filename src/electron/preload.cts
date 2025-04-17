@@ -34,7 +34,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   logMessage: (level: string, file: string, message: string) => {
     ipcRenderer.send("log-message", { level, file, message });
   },
-  openFileDialog: () => ipcInvoke("openFileDialog"),
+  openFileDialog: (type: string) => ipcInvoke("openFileDialog", type),
   saveIconImage: (sourcePath: string, row: number, col: number) =>
     ipcInvoke("saveIconImage", sourcePath, row, col),
   launchProgram: (row: number, col: number) =>
