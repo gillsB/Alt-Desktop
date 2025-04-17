@@ -1,12 +1,12 @@
-import { app, BrowserWindow, globalShortcut, Menu } from "electron";
+import { app, BrowserWindow, Menu } from "electron";
 import { ensureAppDataFiles } from "./appDataSetup.js";
 import { registerIpcHandlers } from "./ipcHandlers.js";
 import { createLoggerForFile } from "./logging.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
-import { getActiveSubWindow } from "./subWindowManager.js";
 import { createTray } from "./tray.js";
 import { isDev } from "./util.js";
+import { handleWindowState, registerWindowKeybinds } from "./windowState.js";
 
 const logger = createLoggerForFile("main.ts");
 
@@ -46,47 +46,11 @@ app.on("ready", () => {
     mainWindow.maximize();
   });
 
-  // Synchronize minimize/restore actions with the subwindow
-  mainWindow.on("minimize", () => {
-    const activeSubWindow = getActiveSubWindow();
-    if (activeSubWindow) {
-      activeSubWindow.hide(); // Minimizing the subWindow adds a goofy animation. so .hide()
-    }
-  });
+  // Handle window state events
+  handleWindowState(mainWindow);
 
-  mainWindow.on("restore", () => {
-    const activeSubWindow = getActiveSubWindow();
-    if (activeSubWindow) {
-      activeSubWindow.show(); // Restoring the subWindow adds a goofy animation. so .show()
-    }
-  });
-
-  const toggleOverlayKeybind = (() => {
-    let isKeyPressed = false;
-
-    return globalShortcut.register("Alt+D", () => {
-      if (isKeyPressed) return;
-
-      isKeyPressed = true;
-
-      if (mainWindow.isMinimized()) {
-        logger.info("Restoring main window");
-        mainWindow.restore();
-      } else {
-        logger.info("Minimizing main window");
-        mainWindow.minimize();
-      }
-
-      // Reset the key state after a short delay to allow for key release
-      setTimeout(() => {
-        isKeyPressed = false;
-      }, 50);
-    });
-  })();
-
-  if (!toggleOverlayKeybind) {
-    logger.error("Keybind binding failed");
-  }
+  // Register global keybinds
+  registerWindowKeybinds(mainWindow);
 
   registerIpcHandlers(mainWindow);
 
