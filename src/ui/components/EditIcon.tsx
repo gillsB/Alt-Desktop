@@ -19,6 +19,7 @@ const EditIcon: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isHoveringImage, setHoveringImage] = useState(false);
+  const [isHoveringProgram, setHoveringProgram] = useState(false);
 
   const dragCounter = useRef(0);
 
@@ -230,6 +231,18 @@ const EditIcon: React.FC = () => {
                   )
                 }
               />
+              <button
+                className="file-select-button flex items-center gap-2"
+                onClick={handleFileSelect} //update this with parameter to open program
+                onMouseEnter={() => setHoveringProgram(true)}
+                onMouseLeave={() => setHoveringProgram(false)}
+              >
+                {isHoveringProgram ? (
+                  <FolderOpenIcon className="custom-folder-icon" />
+                ) : (
+                  <FolderIcon className="custom-folder-icon" />
+                )}
+              </button>
             </div>
             <div className="edit-icon-field">
               <label htmlFor="website-path">Website Link</label>
