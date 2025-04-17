@@ -5,6 +5,7 @@ import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { isDev } from "./util.js";
 
 const logger = createLoggerForFile("subWindowManager.ts");
+let mainWindow: BrowserWindow | null = null; // Store the main window reference
 
 let activeSubWindow: BrowserWindow | null = null;
 const allowedUrls: string[] = []; // Start with an empty list
@@ -33,7 +34,7 @@ export function openSubWindow(
 
   // Find the main window - get the first window if there's no specific "AltDesktop" titled window
   const allWindows = BrowserWindow.getAllWindows();
-  const mainWindow =
+  mainWindow =
     allWindows.find((win) => win.title === "AltDesktop") ||
     (allWindows.length > 0 ? allWindows[0] : null);
 
@@ -76,7 +77,6 @@ export function openSubWindow(
   // Only show the window once it's ready to prevent flashing
   activeSubWindow.once("ready-to-show", () => {
     if (activeSubWindow) {
-
       activeSubWindow.show();
       activeSubWindow.focus();
     }
@@ -94,6 +94,7 @@ export function getActiveSubWindow(): BrowserWindow | null {
 
 export function closeActiveSubWindow(): void {
   if (activeSubWindow) {
+    mainWindow?.focus();
     // Get the URL of the active subwindow
     const subWindowUrl = activeSubWindow.webContents.getURL();
     logger.info(`Closing active subwindow with URL: ${subWindowUrl}`);
