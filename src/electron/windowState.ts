@@ -4,6 +4,8 @@ import { getActiveSubWindow } from "./subWindowManager.js";
 
 const logger = createLoggerForFile("windowState.ts");
 
+let lastBounds: Electron.Rectangle | null = null; // Store the last window bounds
+
 export function handleWindowState(mainWindow: BrowserWindow) {
   mainWindow.on("minimize", () => {
     const activeSubWindow = getActiveSubWindow();
@@ -18,6 +20,12 @@ export function handleWindowState(mainWindow: BrowserWindow) {
       activeSubWindow.show(); // Restoring the subWindow adds a goofy animation. so .show()
     }
   });
+
+  mainWindow.on("hide", () => {
+    // Save the window bounds before hiding it to the tray
+    lastBounds = mainWindow.getBounds();
+    logger.info("Saved window bounds before hiding:", lastBounds);
+  });
 }
 
 export function registerWindowKeybinds(mainWindow: BrowserWindow) {
@@ -28,12 +36,27 @@ export function registerWindowKeybinds(mainWindow: BrowserWindow) {
 
     isKeyPressed = true;
 
-    if (mainWindow.isMinimized()) {
-      logger.info("Restoring main window");
-      mainWindow.restore();
-    } else {
+    if (mainWindow.isVisible() && !mainWindow.isMinimized()) {
       logger.info("Minimizing main window");
       mainWindow.minimize();
+    } else {
+      logger.info("Restoring main window");
+
+      // If the window is hidden (e.g., sent to the tray), show it first
+      if (!mainWindow.isVisible()) {
+        mainWindow.show();
+      }
+
+      // Restore the window to its last bounds if available
+      if (lastBounds) {
+        logger.info("Restoring window to last bounds:", lastBounds);
+        mainWindow.setBounds(lastBounds);
+      }
+
+      // Ensure the window is not minimized
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
     }
 
     // Reset the key state after a short delay to allow for key release
