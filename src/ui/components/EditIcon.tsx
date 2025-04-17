@@ -81,25 +81,38 @@ const EditIcon: React.FC = () => {
     }
   };
 
-  const handleFileSelect = async () => {
+  const handleFileSelect = async (type: string) => {
     if (!icon) return;
 
     try {
       // Open a file dialog to select an image
-      const filePath = await window.electron.openFileDialog("image");
-      if (filePath) {
-        // Save the file to the appropriate folder
-        const savedFilePath = await window.electron.saveIconImage(
-          filePath,
-          icon.row,
-          icon.col
-        );
+      if (type === "image") {
+        logger.info("Opening file dialog for image selection.");
+        const filePath = await window.electron.openFileDialog("image");
+        if (filePath) {
+          // Save the file to the appropriate folder
+          const savedFilePath = await window.electron.saveIconImage(
+            filePath,
+            icon.row,
+            icon.col
+          );
 
-        // Update the icon's image path
-        setIcon((prevIcon) =>
-          prevIcon ? { ...prevIcon, image: savedFilePath } : null
-        );
-        logger.info(`Image saved to: ${savedFilePath}`);
+          // Update the icon's image path
+          setIcon((prevIcon) =>
+            prevIcon ? { ...prevIcon, image: savedFilePath } : null
+          );
+          logger.info(`Image saved to: ${savedFilePath}`);
+        }
+      } else {
+        logger.info(`Opening file dialog for ${type} selection.`);
+        const filePath = await window.electron.openFileDialog("File");
+        if (filePath) {
+          // Update the icon's program link
+          setIcon((prevIcon) =>
+            prevIcon ? { ...prevIcon, programLink: filePath } : null
+          );
+          logger.info(`Program link updated to: ${filePath}`);
+        }
       }
     } catch (error) {
       logger.error("Failed to select or save image:", error);
@@ -206,7 +219,7 @@ const EditIcon: React.FC = () => {
               />
               <button
                 className="file-select-button flex items-center gap-2"
-                onClick={handleFileSelect}
+                onClick={() => handleFileSelect("image")}
                 onMouseEnter={() => setHoveringImage(true)}
                 onMouseLeave={() => setHoveringImage(false)}
               >
@@ -233,7 +246,7 @@ const EditIcon: React.FC = () => {
               />
               <button
                 className="file-select-button flex items-center gap-2"
-                onClick={handleFileSelect} //update this with parameter to open program
+                onClick={() => handleFileSelect("file")} //update this with parameter to open program
                 onMouseEnter={() => setHoveringProgram(true)}
                 onMouseLeave={() => setHoveringProgram(false)}
               >
