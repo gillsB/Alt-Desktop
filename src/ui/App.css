@@ -457,4 +457,12 @@ body,
   color: yellow;
   display: flex;
   justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+.custom-folder-icon:hover {
+  outline: 2px solid yellow;
+  outline-offset: 2px;
+  border-radius: 2px;
+  cursor: pointer;
 }

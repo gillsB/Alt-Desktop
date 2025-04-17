@@ -1,4 +1,4 @@
-import { FolderIcon } from "@heroicons/react/24/solid";
+import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { DesktopIcon, getDefaultDesktopIcon } from "../../electron/DesktopIcon";
@@ -18,6 +18,7 @@ const EditIcon: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isHoveringImage, setHoveringImage] = useState(false);
 
   const dragCounter = useRef(0);
 
@@ -205,8 +206,14 @@ const EditIcon: React.FC = () => {
               <button
                 className="file-select-button flex items-center gap-2"
                 onClick={handleFileSelect}
+                onMouseEnter={() => setHoveringImage(true)}
+                onMouseLeave={() => setHoveringImage(false)}
               >
-                <FolderIcon className="custom-folder-icon" />
+                {isHoveringImage ? (
+                  <FolderOpenIcon className="custom-folder-icon" />
+                ) : (
+                  <FolderIcon className="custom-folder-icon" />
+                )}
               </button>
             </div>
             <div className="edit-icon-field">
