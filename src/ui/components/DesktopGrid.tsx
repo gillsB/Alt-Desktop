@@ -658,9 +658,14 @@ const DesktopGrid: React.FC = () => {
 
   function contextMenuPosition(y: number): number {
     const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-    const menuHeight = 180; // Approximate height of the context menu
+    let menuHeight = 0;
     const viewportHeight = window.innerHeight - headerHeight;
 
+    if (contextMenu?.type === "desktop") {
+      menuHeight = 145; // Approximate height of 4 items.
+    } else {
+      menuHeight = 180; // Approximate height of 5 items.
+    }
     // If the menu would overflow off the bottom, position it upwards
     if (y + menuHeight > viewportHeight) {
       return y - menuHeight;
