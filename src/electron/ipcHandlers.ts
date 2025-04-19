@@ -447,8 +447,44 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "deleteIcon",
     async (row: number, col: number): Promise<boolean> => {
-      logger.info("Delete icon called", row, col);
-      return false;
+      const directoryPath = path.join(getAppDataPath(), "desktop");
+      const filePath = path.join(directoryPath, "desktopIcons.json");
+
+      try {
+        logger.info(`Deleting icon at [${row}, ${col}] from ${filePath}`);
+
+        // Ensure the file exists
+        if (!fs.existsSync(filePath)) {
+          logger.warn(`File not found: ${filePath}`);
+          return false;
+        }
+
+        // Read the JSON file
+        const data = fs.readFileSync(filePath, "utf-8");
+        const desktopData: DesktopIconData = JSON.parse(data);
+
+        // Filter out the icon with the matching row and col
+        const updatedIcons = desktopData.icons.filter(
+          (icon) => icon.row !== row || icon.col !== col
+        );
+
+        if (updatedIcons.length === desktopData.icons.length) {
+          logger.warn(`No icon found at [${row}, ${col}] to delete.`);
+          return false; // No icon was deleted
+        }
+
+        // Update the JSON data
+        desktopData.icons = updatedIcons;
+
+        // Write the updated JSON back to the file
+        fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+        logger.info(`Successfully deleted icon at [${row}, ${col}]`);
+
+        return true;
+      } catch (error) {
+        logger.error(`Error deleting icon at [${row}, ${col}]: ${error}`);
+        return false;
+      }
     }
   );
 }
