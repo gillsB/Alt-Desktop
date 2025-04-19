@@ -41,6 +41,7 @@ interface EventParamMapping {
   launchWebsite: [number, number];
   getFilePath: [File];
   getFileType: [string];
+  deleteIcon: [number, number];
 }
 
 // The returns from the main process to the renderer
@@ -64,6 +65,7 @@ type EventPayloadMapping = {
   launchWebsite: boolean;
   getFilePath: string;
   getFileType: string;
+  deleteIcon: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -101,5 +103,6 @@ interface Window {
     launchWebsite: (row: number, col: number) => Promise<boolean>;
     getFilePath: (file: File) => string;
     getFileType: (filepath: string) => Promise<string>;
+    deleteIcon: (row: number, col: number) => Promise<boolean>;
   };
 }

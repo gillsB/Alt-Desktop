@@ -43,6 +43,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("launchWebsite", row, col),
   getFilePath: (file: File) => webUtils.getPathForFile(file),
   getFileType: (filepath: string) => ipcInvoke("getFileType", filepath),
+  deleteIcon: (row: number, col: number) => ipcInvoke("deleteIcon", row, col),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

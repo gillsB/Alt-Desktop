@@ -444,4 +444,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return "";
     }
   });
+  ipcMainHandle(
+    "deleteIcon",
+    async (row: number, col: number): Promise<boolean> => {
+      logger.info("Delete icon called", row, col);
+      return false;
+    }
+  );
 }
