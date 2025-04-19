@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
@@ -51,6 +51,8 @@ const DesktopGrid: React.FC = () => {
 
   const numRows = 20;
   const numCols = 50;
+
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Function to toggle grid visibility
   const toggleGrid = () => {
@@ -415,6 +417,37 @@ const DesktopGrid: React.FC = () => {
     );
   };
 
+  const adjustContextMenuPosition = () => {
+    // Only run if context menu exists
+    if (!contextMenuRef.current) return;
+
+    const menuElement = contextMenuRef.current;
+    const menuRect = menuElement.getBoundingClientRect();
+    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
+    const viewportHeight = window.innerHeight - headerHeight;
+    const viewportWidth = window.innerWidth;
+
+    // Get current position from style
+    const currentX = parseFloat(menuElement.style.left);
+    const currentY = parseFloat(menuElement.style.top);
+
+    // Adjust if needed to prevent overflow
+    if (currentX + menuRect.width > viewportWidth) {
+      menuElement.style.left = `${currentX - menuRect.width}px`;
+    }
+
+    if (currentY + menuRect.height > viewportHeight) {
+      menuElement.style.top = `${currentY - menuRect.height}px`;
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (contextMenu) {
+      // Use requestAnimationFrame to ensure the menu is rendered
+      requestAnimationFrame(adjustContextMenuPosition);
+    }
+  }, [contextMenu]);
+
   return (
     <>
       <div
@@ -522,10 +555,12 @@ const DesktopGrid: React.FC = () => {
 
       {contextMenu && (
         <div
+          ref={contextMenuRef}
           className="context-menu"
           style={{
-            left: contextMenu.x,
-            top: contextMenuPosition(contextMenu.y),
+            left: `${contextMenu.x}px`,
+            top: `${contextMenu.y}px`,
+            position: "absolute",
           }}
         >
           {contextMenu.type === "desktop" ? (
@@ -555,11 +590,6 @@ const DesktopGrid: React.FC = () => {
                 className="menu-item has-submenu"
                 onMouseEnter={() => setShowLaunchSubmenu(true)}
                 onMouseLeave={() => setShowLaunchSubmenu(false)}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
               >
                 Launch
                 <span className="submenu-arrow">▶</span>
@@ -584,11 +614,6 @@ const DesktopGrid: React.FC = () => {
                 className="menu-item has-submenu"
                 onMouseEnter={() => setShowOpenSubmenu(true)}
                 onMouseLeave={() => setShowOpenSubmenu(false)}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
               >
                 Open
                 <span className="submenu-arrow">▶</span>
@@ -654,25 +679,6 @@ const DesktopGrid: React.FC = () => {
   function headerAdjustY(Y: number): number {
     const headerHeight = document.querySelector("header")?.offsetHeight || 0;
     return Y - headerHeight;
-  }
-
-  function contextMenuPosition(y: number): number {
-    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-    let menuHeight = 0;
-    const viewportHeight = window.innerHeight - headerHeight;
-
-    if (contextMenu?.type === "desktop") {
-      menuHeight = 145; // Approximate height of 4 items.
-    } else {
-      menuHeight = 180; // Approximate height of 5 items.
-    }
-    // If the menu would overflow off the bottom, position it upwards
-    if (y + menuHeight > viewportHeight) {
-      return y - menuHeight;
-    }
-
-    // Otherwise, position it normally
-    return y;
   }
 };
 
