@@ -360,6 +360,24 @@ const DesktopGrid: React.FC = () => {
       hideHighlightBox();
     }
   };
+
+  const handleDeleteIcon = async () => {
+    if (contextMenu?.icon) {
+      const { row, col } = contextMenu.icon;
+
+      try {
+        // Call the Electron API to delete the icon
+        await window.electron.deleteIcon(row, col);
+        logger.info(`Deleted icon at [${row}, ${col}]`);
+      } catch (error) {
+        logger.error(`Failed to delete icon at [${row}, ${col}]:`, error);
+      }
+
+      setContextMenu(null);
+      hideHighlightBox();
+    }
+  };
+
   const handleReloadDesktop = async () => {
     try {
       // Call the Electron API to reload the icon
@@ -645,7 +663,9 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-item" onClick={handleReloadIcon}>
                 Reload Icon
               </div>
-              <div className="menu-item">Delete</div>
+              <div className="menu-item" onClick={handleDeleteIcon}>
+                Delete
+              </div>
             </>
           )}
         </div>
