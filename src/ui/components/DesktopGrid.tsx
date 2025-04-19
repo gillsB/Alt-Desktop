@@ -439,6 +439,14 @@ const DesktopGrid: React.FC = () => {
     if (currentY + menuRect.height > viewportHeight) {
       menuElement.style.top = `${currentY - menuRect.height}px`;
     }
+
+    const submenuWidth = 120; // Approximate width submenu
+    const shouldShowSubmenuLeft =
+      currentX + menuRect.width + submenuWidth > viewportWidth;
+    menuElement.setAttribute(
+      "data-submenu-direction",
+      shouldShowSubmenuLeft ? "left" : "right"
+    );
   };
 
   useLayoutEffect(() => {
