@@ -487,4 +487,37 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle(
+    "openInExplorer",
+    async (
+      type: "image" | "programLink",
+      filePath: string
+    ): Promise<boolean> => {
+      logger.info("here");
+      try {
+        let resolvedPath = filePath;
+        logger.info("resolvedPath", resolvedPath);
+
+        if (type === "image") {
+          // Resolve the localized app-data file path
+          const appDataBasePath = getAppDataPath();
+          resolvedPath = path.resolve(appDataBasePath, filePath);
+        }
+
+        if (!fs.existsSync(resolvedPath)) {
+          logger.warn(`File does not exist: ${resolvedPath}`);
+          // todo add attempt to open parent folder, if that does not exist then return false.
+          return false;
+        }
+
+        // Open the file in Explorer
+        shell.showItemInFolder(resolvedPath);
+        logger.info(`Opened ${type} in Explorer: ${resolvedPath}`);
+        return true;
+      } catch (error) {
+        logger.error(`Failed to open ${type} in Explorer: ${error}`);
+        return false;
+      }
+    }
+  );
 }
