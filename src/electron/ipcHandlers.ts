@@ -493,7 +493,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       type: "image" | "programLink",
       filePath: string
     ): Promise<boolean> => {
-      logger.info("here");
       try {
         let resolvedPath = filePath;
         logger.info("resolvedPath", resolvedPath);
@@ -506,8 +505,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         if (!fs.existsSync(resolvedPath)) {
           logger.warn(`File does not exist: ${resolvedPath}`);
-          // todo add attempt to open parent folder, if that does not exist then return false.
-          return false;
+
+          // Attempt to resolve the parent folder
+          const parentFolder = path.dirname(resolvedPath);
+          if (fs.existsSync(parentFolder)) {
+            logger.info(`Opening parent folder: ${parentFolder}`);
+            shell.openPath(parentFolder);
+            return true;
+          } else {
+            logger.error(`Parent folder does not exist: ${parentFolder}`);
+            return false;
+          }
         }
 
         // Open the file in Explorer
