@@ -351,7 +351,17 @@ const DesktopGrid: React.FC = () => {
 
       try {
         // Call the Electron API to reload the icon
-        await window.electron.reloadIcon(row, col);
+        const ret = await window.electron.reloadIcon(row, col);
+        if (!ret) {
+          logger.info(
+            `Icon not found at [${row}, ${col}], removing it from map`
+          );
+          setIconsMap((prevMap) => {
+            const newMap = new Map(prevMap);
+            newMap.delete(`${row},${col}`);
+            return newMap;
+          });
+        }
       } catch (error) {
         logger.error(`Failed to reload icon at [${row}, ${col}]:`, error);
       }
@@ -375,6 +385,7 @@ const DesktopGrid: React.FC = () => {
 
       setContextMenu(null);
       hideHighlightBox();
+      handleReloadIcon();
     }
   };
 

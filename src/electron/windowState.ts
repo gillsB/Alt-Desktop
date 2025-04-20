@@ -24,7 +24,7 @@ export function handleWindowState(mainWindow: BrowserWindow) {
   mainWindow.on("hide", () => {
     // Save the window bounds before hiding it to the tray
     lastBounds = mainWindow.getBounds();
-    logger.info("Saved window bounds before hiding:", lastBounds);
+    logger.info("Saved window bounds before hiding:");
   });
 }
 
