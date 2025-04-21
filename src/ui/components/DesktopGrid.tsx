@@ -420,13 +420,27 @@ const DesktopGrid: React.FC = () => {
     setShowLaunchSubmenu(false);
   };
 
-  const handleOpenSubmenuClick = (option: string) => {
+  const handleOpenSubmenuClick = async (option: string) => {
     if (contextMenu?.icon) {
-      const { name } = contextMenu.icon;
+      const { row, col, name, image } = contextMenu.icon;
 
       switch (option) {
         case "Image folder":
-          logger.info(`Opening image folder for icon: ${name}`);
+          if (image) {
+            const filePath = `data/[${row},${col}]/${image}`;
+            logger.info(
+              `Opening image folder for icon: ${name}, path: ${filePath}`
+            );
+            const success = await window.electron.openInExplorer(
+              "image",
+              filePath
+            );
+            if (!success) {
+              logger.error(`Failed to open image folder for icon: ${name}`);
+            }
+          } else {
+            logger.warn(`No image path available for icon: ${name}`);
+          }
           break;
         case "Program folder":
           logger.info(`Opening program folder for icon: ${name}`);
