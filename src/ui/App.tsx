@@ -6,7 +6,7 @@ import EditIcon from "./components/EditIcon";
 import { Header } from "./components/Header";
 import HoverOpacityItem from "./components/HoverOpacityItem";
 import VideoBackground from "./components/VideoBackground";
-import SmallMenu from "./components/smallMenu";
+import SmallMenu from "./components/SmallMenu";
 
 const App: React.FC = () => {
   const [videoOpacity, setVideoOpacity] = useState(1);
