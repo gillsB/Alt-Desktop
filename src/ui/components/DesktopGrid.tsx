@@ -422,7 +422,7 @@ const DesktopGrid: React.FC = () => {
 
   const handleOpenSubmenuClick = async (option: string) => {
     if (contextMenu?.icon) {
-      const { row, col, name, image } = contextMenu.icon;
+      const { row, col, name, image, programLink } = contextMenu.icon;
 
       switch (option) {
         case "Image folder":
@@ -443,7 +443,19 @@ const DesktopGrid: React.FC = () => {
           }
           break;
         case "Program folder":
+          if (programLink) {
+            const success = await window.electron.openInExplorer(
+              "programLink",
+              programLink
+            );
+            if (!success) {
+              logger.error(`Failed to open program folder for icon: ${name}`);
+            }
+          } else {
+            logger.warn(`No program path available for icon: ${name}`);
+          }
           logger.info(`Opening program folder for icon: ${name}`);
+
           break;
         default:
           logger.warn(`Unknown submenu option: ${option}`);
