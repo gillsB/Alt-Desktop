@@ -104,9 +104,14 @@ const SafeImageComponent: React.FC<{
   });
 
   useEffect(() => {
-    logger.info("useEffect triggered");
+    // Handle special cases for " " or "none"
     if (originalImage === " " || originalImage.toLowerCase() === "none") {
       logger.info("Image path is a special case, user wants an empty image.");
+      setImageSrc(""); // discard cached image
+      setImageDimensions({
+        width: width || DEFAULT_MAX_SIZE,
+        height: height || DEFAULT_MAX_SIZE,
+      });
       return;
     }
 
@@ -170,7 +175,7 @@ const SafeImageComponent: React.FC<{
         style={{
           width: imageDimensions.width,
           height: imageDimensions.height,
-          backgroundImage: `url(${imageSrc})`,
+          backgroundImage: imageSrc ? `url(${imageSrc})` : "none",
           backgroundSize: width && height ? "100% 100%" : "contain",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
