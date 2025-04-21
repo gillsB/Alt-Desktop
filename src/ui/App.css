@@ -497,7 +497,8 @@ body,
 }
 
 .small-menu-content {
-  width: 90%;
+  width: 100%;
+  height: 100%;
   max-width: 400px;
   padding: 20px;
   background-color: #3a3a3a;

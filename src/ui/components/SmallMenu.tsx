@@ -19,14 +19,27 @@ const SmallMenu: React.FC = () => {
 
   return (
     <div className="small-menu-container">
+      <header className="subwindow-header">
+        <div className="header-title">{title}</div>
+        <div className="window-controls">
+          <button
+            id="close"
+            onClick={() => {
+              logger.info("Close button clicked");
+              window.close();
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      </header>
       <div className="small-menu-content">
-        <h2 className="small-menu-title">{title}</h2>
         <p className="small-menu-message">{message}</p>
         <button
           className="small-menu-button"
           onClick={() => {
             logger.info("Close button clicked");
-            window.close(); // Close the window
+            window.close();
           }}
         >
           Close
