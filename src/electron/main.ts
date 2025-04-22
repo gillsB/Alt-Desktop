@@ -56,7 +56,7 @@ app.on("ready", () => {
 
   createTray(mainWindow);
   handleCloseEvents(mainWindow);
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
 });
 
 function handleCloseEvents(mainWindow: BrowserWindow) {

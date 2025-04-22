@@ -517,6 +517,7 @@ body,
 }
 
 .small-window-message {
+  white-space: pre-wrap;
   font-size: 1rem;
   color: #dcdcdc;
   margin: 0;

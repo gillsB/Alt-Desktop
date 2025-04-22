@@ -422,26 +422,33 @@ const DesktopGrid: React.FC = () => {
 
   const handleOpenSubmenuClick = async (option: string) => {
     if (contextMenu?.icon) {
-      const { row, col, name, image, programLink } = contextMenu.icon;
+      const { row, col, name, programLink } = contextMenu.icon;
+      let { image } = contextMenu.icon;
 
       switch (option) {
-        case "Image folder":
-          if (image) {
-            const filePath = `data/[${row},${col}]/${image}`;
-            logger.info(
-              `Opening image folder for icon: ${name}, path: ${filePath}`
+        case "Image folder": {
+          // Set image to default so it opens [row,col] folder instead of the data folder.
+          if (image === "") {
+            image = "default.png";
+          }
+          const filePath = `data/[${row},${col}]/${image}`;
+          logger.info(
+            `Opening image folder for icon: ${name}, path: ${filePath}`
+          );
+          const success = await window.electron.openInExplorer(
+            "image",
+            filePath
+          );
+          if (!success) {
+            logger.error(`Failed to open image folder for icon: ${name}`);
+            await window.electron.showSmallWindow(
+              "Cannot resolve icon image path",
+              `No image path available for icon: ${name} \nLocalPath: ${filePath}`,
+              ["Okay"]
             );
-            const success = await window.electron.openInExplorer(
-              "image",
-              filePath
-            );
-            if (!success) {
-              logger.error(`Failed to open image folder for icon: ${name}`);
-            }
-          } else {
-            logger.warn(`No image path available for icon: ${name}`);
           }
           break;
+        }
         case "Program folder":
           if (programLink) {
             const success = await window.electron.openInExplorer(
