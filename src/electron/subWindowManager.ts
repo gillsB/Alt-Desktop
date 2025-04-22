@@ -8,7 +8,7 @@ const logger = createLoggerForFile("subWindowManager.ts");
 let mainWindow: BrowserWindow | null = null; // Store the main window reference
 
 let activeSubWindow: BrowserWindow | null = null;
-const smallMenuWindows: BrowserWindow[] = []; // Store multiple smallMenu windows
+const smallWindows: BrowserWindow[] = []; // Store multiple small windows
 const allowedUrls: string[] = []; // Start with an empty list
 
 // Add the main window URL to the allow-list
@@ -90,13 +90,13 @@ export function openSubWindow(
 }
 
 /**
- * Opens a small menu window with the specified options.
+ * Opens a small window with the specified options.
  *
- * @param {string} title - The title of the small menu.
- * @param {string} message - The message to display in the small menu.
+ * @param {string} title - The title of the small window.
+ * @param {string} message - The message to display in the small window.
  */
-export function openSmallMenu(title: string, message: string): BrowserWindow {
-  logger.info("Attempting to open a small menu...");
+export function openSmallWindow(title: string, message: string): BrowserWindow {
+  logger.info("Attempting to open a small window...");
 
   // Find the main window
   const allWindows = BrowserWindow.getAllWindows();
@@ -105,17 +105,17 @@ export function openSmallMenu(title: string, message: string): BrowserWindow {
     (allWindows.length > 0 ? allWindows[0] : null);
 
   if (!mainWindow) {
-    logger.error("No windows found when trying to create small menu");
+    logger.error("No windows found when trying to create small window");
     throw new Error("No main window found");
   }
 
   logger.info(`Found main window with title: ${mainWindow.title}`);
 
-  // Create a new small menu window
-  const smallMenuWindow = new BrowserWindow({
+  // Create a new small window
+  const smallWindow = new BrowserWindow({
     width: 400,
     height: 200,
-    title: "Small Menu",
+    title: "Small Window",
     parent: mainWindow,
     modal: true,
     resizable: false,
@@ -128,40 +128,40 @@ export function openSmallMenu(title: string, message: string): BrowserWindow {
     },
   });
 
-  let smallMenuUrl: string;
+  let smallWindowUrl: string;
   if (isDev()) {
-    smallMenuUrl = `http://localhost:5123/#/small-menu?title=${encodeURIComponent(
+    smallWindowUrl = `http://localhost:5123/#/small-window?title=${encodeURIComponent(
       title
     )}&message=${encodeURIComponent(message)}`;
   } else {
-    smallMenuUrl = `${pathToFileURL(getUIPath()).toString()}#/small-menu?title=${encodeURIComponent(
+    smallWindowUrl = `${pathToFileURL(getUIPath()).toString()}#/small-window?title=${encodeURIComponent(
       title
     )}&message=${encodeURIComponent(message)}`;
   }
 
-  logger.info(`Loading small menu URL: ${smallMenuUrl}`);
-  smallMenuWindow.loadURL(smallMenuUrl);
+  logger.info(`Loading small window URL: ${smallWindowUrl}`);
+  smallWindow.loadURL(smallWindowUrl);
 
   // Only show the window once it's ready to prevent flashing
-  smallMenuWindow.once("ready-to-show", () => {
-    logger.info("Small menu is ready to show");
-    smallMenuWindow.show();
+  smallWindow.once("ready-to-show", () => {
+    logger.info("Small window is ready to show");
+    smallWindow.show();
   });
 
-  // Add the small menu window to the list
-  smallMenuWindows.push(smallMenuWindow);
+  // Add the small window to the list
+  smallWindows.push(smallWindow);
 
   // Handle window close
-  smallMenuWindow.on("closed", () => {
-    logger.info("Small menu window closed");
-    const index = smallMenuWindows.indexOf(smallMenuWindow);
+  smallWindow.on("closed", () => {
+    logger.info("Small window closed");
+    const index = smallWindows.indexOf(smallWindow);
     if (index !== -1) {
-      smallMenuWindows.splice(index, 1);
+      smallWindows.splice(index, 1);
     }
   });
 
-  logger.info(`Created small menu with title: ${title}`);
-  return smallMenuWindow;
+  logger.info(`Created small window with title: ${title}`);
+  return smallWindow;
 }
 
 export function getActiveSubWindow(): BrowserWindow | null {
@@ -214,6 +214,6 @@ export function getAllowedUrls(): string[] {
   return allowedUrls;
 }
 
-export function getSmallMenuWindows(): BrowserWindow[] {
-  return smallMenuWindows;
+export function getSmallWindows(): BrowserWindow[] {
+  return smallWindows;
 }

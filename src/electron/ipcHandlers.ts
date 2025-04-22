@@ -9,7 +9,7 @@ import { baseLogger, createLoggerForFile } from "./logging.js"; // Import the ba
 import {
   closeActiveSubWindow,
   getActiveSubWindow,
-  openSmallMenu,
+  openSmallWindow,
 } from "./subWindowManager.js";
 import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
@@ -530,16 +530,16 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
   ipcMainHandle(
-    "showTestSmallMenu",
+    "showTestSmallWindow",
     async (title: string, message: string): Promise<boolean> => {
       try {
         logger.info(
-          `Showing test small menu with title: "${title}" and message: "${message}"`
+          `Showing test small window with title: "${title}" and message: "${message}"`
         );
-        openSmallMenu(title, message);
+        openSmallWindow(title, message);
         return true;
       } catch (error) {
-        logger.error(`Failed to show test small menu: ${error}`);
+        logger.error(`Failed to show test small window: ${error}`);
         return false;
       }
     }

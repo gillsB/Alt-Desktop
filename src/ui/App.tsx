@@ -5,8 +5,8 @@ import DesktopGrid from "./components/DesktopGrid";
 import EditIcon from "./components/EditIcon";
 import { Header } from "./components/Header";
 import HoverOpacityItem from "./components/HoverOpacityItem";
+import SmallWindow from "./components/SmallWindow";
 import VideoBackground from "./components/VideoBackground";
-import SmallMenu from "./components/SmallMenu";
 
 const App: React.FC = () => {
   const [videoOpacity, setVideoOpacity] = useState(1);
@@ -30,7 +30,7 @@ const App: React.FC = () => {
         />
         {/* Route for the EditIcon component only */}
         <Route path="/edit-icon" element={<EditIcon />} />
-        <Route path="/small-menu" element={<SmallMenu />} />
+        <Route path="/small-window" element={<SmallWindow />} />
       </Routes>
     </Router>
   );

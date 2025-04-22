@@ -3,22 +3,22 @@ import { useLocation } from "react-router-dom";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
 
-const logger = createLogger("SmallMenu.tsx");
+const logger = createLogger("SmallWindow.tsx");
 
-const SmallMenu: React.FC = () => {
+const SmallWindow: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const title = queryParams.get("title") || "Small Menu";
+  const title = queryParams.get("title") || "SmallWindow";
   const message = queryParams.get("message") || "No message provided.";
 
   useEffect(() => {
-    logger.info("SmallMenu component mounted");
+    logger.info("SmallWindow component mounted");
     logger.info(`Title: ${title}`);
     logger.info(`Message: ${message}`);
   }, [title, message]);
 
   return (
-    <div className="small-menu-container">
+    <div className="small-window-container">
       <header className="subwindow-header">
         <div className="header-title">{title}</div>
         <div className="window-controls">
@@ -33,10 +33,10 @@ const SmallMenu: React.FC = () => {
           </button>
         </div>
       </header>
-      <div className="small-menu-content">
-        <p className="small-menu-message">{message}</p>
+      <div className="small-window-content">
+        <p className="small-window-message">{message}</p>
         <button
-          className="small-menu-button"
+          className="small-window-button"
           onClick={() => {
             logger.info("Close button clicked");
             window.close();
@@ -49,4 +49,4 @@ const SmallMenu: React.FC = () => {
   );
 };
 
-export default SmallMenu;
+export default SmallWindow;
