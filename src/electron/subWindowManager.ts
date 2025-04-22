@@ -94,8 +94,13 @@ export function openSubWindow(
  *
  * @param {string} title - The title of the small window.
  * @param {string} message - The message to display in the small window.
+ * @param {string[]} [buttons=["Okay"]] - The buttons to display in the small window.
  */
-export function openSmallWindow(title: string, message: string): BrowserWindow {
+export function openSmallWindow(
+  title: string,
+  message: string,
+  buttons: string[] = ["Okay"]
+): BrowserWindow {
   logger.info("Attempting to open a small window...");
 
   // Find the main window
@@ -128,15 +133,18 @@ export function openSmallWindow(title: string, message: string): BrowserWindow {
     },
   });
 
+  // Encode the buttons array as a JSON string for the query parameter
+  const encodedButtons = encodeURIComponent(JSON.stringify(buttons));
+
   let smallWindowUrl: string;
   if (isDev()) {
     smallWindowUrl = `http://localhost:5123/#/small-window?title=${encodeURIComponent(
       title
-    )}&message=${encodeURIComponent(message)}`;
+    )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}`;
   } else {
     smallWindowUrl = `${pathToFileURL(getUIPath()).toString()}#/small-window?title=${encodeURIComponent(
       title
-    )}&message=${encodeURIComponent(message)}`;
+    )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}`;
   }
 
   logger.info(`Loading small window URL: ${smallWindowUrl}`);

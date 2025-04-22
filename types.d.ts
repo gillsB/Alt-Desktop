@@ -43,7 +43,7 @@ interface EventParamMapping {
   getFileType: [string];
   deleteIcon: [number, number];
   openInExplorer: ["image" | "programLink", string];
-  showTestSmallWindow: [string, string];
+  showTestSmallWindow: [string, string, string[]];
 }
 
 // The returns from the main process to the renderer
@@ -112,6 +112,10 @@ interface Window {
       type: "image" | "programLink",
       filePath: string
     ) => Promise<boolean>;
-    showTestSmallWindow: (title: string, message: string) => Promise<boolean>;
+    showTestSmallWindow: (
+      title: string,
+      message: string,
+      buttons: string[]
+    ) => Promise<boolean>;
   };
 }

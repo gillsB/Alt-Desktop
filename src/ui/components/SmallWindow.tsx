@@ -11,11 +11,16 @@ const SmallWindow: React.FC = () => {
   const title = queryParams.get("title") || "SmallWindow";
   const message = queryParams.get("message") || "No message provided.";
 
+  const buttons: string[] = JSON.parse(
+    queryParams.get("buttons") || '["Okay"]'
+  );
+
   useEffect(() => {
     logger.info("SmallWindow component mounted");
     logger.info(`Title: ${title}`);
     logger.info(`Message: ${message}`);
-  }, [title, message]);
+    logger.info(`Buttons: ${buttons}`);
+  }, [title, message, buttons]);
 
   return (
     <div className="small-window-container">
@@ -35,15 +40,20 @@ const SmallWindow: React.FC = () => {
       </header>
       <div className="small-window-content">
         <p className="small-window-message">{message}</p>
-        <button
-          className="small-window-button"
-          onClick={() => {
-            logger.info("Close button clicked");
-            window.close();
-          }}
-        >
-          Close
-        </button>
+        <div className="small-window-buttons">
+          {buttons.map((button: string, index: number) => (
+            <button
+              key={index}
+              className="small-window-button"
+              onClick={() => {
+                logger.info(`Button clicked: ${button}`);
+                window.close();
+              }}
+            >
+              {button}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

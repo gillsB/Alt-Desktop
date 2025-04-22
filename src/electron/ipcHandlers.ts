@@ -531,12 +531,16 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
   ipcMainHandle(
     "showTestSmallWindow",
-    async (title: string, message: string): Promise<boolean> => {
+    async (
+      title: string,
+      message: string,
+      buttons: string[] = ["Okay"]
+    ): Promise<boolean> => {
       try {
         logger.info(
-          `Showing test small window with title: "${title}" and message: "${message}"`
+          `Showing test small window with title: "${title}", message: "${message}", and buttons: ${JSON.stringify(buttons)}`
         );
-        openSmallWindow(title, message);
+        openSmallWindow(title, message, buttons);
         return true;
       } catch (error) {
         logger.error(`Failed to show test small window: ${error}`);
