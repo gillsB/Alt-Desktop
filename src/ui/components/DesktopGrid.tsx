@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
+import { showSmallWindow } from "../util/uiUtil";
 import { createLogger } from "../util/uiLogger";
 import { SafeImage } from "./SafeImage";
 
@@ -441,7 +442,7 @@ const DesktopGrid: React.FC = () => {
           );
           if (!success) {
             logger.error(`Failed to open image folder for icon: ${name}`);
-            await window.electron.showSmallWindow(
+            await showSmallWindow(
               "Cannot resolve icon image path",
               `No image path available for icon: ${name} \nLocalPath: ${filePath}`,
               ["Okay"]
