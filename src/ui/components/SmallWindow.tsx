@@ -10,7 +10,7 @@ const SmallWindow: React.FC = () => {
   const queryParams = new URLSearchParams(location.search);
   const title = queryParams.get("title") || "SmallWindow";
   const message = queryParams.get("message") || "No message provided.";
-
+  const windowId = parseInt(queryParams.get("windowId") || "-1", 10); // Get the windowId from query parameters
   const buttons: string[] = JSON.parse(
     queryParams.get("buttons") || '["Okay"]'
   );
@@ -19,8 +19,18 @@ const SmallWindow: React.FC = () => {
     logger.info("SmallWindow component mounted");
     logger.info(`Title: ${title}`);
     logger.info(`Message: ${message}`);
+    logger.info(`Window ID: ${windowId}`);
     logger.info(`Buttons: ${buttons}`);
-  }, [title, message, buttons]);
+  }, [title, message, windowId, buttons]);
+
+  const handleButtonClick = (buttonValue: string) => {
+    logger.info(`Button clicked in UI: ${buttonValue}`);
+    window.electron.sendButtonResponse({
+      windowId,
+      buttonText: buttonValue,
+    });
+    window.close();
+  };
 
   return (
     <div className="small-window-container">
@@ -31,7 +41,7 @@ const SmallWindow: React.FC = () => {
             id="close"
             onClick={() => {
               logger.info("Close button clicked");
-              window.close();
+              handleButtonClick("Close");
             }}
           >
             ✕
@@ -47,7 +57,7 @@ const SmallWindow: React.FC = () => {
               className="small-window-button"
               onClick={() => {
                 logger.info(`Button clicked: ${button}`);
-                window.close();
+                handleButtonClick(button);
               }}
             >
               {button}

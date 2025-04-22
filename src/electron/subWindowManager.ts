@@ -11,6 +11,15 @@ let activeSubWindow: BrowserWindow | null = null;
 const smallWindows: BrowserWindow[] = []; // Store multiple small windows
 const allowedUrls: string[] = []; // Start with an empty list
 
+// Map to track pending small window responses
+export const pendingSmallWindowResponses = new Map<
+  number,
+  {
+    resolve: (value: string) => void;
+    reject: (reason: unknown) => void;
+  }
+>();
+
 // Add the main window URL to the allow-list
 const mainWindowUrl = isDev()
   ? "http://localhost:5123"
@@ -90,86 +99,110 @@ export function openSubWindow(
 }
 
 /**
- * Opens a small window with the specified options.
+ * Opens a small window with the specified options and returns a promise that resolves with the string of the clicked button.
  *
  * @param {string} title - The title of the small window.
  * @param {string} message - The message to display in the small window.
  * @param {string[]} [buttons=["Okay"]] - The buttons to display in the small window.
+ * @returns {Promise<string>} A promise that resolves with the button text that was clicked.
  */
 export function openSmallWindow(
   title: string,
   message: string,
   buttons: string[] = ["Okay"]
-): BrowserWindow {
+): Promise<string> {
   logger.info("Attempting to open a small window...");
 
-  // Find the main window
-  const allWindows = BrowserWindow.getAllWindows();
-  mainWindow =
-    allWindows.find((win) => win.title === "AltDesktop") ||
-    (allWindows.length > 0 ? allWindows[0] : null);
+  return new Promise((resolve, reject) => {
+    try {
+      // Find the main window
+      const allWindows = BrowserWindow.getAllWindows();
+      mainWindow =
+        allWindows.find((win) => win.title === "AltDesktop") ||
+        (allWindows.length > 0 ? allWindows[0] : null);
 
-  if (!mainWindow) {
-    logger.error("No windows found when trying to create small window");
-    throw new Error("No main window found");
-  }
+      if (!mainWindow) {
+        logger.error("No windows found when trying to create small window");
+        reject(new Error("No main window found"));
+        return;
+      }
 
-  logger.info(`Found main window with title: ${mainWindow.title}`);
+      logger.info(`Found main window with title: ${mainWindow.title}`);
 
-  // Create a new small window
-  const smallWindow = new BrowserWindow({
-    width: 400,
-    height: 200,
-    title: "Small Window",
-    parent: mainWindow,
-    modal: true,
-    resizable: false,
-    frame: false,
-    backgroundColor: "#00000000",
-    show: false,
-    webPreferences: {
-      preload: getPreloadPath(),
-      webSecurity: true,
-    },
-  });
+      // Create a new small window
+      const smallWindow = new BrowserWindow({
+        width: 400,
+        height: 200,
+        title: "Small Window",
+        parent: mainWindow,
+        modal: true,
+        resizable: false,
+        frame: false,
+        backgroundColor: "#00000000",
+        show: false,
+        webPreferences: {
+          preload: getPreloadPath(),
+          webSecurity: true,
+        },
+      });
 
-  // Encode the buttons array as a JSON string for the query parameter
-  const encodedButtons = encodeURIComponent(JSON.stringify(buttons));
+      // Store the promise callbacks in the map with the window ID as the key
+      pendingSmallWindowResponses.set(smallWindow.id, { resolve, reject });
 
-  let smallWindowUrl: string;
-  if (isDev()) {
-    smallWindowUrl = `http://localhost:5123/#/small-window?title=${encodeURIComponent(
-      title
-    )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}`;
-  } else {
-    smallWindowUrl = `${pathToFileURL(getUIPath()).toString()}#/small-window?title=${encodeURIComponent(
-      title
-    )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}`;
-  }
+      // Encode the buttons array and windowId as query parameters
+      const encodedButtons = encodeURIComponent(JSON.stringify(buttons));
+      const windowId = smallWindow.id;
 
-  logger.info(`Loading small window URL: ${smallWindowUrl}`);
-  smallWindow.loadURL(smallWindowUrl);
+      let smallWindowUrl: string;
+      if (isDev()) {
+        smallWindowUrl = `http://localhost:5123/#/small-window?title=${encodeURIComponent(
+          title
+        )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}&windowId=${windowId}`;
+      } else {
+        smallWindowUrl = `${pathToFileURL(getUIPath()).toString()}#/small-window?title=${encodeURIComponent(
+          title
+        )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}&windowId=${windowId}`;
+      }
 
-  // Only show the window once it's ready to prevent flashing
-  smallWindow.once("ready-to-show", () => {
-    logger.info("Small window is ready to show");
-    smallWindow.show();
-  });
+      logger.info(`Loading small window URL: ${smallWindowUrl}`);
+      smallWindow.loadURL(smallWindowUrl);
 
-  // Add the small window to the list
-  smallWindows.push(smallWindow);
+      // Only show the window once it's ready to prevent flashing
+      smallWindow.once("ready-to-show", () => {
+        logger.info("Small window is ready to show");
+        smallWindow.show();
+      });
 
-  // Handle window close
-  smallWindow.on("closed", () => {
-    logger.info("Small window closed");
-    const index = smallWindows.indexOf(smallWindow);
-    if (index !== -1) {
-      smallWindows.splice(index, 1);
+      // Add the small window to the list
+      smallWindows.push(smallWindow);
+
+      // Handle window close without a button click
+      smallWindow.on("closed", () => {
+        logger.info("Small window closed");
+        const index = smallWindows.indexOf(smallWindow);
+        if (index !== -1) {
+          smallWindows.splice(index, 1);
+        }
+
+        // If we still have a pending response for this window, resolve with default value
+        if (pendingSmallWindowResponses.has(smallWindow.id)) {
+          const pendingResponse = pendingSmallWindowResponses.get(
+            smallWindow.id
+          );
+          pendingSmallWindowResponses.delete(smallWindow.id);
+
+          if (pendingResponse) {
+            pendingResponse.resolve(buttons[0] || "");
+          }
+        }
+      });
+
+      logger.info(`Created small window with title: ${title}`);
+    } catch (error) {
+      logger.error(`Error opening small window: ${error}`);
+      reject(error);
     }
   });
-
-  logger.info(`Created small window with title: ${title}`);
-  return smallWindow;
 }
 
 export function getActiveSubWindow(): BrowserWindow | null {

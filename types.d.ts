@@ -43,7 +43,7 @@ interface EventParamMapping {
   getFileType: [string];
   deleteIcon: [number, number];
   openInExplorer: ["image" | "programLink", string];
-  showTestSmallWindow: [string, string, string[]];
+  showSmallWindow: [string, string, string[]];
 }
 
 // The returns from the main process to the renderer
@@ -69,7 +69,8 @@ type EventPayloadMapping = {
   getFileType: string;
   deleteIcon: boolean;
   openInExplorer: boolean;
-  showTestSmallWindow: boolean;
+  showSmallWindow: string;
+  "button-response": { windowId: number; buttonText: string | null };
 };
 
 type UnsubscribeFunction = () => void;
@@ -112,10 +113,14 @@ interface Window {
       type: "image" | "programLink",
       filePath: string
     ) => Promise<boolean>;
-    showTestSmallWindow: (
+    showSmallWindow: (
       title: string,
       message: string,
       buttons: string[]
-    ) => Promise<boolean>;
+    ) => Promise<string>;
+    sendButtonResponse: (payload: {
+      windowId: number;
+      buttonText: string | null;
+    }) => void;
   };
 }

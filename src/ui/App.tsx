@@ -28,7 +28,7 @@ const App: React.FC = () => {
             </div>
           }
         />
-        {/* Route for the EditIcon component only */}
+        {/* Route for the EditIcon and SmallWindow */}
         <Route path="/edit-icon" element={<EditIcon />} />
         <Route path="/small-window" element={<SmallWindow />} />
       </Routes>

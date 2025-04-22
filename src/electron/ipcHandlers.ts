@@ -10,6 +10,7 @@ import {
   closeActiveSubWindow,
   getActiveSubWindow,
   openSmallWindow,
+  pendingSmallWindowResponses,
 } from "./subWindowManager.js";
 import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
@@ -530,21 +531,43 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
   ipcMainHandle(
-    "showTestSmallWindow",
+    "showSmallWindow",
     async (
       title: string,
       message: string,
       buttons: string[] = ["Okay"]
-    ): Promise<boolean> => {
+    ): Promise<string> => {
       try {
         logger.info(
-          `Showing test small window with title: "${title}", message: "${message}", and buttons: ${JSON.stringify(buttons)}`
+          `Showing small window with title: "${title}", message: "${message}", and buttons: ${JSON.stringify(buttons)}`
         );
-        openSmallWindow(title, message, buttons);
-        return true;
+
+        // Call openSmallWindow and wait for the button clicked
+        const buttonClicked = await openSmallWindow(title, message, buttons);
+        logger.info(`User clicked button: ${buttonClicked}`);
+
+        return buttonClicked;
       } catch (error) {
-        logger.error(`Failed to show test small window: ${error}`);
-        return false;
+        logger.error(`Failed to show small window: ${error}`);
+        return ""; // Return an empty string on error
+      }
+    }
+  );
+  ipcMainOn(
+    "button-response",
+    (payload: { windowId: number; buttonText: string | null }) => {
+      const { windowId, buttonText } = payload;
+
+      logger.info(
+        `Received button response in main process: ${buttonText} from window ${windowId}`
+      );
+
+      if (windowId && pendingSmallWindowResponses.has(windowId)) {
+        const { resolve } = pendingSmallWindowResponses.get(windowId)!;
+        pendingSmallWindowResponses.delete(windowId);
+
+        // Resolve with the button text or default to an empty string
+        resolve(buttonText || "");
       }
     }
   );

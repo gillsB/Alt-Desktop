@@ -46,8 +46,12 @@ electron.contextBridge.exposeInMainWorld("electron", {
   deleteIcon: (row: number, col: number) => ipcInvoke("deleteIcon", row, col),
   openInExplorer: (type: "image" | "programLink", filePath: string) =>
     ipcInvoke("openInExplorer", type, filePath),
-  showTestSmallWindow: (title: string, message: string, buttons: string[]) =>
-    ipcInvoke("showTestSmallWindow", title, message, buttons),
+  showSmallWindow: (title: string, message: string, buttons: string[]) =>
+    ipcInvoke("showSmallWindow", title, message, buttons),
+  sendButtonResponse: (payload: {
+    windowId: number;
+    buttonText: string | null;
+  }) => ipcSend("button-response", payload),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
