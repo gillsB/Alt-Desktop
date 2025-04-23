@@ -1,8 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
-import { showSmallWindow } from "../util/uiUtil";
 import { createLogger } from "../util/uiLogger";
+import { showSmallWindow } from "../util/uiUtil";
 import { SafeImage } from "./SafeImage";
 
 const logger = createLogger("DesktopGrid.tsx");
@@ -374,12 +374,23 @@ const DesktopGrid: React.FC = () => {
 
   const handleDeleteIcon = async () => {
     if (contextMenu?.icon) {
-      const { row, col } = contextMenu.icon;
+      const { name, row, col } = contextMenu.icon;
 
       try {
+        const ret = await showSmallWindow(
+          "Delete Icon",
+          `Are you sure you want to delete the icon: ${name} \nat [${row}, ${col}]?`,
+          ["Yes", "No"]
+        );
         // Call the Electron API to delete the icon
-        await window.electron.deleteIcon(row, col);
-        logger.info(`Deleted icon at [${row}, ${col}]`);
+        if (ret === "Yes") {
+          await window.electron.deleteIcon(row, col);
+          logger.info(`Deleted icon at [${row}, ${col}]`);
+        } else {
+          logger.info(
+            `Icon deletion cancelled at [${row}, ${col}] ret = ${ret}`
+          );
+        }
       } catch (error) {
         logger.error(`Failed to delete icon at [${row}, ${col}]:`, error);
       }
