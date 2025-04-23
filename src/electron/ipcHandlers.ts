@@ -213,7 +213,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         );
 
         if (icon) {
-          logger.info(`Reloaded icon at [${row}, ${col}]: ${icon}`);
+          logger.info(
+            `Reloaded icon at [${row}, ${col}]: ${JSON.stringify(icon)}`
+          );
 
           // Notify the renderer process to reload the icon
           if (mainWindow) {

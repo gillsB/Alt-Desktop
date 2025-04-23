@@ -56,7 +56,6 @@ export function registerSafeFileProtocol(
       let fullPath: string = path.resolve(appDataBasePath, requestedPath);
       logger.info(`Resolved full path: ${fullPath}`);
       if (!fullPath.startsWith(appDataBasePath)) {
-        //TODO possibly notify the user about this through an error message popup.
         logger.warn(`Blocked path traversal attempt:
           Raw request: ${req.url}
           Decoded path: ${requestedPath}

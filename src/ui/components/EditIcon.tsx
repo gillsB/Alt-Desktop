@@ -66,18 +66,48 @@ const EditIcon: React.FC = () => {
       return;
     }
 
-    if (await window.electron.setIconData(icon)) {
-      if (await window.electron.reloadIcon(icon.row, icon.col)) {
-        console.log("Icon reloaded successfully");
-        logger.info("Icon reloaded successfully.");
-      } else {
-        console.error("Failed to reload icon");
-        logger.error("Failed to reload icon.");
+    try {
+      // Check if the image path looks like a full file path
+      const validExtensions = /\.(png|jpg|jpeg|gif|bmp|svg|webp)$/i;
+      const driveLetterRegex = /^[a-zA-Z]:[\\/]/;
+
+      if (
+        validExtensions.test(icon.image) &&
+        driveLetterRegex.test(icon.image)
+      ) {
+        logger.info(`Resolving full file path for image: ${icon.image}`);
+        try {
+          const savedFilePath = await window.electron.saveIconImage(
+            icon.image,
+            icon.row,
+            icon.col
+          );
+
+          // Update the icon's image path with the resolved file path
+          icon.image = savedFilePath;
+          logger.info(`Image resolved and saved to: ${savedFilePath}`);
+        } catch (error) {
+          logger.error("Failed to resolve and save image path:", error);
+          return; // Stop saving if the image resolution fails
+        }
       }
-      window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
-    } else {
-      console.log("Failed to save icon");
-      logger.warn("Failed to save icon.");
+
+      // Save the icon data
+      if (await window.electron.setIconData(icon)) {
+        if (await window.electron.reloadIcon(icon.row, icon.col)) {
+          console.log("Icon reloaded successfully");
+          logger.info("Icon reloaded successfully.");
+        } else {
+          console.error("Failed to reload icon");
+          logger.error("Failed to reload icon.");
+        }
+        window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+      } else {
+        console.log("Failed to save icon");
+        logger.warn("Failed to save icon.");
+      }
+    } catch (error) {
+      logger.error("Error during save operation:", error);
     }
   };
 
