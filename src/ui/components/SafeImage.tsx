@@ -106,7 +106,9 @@ const SafeImageComponent: React.FC<{
   useEffect(() => {
     // Handle special cases for " " or "none"
     if (originalImage === " " || originalImage.toLowerCase() === "none") {
-      logger.info("Image path is a special case, user wants an empty image.");
+      logger.info(
+        `Icon ${row},${col} is a special case, user wants empty image`
+      );
       setImageSrc(""); // discard cached image
       setImageDimensions({
         width: width || DEFAULT_MAX_SIZE,

@@ -53,8 +53,6 @@ export function openSubWindow(
     throw new Error("No main window found");
   }
 
-  logger.info(`Found main window with title: ${mainWindow.title}`);
-
   // Create a new subwindow
   activeSubWindow = new BrowserWindow({
     ...options,
@@ -111,8 +109,6 @@ export function openSmallWindow(
   message: string,
   buttons: string[] = ["Okay"]
 ): Promise<string> {
-  logger.info("Attempting to open a small window...");
-
   return new Promise((resolve, reject) => {
     try {
       // Find the main window
@@ -126,8 +122,6 @@ export function openSmallWindow(
         reject(new Error("No main window found"));
         return;
       }
-
-      logger.info(`Found main window with title: ${mainWindow.title}`);
 
       // Create a new small window
       const smallWindow = new BrowserWindow({
@@ -169,7 +163,6 @@ export function openSmallWindow(
 
       // Only show the window once it's ready to prevent flashing
       smallWindow.once("ready-to-show", () => {
-        logger.info("Small window is ready to show");
         smallWindow.show();
       });
 

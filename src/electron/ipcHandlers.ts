@@ -544,7 +544,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         // Call openSmallWindow and wait for the button clicked
         const buttonClicked = await openSmallWindow(title, message, buttons);
-        logger.info(`User clicked button: ${buttonClicked}`);
 
         return buttonClicked;
       } catch (error) {

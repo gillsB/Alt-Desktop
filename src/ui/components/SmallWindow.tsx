@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useLocation } from "react-router-dom";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
@@ -14,14 +14,6 @@ const SmallWindow: React.FC = () => {
   const buttons: string[] = JSON.parse(
     queryParams.get("buttons") || '["Okay"]'
   );
-
-  useEffect(() => {
-    logger.info("SmallWindow component mounted");
-    logger.info(`Title: ${title}`);
-    logger.info(`Message: ${message}`);
-    logger.info(`Window ID: ${windowId}`);
-    logger.info(`Buttons: ${buttons}`);
-  }, [title, message, windowId, buttons]);
 
   const handleButtonClick = (buttonValue: string) => {
     logger.info(`Button clicked in UI: ${buttonValue}`);
@@ -56,7 +48,6 @@ const SmallWindow: React.FC = () => {
               key={index}
               className="small-window-button"
               onClick={() => {
-                logger.info(`Button clicked: ${button}`);
                 handleButtonClick(button);
               }}
             >

@@ -106,8 +106,9 @@ export function ipcWebContentsSend<Key extends keyof EventPayloadMapping>(
 export function validateEventFrame(frame: WebFrameMain) {
   const allowedUrls = getAllowedUrls();
 
-  logger.info(`Validating frame URL: ${frame.url}`);
-  logger.info(`Allowed URLs: ${JSON.stringify(allowedUrls)}`);
+  logger.info(
+    `frame URL: ${frame.url} Allowed URLs: ${JSON.stringify(allowedUrls)}`
+  );
 
   if (!allowedUrls.some((url) => frame.url.startsWith(url))) {
     logger.error(`Malicious event from unknown source: ${frame.url}`);

@@ -38,7 +38,6 @@ export function registerSafeFileProtocol(
   protocol.handle(protocolName, async (req) => {
     try {
       const requestedUrl = new URL(req.url);
-      logger.info(`Received request: ${req.url}`);
 
       const requestedPath = decodeURIComponent(requestedUrl.pathname).replace(
         /^\/+/,
@@ -52,7 +51,6 @@ export function registerSafeFileProtocol(
       }
 
       const appDataBasePath: string = path.join(getAppDataPath());
-      logger.info(`AppData base path: ${appDataBasePath}`);
 
       // Resolve the full path, ensuring it stays within the AppData directory
       let fullPath: string = path.resolve(appDataBasePath, requestedPath);
