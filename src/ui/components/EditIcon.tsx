@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { DesktopIcon, getDefaultDesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
+import { showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditIcon.tsx");
@@ -87,7 +88,19 @@ const EditIcon: React.FC = () => {
           icon.image = savedFilePath;
           logger.info(`Image resolved and saved to: ${savedFilePath}`);
         } catch (error) {
-          logger.error("Failed to resolve and save image path:", error);
+          if (
+            error instanceof Error &&
+            error.message.includes("Source file does not exist:")
+          ) {
+            logger.error("Failed to resolve and save image path:", error);
+            showSmallWindow(
+              "Bad Image Path",
+              `Image path: ${icon.image} \nis invalid or does not exist.`,
+              ["Okay"]
+            );
+          } else {
+            logger.error("Unexpected error during save operation:", error);
+          }
           return; // Stop saving if the image resolution fails
         }
       }

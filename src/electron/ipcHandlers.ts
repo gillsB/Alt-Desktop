@@ -298,6 +298,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const ext = path.extname(sourcePath);
       const baseName = path.basename(sourcePath, ext);
 
+      // Verify that the source file exists
+      if (!fs.existsSync(sourcePath)) {
+        logger.error(`Source file does not exist: ${sourcePath}`);
+        throw new Error(`Source file does not exist: ${sourcePath}`);
+      }
+
+      // Ensure the target directory exists
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
       }
