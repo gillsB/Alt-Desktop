@@ -60,8 +60,24 @@ const EditIcon: React.FC = () => {
     fetchIcon();
   }, [row, col]);
 
-  const handleClose = () => {
-    logger.info(`Closing EditIcon[${row},${col}] subwindow.`);
+  const handleClose = async () => {
+    logger.info(`User attempting to close EditIcon[${row},${col}]`);
+    try {
+      const ret = await showSmallWindow(
+        "Close Without Saving",
+        "Close without saving the changes?",
+        ["Yes", "No"]
+      );
+      if (ret === "Yes") {
+        logger.info("User confirmed to close without saving.");
+        closeWindow();
+      }
+    } catch (error) {
+      logger.error("Error showing close confirmation window:", error);
+    }
+  };
+
+  const closeWindow = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
 
@@ -119,7 +135,7 @@ const EditIcon: React.FC = () => {
           console.error("Failed to reload icon");
           logger.error("Failed to reload icon.");
         }
-        handleClose();
+        closeWindow();
       } else {
         console.log("Failed to save icon");
         logger.warn("Failed to save icon.");
