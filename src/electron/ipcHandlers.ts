@@ -240,9 +240,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "editIcon",
     async (row: number, col: number): Promise<boolean> => {
-      logger.info(`ipcMainHandle editIcon called with ${row}, ${col}`);
-      openEditIconWindow(row, col);
-      return false;
+      try {
+        logger.info(`ipcMainHandle editIcon called with ${row}, ${col}`);
+        openEditIconWindow(row, col);
+        return true;
+      } catch (error) {
+        logger.error(`Error opening edit icon window: ${error}`);
+        return false;
+      }
     }
   );
 
