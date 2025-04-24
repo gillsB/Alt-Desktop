@@ -24,6 +24,8 @@ const EditIcon: React.FC = () => {
 
   const dragCounter = useRef(0);
 
+  const originalIcon = useRef<DesktopIcon | null>(null);
+
   useEffect(() => {
     const fetchIcon = async () => {
       if (!row || !col) {
@@ -40,10 +42,16 @@ const EditIcon: React.FC = () => {
 
         if (iconData) {
           setIcon(iconData);
+          originalIcon.current = { ...iconData };
           logger.info("Fetched icon data successfully.");
         } else {
           // Use the default DesktopIcon values
-          setIcon(getDefaultDesktopIcon(parseInt(row, 10), parseInt(col, 10)));
+          const defaultIcon = getDefaultDesktopIcon(
+            parseInt(row, 10),
+            parseInt(col, 10)
+          );
+          setIcon(defaultIcon);
+          originalIcon.current = { ...defaultIcon };
           logger.warn(
             `No icon found at row ${row}, column ${col}. Initialized with default values.`
           );
@@ -60,20 +68,43 @@ const EditIcon: React.FC = () => {
     fetchIcon();
   }, [row, col]);
 
+  const getChanges = (): boolean => {
+    if (!icon || !originalIcon.current) {
+      return false; // No changes if either the current or original icon is null
+    }
+
+    // Dynamically compare all keys in the icon object
+    for (const key of Object.keys(icon)) {
+      if (
+        icon[key as keyof DesktopIcon] !==
+        originalIcon.current[key as keyof DesktopIcon]
+      ) {
+        return true; // Return true if any field has changed
+      }
+    }
+
+    return false; // No changes detected
+  };
+
   const handleClose = async () => {
     logger.info(`User attempting to close EditIcon[${row},${col}]`);
-    try {
-      const ret = await showSmallWindow(
-        "Close Without Saving",
-        "Close without saving the changes?",
-        ["Yes", "No"]
-      );
-      if (ret === "Yes") {
-        logger.info("User confirmed to close without saving.");
-        closeWindow();
+    if (getChanges()) {
+      try {
+        const ret = await showSmallWindow(
+          "Close Without Saving",
+          "Close without saving the changes?",
+          ["Yes", "No"]
+        );
+        if (ret === "Yes") {
+          logger.info("User confirmed to close without saving.");
+          closeWindow();
+        }
+      } catch (error) {
+        logger.error("Error showing close confirmation window:", error);
       }
-    } catch (error) {
-      logger.error("Error showing close confirmation window:", error);
+    } else {
+      logger.info("No changes detected, closing without confirmation.");
+      closeWindow();
     }
   };
 
