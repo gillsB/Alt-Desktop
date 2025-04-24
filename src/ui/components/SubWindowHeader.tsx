@@ -1,15 +1,22 @@
 interface SubWindowHeaderProps {
   title: string;
+  onClose?: () => void;
 }
 
-export function SubWindowHeader({ title }: SubWindowHeaderProps) {
+export function SubWindowHeader({ title, onClose }: SubWindowHeaderProps) {
   return (
     <header className="subwindow-header">
       <div className="header-title">{title}</div>
       <div className="window-controls">
         <button
           id="close"
-          onClick={() => window.electron.sendSubWindowAction("CLOSE_SUBWINDOW")}
+          onClick={() => {
+            if (onClose) {
+              onClose();
+            } else {
+              window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+            }
+          }}
         >
           ✕
         </button>

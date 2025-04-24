@@ -60,6 +60,11 @@ const EditIcon: React.FC = () => {
     fetchIcon();
   }, [row, col]);
 
+  const handleClose = () => {
+    logger.info(`Closing EditIcon[${row},${col}] subwindow.`);
+    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+  };
+
   const handleSave = async () => {
     if (!icon) {
       console.error("Icon data is missing.");
@@ -114,7 +119,7 @@ const EditIcon: React.FC = () => {
           console.error("Failed to reload icon");
           logger.error("Failed to reload icon.");
         }
-        window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+        handleClose();
       } else {
         console.log("Failed to save icon");
         logger.warn("Failed to save icon.");
@@ -233,7 +238,10 @@ const EditIcon: React.FC = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleFileDrop}
     >
-      <SubWindowHeader title={`Editing [${row},${col}]`} />
+      <SubWindowHeader
+        title={`Editing [${row},${col}]`}
+        onClose={handleClose}
+      />
       <div className="edit-icon-content">
         {loading && <div>Loading...</div>}
         {error && <div>Error: {error}</div>}
