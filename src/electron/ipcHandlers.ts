@@ -120,6 +120,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         case "CLOSE_SUBWINDOW":
           logger.info(`SubWindowAction CLOSE_SUBWINDOW`);
           closeActiveSubWindow();
+          if (mainWindow) {
+            mainWindow.webContents.send("hide-highlight");
+            logger.info("Sent 'hide-highlight' message to renderer.");
+          }
           break;
       }
     }

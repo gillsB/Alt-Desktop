@@ -216,7 +216,6 @@ const DesktopGrid: React.FC = () => {
   }, [contextMenu]);
 
   useEffect(() => {
-    // Listen for the reload-icon event from the main process
     const handleReloadIcon = (
       _: Electron.IpcRendererEvent,
       { row, col, icon }: { row: number; col: number; icon: DesktopIcon }
@@ -224,16 +223,27 @@ const DesktopGrid: React.FC = () => {
       handleIpcReloadIcon(row, col, icon);
     };
 
+    const handleHideHighlightBox = () => {
+      console.log("Received 'hide-highlight' event from main process.");
+      hideHighlightBox();
+    };
+
+    // Listen for the 'reload-icon' event
     window.electron.on(
       "reload-icon",
       handleReloadIcon as (...args: unknown[]) => void
     );
 
+    // Listen for the 'hide-highlight' event
+    window.electron.on("hide-highlight", handleHideHighlightBox);
+
+    // Cleanup the event listeners on unmount
     return () => {
       window.electron.off(
         "reload-icon",
         handleReloadIcon as (...args: unknown[]) => void
       );
+      window.electron.off("hide-highlight", handleHideHighlightBox);
     };
   }, []);
 
