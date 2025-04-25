@@ -4,6 +4,7 @@ import { registerIpcHandlers } from "./ipcHandlers.js";
 import { createLoggerForFile } from "./logging.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
+import { getActiveSubWindow } from "./subWindowManager.js";
 import { createTray } from "./tray.js";
 import { isDev } from "./util.js";
 import { handleWindowState, registerWindowKeybinds } from "./windowState.js";
@@ -64,22 +65,39 @@ function handleCloseEvents(mainWindow: BrowserWindow) {
 
   mainWindow.on("close", (e) => {
     if (willClose) {
-      // if we tell it to close just return (full close).
+      // If we tell it to close, just return (full close).
       return;
     }
-    // else hide to tray.
+
+    // Else hide to tray.
     e.preventDefault();
     mainWindow.hide();
-    //mac os hide taskbar
+
+    // Hide the active subwindow as well
+    const activeSubWindow = getActiveSubWindow();
+    if (activeSubWindow) {
+      activeSubWindow.hide();
+      logger.info("Active subwindow hidden due to closing mainWindow.");
+    }
+
+    // macOS: hide taskbar
     if (app.dock) {
       app.dock.hide();
     }
   });
+
   app.on("before-quit", () => {
     willClose = true;
   });
 
   mainWindow.on("show", () => {
     willClose = false;
+
+    // Show the active subwindow when the main window is restored
+    const activeSubWindow = getActiveSubWindow();
+    if (activeSubWindow) {
+      activeSubWindow.show();
+      logger.info("Active subwindow shown along with main window.");
+    }
   });
 }
