@@ -381,6 +381,15 @@ const EditIcon: React.FC = () => {
                 }
               />
             </div>
+            <div className="edit-icon-field">
+              <label htmlFor="font-size">Font Size</label>
+              <input
+                id="font-size"
+                type="text"
+                value={icon.fontSize}
+                onChange={(e) => setIcon({ ...icon, fontSize: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
           </>
         )}
       </div>

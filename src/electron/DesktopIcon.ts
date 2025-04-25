@@ -11,6 +11,7 @@ export interface DesktopIcon {
   args?: string[];
   websiteLink?: string;
   fontColor?: string;
+  fontSize?: number;
 }
 
 // Default values for a DesktopIcon
