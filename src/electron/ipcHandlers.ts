@@ -469,6 +469,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     async (row: number, col: number): Promise<boolean> => {
       const directoryPath = path.join(getAppDataPath(), "desktop");
       const filePath = path.join(directoryPath, "desktopIcons.json");
+      const iconFolderPath = path.join(
+        getAppDataPath(),
+        "data",
+        `[${row},${col}]`
+      );
 
       try {
         logger.info(`Deleting icon at [${row}, ${col}] from ${filePath}`);
@@ -499,6 +504,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         // Write the updated JSON back to the file
         fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
         logger.info(`Successfully deleted icon at [${row}, ${col}]`);
+
+        // Delete the icon folder
+        if (fs.existsSync(iconFolderPath)) {
+          fs.rmSync(iconFolderPath, { recursive: true, force: true });
+          logger.info(`Successfully deleted folder: ${iconFolderPath}`);
+        } else {
+          logger.warn(`Folder not found: ${iconFolderPath}`);
+        }
 
         return true;
       } catch (error) {

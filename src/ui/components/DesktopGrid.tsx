@@ -636,6 +636,7 @@ const DesktopGrid: React.FC = () => {
               />
               <div
                 className="desktop-icon-name"
+                title={icon.name}
                 style={{
                   color: icon.fontColor || "white",
                   fontSize: icon.fontSize || "1rem",
