@@ -186,13 +186,14 @@ body,
     -1px 1px 0 #000,
     1px 1px 0 #000;
   line-height: 1.2;
-  height: 3.6em;
+  max-height: 4em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
   overflow-wrap: break-word;
   word-break: break-word;
   padding-top: 4px;
+  padding-bottom: 1px;
   box-sizing: border-box;
   text-align: center;
   cursor: pointer;
