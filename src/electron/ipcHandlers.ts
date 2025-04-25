@@ -505,10 +505,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
         logger.info(`Successfully deleted icon at [${row}, ${col}]`);
 
-        // Delete the icon folder
+        // Move the icon folder to the recycle bin
         if (fs.existsSync(iconFolderPath)) {
-          fs.rmSync(iconFolderPath, { recursive: true, force: true });
-          logger.info(`Successfully deleted folder: ${iconFolderPath}`);
+          await shell.trashItem(iconFolderPath);
+          logger.info(
+            `Successfully moved folder to recycle bin: ${iconFolderPath}`
+          );
         } else {
           logger.warn(`Folder not found: ${iconFolderPath}`);
         }
