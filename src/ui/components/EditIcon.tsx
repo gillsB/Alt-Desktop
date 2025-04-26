@@ -414,12 +414,13 @@ const EditIcon: React.FC = () => {
                 id="font-size"
                 type="number"
                 value={icon.fontSize}
-                onChange={(e) =>
-                  setIcon({
-                    ...icon,
-                    fontSize: parseFloat(e.target.value) || 0,
-                  })
-                }
+                onChange={(e) => {
+                  const updatedValue = e.target.value;
+                  setIcon({ ...icon, fontSize: parseFloat(updatedValue) || 0 });
+                  sendPreviewUpdate({
+                    fontSize: parseFloat(updatedValue) || 0,
+                  });
+                }}
               />
             </div>
             <div className="edit-icon-field">

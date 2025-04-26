@@ -678,16 +678,18 @@ const DesktopGrid: React.FC = () => {
                 highlighted={isIconHighlighted(icon.row, icon.col)}
                 forceReload={reloadTimestamp} // Pass the reload timestamp
               />
-              <div
-                className="desktop-icon-name"
-                title={icon.name}
-                style={{
-                  color: icon.fontColor || "white",
-                  fontSize: icon.fontSize || "1rem",
-                }}
-              >
-                {icon.name}
-              </div>
+              {icon.fontSize !== 0 && (
+                <div
+                  className="desktop-icon-name"
+                  title={icon.name}
+                  style={{
+                    color: icon.fontColor || "white",
+                    fontSize: icon.fontSize || "1rem",
+                  }}
+                >
+                  {icon.name}
+                </div>
+              )}
             </div>
           );
         })}
