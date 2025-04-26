@@ -422,6 +422,32 @@ const EditIcon: React.FC = () => {
                 }
               />
             </div>
+            <div className="edit-icon-field">
+              <label htmlFor="offset-x">Offset X</label>
+              <input
+                id="offset-x"
+                type="number"
+                value={icon.offsetX}
+                onChange={(e) => {
+                  const updatedValue = e.target.value;
+                  setIcon({ ...icon, offsetX: parseFloat(updatedValue) || 0 });
+                  sendPreviewUpdate({ offsetX: parseFloat(updatedValue) || 0 });
+                }}
+              />
+            </div>
+            <div className="edit-icon-field">
+              <label htmlFor="offset-y">Offset Y</label>
+              <input
+                id="offset-y"
+                type="number"
+                value={icon.offsetY}
+                onChange={(e) => {
+                  const updatedValue = e.target.value;
+                  setIcon({ ...icon, offsetY: parseFloat(updatedValue) || 0 });
+                  sendPreviewUpdate({ offsetY: parseFloat(updatedValue) || 0 });
+                }}
+              />
+            </div>
           </>
         )}
       </div>
