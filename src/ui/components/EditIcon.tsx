@@ -413,12 +413,22 @@ const EditIcon: React.FC = () => {
               <input
                 id="font-size"
                 type="number"
+                title="Leave blank for default size"
                 value={icon.fontSize}
                 onChange={(e) => {
                   const updatedValue = e.target.value;
-                  setIcon({ ...icon, fontSize: parseFloat(updatedValue) || 0 });
+                  setIcon({
+                    ...icon,
+                    fontSize:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
+                  });
                   sendPreviewUpdate({
-                    fontSize: parseFloat(updatedValue) || 0,
+                    fontSize:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
                   });
                 }}
               />
@@ -428,11 +438,23 @@ const EditIcon: React.FC = () => {
               <input
                 id="offset-x"
                 type="number"
+                title="Leave blank for default offset"
                 value={icon.offsetX}
                 onChange={(e) => {
                   const updatedValue = e.target.value;
-                  setIcon({ ...icon, offsetX: parseFloat(updatedValue) || 0 });
-                  sendPreviewUpdate({ offsetX: parseFloat(updatedValue) || 0 });
+                  setIcon({
+                    ...icon,
+                    offsetX:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
+                  });
+                  sendPreviewUpdate({
+                    offsetX:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
+                  });
                 }}
               />
             </div>
@@ -441,11 +463,23 @@ const EditIcon: React.FC = () => {
               <input
                 id="offset-y"
                 type="number"
+                title="Leave blank for default offset"
                 value={icon.offsetY}
                 onChange={(e) => {
                   const updatedValue = e.target.value;
-                  setIcon({ ...icon, offsetY: parseFloat(updatedValue) || 0 });
-                  sendPreviewUpdate({ offsetY: parseFloat(updatedValue) || 0 });
+                  setIcon({
+                    ...icon,
+                    offsetY:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
+                  });
+                  sendPreviewUpdate({
+                    offsetY:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
+                  });
                 }}
               />
             </div>
