@@ -108,13 +108,21 @@ const EditIcon: React.FC = () => {
     }
   };
 
-  const closeWindow = () => {
+  const closeWindow = async () => {
+    // reload icon
+    if (!icon) {
+      logger.error("Icon data is missing. (closeWindow)");
+      return;
+    }
+    if (await window.electron.reloadIcon(icon.row, icon.col)) {
+      logger.info("Icon reloaded successfully.");
+    }
+    // close subwindow
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
 
   const handleSave = async () => {
     if (!icon) {
-      console.error("Icon data is missing.");
       logger.error("Icon data is missing.");
       return;
     }
@@ -159,17 +167,18 @@ const EditIcon: React.FC = () => {
 
       // Save the icon data
       if (await window.electron.setIconData(icon)) {
-        if (await window.electron.reloadIcon(icon.row, icon.col)) {
-          console.log("Icon reloaded successfully");
-          logger.info("Icon reloaded successfully.");
-        } else {
-          console.error("Failed to reload icon");
-          logger.error("Failed to reload icon.");
+        logger.error("Failed to reload icon.");
+        const ret = await showSmallWindow(
+          "Error",
+          "Failed to update icon data. Please report this error.\nDo you still want to close?",
+          ["Yes", "No"]
+        );
+        if (ret === "Yes") {
+          logger.info("User confirmed to close after error.");
+          closeWindow();
         }
-        closeWindow();
       } else {
-        console.log("Failed to save icon");
-        logger.warn("Failed to save icon.");
+        closeWindow();
       }
     } catch (error) {
       logger.error("Error during save operation:", error);
