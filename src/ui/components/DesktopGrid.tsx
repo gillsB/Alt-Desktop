@@ -237,6 +237,11 @@ const DesktopGrid: React.FC = () => {
     // Listen for the 'hide-highlight' event
     window.electron.on("hide-highlight", handleHideHighlightBox);
 
+    window.electron.on(
+      "update-icon-preview",
+      handlePreviewUpdate as (...args: unknown[]) => void
+    );
+
     // Cleanup the event listeners on unmount
     return () => {
       window.electron.off(
@@ -244,6 +249,10 @@ const DesktopGrid: React.FC = () => {
         handleReloadIcon as (...args: unknown[]) => void
       );
       window.electron.off("hide-highlight", handleHideHighlightBox);
+      window.electron.off(
+        "update-icon-preview",
+        handlePreviewUpdate as (...args: unknown[]) => void
+      );
     };
   }, []);
 
@@ -531,6 +540,41 @@ const DesktopGrid: React.FC = () => {
       "data-submenu-direction",
       shouldShowSubmenuLeft ? "left" : "right"
     );
+  };
+
+  const handlePreviewUpdate = (
+    _: Electron.IpcRendererEvent,
+    {
+      row,
+      col,
+      updates,
+    }: { row: number; col: number; updates: Partial<DesktopIcon> }
+  ) => {
+    logger.info(`Received preview update for icon [${row}, ${col}]`);
+    logger.info("Updates:", updates);
+
+    // Update the icon in the map with the preview changes
+    setIconsMap((prevMap) => {
+      const newMap = new Map(prevMap);
+      const key = `${row},${col}`;
+      const currentIcon = prevMap.get(key);
+
+      if (currentIcon) {
+        // Create updated icon by merging current icon with preview updates
+        const updatedIcon = { ...currentIcon, ...updates };
+        newMap.set(key, updatedIcon);
+
+        // Force a reload of the image if the image path was updated
+        if (updates.image) {
+          setReloadTimestamps((prev) => ({
+            ...prev,
+            [key]: Date.now(),
+          }));
+        }
+      }
+
+      return newMap;
+    });
   };
 
   useLayoutEffect(() => {

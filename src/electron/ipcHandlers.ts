@@ -608,4 +608,45 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle(
+    "previewIconUpdate",
+    async (
+      row: number,
+      col: number,
+      updates: Partial<DesktopIcon>
+    ): Promise<boolean> => {
+      try {
+        logger.info(
+          `Received previewIconUpdate for icon at [${row}, ${col}] with updates: ${JSON.stringify(
+            updates
+          )}`
+        );
+
+        // Ensure updates is not null or undefined
+        if (!updates || typeof updates !== "object") {
+          logger.error("Invalid updates object:", updates);
+          return false;
+        }
+
+        // Notify the renderer process to update the preview
+        if (mainWindow) {
+          mainWindow.webContents.send("update-icon-preview", {
+            row,
+            col,
+            updates, // Ensure this is the correct object
+          });
+          logger.info(
+            `Sent 'update-icon-preview' event to renderer for [${row}, ${col}]`
+          );
+        }
+
+        return true;
+      } catch (error) {
+        logger.error(
+          `Error handling previewIconUpdate for [${row}, ${col}]: ${error}`
+        );
+        return false;
+      }
+    }
+  );
 }

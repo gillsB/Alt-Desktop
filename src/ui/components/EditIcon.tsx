@@ -277,6 +277,20 @@ const EditIcon: React.FC = () => {
     }
   };
 
+  const sendPreviewUpdate = async (updatedFields: Partial<DesktopIcon>) => {
+    if (!icon) return;
+    try {
+      await window.electron.previewIconUpdate(
+        icon.row,
+        icon.col,
+        updatedFields
+      );
+      logger.info(`Sent preview update for [${icon.row},${icon.col}]`);
+    } catch (error) {
+      logger.error("Failed to send icon preview update:", error);
+    }
+  };
+
   return (
     <div
       className="edit-icon-container"
@@ -300,7 +314,11 @@ const EditIcon: React.FC = () => {
                 id="icon-name"
                 type="text"
                 value={icon.name}
-                onChange={(e) => setIcon({ ...icon, name: e.target.value })}
+                onChange={(e) => {
+                  const updatedValue = e.target.value;
+                  setIcon({ ...icon, name: updatedValue });
+                  sendPreviewUpdate({ name: updatedValue });
+                }}
               />
             </div>
             <div className="edit-icon-field">

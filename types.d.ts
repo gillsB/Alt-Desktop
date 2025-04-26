@@ -44,6 +44,7 @@ interface EventParamMapping {
   deleteIcon: [number, number];
   openInExplorer: ["image" | "programLink", string];
   showSmallWindow: [string, string, string[]];
+  previewIconUpdate: [number, number, Partial<DesktopIcon>];
 }
 
 // The returns from the main process to the renderer
@@ -71,6 +72,7 @@ type EventPayloadMapping = {
   openInExplorer: boolean;
   showSmallWindow: string;
   "button-response": { windowId: number; buttonText: string | null };
+  previewIconUpdate: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -122,5 +124,10 @@ interface Window {
       windowId: number;
       buttonText: string | null;
     }) => void;
+    previewIconUpdate: (
+      row: number,
+      col: number,
+      updates: Partial<DesktopIcon>
+    ) => Promise<boolean>;
   };
 }

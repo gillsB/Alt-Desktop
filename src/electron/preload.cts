@@ -1,5 +1,21 @@
 import electron, { ipcRenderer, webUtils } from "electron";
 
+interface DesktopIcon {
+  row: number;
+  col: number;
+  name: string;
+  width?: number;
+  height?: number;
+  offsetX?: number;
+  offsetY?: number;
+  image: string;
+  programLink?: string;
+  args?: string[];
+  websiteLink?: string;
+  fontColor?: string;
+  fontSize?: number;
+}
+
 // builds the bridge for communicating with ui
 electron.contextBridge.exposeInMainWorld("electron", {
   ...window.electron,
@@ -52,6 +68,11 @@ electron.contextBridge.exposeInMainWorld("electron", {
     windowId: number;
     buttonText: string | null;
   }) => ipcSend("button-response", payload),
+  previewIconUpdate: (
+    row: number,
+    col: number,
+    updates: Partial<DesktopIcon>
+  ) => ipcInvoke("previewIconUpdate", row, col, updates),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
