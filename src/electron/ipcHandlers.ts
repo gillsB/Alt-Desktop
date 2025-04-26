@@ -318,6 +318,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         fs.mkdirSync(targetDir, { recursive: true });
       }
 
+      if (sourcePath.startsWith(targetDir)) {
+        logger.info("Source already in target directory, skipping copy.");
+        return path.basename(sourcePath);
+      }
+
       let localFileName = `${baseName}${ext}`;
       let targetPath = path.join(targetDir, localFileName);
       let counter = 1;
