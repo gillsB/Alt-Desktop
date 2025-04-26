@@ -166,7 +166,7 @@ const EditIcon: React.FC = () => {
       }
 
       // Save the icon data
-      if (await window.electron.setIconData(icon)) {
+      if (!(await window.electron.setIconData(icon))) {
         logger.error("Failed to reload icon.");
         const ret = await showSmallWindow(
           "Error",
@@ -336,11 +336,11 @@ const EditIcon: React.FC = () => {
                 id="image-path"
                 type="text"
                 value={icon.image}
-                onChange={(e) =>
-                  setIcon((prevIcon) =>
-                    prevIcon ? { ...prevIcon, image: e.target.value } : null
-                  )
-                }
+                onChange={(e) => {
+                  const updatedValue = e.target.value;
+                  setIcon({ ...icon, image: updatedValue });
+                  sendPreviewUpdate({ image: updatedValue });
+                }}
               />
               <button
                 className="file-select-button flex items-center gap-2"
