@@ -129,7 +129,7 @@ export function openSmallWindow(
         height: 200,
         title: "Small Window",
         parent: mainWindow,
-        modal: true,
+        modal: false,
         resizable: false,
         frame: false,
         backgroundColor: "#00000000",

@@ -261,7 +261,6 @@ const DesktopGrid: React.FC = () => {
     if (!icon) return iconsMap; // No update if icon doesn't exist
     const newColor = icon.fontColor === "red" ? "white" : "red";
     updateIconField([row, col], "fontColor", newColor);
-    hideHighlightBox();
   };
 
   const handleIconDoubleClick = async (row: number, col: number) => {
