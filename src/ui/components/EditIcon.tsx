@@ -508,6 +508,31 @@ const EditIcon: React.FC = () => {
                 }}
               />
             </div>
+            <div className="edit-icon-field">
+              <label htmlFor="icon-height">Icon height</label>
+              <input
+                id="icon-height"
+                type="number"
+                title="Leave blank for default height"
+                value={icon.height}
+                onChange={(e) => {
+                  const updatedValue = e.target.value;
+                  setIcon({
+                    ...icon,
+                    height:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
+                  });
+                  sendPreviewUpdate({
+                    height:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
+                  });
+                }}
+              />
+            </div>
           </>
         )}
       </div>
