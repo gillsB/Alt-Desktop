@@ -140,15 +140,31 @@ const SafeImageComponent: React.FC<{
       }
 
       const aspectRatio = img.width / img.height;
-      const imageWidth =
-        aspectRatio > 1 ? DEFAULT_MAX_SIZE : DEFAULT_MAX_SIZE * aspectRatio;
-      const imageHeight =
-        aspectRatio > 1 ? DEFAULT_MAX_SIZE / aspectRatio : DEFAULT_MAX_SIZE;
 
-      setImageDimensions({
-        width: Math.round(imageWidth),
-        height: Math.round(imageHeight),
-      });
+      if (width) {
+        // Only width is defined, calculate height based on aspect ratio
+        setImageDimensions({
+          width,
+          height: Math.round(width / aspectRatio),
+        });
+      } else if (height) {
+        // Only height is defined, calculate width based on aspect ratio
+        setImageDimensions({
+          width: Math.round(height * aspectRatio),
+          height,
+        });
+      } else {
+        // Neither width nor height is defined, use default size
+        const imageWidth =
+          aspectRatio > 1 ? DEFAULT_MAX_SIZE : DEFAULT_MAX_SIZE * aspectRatio;
+        const imageHeight =
+          aspectRatio > 1 ? DEFAULT_MAX_SIZE / aspectRatio : DEFAULT_MAX_SIZE;
+
+        setImageDimensions({
+          width: Math.round(imageWidth),
+          height: Math.round(imageHeight),
+        });
+      }
     };
 
     img.onerror = () => {
