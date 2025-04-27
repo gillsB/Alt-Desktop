@@ -483,6 +483,31 @@ const EditIcon: React.FC = () => {
                 }}
               />
             </div>
+            <div className="edit-icon-field">
+              <label htmlFor="icon-width">Icon width</label>
+              <input
+                id="icon-width"
+                type="number"
+                title="Leave blank for default width"
+                value={icon.width}
+                onChange={(e) => {
+                  const updatedValue = e.target.value;
+                  setIcon({
+                    ...icon,
+                    width:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
+                  });
+                  sendPreviewUpdate({
+                    width:
+                      updatedValue === ""
+                        ? undefined
+                        : parseFloat(updatedValue),
+                  });
+                }}
+              />
+            </div>
           </>
         )}
       </div>
