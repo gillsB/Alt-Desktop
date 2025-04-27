@@ -117,12 +117,6 @@ const EditIcon: React.FC = () => {
     if (await window.electron.reloadIcon(icon.row, icon.col)) {
       logger.info("Icon reloaded successfully.");
     }
-    // Update main window as last in focus.
-    // When closing subwindow + smallWindow, focus can get confused since last focus was smallWindow.
-    // This then defaults to OS default which is to focus the last focused window.
-    // This default also skips mainWindow as it is considered the parent window.
-    // So just focus mainWindow to redirect last focus to it.
-    window.electron.requestMainWindowFocus();
 
     // close subwindow
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");

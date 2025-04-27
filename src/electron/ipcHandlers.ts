@@ -119,6 +119,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       switch (payload.action) {
         case "CLOSE_SUBWINDOW":
           logger.info(`SubWindowAction CLOSE_SUBWINDOW`);
+          mainWindow.focus();
           closeActiveSubWindow();
           if (mainWindow) {
             mainWindow.webContents.send("hide-highlight");
@@ -649,18 +650,4 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
-  ipcMainHandle("requestMainWindowFocus", async (): Promise<boolean> => {
-    try {
-      if (mainWindow) {
-        mainWindow.focus();
-        return true;
-      } else {
-        logger.warn("Main window is not available.");
-        return false;
-      }
-    } catch (error) {
-      logger.error(`Error focusing main window: ${error}`);
-      return false;
-    }
-  });
 }
