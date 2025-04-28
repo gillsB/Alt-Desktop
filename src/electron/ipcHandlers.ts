@@ -1,4 +1,4 @@
-import { dialog, ipcMain, shell } from "electron";
+import { dialog, ipcMain, screen, shell } from "electron";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
@@ -198,6 +198,19 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle("getSubWindowState", async (): Promise<boolean> => {
     const subWindow = getActiveSubWindow();
+    if (subWindow) {
+      // Re-center the subwindow
+      const { width, height } = subWindow.getBounds();
+      const { width: screenWidth, height: screenHeight } =
+        screen.getPrimaryDisplay().workAreaSize;
+
+      const x = Math.round((screenWidth - width) / 2);
+      const y = Math.round((screenHeight - height) / 2);
+
+      subWindow.setBounds({ x, y, width, height });
+
+      subWindow.focus();
+    }
     return subWindow !== null; // Return true if a subwindow is active
   });
 
