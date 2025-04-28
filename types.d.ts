@@ -98,6 +98,7 @@ interface Window {
     editIcon: (row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;
+    getSubWindowState: () => Promise<boolean>;
     reloadWindow: () => Promise<boolean>;
     logMessage: (level: string, file: string, message: string) => void;
     openFileDialog: (string) => Promise<string | null>;

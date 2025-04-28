@@ -73,6 +73,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     col: number,
     updates: Partial<DesktopIcon>
   ) => ipcInvoke("previewIconUpdate", row, col, updates),
+  getSubWindowState: () => ipcInvoke("getSubWindowState"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

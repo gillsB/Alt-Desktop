@@ -340,7 +340,11 @@ const DesktopGrid: React.FC = () => {
     );
   };
 
-  const handleEditIcon = (row?: number, col?: number) => {
+  const handleEditIcon = async (row?: number, col?: number) => {
+    if (await window.electron.getSubWindowState()) {
+      logger.info("Subwindow is already open, not opening a new one.");
+      return;
+    }
     if (row !== undefined && col !== undefined) {
       // If row and col are provided, directly call editIcon
       window.electron.ensureDataFolder(row, col);
