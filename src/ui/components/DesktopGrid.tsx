@@ -288,7 +288,10 @@ const DesktopGrid: React.FC = () => {
     });
   };
 
-  const handleDesktopRightClick = (e: React.MouseEvent) => {
+  const handleDesktopRightClick = async (e: React.MouseEvent) => {
+    if (await window.electron.getSubWindowState()) {
+      return;
+    }
     e.preventDefault();
     const { clientX: x, clientY: y } = e;
     // React.MouseEvent returns global coordinates, so we need to adjust them to local coordinates
@@ -326,11 +329,14 @@ const DesktopGrid: React.FC = () => {
     }
   };
 
-  const handleIconRightClick = (
+  const handleIconRightClick = async (
     e: React.MouseEvent,
     row: number,
     col: number
   ) => {
+    if (await window.electron.getSubWindowState()) {
+      return;
+    }
     e.stopPropagation();
     handleRightClick(e, "icon", row, col);
     showHighlightAt(row, col);
