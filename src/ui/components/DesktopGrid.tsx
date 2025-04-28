@@ -289,7 +289,11 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleDesktopRightClick = async (e: React.MouseEvent) => {
-    if (await window.electron.getSubWindowState()) {
+    // If a subwindow is active, do not show the context menu
+    if (await window.electron.isSubWindowActive()) {
+      logger.info(
+        "Subwindow is already open, not opening a new one (DesktopRightClick)."
+      );
       return;
     }
     e.preventDefault();
@@ -334,7 +338,11 @@ const DesktopGrid: React.FC = () => {
     row: number,
     col: number
   ) => {
-    if (await window.electron.getSubWindowState()) {
+    // If a subwindow is active, do not show the context menu
+    if (await window.electron.isSubWindowActive()) {
+      logger.info(
+        "Subwindow is already open, not opening a new one (IconRightClick)."
+      );
       return;
     }
     e.stopPropagation();
@@ -347,7 +355,8 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleEditIcon = async (row?: number, col?: number) => {
-    if (await window.electron.getSubWindowState()) {
+    // If a subwindow is active, do not open a new one
+    if (await window.electron.isSubWindowActive()) {
       logger.info("Subwindow is already open, not opening a new one.");
       return;
     }

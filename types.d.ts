@@ -31,7 +31,6 @@ interface EventParamMapping {
   setIconData: [DesktopIcon];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
   getDesktopIcon: [number, number];
-  getSubWindowState: [];
   reloadIcon: [number, number];
   editIcon: [number, number];
   reloadWindow: [];
@@ -45,6 +44,7 @@ interface EventParamMapping {
   openInExplorer: ["image" | "programLink", string];
   showSmallWindow: [string, string, string[]];
   previewIconUpdate: [number, number, Partial<DesktopIcon>];
+  isSubWindowActive: [];
 }
 
 // The returns from the main process to the renderer
@@ -58,7 +58,6 @@ type EventPayloadMapping = {
   setIconData: boolean;
   sendSubWindowAction: { action: SubWindowAction; icon?: DesktopIcon };
   getDesktopIcon: DesktopIcon | null;
-  getSubWindowState: boolean;
   reloadIcon: boolean;
   editIcon: boolean;
   reloadWindow: boolean;
@@ -73,6 +72,7 @@ type EventPayloadMapping = {
   showSmallWindow: string;
   "button-response": { windowId: number; buttonText: string | null };
   previewIconUpdate: boolean;
+  isSubWindowActive: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -98,7 +98,7 @@ interface Window {
     editIcon: (row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;
-    getSubWindowState: () => Promise<boolean>;
+    subWindowFocus: () => Promise<boolean>;
     reloadWindow: () => Promise<boolean>;
     logMessage: (level: string, file: string, message: string) => void;
     openFileDialog: (string) => Promise<string | null>;

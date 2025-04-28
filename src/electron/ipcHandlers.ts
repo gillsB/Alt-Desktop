@@ -196,9 +196,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
 
-  ipcMainHandle("getSubWindowState", async (): Promise<boolean> => {
+  ipcMainHandle("isSubWindowActive", async (): Promise<boolean> => {
     const subWindow = getActiveSubWindow();
     if (subWindow) {
+      logger.info("Subwindow is active, re-centering it.");
       // Re-center the subwindow
       const { width, height } = subWindow.getBounds();
       const { width: screenWidth, height: screenHeight } =
@@ -210,6 +211,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       subWindow.setBounds({ x, y, width, height });
 
       subWindow.focus();
+    } else {
+      logger.info("No active subwindow found.");
     }
     return subWindow !== null; // Return true if a subwindow is active
   });

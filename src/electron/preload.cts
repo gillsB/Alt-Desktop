@@ -37,7 +37,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   sendSubWindowAction: (action, icon) =>
     ipcSend("sendSubWindowAction", { action, icon }),
   getDesktopIcon: (row, col) => ipcInvoke("getDesktopIcon", row, col),
-  isSubWindowActive: () => ipcInvoke("getSubWindowState"),
+  isSubWindowActive: () => ipcInvoke("isSubWindowActive"),
   reloadIcon: (row, col) => ipcInvoke("reloadIcon", row, col),
   editIcon: (row, col) => ipcInvoke("editIcon", row, col),
   on: (channel: string, callback: (...args: unknown[]) => void) => {
@@ -73,7 +73,6 @@ electron.contextBridge.exposeInMainWorld("electron", {
     col: number,
     updates: Partial<DesktopIcon>
   ) => ipcInvoke("previewIconUpdate", row, col, updates),
-  getSubWindowState: () => ipcInvoke("getSubWindowState"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
