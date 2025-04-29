@@ -5,6 +5,7 @@ import DesktopGrid from "./components/DesktopGrid";
 import EditIcon from "./components/EditIcon";
 import { Header } from "./components/Header";
 import HoverOpacityItem from "./components/HoverOpacityItem";
+import Settings from "./components/Settings";
 import SmallWindow from "./components/SmallWindow";
 import VideoBackground from "./components/VideoBackground";
 
@@ -31,7 +32,7 @@ const App: React.FC = () => {
         {/* Route for the EditIcon and SmallWindow */}
         <Route path="/edit-icon" element={<EditIcon />} />
         <Route path="/small-window" element={<SmallWindow />} />
-        <Route path="/settings" element={<div>Settings</div>} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );
