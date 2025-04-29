@@ -292,7 +292,7 @@ const DesktopGrid: React.FC = () => {
     // If a subwindow is active, do not show the context menu
     if (await window.electron.isSubWindowActive()) {
       logger.info(
-        "Subwindow is already open, not opening a new one (DesktopRightClick)."
+        "Subwindow is open, nulled request for contextMenu (desktop click)."
       );
       return;
     }
@@ -341,7 +341,7 @@ const DesktopGrid: React.FC = () => {
     // If a subwindow is active, do not show the context menu
     if (await window.electron.isSubWindowActive()) {
       logger.info(
-        "Subwindow is already open, not opening a new one (IconRightClick)."
+        "Subwindow is open, nulled request for contextMenu(Icon click)."
       );
       return;
     }

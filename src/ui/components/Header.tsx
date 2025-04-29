@@ -1,8 +1,17 @@
+import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const devMode = process.env.NODE_ENV === "development";
+
+  const settingsClicked = async () => {
+    if (await window.electron.isSubWindowActive()) {
+      return;
+    } else {
+      window.electron.openSettings();
+    }
+  };
   return (
     <header>
       {devMode && (
@@ -27,6 +36,9 @@ export function Header() {
         </div>
       )}
       <div className="window-controls">
+        <button id="settings" onClick={settingsClicked} title="Settings">
+          <Cog6ToothIcon className="settings-icon" />
+        </button>
         <button
           id="minimize"
           onClick={() => window.electron.sendHeaderAction("MINIMIZE")}
