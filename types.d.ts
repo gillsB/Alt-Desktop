@@ -32,6 +32,7 @@ interface EventParamMapping {
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
   getDesktopIcon: [number, number];
   reloadIcon: [number, number];
+  openSettings: [];
   editIcon: [number, number];
   reloadWindow: [];
   openFileDialog: [string];
@@ -59,6 +60,7 @@ type EventPayloadMapping = {
   sendSubWindowAction: { action: SubWindowAction; icon?: DesktopIcon };
   getDesktopIcon: DesktopIcon | null;
   reloadIcon: boolean;
+  openSettings: boolean;
   editIcon: boolean;
   reloadWindow: boolean;
   openFileDialog: string | null;
@@ -95,6 +97,7 @@ interface Window {
     getDesktopIcon: (row: number, col: number) => Promise<DesktopIcon | null>;
     isSubWindowActive: () => Promise<boolean>;
     reloadIcon: (row: number, col: number) => Promise<boolean>;
+    openSettings: () => Promise<boolean>;
     editIcon: (row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;

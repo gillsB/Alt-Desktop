@@ -39,6 +39,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getDesktopIcon: (row, col) => ipcInvoke("getDesktopIcon", row, col),
   isSubWindowActive: () => ipcInvoke("isSubWindowActive"),
   reloadIcon: (row, col) => ipcInvoke("reloadIcon", row, col),
+  openSettings: () => ipcInvoke("openSettings"),
   editIcon: (row, col) => ipcInvoke("editIcon", row, col),
   on: (channel: string, callback: (...args: unknown[]) => void) => {
     electron.ipcRenderer.on(channel, callback);

@@ -258,6 +258,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
+  ipcMainHandle("openSettings", async (): Promise<boolean> => {
+    logger.info("called openSettings");
+    return true;
+  });
+
   ipcMainHandle(
     "editIcon",
     async (row: number, col: number): Promise<boolean> => {
