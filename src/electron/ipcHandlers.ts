@@ -6,6 +6,7 @@ import { getAppDataPath } from "./appDataSetup.js";
 import { DesktopIcon } from "./DesktopIcon.js";
 import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile } from "./logging.js"; // Import the baseLogger directly
+import { openSettingsWindow } from "./settingsWindow.js";
 import {
   closeActiveSubWindow,
   getActiveSubWindow,
@@ -259,8 +260,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
 
   ipcMainHandle("openSettings", async (): Promise<boolean> => {
-    logger.info("called openSettings");
-    return true;
+    try {
+      logger.info(`ipcMainHandle openSettings called`);
+      openSettingsWindow();
+      return true;
+    } catch (error) {
+      logger.error(`Error opening settings window: ${error}`);
+      return false;
+    }
   });
 
   ipcMainHandle(

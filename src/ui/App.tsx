@@ -31,6 +31,7 @@ const App: React.FC = () => {
         {/* Route for the EditIcon and SmallWindow */}
         <Route path="/edit-icon" element={<EditIcon />} />
         <Route path="/small-window" element={<SmallWindow />} />
+        <Route path="/settings" element={<div>Settings</div>} />
       </Routes>
     </Router>
   );
