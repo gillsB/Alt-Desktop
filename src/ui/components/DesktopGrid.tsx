@@ -449,6 +449,15 @@ const DesktopGrid: React.FC = () => {
     setContextMenu(null); // Close the context menu
   };
 
+  const handleOpenSettings = async () => {
+    try {
+      await window.electron.openSettings();
+    } catch (error) {
+      logger.error(`Failed to open settings`, error);
+    }
+    setContextMenu(null);
+  };
+
   const handleLaunchSubmenuClick = async (option: string) => {
     if (contextMenu && contextMenu?.icon) {
       const { name } = contextMenu.icon;
@@ -728,7 +737,9 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-item" onClick={() => handleEditIcon()}>
                 New Icon
               </div>
-              <div className="menu-item">Settings</div>
+              <div className="menu-item" onClick={handleOpenSettings}>
+                Settings
+              </div>
               <div className="menu-item" onClick={handleReloadDesktop}>
                 Reload Desktop
               </div>
