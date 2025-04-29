@@ -145,12 +145,12 @@ const SafeImageComponent: React.FC<{
         // Only width is defined, calculate height based on aspect ratio
         setImageDimensions({
           width,
-          height: Math.round(width / aspectRatio),
+          height: Math.min(Math.round(width / aspectRatio), DEFAULT_MAX_SIZE),
         });
       } else if (height) {
         // Only height is defined, calculate width based on aspect ratio
         setImageDimensions({
-          width: Math.round(height * aspectRatio),
+          width: Math.min(Math.round(height * aspectRatio), DEFAULT_MAX_SIZE),
           height,
         });
       } else {
