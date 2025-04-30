@@ -1,19 +1,3 @@
-export interface DesktopIcon {
-  row: number;
-  col: number;
-  name: string;
-  width?: number;
-  height?: number;
-  offsetX?: number;
-  offsetY?: number;
-  image: string;
-  programLink?: string;
-  args?: string[];
-  websiteLink?: string;
-  fontColor?: string;
-  fontSize?: number;
-}
-
 // Default values for a DesktopIcon
 export const DEFAULT_DESKTOP_ICON: DesktopIcon = {
   row: -1,

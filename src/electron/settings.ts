@@ -43,3 +43,24 @@ export const ensureDefaultSettings = (): void => {
     logger.error("Error ensuring default settings:", error);
   }
 };
+
+export const getSetting = (key: keyof typeof defaultSettings): unknown => {
+  try {
+    const settingsFilePath = getSettingsFilePath();
+    const settings = JSON.parse(fs.readFileSync(settingsFilePath, "utf-8"));
+
+    if (key in settings) {
+      return settings[key];
+    } else if (key in defaultSettings) {
+      return defaultSettings[key];
+    } else {
+      logger.error(
+        `Setting "${key}" not found in settings or defaultSettings.`
+      );
+      return null;
+    }
+  } catch (error) {
+    logger.error("Error retrieving setting:", error);
+    return null;
+  }
+};

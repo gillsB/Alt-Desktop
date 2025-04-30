@@ -2,7 +2,6 @@ import { dialog, ipcMain, screen, shell } from "electron";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
-import { DesktopIcon } from "./DesktopIcon.js";
 import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile } from "./logging.js"; // Import the baseLogger directly
 import { openSettingsWindow } from "./settingsWindow.js";

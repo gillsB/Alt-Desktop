@@ -1,11 +1,18 @@
+import { useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
 import { SubWindowHeader } from "./SubWindowHeader";
 
-const logger = createLogger("EditIcon.tsx");
+const logger = createLogger("Settings.tsx");
 
 const Settings: React.FC = () => {
   logger.info("Settings component rendered");
+
+  // Initialize settings with a default object.
+  // TODO make a useEffect to load it from settings.json later.
+  const [settings, setSettings] = useState<SettingsData>({
+    background: "",
+  });
 
   const handleClose = () => {
     logger.info("Settings window closed");
@@ -13,7 +20,9 @@ const Settings: React.FC = () => {
   };
 
   const handleSave = () => {
-    logger.info("Save button clicked");
+    if (settings) {
+      logger.info("Settings obj:", settings); //just print for now to make sure it works
+    }
   };
 
   return (
@@ -25,8 +34,13 @@ const Settings: React.FC = () => {
           <input
             id="background"
             type="text"
+            value={settings.background}
             onChange={(e) => {
-              logger.info("background field changed", e.target.value);
+              setSettings((prev) => ({
+                ...prev,
+                background: e.target.value, // Update the background field
+              }));
+              logger.info("Background path changed:", e.target.value);
             }}
           />
         </div>

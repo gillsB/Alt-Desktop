@@ -26,6 +26,26 @@ type DesktopIconData = {
   icons: DesktopIcon[];
 };
 
+type SettingsData = {
+  background: string;
+};
+
+type DesktopIcon = {
+  row: number;
+  col: number;
+  name: string;
+  width?: number;
+  height?: number;
+  offsetX?: number;
+  offsetY?: number;
+  image: string;
+  programLink?: string;
+  args?: string[];
+  websiteLink?: string;
+  fontColor?: string;
+  fontSize?: number;
+}
+
 // Items/objects being sent from the renderer to the main process
 interface EventParamMapping {
   statistics: [];

@@ -1,7 +1,7 @@
 import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { DesktopIcon, getDefaultDesktopIcon } from "../../electron/DesktopIcon";
+import { getDefaultDesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
