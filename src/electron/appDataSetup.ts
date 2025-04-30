@@ -1,8 +1,15 @@
 import fs from "fs";
 import path from "path";
 import { createLoggerForFile } from "./logging.js";
-import { ensureFileExists } from "./util.js";
-import { defaultSettings } from "./settings.js";
+import { defaultSettings, ensureDefaultSettings } from "./settings.js";
+import {
+  ensureFileExists,
+  getDataFolderPath,
+  getDesktopIconsFilePath,
+  getDesktopPath,
+  getLogsFolderPath,
+  getSettingsFilePath,
+} from "./util.js";
 
 const logger = createLoggerForFile("appDataSetup.ts");
 
@@ -43,12 +50,11 @@ export const getAppDataPath = (): string => {
  */
 export const ensureAppDataFiles = () => {
   try {
-    const basePath = getAppDataPath();
-    const desktopPath = path.join(basePath, "desktop");
-    const dataFolderPath = path.join(basePath, "data");
-    const logsFolderPath = path.join(basePath, "logs");
-    const desktopIconsFilePath = path.join(desktopPath, "desktopIcons.json");
-    const settingsFilePath = path.join(desktopPath, "settings.json");
+    const desktopPath = getDesktopPath();
+    const dataFolderPath = getDataFolderPath();
+    const logsFolderPath = getLogsFolderPath();
+    const desktopIconsFilePath = getDesktopIconsFilePath();
+    const settingsFilePath = getSettingsFilePath();
 
     // Ensure directories exist
     if (!fs.existsSync(desktopPath)) {
@@ -77,6 +83,7 @@ export const ensureAppDataFiles = () => {
     // Ensure desktopIcons.json exists
     ensureFileExists(desktopIconsFilePath, { icons: [] });
     ensureFileExists(settingsFilePath, defaultSettings);
+    ensureDefaultSettings();
   } catch (error) {
     logger.error("Error ensuring AppData files:", error);
   }

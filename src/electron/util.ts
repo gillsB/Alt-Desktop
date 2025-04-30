@@ -1,7 +1,9 @@
 import { ipcMain, WebContents, WebFrameMain } from "electron";
 import fs from "fs";
+import { getAppDataPath } from "./appDataSetup.js";
 import { createLoggerForFile } from "./logging.js";
 import { getAllowedUrls } from "./subWindowManager.js";
+import path from "path";
 
 const logger = createLoggerForFile("util.ts");
 
@@ -151,4 +153,28 @@ export const ensureFileExists = (
     logger.error("Failed to create file:", filePath, error);
     return false;
   }
+};
+
+export const getBasePath = (): string => {
+  return getAppDataPath();
+};
+
+export const getDesktopPath = (): string => {
+  return path.join(getBasePath(), "desktop");
+};
+
+export const getDataFolderPath = (): string => {
+  return path.join(getBasePath(), "data");
+};
+
+export const getLogsFolderPath = (): string => {
+  return path.join(getBasePath(), "logs");
+};
+
+export const getDesktopIconsFilePath = (): string => {
+  return path.join(getDesktopPath(), "desktopIcons.json");
+};
+
+export const getSettingsFilePath = (): string => {
+  return path.join(getDesktopPath(), "settings.json");
 };
