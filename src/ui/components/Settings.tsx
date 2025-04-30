@@ -12,11 +12,31 @@ const Settings: React.FC = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
 
+  const handleSave = () => {
+    logger.info("Save button clicked");
+  };
+
   return (
     <div className="settings-container">
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
-      <h1>Settings</h1>
-      <p>Settings content goes here.</p>
+      <div className="settings-content">
+        <div className="settings-field">
+          <label htmlFor="background">Icon Name</label>
+          <input
+            id="background"
+            type="text"
+            value={""}
+            onChange={(e) => {
+              logger.info("background field changed", e.target.value);
+            }}
+          />
+        </div>
+      </div>
+      <div className="settings-footer">
+        <button className="save-button" onClick={handleSave}>
+          Save
+        </button>
+      </div>
     </div>
   );
 };

@@ -8,5 +8,7 @@ export function openEditIconWindow(row: number, col: number) {
   };
 
   const subWindowHash = `edit-icon?row=${row}&col=${col}`;
-  openSubWindow(options, subWindowHash, "Edit Icon");
+  const editWindow = openSubWindow(options, subWindowHash, "Edit Icon");
+
+  //editWindow.webContents.openDevTools({ mode: "detach" });
 }

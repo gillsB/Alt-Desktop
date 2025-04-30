@@ -8,5 +8,7 @@ export function openSettingsWindow() {
   };
 
   const subWindowHash = `settings`;
-  openSubWindow(options, subWindowHash, "Settings");
+  const settingsWindow = openSubWindow(options, subWindowHash, "Settings");
+
+  //settingsWindow.webContents.openDevTools({ mode: "detach" });
 }
