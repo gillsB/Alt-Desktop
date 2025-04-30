@@ -21,11 +21,10 @@ const Settings: React.FC = () => {
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
       <div className="settings-content">
         <div className="settings-field">
-          <label htmlFor="background">Icon Name</label>
+          <label htmlFor="background">Background path</label>
           <input
             id="background"
             type="text"
-            value={""}
             onChange={(e) => {
               logger.info("background field changed", e.target.value);
             }}

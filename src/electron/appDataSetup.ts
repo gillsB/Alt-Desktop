@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { createLoggerForFile } from "./logging.js";
 import { ensureFileExists } from "./util.js";
+import { defaultSettings } from "./settings.js";
 
 const logger = createLoggerForFile("appDataSetup.ts");
 
@@ -47,6 +48,7 @@ export const ensureAppDataFiles = () => {
     const dataFolderPath = path.join(basePath, "data");
     const logsFolderPath = path.join(basePath, "logs");
     const desktopIconsFilePath = path.join(desktopPath, "desktopIcons.json");
+    const settingsFilePath = path.join(desktopPath, "settings.json");
 
     // Ensure directories exist
     if (!fs.existsSync(desktopPath)) {
@@ -74,6 +76,7 @@ export const ensureAppDataFiles = () => {
 
     // Ensure desktopIcons.json exists
     ensureFileExists(desktopIconsFilePath, { icons: [] });
+    ensureFileExists(settingsFilePath, defaultSettings);
   } catch (error) {
     logger.error("Error ensuring AppData files:", error);
   }
