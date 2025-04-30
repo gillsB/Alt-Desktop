@@ -1,9 +1,8 @@
 import { ipcMain, WebContents, WebFrameMain } from "electron";
 import fs from "fs";
-import { getAppDataPath } from "./appDataSetup.js";
+import path from "path";
 import { createLoggerForFile } from "./logging.js";
 import { getAllowedUrls } from "./subWindowManager.js";
-import path from "path";
 
 const logger = createLoggerForFile("util.ts");
 
@@ -153,6 +152,22 @@ export const ensureFileExists = (
     logger.error("Failed to create file:", filePath, error);
     return false;
   }
+};
+
+/**
+ * Retrieves the appData path for "AltDesktop" within the user's AppData/Roaming directory.
+ *
+ * @returns {string} The full path ..../AppData/Roaming/AltDesktop
+ * @throws {Error} If the APPDATA environment variable is not in process.env.APPDATA
+ *
+ */
+export const getAppDataPath = (): string => {
+  const appDataPath = process.env.APPDATA;
+  if (!appDataPath) {
+    logger.error("APPDATA environment variable is not set.");
+    throw new Error("APPDATA environment variable is not set.");
+  }
+  return path.join(appDataPath, "AltDesktop");
 };
 
 export const getBasePath = (): string => {

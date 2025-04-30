@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 import { createLoggerForFile } from "./logging.js";
 import { defaultSettings, ensureDefaultSettings } from "./settings.js";
 import {
@@ -12,31 +11,6 @@ import {
 } from "./util.js";
 
 const logger = createLoggerForFile("appDataSetup.ts");
-
-/**
- * Retrieves the appData path for "AltDesktop" within the user's AppData/Roaming directory.
- *
- * @returns {string} The full path ..../AppData/Roaming/AltDesktop
- * @throws {Error} If the APPDATA environment variable is not in process.env.APPDATA
- *
- * @example
- * ```ts
- * try {
- *   const appDataPath = getAppDataPath();
- *   console.log(appDataPath); // Outputs: C:\Users\Username\AppData\Roaming\AltDesktop
- * } catch (error) {
- *   console.error(error.message);
- * }
- * ```
- */
-export const getAppDataPath = (): string => {
-  const appDataPath = process.env.APPDATA;
-  if (!appDataPath) {
-    logger.error("APPDATA environment variable is not set.");
-    throw new Error("APPDATA environment variable is not set.");
-  }
-  return path.join(appDataPath, "AltDesktop");
-};
 
 /**
  * Ensures that necessary AppData directories and files exist in .../AppData/Roaming/AltDesktop/

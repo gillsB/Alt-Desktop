@@ -3,7 +3,7 @@ import path from "path";
 import winston from "winston";
 
 // Configure the log file path
-const logDir = path.join(getAppDataPath(), "logs");
+const logDir = path.join(getAppDataPath(), "logs"); //cannot use util function as this runs before util.
 const logFileName = `main_${new Date().toISOString().replace(/[:.]/g, "-")}.log`;
 const logFile = path.join(logDir, logFileName);
 
@@ -76,6 +76,7 @@ function cleanupOldLogFiles() {
   }
 }
 
+// Must use its own function as appDataSetup.ts is loaded after this file
 function getAppDataPath() {
   const appDataPath = process.env.APPDATA;
   if (!appDataPath) {

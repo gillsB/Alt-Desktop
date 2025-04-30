@@ -2,7 +2,6 @@ import { dialog, ipcMain, screen, shell } from "electron";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
-import { getAppDataPath } from "./appDataSetup.js";
 import { DesktopIcon } from "./DesktopIcon.js";
 import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile } from "./logging.js"; // Import the baseLogger directly
@@ -15,6 +14,9 @@ import {
 } from "./subWindowManager.js";
 import {
   ensureFileExists,
+  getAppDataPath,
+  getDataFolderPath,
+  getDesktopIconsFilePath,
   ipcMainHandle,
   ipcMainOn,
   setSubWindowDevtoolsEnabled,
@@ -25,8 +27,7 @@ const logger = createLoggerForFile("ipcHandlers.ts");
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {
-    const directoryPath = path.join(getAppDataPath(), "desktop");
-    const filePath = path.join(directoryPath, "desktopIcons.json");
+    const filePath = getDesktopIconsFilePath();
 
     try {
       // Read JSON file
@@ -50,17 +51,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "getDesktopIcon",
     async (row: number, col: number): Promise<DesktopIcon | null> => {
-      logger.info("ipcMainHandle getDesktopIcon called");
-      const directoryPath = path.join(getAppDataPath(), "desktop");
-      logger.info(`Directory path: ${directoryPath}`);
-      const filePath = path.join(directoryPath, "desktopIcons.json");
+      const filePath = getDesktopIconsFilePath();
 
       try {
         logger.info(
           `Received request for getDesktopIcon with row: ${row}, col: ${col}`
         );
-        logger.info(`Directory path: ${directoryPath}`);
-        logger.info(`File path: ${filePath}`);
+        logger.info(`DesktopIcons file path: ${filePath}`);
 
         // Read JSON file
         const data = fs.readFileSync(filePath, "utf-8");
@@ -148,9 +145,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "ensureDataFolder",
     async (row: number, col: number): Promise<boolean> => {
       try {
-        const basePath = getAppDataPath();
-        const dataFolderPath = path.join(basePath, "data");
-        const fullPath = path.join(dataFolderPath, `[${row},${col}]`);
+        const fullPath = path.join(getDataFolderPath(), `[${row},${col}]`);
 
         if (!fs.existsSync(fullPath)) {
           logger.info(
@@ -172,8 +167,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("setIconData", async (icon: DesktopIcon): Promise<boolean> => {
     try {
       const { row, col } = icon; // Extract row and col from the icon object
-      const directoryPath = path.join(getAppDataPath(), "desktop");
-      const filePath = path.join(directoryPath, "desktopIcons.json");
+      const filePath = getDesktopIconsFilePath();
 
       logger.info(`Updating icon at [${row},${col}] in ${filePath}`);
       let desktopData: DesktopIconData = { icons: [] };
@@ -234,8 +228,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "reloadIcon",
     async (row: number, col: number): Promise<boolean> => {
-      const directoryPath = path.join(getAppDataPath(), "desktop");
-      const filePath = path.join(directoryPath, "desktopIcons.json");
+      const filePath = getDesktopIconsFilePath();
 
       try {
         // Read JSON file
@@ -343,8 +336,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "saveIconImage",
     async (sourcePath: string, row: number, col: number): Promise<string> => {
-      const basePath = getAppDataPath();
-      const targetDir = path.join(basePath, "data", `[${row},${col}]`);
+      const targetDir = path.join(getDataFolderPath(), `[${row},${col}]`);
 
       const ext = path.extname(sourcePath);
       const baseName = path.basename(sourcePath, ext);
@@ -411,8 +403,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "launchProgram",
     async (row: number, col: number): Promise<boolean> => {
-      const directoryPath = path.join(getAppDataPath(), "desktop");
-      const filePath = path.join(directoryPath, "desktopIcons.json");
+      const filePath = getDesktopIconsFilePath();
 
       try {
         const data = fs.readFileSync(filePath, "utf-8");
@@ -451,8 +442,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "launchWebsite",
     async (row: number, col: number): Promise<boolean> => {
-      const directoryPath = path.join(getAppDataPath(), "desktop");
-      const filePath = path.join(directoryPath, "desktopIcons.json");
+      const filePath = getDesktopIconsFilePath();
 
       try {
         const data = fs.readFileSync(filePath, "utf-8");
@@ -514,13 +504,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "deleteIcon",
     async (row: number, col: number): Promise<boolean> => {
-      const directoryPath = path.join(getAppDataPath(), "desktop");
-      const filePath = path.join(directoryPath, "desktopIcons.json");
-      const iconFolderPath = path.join(
-        getAppDataPath(),
-        "data",
-        `[${row},${col}]`
-      );
+      const filePath = getDesktopIconsFilePath();
+      const iconFolderPath = path.join(getDataFolderPath(), `[${row},${col}]`);
 
       try {
         logger.info(`Deleting icon at [${row}, ${col}] from ${filePath}`);
