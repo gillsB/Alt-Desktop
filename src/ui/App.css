@@ -11,11 +11,11 @@ header {
   height: 2rem;
 }
 
+/* Devtools */
 .menu-container {
   position: relative;
   -webkit-app-region: no-drag;
 }
-
 .menu-button {
   background: none;
   border: none;
@@ -29,7 +29,6 @@ header {
   justify-content: center;
   border-radius: 0;
 }
-
 .dropdown-menu {
   position: absolute;
   top: 2.5rem;
@@ -42,22 +41,40 @@ header {
   border-radius: 0;
   overflow: hidden;
   z-index: 1000;
+  width: 200px;
 }
-
 .dropdown-menu button {
   background: none;
   border: none;
   color: white;
   padding: 0.5rem 1rem;
   text-align: left;
-  width: 100%;
+  width: 85%;
   cursor: pointer;
 }
-
 .dropdown-menu button:hover {
   background: #333;
 }
+.checkbox-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+}
+.checkbox-container label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  color: white;
+  cursor: pointer;
+  flex-grow: 1;
+}
+.checkbox-container input {
+  margin-right: 0.5rem;
+}
 
+/* Header buttons*/
 .window-controls {
   display: flex;
   gap: 0;

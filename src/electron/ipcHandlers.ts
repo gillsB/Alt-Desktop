@@ -13,7 +13,12 @@ import {
   openSmallWindow,
   pendingSmallWindowResponses,
 } from "./subWindowManager.js";
-import { ensureFileExists, ipcMainHandle, ipcMainOn } from "./util.js";
+import {
+  ensureFileExists,
+  ipcMainHandle,
+  ipcMainOn,
+  setSubWindowDevtoolsEnabled,
+} from "./util.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 
 const logger = createLoggerForFile("ipcHandlers.ts");
@@ -110,6 +115,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       case "SHOW_DEVTOOLS":
         logger.info(`HeaderAction SHOW_DEVTOOLS`);
         mainWindow.webContents.openDevTools();
+        break;
+      case "ENABLE_SUBWINDOW_DEVTOOLS":
+        logger.info(`HeaderAction ENABLE_SUBWINDOW_DEVTOOLS`);
+        setSubWindowDevtoolsEnabled(true);
+        break;
+      case "DISABLE_SUBWINDOW_DEVTOOLS":
+        logger.info(`HeaderAction DISABLE_SUBWINDOW_DEVTOOLS`);
+        setSubWindowDevtoolsEnabled(false);
         break;
     }
   });

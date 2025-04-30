@@ -12,7 +12,13 @@ type StaticData = {
 
 type View = "CPU" | "RAM" | "STORAGE";
 
-type HeaderAction = "MINIMIZE" | "MAXIMIZE" | "CLOSE" | "SHOW_DEVTOOLS";
+type HeaderAction =
+  | "MINIMIZE"
+  | "MAXIMIZE"
+  | "CLOSE"
+  | "SHOW_DEVTOOLS"
+  | "ENABLE_SUBWINDOW_DEVTOOLS"
+  | "DISABLE_SUBWINDOW_DEVTOOLS";
 
 type SubWindowAction = "EDIT_ICON" | "CLOSE_SUBWINDOW";
 

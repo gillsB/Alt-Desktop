@@ -5,9 +5,19 @@ import { getAllowedUrls } from "./subWindowManager.js";
 
 const logger = createLoggerForFile("util.ts");
 
+let isSubWindowDevtoolsEnabled = false;
+
 export function isDev(): boolean {
   return process.env.NODE_ENV === "development";
 }
+
+export function setSubWindowDevtoolsEnabled(enabled: boolean): void {
+  isSubWindowDevtoolsEnabled = enabled;
+}
+export function subWindowDevtoolsEnabled(): boolean {
+  return isSubWindowDevtoolsEnabled;
+}
+
 /**
  * Registers an IPC event handler for the specified key.
  *

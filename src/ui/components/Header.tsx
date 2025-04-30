@@ -1,8 +1,13 @@
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
+import { createLogger } from "../util/uiLogger";
+
+const logger = createLogger("Header.tsx");
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [subWindowDevtoolsChecked, setSubWindowDevtoolsChecked] =
+    useState(false); // State for the checkbox
   const devMode = process.env.NODE_ENV === "development";
 
   const settingsClicked = async () => {
@@ -12,6 +17,7 @@ export function Header() {
       window.electron.openSettings();
     }
   };
+
   return (
     <header>
       {devMode && (
@@ -31,6 +37,30 @@ export function Header() {
               >
                 Show Devtools
               </button>
+              <div className="checkbox-container">
+                <label>
+                  Subwindow tools
+                  <input
+                    type="checkbox"
+                    checked={subWindowDevtoolsChecked}
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      setSubWindowDevtoolsChecked(isChecked);
+                      if (isChecked) {
+                        logger.info("Subwindow devtools enabled.");
+                        window.electron.sendHeaderAction(
+                          "ENABLE_SUBWINDOW_DEVTOOLS"
+                        );
+                      } else {
+                        logger.info("Subwindow devtools disabled.");
+                        window.electron.sendHeaderAction(
+                          "DISABLE_SUBWINDOW_DEVTOOLS"
+                        );
+                      }
+                    }}
+                  />
+                </label>
+              </div>
             </div>
           )}
         </div>
