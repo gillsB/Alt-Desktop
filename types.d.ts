@@ -1,15 +1,16 @@
+// These 3 are inactive (originally used in ElectronResources repository).
+// Originally used as a reference for creating ipc calls.
+// Might use them in the future though so their types are still here.
 type Statistics = {
   cpuUsage: number;
   ramUsage: number;
   storageUsage: number;
 };
-
 type StaticData = {
   totalStorage: number;
   cpuModel: string;
   totalMemoryGB: number;
 };
-
 type View = "CPU" | "RAM" | "STORAGE";
 
 type HeaderAction =
@@ -44,7 +45,7 @@ type DesktopIcon = {
   websiteLink?: string;
   fontColor?: string;
   fontSize?: number;
-}
+};
 
 // Items/objects being sent from the renderer to the main process
 interface EventParamMapping {
@@ -72,6 +73,7 @@ interface EventParamMapping {
   showSmallWindow: [string, string, string[]];
   previewIconUpdate: [number, number, Partial<DesktopIcon>];
   isSubWindowActive: [];
+  getSettingsData: [];
 }
 
 // The returns from the main process to the renderer
@@ -101,6 +103,7 @@ type EventPayloadMapping = {
   "button-response": { windowId: number; buttonText: string | null };
   previewIconUpdate: boolean;
   isSubWindowActive: boolean;
+  getSettingsData: SettingsData;
 };
 
 type UnsubscribeFunction = () => void;
@@ -159,5 +162,6 @@ interface Window {
       col: number,
       updates: Partial<DesktopIcon>
     ) => Promise<boolean>;
+    getSettingsData: () => Promise<SettingsData>;
   };
 }

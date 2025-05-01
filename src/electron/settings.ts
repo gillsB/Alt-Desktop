@@ -4,7 +4,6 @@ import { getSettingsFilePath } from "./util.js";
 
 export const defaultSettings = {
   background: "",
-  testKey: "testValue",
 };
 
 const logger = createLoggerForFile("settings.ts");

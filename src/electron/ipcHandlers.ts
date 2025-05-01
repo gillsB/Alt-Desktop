@@ -4,6 +4,7 @@ import mime from "mime-types";
 import path from "path";
 import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile } from "./logging.js"; // Import the baseLogger directly
+import { defaultSettings } from "./settings.js";
 import { openSettingsWindow } from "./settingsWindow.js";
 import {
   closeActiveSubWindow,
@@ -16,6 +17,7 @@ import {
   getAppDataPath,
   getDataFolderPath,
   getDesktopIconsFilePath,
+  getSettingsFilePath,
   ipcMainHandle,
   ipcMainOn,
   setSubWindowDevtoolsEnabled,
@@ -675,4 +677,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle("getSettingsData", async (): Promise<SettingsData> => {
+    try {
+      const settingsFilePath = getSettingsFilePath();
+      const settings = JSON.parse(fs.readFileSync(settingsFilePath, "utf-8"));
+      return settings;
+    } catch (error) {
+      logger.error("Error retrieving settings data:", error);
+      return defaultSettings;
+    }
+  });
 }
