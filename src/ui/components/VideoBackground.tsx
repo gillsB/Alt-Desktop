@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { createLogger } from "../util/uiLogger";
+
+const logger = createLogger("VideoBackground.tsx");
 
 interface VideoBackgroundProps {
-  testMode?: boolean;
   opacity?: number;
   fallbackColor?: string; // Optional prop for the fallback background color
 }
@@ -24,6 +26,22 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
 }) => {
   // State for test mode functionality
   const [videoError, setVideoError] = useState(false); // State to track video load errors
+  const [videoSrc, setVideoSrc] = useState<string | null>("");
+
+  useEffect(() => {
+    const fetchBackgroundSetting = async () => {
+      try {
+        const background = await window.electron.getSetting("background");
+        logger.info("Background setting:", background);
+        setVideoSrc(background || null); // Fallback if not found.
+      } catch (error) {
+        logger.error("Error fetching background setting:", error);
+        setVideoSrc(null); // Fallback on error.
+      }
+    };
+
+    fetchBackgroundSetting();
+  }, []);
 
   const videoStyle: React.CSSProperties = {
     opacity,
@@ -48,7 +66,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   };
 
   // In normal mode, just return the video or fallback background
-  return !videoError ? (
+  return videoSrc && !videoError ? (
     <video
       id="video-bg"
       autoPlay
@@ -57,7 +75,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       style={videoStyle}
       onError={() => setVideoError(true)} // Handle video load error
     >
-      <source src="background.mp4" type="video/mp4" />
+      <source src={videoSrc} type="video/mp4" />
       Browser does not support the video tag.
     </video>
   ) : (
