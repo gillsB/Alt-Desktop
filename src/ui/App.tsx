@@ -23,7 +23,7 @@ const App: React.FC = () => {
               <Header />
               <div className="main">
                 <HoverOpacityItem setVideoOpacity={setVideoOpacity} />
-                <VideoBackground testMode={false} opacity={videoOpacity} />
+                <VideoBackground opacity={videoOpacity} />
                 <DesktopGrid />
               </div>
             </div>
