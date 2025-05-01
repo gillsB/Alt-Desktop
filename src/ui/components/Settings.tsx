@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
+import { showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("Settings.tsx");
 
 const Settings: React.FC = () => {
-  logger.info("Settings component rendered");
-
   // Initialize settings with a default object.
   const [settings, setSettings] = useState<SettingsData | null>(null);
 
@@ -16,9 +15,25 @@ const Settings: React.FC = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (settings) {
-      logger.info("Settings obj:", settings); //just print for now to make sure it works
+      logger.info("Saving settings:", settings);
+      if (await window.electron.saveSettingsData(settings)) {
+        logger.info("Settings saved successfully.");
+        handleClose();
+      } else {
+        logger.error("Failed to save settings.");
+      }
+    } else {
+      logger.error("No settings to save.");
+    }
+    const ret = await showSmallWindow(
+      "Did not save",
+      "Settings did not save correctly, check logs. \nClick yes to continue closing settings.",
+      ["Yes", "No"]
+    );
+    if (ret === "Yes") {
+      handleClose();
     }
   };
 
