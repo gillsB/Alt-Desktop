@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
 import { SubWindowHeader } from "./SubWindowHeader";
@@ -9,10 +9,7 @@ const Settings: React.FC = () => {
   logger.info("Settings component rendered");
 
   // Initialize settings with a default object.
-  // TODO make a useEffect to load it from settings.json later.
-  const [settings, setSettings] = useState<SettingsData>({
-    background: "",
-  });
+  const [settings, setSettings] = useState<SettingsData | null>(null);
 
   const handleClose = () => {
     logger.info("Settings window closed");
@@ -25,6 +22,20 @@ const Settings: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const loadedSettings = await window.electron.getSettingsData();
+        setSettings(loadedSettings);
+        logger.info("Loaded settings:", loadedSettings);
+      } catch (error) {
+        logger.error("Error loading settings:", error);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
   return (
     <div className="settings-container">
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
@@ -34,7 +45,7 @@ const Settings: React.FC = () => {
           <input
             id="background"
             type="text"
-            value={settings.background}
+            value={settings?.background || ""}
             onChange={(e) => {
               setSettings((prev) => ({
                 ...prev,
