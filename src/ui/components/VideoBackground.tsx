@@ -10,30 +10,33 @@ interface VideoBackgroundProps {
 
 /**
  * A React component that renders a video background.
- * - In normal mode, it displays a single looping background video. (background.mp4 in root folder)
- * - In test mode, it provides a toggle button to enable/disable the video and cycle through different the different backgrounds:
- *  "background.mp4" and "background2.mp4" -> "background5.mp4"
+ * - It uses a custom video protocol to securely load videos from any location
  * - If the video fails to load, it falls back to a solid color background.
  *
  * @component
  * @param {number} [opacity=1] - The opacity of the video background.
- * @param {string} [fallbackColor="#000"] - The fallback background color if the video fails to load.
+ * @param {string} [fallbackColor="#87BEC5"] - The fallback background color if the video fails to load.
  * @returns {JSX.Element} The VideoBackground component.
  */
 const VideoBackground: React.FC<VideoBackgroundProps> = ({
   opacity = 1, // Default fully visible
   fallbackColor = "#87BEC5", // Default fallback color
 }) => {
-  // State for test mode functionality
+  // State for video functionality
   const [videoError, setVideoError] = useState(false); // State to track video load errors
-  const [videoSrc, setVideoSrc] = useState<string | null>("");
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBackgroundSetting = async () => {
       try {
         const background = await window.electron.getSetting("background");
         logger.info("Background setting:", background);
-        setVideoSrc(background || null); // Fallback if not found.
+        if (background) {
+          const videoFilePath =
+            await window.electron.convertToVideoFileUrl(background);
+          logger.info("Converted video file path:", videoFilePath);
+          setVideoSrc(videoFilePath);
+        }
       } catch (error) {
         logger.error("Error fetching background setting:", error);
         setVideoSrc(null); // Fallback on error.
@@ -65,7 +68,6 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     opacity,
   };
 
-  // In normal mode, just return the video or fallback background
   return videoSrc && !videoError ? (
     <video
       id="video-bg"
@@ -73,9 +75,19 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       loop
       muted
       style={videoStyle}
-      onError={() => setVideoError(true)} // Handle video load error
+      src={videoSrc ?? undefined}
+      onError={(e) => {
+        const videoElement = e.target as HTMLVideoElement;
+        logger.error("Video load error occurred", {
+          currentSrc: videoElement.currentSrc,
+          networkState: videoElement.networkState,
+          errorCode: videoElement.error?.code,
+          errorMessage: videoElement.error?.message,
+        });
+        setVideoError(true);
+        setVideoSrc(null);
+      }}
     >
-      <source src={videoSrc} type="video/mp4" />
       Browser does not support the video tag.
     </video>
   ) : (

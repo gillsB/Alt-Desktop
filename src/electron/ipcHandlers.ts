@@ -23,6 +23,7 @@ import {
   setSubWindowDevtoolsEnabled,
 } from "./util.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
+import { getVideoFileUrl } from "./videoFileProtocol.js";
 
 const logger = createLoggerForFile("ipcHandlers.ts");
 
@@ -720,4 +721,30 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMain.handle("convertToVideoFileUrl", async (_event, filePath) => {
+    try {
+      // Check if the file exists and is a video
+      if (!fs.existsSync(filePath)) {
+        logger.warn(`Video file does not exist: ${filePath}`);
+        return null;
+      }
+
+      // Check file extension
+      const fileExt = path.extname(filePath).toLowerCase();
+      const allowedExtensions = [".mp4", ".webm", ".mov", ".ogg"];
+
+      if (!allowedExtensions.includes(fileExt)) {
+        logger.warn(`Not a valid video file: ${filePath}`);
+        return null;
+      }
+
+      // Convert to video URL
+      const pathResult = getVideoFileUrl(filePath);
+      logger.info("returning video URL:", pathResult);
+      return pathResult;
+    } catch (error) {
+      logger.error(`Error converting path to video URL: ${error}`);
+      return null;
+    }
+  });
 }

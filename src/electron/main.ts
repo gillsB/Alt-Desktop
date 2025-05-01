@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu, protocol } from "electron";
 import { ensureAppDataFiles } from "./appDataSetup.js";
 import { registerIpcHandlers } from "./ipcHandlers.js";
 import { createLoggerForFile } from "./logging.js";
@@ -7,6 +7,7 @@ import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { getActiveSubWindow } from "./subWindowManager.js";
 import { createTray } from "./tray.js";
 import { isDev } from "./util.js";
+import { registerVideoFileProtocol } from "./videoFileProtocol.js";
 import { handleWindowState, registerWindowKeybinds } from "./windowState.js";
 
 const logger = createLoggerForFile("main.ts");
@@ -14,12 +15,24 @@ const logger = createLoggerForFile("main.ts");
 // This disables the menu completely for all windows (including the sub windows).
 Menu.setApplicationMenu(null);
 
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "video-file",
+    privileges: {
+      bypassCSP: true,
+      stream: true,
+    },
+  },
+]);
+
 app.on("ready", () => {
   ensureAppDataFiles();
   logger.info("App is starting...");
 
   // Register our safe file protocol for loading icons.
   registerSafeFileProtocol("appdata-file");
+
+  registerVideoFileProtocol("video-file");
 
   app.commandLine.appendSwitch("enable-transparent-visuals");
   const mainWindow = new BrowserWindow({

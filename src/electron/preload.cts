@@ -77,6 +77,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getSettingsData: () => ipcInvoke("getSettingsData"),
   saveSettingsData: (data: SettingsData) => ipcInvoke("saveSettingsData", data),
   getSetting: (key: SettingKey) => ipcInvoke("getSetting", key),
+  convertToVideoFileUrl: (filePath) =>
+    ipcInvoke("convertToVideoFileUrl", filePath),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
