@@ -31,6 +31,8 @@ type SettingsData = {
   background: string;
 };
 
+type SettingKey = keyof SettingsData;
+
 type DesktopIcon = {
   row: number;
   col: number;
@@ -75,6 +77,7 @@ interface EventParamMapping {
   isSubWindowActive: [];
   getSettingsData: [];
   saveSettingsData: [SettingsData];
+  getSetting: [SettingKey];
 }
 
 // The returns from the main process to the renderer
@@ -106,6 +109,7 @@ type EventPayloadMapping = {
   isSubWindowActive: boolean;
   getSettingsData: SettingsData;
   saveSettingsData: boolean;
+  getSetting: SettingsData[SettingKey];
 };
 
 type UnsubscribeFunction = () => void;
@@ -166,5 +170,6 @@ interface Window {
     ) => Promise<boolean>;
     getSettingsData: () => Promise<SettingsData>;
     saveSettingsData: (settings: SettingsData) => Promise<boolean>;
+    getSetting<T extends SettingKey>(key: T): Promise<SettingsData[T]>;
   };
 }

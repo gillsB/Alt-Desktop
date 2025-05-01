@@ -705,4 +705,19 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle(
+    "getSetting",
+    async (key: SettingKey): Promise<SettingsData[SettingKey]> => {
+      try {
+        const settingsFilePath = getSettingsFilePath();
+        const settings = JSON.parse(fs.readFileSync(settingsFilePath, "utf-8"));
+        const value =
+          settings[key] !== undefined ? settings[key] : defaultSettings[key];
+        return value; // Return the value as is, without converting to a string
+      } catch (error) {
+        logger.error("Error retrieving setting:", error);
+        return defaultSettings[key]; // Return the default value
+      }
+    }
+  );
 }
