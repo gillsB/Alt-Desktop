@@ -75,6 +75,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     updates: Partial<DesktopIcon>
   ) => ipcInvoke("previewIconUpdate", row, col, updates),
   getSettingsData: () => ipcInvoke("getSettingsData"),
+  saveSettingsData: (data: SettingsData) => ipcInvoke("saveSettingsData", data),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

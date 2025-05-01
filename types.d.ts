@@ -74,6 +74,7 @@ interface EventParamMapping {
   previewIconUpdate: [number, number, Partial<DesktopIcon>];
   isSubWindowActive: [];
   getSettingsData: [];
+  saveSettingsData: [SettingsData];
 }
 
 // The returns from the main process to the renderer
@@ -104,6 +105,7 @@ type EventPayloadMapping = {
   previewIconUpdate: boolean;
   isSubWindowActive: boolean;
   getSettingsData: SettingsData;
+  saveSettingsData: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -163,5 +165,6 @@ interface Window {
       updates: Partial<DesktopIcon>
     ) => Promise<boolean>;
     getSettingsData: () => Promise<SettingsData>;
+    saveSettingsData: (settings: SettingsData) => Promise<boolean>;
   };
 }

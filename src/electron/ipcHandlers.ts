@@ -687,4 +687,22 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return defaultSettings;
     }
   });
+  ipcMainHandle(
+    "saveSettingsData",
+    async (data: SettingsData): Promise<boolean> => {
+      try {
+        const settingsFilePath = getSettingsFilePath();
+        fs.writeFileSync(
+          settingsFilePath,
+          JSON.stringify(data, null, 2),
+          "utf-8"
+        );
+        logger.info("Settings data saved successfully.");
+        return true;
+      } catch (error) {
+        logger.error("Error saving settings data:", error);
+        return false;
+      }
+    }
+  );
 }
