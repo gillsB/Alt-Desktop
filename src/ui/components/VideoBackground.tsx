@@ -69,15 +69,24 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
         logger.info("Background setting:", background);
 
         if (background) {
-          setIsLoading(true);
-          const videoFilePath =
-            await window.electron.convertToVideoFileUrl(background);
-          logger.info("Converted video file path:", videoFilePath);
+          const fileType = await window.electron.getFileType(background);
+          if (fileType === "video/mp4") {
+            setIsLoading(true);
+            const videoFilePath =
+              await window.electron.convertToVideoFileUrl(background);
+            logger.info("Converted video file path:", videoFilePath);
 
-          // Add cache busting parameter to prevent browser caching issues
-          const cacheBuster = Date.now();
-          setVideoSrc(`${videoFilePath}?nocache=${cacheBuster}`);
-          setVideoError(false);
+            // Add cache busting parameter to prevent browser caching issues
+            const cacheBuster = Date.now();
+            setVideoSrc(`${videoFilePath}?nocache=${cacheBuster}`);
+            setVideoError(false);
+          } else {
+            logger.info(
+              `Background ${background} is not a video file, using fallback color.`
+            );
+            setVideoSrc(null);
+            return;
+          }
         }
       } catch (error) {
         logger.error("Error fetching background setting:", error);

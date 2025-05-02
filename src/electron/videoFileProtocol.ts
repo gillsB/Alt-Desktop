@@ -45,29 +45,32 @@ export function registerVideoFileProtocol(
   // Set up periodic performance logging if enabled
   if (options.logPerformance) {
     setInterval(() => {
-      const avgDuration =
-        performanceMetrics.requestDurations.length > 0
-          ? performanceMetrics.requestDurations.reduce(
-              (sum, duration) => sum + duration,
-              0
-            ) / performanceMetrics.requestDurations.length
-          : 0;
+      // Only log metrics if there were valid video requests
+      if (performanceMetrics.totalRequests > 0) {
+        const avgDuration =
+          performanceMetrics.requestDurations.length > 0
+            ? performanceMetrics.requestDurations.reduce(
+                (sum, duration) => sum + duration,
+                0
+              ) / performanceMetrics.requestDurations.length
+            : 0;
 
-      logger.info(
-        "Video protocol performance metrics:",
-        JSON.stringify({
-          totalRequests: performanceMetrics.totalRequests,
-          rangeRequests: performanceMetrics.rangeRequests,
-          fullRequests: performanceMetrics.fullRequests,
-          errors: performanceMetrics.errors,
-          bytesSent: formatBytes(performanceMetrics.bytesSent),
-          avgResponseTime: `${avgDuration.toFixed(2)}ms`,
-          activeHandles: fileHandleCache.size,
-        })
-      );
+        logger.info(
+          "Video protocol performance metrics:",
+          JSON.stringify({
+            totalRequests: performanceMetrics.totalRequests,
+            rangeRequests: performanceMetrics.rangeRequests,
+            fullRequests: performanceMetrics.fullRequests,
+            errors: performanceMetrics.errors,
+            bytesSent: formatBytes(performanceMetrics.bytesSent),
+            avgResponseTime: `${avgDuration.toFixed(2)}ms`,
+            activeHandles: fileHandleCache.size,
+          })
+        );
 
-      // Reset metrics after logging
-      performanceMetrics.requestDurations = [];
+        // Reset metrics after logging
+        performanceMetrics.requestDurations = [];
+      }
     }, 60000); // Log every minute
   }
 
@@ -102,6 +105,17 @@ export function registerVideoFileProtocol(
         return new Response("Not Found", { status: 404 });
       }
 
+      // Security check: File must be a valid video type
+      const ext = path.extname(decodedPath).toLowerCase();
+      const allowedExtensions = [".mp4", ".webm", ".mov", ".ogg"];
+      if (!allowedExtensions.includes(ext)) {
+        logger.warn(`Blocked non-video file request: "${decodedPath}"`);
+        performanceMetrics.errors++;
+        return new Response("Forbidden: Only video files are allowed", {
+          status: 403,
+        });
+      }
+
       // Security check: File must be readable
       try {
         fs.accessSync(decodedPath, fs.constants.R_OK);
@@ -118,7 +132,6 @@ export function registerVideoFileProtocol(
       const fileSize = stat.size;
 
       // Get content type based on file extension
-      const ext = path.extname(decodedPath).toLowerCase();
       let contentType = mime.lookup(ext) || "video/mp4";
 
       // Ensure proper content type for common video formats
