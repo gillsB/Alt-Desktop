@@ -1,5 +1,7 @@
+import { app } from "electron";
 import fs from "fs";
 import { createLoggerForFile } from "./logging.js";
+import { openSmallWindow } from "./subWindowManager.js";
 import { getSettingsFilePath } from "./util.js";
 
 export const defaultSettings = {
@@ -8,6 +10,8 @@ export const defaultSettings = {
 };
 
 const logger = createLoggerForFile("settings.ts");
+
+let pendingSettingsError: string | null = null;
 
 /**
  * Ensures that all default settings exist in the settings file.
@@ -41,8 +45,20 @@ export const ensureDefaultSettings = (): void => {
     }
   } catch (error) {
     logger.error("Error ensuring default settings:", error);
+
+    pendingSettingsError = `Failed to load settings file. ${error}`;
   }
 };
+
+app.on("ready", () => {
+  app.whenReady().then(() => {
+    if (pendingSettingsError) {
+      logger.info("Attempting to show settings error window.");
+      openSmallWindow("Settings Error", pendingSettingsError, ["OK"]);
+      pendingSettingsError = null; // Clear the error after showing the window
+    }
+  });
+});
 
 export const getSetting = (key: keyof typeof defaultSettings): unknown => {
   try {
