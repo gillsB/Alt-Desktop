@@ -3,9 +3,9 @@ import fs from "fs";
 import mime from "mime-types";
 import path from "path";
 import { URL } from "url";
-import { createLoggerForFile } from "./logging.js";
+import { createVideoLoggerForFile } from "./logging.js";
 
-const logger = createLoggerForFile("videoFileProtocol.ts");
+const logger = createVideoLoggerForFile("videoFileProtocol.ts");
 
 // Cache to store open file handles
 const fileHandleCache = new Map();
