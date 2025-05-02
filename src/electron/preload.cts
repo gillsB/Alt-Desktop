@@ -49,7 +49,10 @@ electron.contextBridge.exposeInMainWorld("electron", {
   },
   reloadWindow: () => ipcInvoke("reloadWindow"),
   logMessage: (level: string, file: string, message: string) => {
-    ipcRenderer.send("log-message", { level, file, message });
+    ipcRenderer.send("logMessage", { level, file, message });
+  },
+  logVideoMessage: (level: string, file: string, message: string) => {
+    ipcRenderer.send("logVideoMessage", { level, file, message });
   },
   openFileDialog: (type: string) => ipcInvoke("openFileDialog", type),
   saveIconImage: (sourcePath: string, row: number, col: number) =>
@@ -68,7 +71,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   sendButtonResponse: (payload: {
     windowId: number;
     buttonText: string | null;
-  }) => ipcSend("button-response", payload),
+  }) => ipcSend("buttonResponse", payload),
   previewIconUpdate: (
     row: number,
     col: number,

@@ -3,7 +3,7 @@ import fs from "fs";
 import mime from "mime-types";
 import path from "path";
 import { openEditIconWindow } from "./editIconWindow.js";
-import { baseLogger, createLoggerForFile } from "./logging.js"; // Import the baseLogger directly
+import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { defaultSettings } from "./settings.js";
 import { openSettingsWindow } from "./settingsWindow.js";
 import {
@@ -383,7 +383,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
 
   // Handle log messages from the renderer process
-  ipcMain.on("log-message", (event, { level, file, message }) => {
+  ipcMain.on("logMessage", (event, { level, file, message }) => {
     switch (level) {
       case "info":
         baseLogger.info({ message, file });
@@ -399,6 +399,24 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         break;
       default:
         baseLogger.info({ message, file });
+    }
+  });
+  ipcMain.on("logVideoMessage", (event, { level, file, message }) => {
+    switch (level) {
+      case "info":
+        videoLogger.info({ message, file });
+        break;
+      case "warn":
+        videoLogger.warn({ message, file });
+        break;
+      case "error":
+        videoLogger.error({ message, file });
+        break;
+      case "debug":
+        videoLogger.debug({ message, file });
+        break;
+      default:
+        videoLogger.info({ message, file });
     }
   });
 
@@ -620,7 +638,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
   ipcMainOn(
-    "button-response",
+    "buttonResponse",
     (payload: { windowId: number; buttonText: string | null }) => {
       const { windowId, buttonText } = payload;
 

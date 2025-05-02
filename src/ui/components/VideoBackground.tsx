@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { createLogger } from "../util/uiLogger";
+import { createLogger, createVideoLogger } from "../util/uiLogger";
 
 const logger = createLogger("VideoBackground.tsx");
+const videoLogger = createVideoLogger("VideoBackground.tsx");
 
 interface VideoBackgroundProps {
   opacity?: number;
@@ -67,6 +68,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       try {
         const background = await window.electron.getSetting("background");
         logger.info("Background setting:", background);
+        videoLogger.info("Background setting:", background);
 
         if (background) {
           const fileType = await window.electron.getFileType(background);
@@ -75,6 +77,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
             const videoFilePath =
               await window.electron.convertToVideoFileUrl(background);
             logger.info("Converted video file path:", videoFilePath);
+            videoLogger.info("Converted video file path:", videoFilePath);
 
             // Add cache busting parameter to prevent browser caching issues
             const cacheBuster = Date.now();
@@ -84,12 +87,16 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
             logger.info(
               `Background ${background} is not a video file, using fallback color.`
             );
+            videoLogger.info(
+              `Background ${background} is not a video file, using fallback color.`
+            );
             setVideoSrc(null);
             return;
           }
         }
       } catch (error) {
         logger.error("Error fetching background setting:", error);
+        videoLogger.error("Error fetching background setting:", error);
         setVideoSrc(null);
         setVideoError(true);
         setIsLoading(false);
@@ -121,7 +128,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
         const video = videoRef.current;
         if (!video) return;
 
-        logger.info("Video performance metrics:", {
+        videoLogger.info("Video performance metrics:", {
           bufferingEvents: performanceMetrics.bufferingEvents,
           suspendEvents: performanceMetrics.suspendEvents,
           currentPlaybackTime: video.currentTime,
@@ -152,7 +159,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     if (!video || !videoSrc) return;
 
     const handleCanPlay = () => {
-      logger.info("Video can play");
+      videoLogger.info("Video can play");
       setIsLoading(false);
       setPerformanceMetrics((prev) => ({
         ...prev,
@@ -193,7 +200,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
 
         // Use a small delay to batch potential rapid suspend events
         suspendLogTimerRef.current = setTimeout(() => {
-          logger.info("Multiple video suspends detected", {
+          videoLogger.info("Multiple video suspends detected", {
             suspendCount: currentSuspendCount,
             timeSinceLastSuspend,
             bufferLength: getBufferLength(video),
@@ -205,11 +212,11 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     };
 
     const handlePlay = () => {
-      logger.info("Video playing");
+      videoLogger.info("Video playing");
     };
 
     const handleEnded = () => {
-      logger.info("Video playback ended, preparing to loop");
+      videoLogger.info("Video playback ended, preparing to loop");
 
       try {
         // Some browsers need this explicit loop handling
@@ -218,12 +225,12 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
         // Use requestAnimationFrame for smoother loop transition
         requestAnimationFrame(() => {
           video.play().catch((err) => {
-            logger.warn("Error during loop replay:", err);
+            videoLogger.warn("Error during loop replay:", err);
             handleVideoError("loop");
           });
         });
       } catch (err) {
-        logger.warn("Error during loop handling:", err);
+        videoLogger.warn("Error during loop handling:", err);
         handleVideoError("loop");
       }
     };
@@ -234,7 +241,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
         bufferingEvents: prev.bufferingEvents + 1,
       }));
 
-      logger.info("Video waiting for data", {
+      videoLogger.info("Video waiting for data", {
         currentTime: video.currentTime,
         readyState: video.readyState,
         bufferLength: getBufferLength(video),
@@ -267,10 +274,10 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
             cachingStrategy: "persistent",
           })
           .catch((e: unknown) => {
-            logger.warn("Navigator API failed on attempt:", e);
+            videoLogger.warn("Navigator API failed on attempt:", e);
           });
       } catch (e) {
-        logger.warn("Navigator API not supported:", e);
+        videoLogger.warn("Navigator API not supported:", e);
       }
     }
 
@@ -293,7 +300,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     const video = videoRef.current;
     if (!video) return;
 
-    logger.error(`Video error occurred during ${context}`, {
+    videoLogger.error(`Video error occurred during ${context}`, {
       currentSrc: video.currentSrc,
       networkState: video.networkState,
       errorCode: video.error?.code,
@@ -304,7 +311,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
 
     // If we haven't exceeded max retries, try again
     if (retryCount < maxRetries && videoSrc) {
-      logger.info(`Retrying video load (${retryCount + 1}/${maxRetries})`);
+      videoLogger.info(`Retrying video load (${retryCount + 1}/${maxRetries})`);
       setRetryCount((prev) => prev + 1);
 
       // Force a reload with a new cache buster
@@ -326,6 +333,9 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       }, 1000);
     } else {
       logger.warn(
+        `Max retries (${maxRetries}) reached or no video source. Showing fallback.`
+      );
+      videoLogger.warn(
         `Max retries (${maxRetries}) reached or no video source. Showing fallback.`
       );
       setVideoError(true);
@@ -372,10 +382,10 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
           // Force crossOrigin to anonymous for better browser handling
           crossOrigin="anonymous"
           // Additional event handlers for better debugging and performance logging
-          onLoadStart={() => logger.info("Video load started")}
-          onStalled={() => logger.warn("Video playback stalled")}
+          onLoadStart={() => videoLogger.info("Video load started")}
+          onStalled={() => videoLogger.warn("Video playback stalled")}
           onCanPlayThrough={() => {
-            logger.info("Video can play through without buffering");
+            videoLogger.info("Video can play through without buffering");
             setIsLoading(false);
           }}
         ></video>

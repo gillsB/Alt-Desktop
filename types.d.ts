@@ -105,7 +105,7 @@ type EventPayloadMapping = {
   deleteIcon: boolean;
   openInExplorer: boolean;
   showSmallWindow: string;
-  "button-response": { windowId: number; buttonText: string | null };
+  buttonResponse: { windowId: number; buttonText: string | null };
   previewIconUpdate: boolean;
   isSubWindowActive: boolean;
   getSettingsData: SettingsData;
@@ -141,6 +141,7 @@ interface Window {
     subWindowFocus: () => Promise<boolean>;
     reloadWindow: () => Promise<boolean>;
     logMessage: (level: string, file: string, message: string) => void;
+    logVideoMessage: (level: string, file: string, message: string) => void;
     openFileDialog: (string) => Promise<string | null>;
     saveIconImage: (
       sourcePath: string,
