@@ -51,7 +51,7 @@ export const videoLogger = winston.createLogger({
       maxFiles: 3, // Keep only the last 3 log files
       tailable: false, // Rotate logs by appending to the end
     }),
-    new winston.transports.Console(), // Log to console as well
+    //new winston.transports.Console(), // Log to console as well
   ],
 });
 

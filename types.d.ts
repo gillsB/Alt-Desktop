@@ -29,6 +29,7 @@ type DesktopIconData = {
 
 type SettingsData = {
   background: string;
+  testKey: boolean;
 };
 
 type SettingKey = keyof SettingsData;

@@ -7,7 +7,6 @@ import { SubWindowHeader } from "./SubWindowHeader";
 const logger = createLogger("Settings.tsx");
 
 const Settings: React.FC = () => {
-  // Initialize settings with a default object.
   const [settings, setSettings] = useState<SettingsData | null>(null);
 
   const handleClose = () => {
@@ -51,6 +50,21 @@ const Settings: React.FC = () => {
     loadSettings();
   }, []);
 
+  // Generic function to update a specific field in the settings
+  const updateSetting = <K extends keyof SettingsData>(
+    key: K,
+    value: SettingsData[K]
+  ) => {
+    setSettings((prev) => {
+      if (!prev) return null; // Handle null state gracefully
+      return {
+        ...prev,
+        [key]: value, // Update only the targeted field
+      };
+    });
+    logger.info(`Updated setting "${key}" to:`, value);
+  };
+
   return (
     <div className="settings-container">
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
@@ -61,13 +75,7 @@ const Settings: React.FC = () => {
             id="background"
             type="text"
             value={settings?.background || ""}
-            onChange={(e) => {
-              setSettings((prev) => ({
-                ...prev,
-                background: e.target.value, // Update the background field
-              }));
-              logger.info("Background path changed:", e.target.value);
-            }}
+            onChange={(e) => updateSetting("background", e.target.value)}
           />
         </div>
       </div>

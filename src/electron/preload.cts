@@ -79,7 +79,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   ) => ipcInvoke("previewIconUpdate", row, col, updates),
   getSettingsData: () => ipcInvoke("getSettingsData"),
   saveSettingsData: (data: SettingsData) => ipcInvoke("saveSettingsData", data),
-  getSetting: (key: SettingKey) => ipcInvoke("getSetting", key),
+  getSetting: <T extends SettingKey>(key: T): Promise<SettingsData[T]> =>
+    ipcInvoke("getSetting", key) as Promise<SettingsData[T]>,
   convertToVideoFileUrl: (filePath) =>
     ipcInvoke("convertToVideoFileUrl", filePath),
 } satisfies Window["electron"]);
