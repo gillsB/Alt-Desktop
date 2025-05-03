@@ -57,6 +57,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   openFileDialog: (type: string) => ipcInvoke("openFileDialog", type),
   saveIconImage: (sourcePath: string, row: number, col: number) =>
     ipcInvoke("saveIconImage", sourcePath, row, col),
+  saveBackgroundImage: (sourcePath: string) =>
+    ipcInvoke("saveBackgroundImage", sourcePath),
   launchProgram: (row: number, col: number) =>
     ipcInvoke("launchProgram", row, col),
   launchWebsite: (row: number, col: number) =>

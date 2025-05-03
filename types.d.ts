@@ -68,6 +68,7 @@ interface EventParamMapping {
   reloadWindow: [];
   openFileDialog: [string];
   saveIconImage: [string, number, number];
+  saveBackgroundImage: [string];
   launchProgram: [number, number];
   launchWebsite: [number, number];
   getFilePath: [File];
@@ -101,6 +102,7 @@ type EventPayloadMapping = {
   reloadWindow: boolean;
   openFileDialog: string | null;
   saveIconImage: string;
+  saveBackgroundImage: string;
   launchProgram: boolean;
   launchWebsite: boolean;
   getFilePath: string;
@@ -152,6 +154,7 @@ interface Window {
       row: number,
       col: number
     ) => Promise<string>;
+    saveBackgroundImage: (sourcePath: string) => Promise<string>;
     launchProgram: (row: number, col: number) => Promise<boolean>;
     launchWebsite: (row: number, col: number) => Promise<boolean>;
     getFilePath: (file: File) => string;

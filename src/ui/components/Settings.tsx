@@ -20,22 +20,55 @@ const Settings: React.FC = () => {
   const handleSave = async () => {
     if (settings) {
       logger.info("Saving settings:", settings);
-      if (await window.electron.saveSettingsData(settings)) {
+
+      // Create a copy of the current settings to work with
+      const updatedSettings = { ...settings };
+
+      // Save the image background if it exists
+      if (updatedSettings.imageBackground) {
+        try {
+          const savedPath = await window.electron.saveBackgroundImage(
+            updatedSettings.imageBackground
+          );
+          // Update our local copy rather than the state
+          updatedSettings.imageBackground = savedPath;
+          logger.info(`Image background saved and updated to: ${savedPath}`);
+        } catch (error) {
+          logger.error("Failed to save image background:", error);
+        }
+      }
+
+      logger.info("Saving settings data to file:", updatedSettings);
+
+      // Save the updated settings data
+      if (await window.electron.saveSettingsData(updatedSettings)) {
         logger.info("Settings saved successfully.");
+        // Update the state once after everything is done
+        setSettings(updatedSettings);
         handleClose();
       } else {
         logger.error("Failed to save settings.");
+
+        const ret = await showSmallWindow(
+          "Did not save",
+          "Settings did not save correctly, check logs. \nClick yes to continue closing settings.",
+          ["Yes", "No"]
+        );
+        if (ret === "Yes") {
+          handleClose();
+        }
       }
     } else {
       logger.error("No settings to save.");
-    }
-    const ret = await showSmallWindow(
-      "Did not save",
-      "Settings did not save correctly, check logs. \nClick yes to continue closing settings.",
-      ["Yes", "No"]
-    );
-    if (ret === "Yes") {
-      handleClose();
+
+      const ret = await showSmallWindow(
+        "Did not save",
+        "No settings to save. \nClick yes to continue closing settings.",
+        ["Yes", "No"]
+      );
+      if (ret === "Yes") {
+        handleClose();
+      }
     }
   };
 
@@ -49,7 +82,10 @@ const Settings: React.FC = () => {
         }
       } else if (type === "image") {
         if (filePath) {
+          // For consistency, we'll only update the path here
+          // The actual saving will happen in handleSave
           updateSetting("imageBackground", filePath);
+          logger.info(`Image background path set to: ${filePath}`);
         }
       } else {
         logger.error("Invalid type for file selection:", type);

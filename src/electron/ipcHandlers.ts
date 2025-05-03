@@ -16,6 +16,7 @@ import {
 import {
   ensureFileExists,
   getAppDataPath,
+  getBackgroundFilePath,
   getDataFolderPath,
   getDesktopIconsFilePath,
   getSettingsFilePath,
@@ -350,6 +351,52 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "saveIconImage",
     async (sourcePath: string, row: number, col: number): Promise<string> => {
       const targetDir = path.join(getDataFolderPath(), `[${row},${col}]`);
+
+      const ext = path.extname(sourcePath);
+      const baseName = path.basename(sourcePath, ext);
+
+      // Verify that the source file exists
+      if (!fs.existsSync(sourcePath)) {
+        logger.error(`Source file does not exist: ${sourcePath}`);
+        throw new Error(`Source file does not exist: ${sourcePath}`);
+      }
+
+      // Ensure the target directory exists
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+
+      if (sourcePath.startsWith(targetDir)) {
+        logger.info("Source already in target directory, skipping copy.");
+        return path.basename(sourcePath);
+      }
+
+      let localFileName = `${baseName}${ext}`;
+      let targetPath = path.join(targetDir, localFileName);
+      let counter = 1;
+
+      // Increment filename if it already exists
+      while (fs.existsSync(targetPath)) {
+        localFileName = `${baseName}(${counter})${ext}`;
+        targetPath = path.join(targetDir, localFileName);
+        counter++;
+      }
+
+      try {
+        fs.copyFileSync(sourcePath, targetPath);
+        logger.info(`Image saved to: ${targetPath}`);
+
+        return localFileName;
+      } catch (error) {
+        logger.error("Failed to save image:", error);
+        throw error;
+      }
+    }
+  );
+  ipcMainHandle(
+    "saveBackgroundImage",
+    async (sourcePath: string): Promise<string> => {
+      const targetDir = getBackgroundFilePath();
 
       const ext = path.extname(sourcePath);
       const baseName = path.basename(sourcePath, ext);
