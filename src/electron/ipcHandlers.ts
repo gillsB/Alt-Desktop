@@ -315,26 +315,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             },
           ],
         });
-      } else if (type === "media") {
-        // Video and Images
+      } else if (type === "video") {
         result = await dialog.showOpenDialog({
           properties: ["openFile"],
           filters: [
             {
-              name: "Media",
-              extensions: [
-                "mp4",
-                "webm",
-                "ogg",
-                "mov",
-                "png",
-                "jpg",
-                "jpeg",
-                "gif",
-                "bmp",
-                "svg",
-                "webp",
-              ],
+              name: "Video",
+              extensions: ["mp4", "webm", "ogg", "mov"],
             },
           ],
         });

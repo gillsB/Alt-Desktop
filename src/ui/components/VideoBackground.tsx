@@ -64,18 +64,19 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   }, []);
 
   useEffect(() => {
-    const fetchBackgroundSetting = async () => {
+    const fetchVideoBackgroundSetting = async () => {
       try {
-        const background = await window.electron.getSetting("background");
-        logger.info("Background setting:", background);
-        videoLogger.info("Background setting:", background);
+        const videoBackground =
+          await window.electron.getSetting("videoBackground");
+        logger.info("videoBackground setting:", videoBackground);
+        videoLogger.info("videoBackground setting:", videoBackground);
 
-        if (background) {
-          const fileType = await window.electron.getFileType(background);
+        if (videoBackground) {
+          const fileType = await window.electron.getFileType(videoBackground);
           if (fileType === "video/mp4") {
             setIsLoading(true);
             const videoFilePath =
-              await window.electron.convertToVideoFileUrl(background);
+              await window.electron.convertToVideoFileUrl(videoBackground);
             logger.info("Converted video file path:", videoFilePath);
             videoLogger.info("Converted video file path:", videoFilePath);
 
@@ -85,25 +86,25 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
             setVideoError(false);
           } else {
             logger.info(
-              `Background ${background} is not a video file, using fallback color.`
+              `videoBackground ${videoBackground} is not a video file, using fallback color.`
             );
             videoLogger.info(
-              `Background ${background} is not a video file, using fallback color.`
+              `videoBackground ${videoBackground} is not a video file, using fallback color.`
             );
             setVideoSrc(null);
             return;
           }
         }
       } catch (error) {
-        logger.error("Error fetching background setting:", error);
-        videoLogger.error("Error fetching background setting:", error);
+        logger.error("Error fetching videoBackground setting:", error);
+        videoLogger.error("Error fetching videoBackground setting:", error);
         setVideoSrc(null);
         setVideoError(true);
         setIsLoading(false);
       }
     };
 
-    fetchBackgroundSetting();
+    fetchVideoBackgroundSetting();
   }, []);
 
   // Reset retry count when video source changes

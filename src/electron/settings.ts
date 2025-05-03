@@ -5,7 +5,8 @@ import { openSmallWindow } from "./subWindowManager.js";
 import { getSettingsFilePath } from "./util.js";
 
 export const defaultSettings = {
-  background: "",
+  videoBackground: "",
+  imageBackground: "",
   testKey: true,
 };
 

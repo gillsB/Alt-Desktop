@@ -9,7 +9,7 @@ const logger = createLogger("Settings.tsx");
 
 const Settings: React.FC = () => {
   const [settings, setSettings] = useState<SettingsData | null>(null);
-  const [isHoveringBackground, setHoveringBackground] = useState(false);
+  const [isHoveringVideo, setHoveringVideo] = useState(false);
 
   const handleClose = () => {
     logger.info("Settings window closed");
@@ -40,13 +40,13 @@ const Settings: React.FC = () => {
 
   const handleFileSelect = async (type: string) => {
     try {
-      // Open a file dialog to select an image
+      // Open a file dialog to select a file
       const filePath = await window.electron.openFileDialog(type);
       if (filePath) {
-        updateSetting("background", filePath);
+        updateSetting("videoBackground", filePath);
       }
     } catch (error) {
-      logger.error("Failed to select or save image:", error);
+      logger.error(`Failed to select or save ${type}:`, error);
     }
   };
 
@@ -84,20 +84,20 @@ const Settings: React.FC = () => {
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
       <div className="settings-content">
         <div className="settings-field">
-          <label htmlFor="background">Background path</label>
+          <label htmlFor="video-background">Video Background path</label>
           <input
-            id="background"
+            id="video-background"
             type="text"
-            value={settings?.background || ""}
-            onChange={(e) => updateSetting("background", e.target.value)}
+            value={settings?.videoBackground || ""}
+            onChange={(e) => updateSetting("videoBackground", e.target.value)}
           />
           <button
             className="file-select-button flex items-center gap-2"
-            onClick={() => handleFileSelect("media")}
-            onMouseEnter={() => setHoveringBackground(true)}
-            onMouseLeave={() => setHoveringBackground(false)}
+            onClick={() => handleFileSelect("video")}
+            onMouseEnter={() => setHoveringVideo(true)}
+            onMouseLeave={() => setHoveringVideo(false)}
           >
-            {isHoveringBackground ? (
+            {isHoveringVideo ? (
               <FolderOpenIcon className="custom-folder-icon" />
             ) : (
               <FolderIcon className="custom-folder-icon" />

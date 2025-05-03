@@ -3,7 +3,7 @@ import { isDev, subWindowDevtoolsEnabled } from "./util.js";
 
 export function openSettingsWindow() {
   const options = {
-    width: 500,
+    width: 600,
     height: 660,
     frame: false,
   };

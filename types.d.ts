@@ -28,7 +28,8 @@ type DesktopIconData = {
 };
 
 type SettingsData = {
-  background: string;
+  videoBackground: string;
+  imageBackground: string;
   testKey: boolean;
 };
 
