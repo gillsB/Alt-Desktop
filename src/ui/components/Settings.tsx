@@ -42,7 +42,9 @@ const Settings: React.FC = () => {
     try {
       // Open a file dialog to select an image
       const filePath = await window.electron.openFileDialog(type);
-      logger.info("Selected file path:", filePath);
+      if (filePath) {
+        updateSetting("background", filePath);
+      }
     } catch (error) {
       logger.error("Failed to select or save image:", error);
     }
