@@ -10,6 +10,7 @@ const logger = createLogger("Settings.tsx");
 const Settings: React.FC = () => {
   const [settings, setSettings] = useState<SettingsData | null>(null);
   const [isHoveringVideo, setHoveringVideo] = useState(false);
+  const [isHoveringImage, setHoveringImage] = useState(false);
 
   const handleClose = () => {
     logger.info("Settings window closed");
@@ -42,8 +43,16 @@ const Settings: React.FC = () => {
     try {
       // Open a file dialog to select a file
       const filePath = await window.electron.openFileDialog(type);
-      if (filePath) {
-        updateSetting("videoBackground", filePath);
+      if (type === "video") {
+        if (filePath) {
+          updateSetting("videoBackground", filePath);
+        }
+      } else if (type === "image") {
+        if (filePath) {
+          updateSetting("imageBackground", filePath);
+        }
+      } else {
+        logger.error("Invalid type for file selection:", type);
       }
     } catch (error) {
       logger.error(`Failed to select or save ${type}:`, error);
@@ -98,6 +107,27 @@ const Settings: React.FC = () => {
             onMouseLeave={() => setHoveringVideo(false)}
           >
             {isHoveringVideo ? (
+              <FolderOpenIcon className="custom-folder-icon" />
+            ) : (
+              <FolderIcon className="custom-folder-icon" />
+            )}
+          </button>
+        </div>
+        <div className="settings-field">
+          <label htmlFor="image-background">Image Background path</label>
+          <input
+            id="image-background"
+            type="text"
+            value={settings?.imageBackground || ""}
+            onChange={(e) => updateSetting("imageBackground", e.target.value)}
+          />
+          <button
+            className="file-select-button flex items-center gap-2"
+            onClick={() => handleFileSelect("image")}
+            onMouseEnter={() => setHoveringImage(true)}
+            onMouseLeave={() => setHoveringImage(false)}
+          >
+            {isHoveringImage ? (
               <FolderOpenIcon className="custom-folder-icon" />
             ) : (
               <FolderIcon className="custom-folder-icon" />
