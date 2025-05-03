@@ -4,6 +4,7 @@ import mime from "mime-types";
 import path from "path";
 import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
+import { getSafeFileUrl } from "./safeFileProtocol.js";
 import { defaultSettings } from "./settings.js";
 import { openSettingsWindow } from "./settingsWindow.js";
 import {
@@ -769,6 +770,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       // Convert to video URL
       const pathResult = getVideoFileUrl(filePath);
       logger.info("returning video URL:", pathResult);
+      return pathResult;
+    } catch (error) {
+      logger.error(`Error converting path to video URL: ${error}`);
+      return null;
+    }
+  });
+  ipcMain.handle("getBackgroundImagePath", async (_event, filePath) => {
+    try {
+      // Check file extension
+      const fileExt = path.extname(filePath).toLowerCase();
+      const allowedExtensions = [
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".bmp",
+        ".svg",
+        ".webp",
+        ".lnk",
+      ];
+
+      if (!allowedExtensions.includes(fileExt)) {
+        logger.warn(`Not a valid image file: ${filePath}`);
+        return null;
+      }
+
+      // Convert to video URL
+      const pathRelative = path.join("/background", filePath);
+      const pathResult = getSafeFileUrl(pathRelative);
+      logger.info("returning image URL:", pathResult);
       return pathResult;
     } catch (error) {
       logger.error(`Error converting path to video URL: ${error}`);

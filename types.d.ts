@@ -81,6 +81,7 @@ interface EventParamMapping {
   saveSettingsData: [SettingsData];
   getSetting: [SettingKey];
   convertToVideoFileUrl: [string];
+  getBackgroundImagePath: [string];
 }
 
 // The returns from the main process to the renderer
@@ -114,6 +115,7 @@ type EventPayloadMapping = {
   saveSettingsData: boolean;
   getSetting: SettingsData[SettingKey];
   convertToVideoFileUrl: string | null;
+  getBackgroundImagePath: string | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -177,5 +179,6 @@ interface Window {
     saveSettingsData: (settings: SettingsData) => Promise<boolean>;
     getSetting<T extends SettingKey>(key: T): Promise<SettingsData[T]>;
     convertToVideoFileUrl: (filePath: string) => Promise<string | null>;
+    getBackgroundImagePath: (filePath: string) => Promise<string | null>;
   };
 }

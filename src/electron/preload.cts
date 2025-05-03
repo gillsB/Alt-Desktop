@@ -83,6 +83,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("getSetting", key) as Promise<SettingsData[T]>,
   convertToVideoFileUrl: (filePath) =>
     ipcInvoke("convertToVideoFileUrl", filePath),
+  getBackgroundImagePath: (filePath) =>
+    ipcInvoke("getBackgroundImagePath", filePath),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

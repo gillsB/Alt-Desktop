@@ -193,3 +193,7 @@ export const getDesktopIconsFilePath = (): string => {
 export const getSettingsFilePath = (): string => {
   return path.join(getDesktopPath(), "settings.json");
 };
+
+export const getBackgroundFilePath = (): string => {
+  return path.join(getBasePath(), "background");
+};

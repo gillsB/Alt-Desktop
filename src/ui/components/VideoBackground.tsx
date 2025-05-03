@@ -11,13 +11,14 @@ interface VideoBackgroundProps {
 }
 
 /**
- * A React component that renders a video background.
- * - It uses a custom video protocol to securely load videos from any location
- * - If the video fails to load, it falls back to a solid color background.
+ * A React component that renders a background with fallback options.
+ * - First attempts to use a video background
+ * - If video fails, falls back to an image background
+ * - If both fail, uses a solid color background
  *
  * @component
- * @param {number} [opacity=1] - The opacity of the video background.
- * @param {string} [fallbackColor="#87BEC5"] - The fallback background color if the video fails to load.
+ * @param {number} [opacity=1] - The opacity of the background.
+ * @param {string} [fallbackColor="#87BEC5"] - The fallback background color if both video and image fail.
  * @param {string} [logLevel="normal"] - Controls verbosity of video events logging.
  * @returns {JSX.Element} The VideoBackground component.
  */
@@ -26,9 +27,11 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   fallbackColor = "#87BEC5",
   logLevel = "normal",
 }) => {
-  // State for video functionality
+  // State for background functionality
   const [videoError, setVideoError] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [suspendCount, setSuspendCount] = useState(0);
@@ -39,6 +42,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     lastSuspendTime: 0,
   });
   const videoRef = useRef<HTMLVideoElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
   const metricsIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const suspendLogThresholdRef = useRef<number>(10); // Log after this many suspend events
@@ -64,8 +68,9 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   }, []);
 
   useEffect(() => {
-    const fetchVideoBackgroundSetting = async () => {
+    const fetchBackgroundSettings = async () => {
       try {
+        // First check for video background
         const videoBackground =
           await window.electron.getSetting("videoBackground");
         logger.info("videoBackground setting:", videoBackground);
@@ -84,27 +89,57 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
             const cacheBuster = Date.now();
             setVideoSrc(`${videoFilePath}?nocache=${cacheBuster}`);
             setVideoError(false);
+            return; // Exit early if we have a valid video
           } else {
             logger.info(
-              `videoBackground ${videoBackground} is not a video file, using fallback color.`
+              `videoBackground ${videoBackground} is not a video file, checking for image fallback.`
             );
             videoLogger.info(
-              `videoBackground ${videoBackground} is not a video file, using fallback color.`
+              `videoBackground ${videoBackground} is not a video file, checking for image fallback.`
             );
             setVideoSrc(null);
-            return;
+            setVideoError(true);
           }
+        } else {
+          // No video setting found
+          setVideoError(true);
+          setVideoSrc(null);
+        }
+
+        // If we get here, video failed or doesn't exist, check for image background
+        const imageBackground =
+          await window.electron.getSetting("imageBackground");
+        logger.info("imageBackground setting:", imageBackground);
+        const imageFilePath =
+          await window.electron.getBackgroundImagePath(imageBackground);
+        logger.info("Converted image file path:", imageFilePath);
+
+        if (imageBackground) {
+          logger.info("Converted image file path:", imageFilePath);
+
+          // Add cache busting parameter
+          const cacheBuster = Date.now();
+          setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
+          setImageError(false);
+          setIsLoading(false);
+        } else {
+          // No image setting found
+          setImageError(true);
+          setImageSrc(null);
+          setIsLoading(false);
         }
       } catch (error) {
-        logger.error("Error fetching videoBackground setting:", error);
-        videoLogger.error("Error fetching videoBackground setting:", error);
+        logger.error("Error fetching background settings:", error);
+        videoLogger.error("Error fetching background settings:", error);
         setVideoSrc(null);
+        setImageSrc(null);
         setVideoError(true);
+        setImageError(true);
         setIsLoading(false);
       }
     };
 
-    fetchVideoBackgroundSetting();
+    fetchBackgroundSettings();
   }, []);
 
   // Reset retry count when video source changes
@@ -334,14 +369,54 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       }, 1000);
     } else {
       logger.warn(
-        `Max retries (${maxRetries}) reached or no video source. Showing fallback.`
+        `Max retries (${maxRetries}) reached or no video source. Trying image fallback.`
       );
       videoLogger.warn(
-        `Max retries (${maxRetries}) reached or no video source. Showing fallback.`
+        `Max retries (${maxRetries}) reached or no video source. Trying image fallback.`
       );
       setVideoError(true);
+      checkImageBackground();
+    }
+  };
+
+  // Function to check for an image background when video fails
+  const checkImageBackground = async () => {
+    try {
+      // Check for image background if not already checked
+      if (!imageSrc) {
+        const localizedPath =
+          await window.electron.getSetting("imageBackground");
+        const imageBackground =
+          await window.electron.getBackgroundImagePath(localizedPath);
+        logger.info("Falling back to imageBackground:", imageBackground);
+
+        if (imageBackground) {
+          const imageFilePath =
+            await window.electron.getBackgroundImagePath(imageBackground);
+          logger.info("Converted image file path:", imageFilePath);
+
+          // Add cache busting parameter
+          const cacheBuster = Date.now();
+          setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
+          setImageError(false);
+        } else {
+          setImageError(true);
+        }
+      }
+      setIsLoading(false);
+    } catch (error) {
+      logger.error("Error fetching image background:", error);
+      setImageSrc(null);
+      setImageError(true);
       setIsLoading(false);
     }
+  };
+
+  // Handle image error
+  const handleImageError = () => {
+    logger.error("Image failed to load, using fallback color");
+    setImageError(true);
+    setIsLoading(false);
   };
 
   const videoStyle: React.CSSProperties = {
@@ -357,6 +432,19 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     zIndex: -1,
   };
 
+  const imageStyle: React.CSSProperties = {
+    opacity: isLoading ? 0 : opacity, // Hide image until it's ready
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    pointerEvents: "none", // Prevent interaction with the image
+    background: "transparent",
+    zIndex: -1,
+  };
+
   const fallbackStyle: React.CSSProperties = {
     backgroundColor: fallbackColor,
     position: "absolute",
@@ -368,33 +456,48 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     zIndex: -1,
   };
 
-  return (
-    <>
-      {videoSrc && !videoError ? (
-        <video
-          id="video-bg"
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          style={videoStyle}
-          src={videoSrc ?? undefined}
-          onError={() => handleVideoError("initial")}
-          // Force crossOrigin to anonymous for better browser handling
-          crossOrigin="anonymous"
-          // Additional event handlers for better debugging and performance logging
-          onLoadStart={() => videoLogger.info("Video load started")}
-          onStalled={() => videoLogger.warn("Video playback stalled")}
-          onCanPlayThrough={() => {
-            videoLogger.info("Video can play through without buffering");
-            setIsLoading(false);
-          }}
-        ></video>
-      ) : (
-        <div style={fallbackStyle}></div>
-      )}
-    </>
-  );
+  // Case 1: Video is available and working
+  if (videoSrc && !videoError) {
+    return (
+      <video
+        id="video-bg"
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        loop
+        style={videoStyle}
+        src={videoSrc}
+        onError={() => handleVideoError("initial")}
+        // Force crossOrigin to anonymous for better browser handling
+        crossOrigin="anonymous"
+        // Additional event handlers for better debugging and performance logging
+        onLoadStart={() => videoLogger.info("Video load started")}
+        onStalled={() => videoLogger.warn("Video playback stalled")}
+        onCanPlayThrough={() => {
+          videoLogger.info("Video can play through without buffering");
+          setIsLoading(false);
+        }}
+      ></video>
+    );
+  }
+
+  // Case 2: Video failed, try image background
+  if (imageSrc && !imageError) {
+    return (
+      <img
+        id="image-bg"
+        ref={imageRef}
+        src={imageSrc}
+        style={imageStyle}
+        onError={handleImageError}
+        alt="Background"
+      />
+    );
+  }
+
+  // Case 3: Both video and image failed or don't exist, use fallback color
+  return <div style={fallbackStyle}></div>;
 };
 
 export default VideoBackground;
