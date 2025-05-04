@@ -7,7 +7,7 @@ import { Header } from "./components/Header";
 import HoverOpacityItem from "./components/HoverOpacityItem";
 import Settings from "./components/Settings";
 import SmallWindow from "./components/SmallWindow";
-import VideoBackground from "./components/VideoBackground";
+import VideoBackground from "./components/Background";
 
 const App: React.FC = () => {
   const [videoOpacity, setVideoOpacity] = useState(1);
