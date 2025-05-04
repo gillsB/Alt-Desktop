@@ -411,12 +411,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
       }
-
+      // If path already from background directory just return it.
       if (sourcePath.startsWith(targetDir)) {
         logger.info("Source already in target directory, skipping copy.");
         return path.basename(sourcePath);
       }
 
+      // Check for existing files with the same name or name with a counter
+      const filesInDir = fs.readdirSync(targetDir);
+      for (const file of filesInDir) {
+        const fileExt = path.extname(file);
+        const fileBaseName = path.basename(file, fileExt);
+
+        // Match files with the same base name or base name with a counter
+        const baseNameRegex = new RegExp(`^${baseName}(\\(\\d+\\))?$`);
+        if (baseNameRegex.test(fileBaseName) && fileExt === ext) {
+          const existingFilePath = path.join(targetDir, file);
+
+          // Compare the two files to see if they are the same
+          if (
+            fs
+              .readFileSync(sourcePath)
+              .equals(fs.readFileSync(existingFilePath))
+          ) {
+            logger.info(`Matching file found: ${file}`);
+            return file; // Return the matching file's name
+          }
+        }
+      }
+
+      // If no matching file is found, copy the file
       let localFileName = `${baseName}${ext}`;
       let targetPath = path.join(targetDir, localFileName);
       let counter = 1;
