@@ -9,6 +9,9 @@ const logger = createLogger("Settings.tsx");
 
 const Settings: React.FC = () => {
   const [settings, setSettings] = useState<SettingsData | null>(null);
+  const [initialSettings, setInitialSettings] = useState<SettingsData | null>(
+    null
+  );
   const [isHoveringVideo, setHoveringVideo] = useState(false);
   const [isHoveringImage, setHoveringImage] = useState(false);
 
@@ -18,6 +21,11 @@ const Settings: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (!getChanges()) {
+      logger.info("No changes detected, closing settings.");
+      handleClose();
+      return;
+    }
     if (settings) {
       logger.info("Saving settings:", settings);
 
@@ -95,11 +103,20 @@ const Settings: React.FC = () => {
     }
   };
 
+  const getChanges = (): boolean => {
+    if (!settings || !initialSettings) return false; // No changes if one corrupts
+    const changesMade =
+      JSON.stringify(settings) !== JSON.stringify(initialSettings);
+    logger.info("Changes detected");
+    return changesMade;
+  };
+
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const loadedSettings = await window.electron.getSettingsData();
         setSettings(loadedSettings);
+        setInitialSettings(loadedSettings);
         logger.info("Loaded settings:", loadedSettings);
       } catch (error) {
         logger.error("Error loading settings:", error);
