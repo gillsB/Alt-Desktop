@@ -53,6 +53,10 @@ const Settings: React.FC = () => {
         logger.info("Settings saved successfully.");
         // Update the state once after everything is done
         setSettings(updatedSettings);
+        // Reload the background if background value changes were made
+        if (getSpecificChanges(["videoBackground", "imageBackground"])) {
+          await window.electron.reloadBackground();
+        }
         handleClose();
       } else {
         logger.error("Failed to save settings.");
@@ -109,6 +113,23 @@ const Settings: React.FC = () => {
       JSON.stringify(settings) !== JSON.stringify(initialSettings);
     logger.info("Changes detected");
     return changesMade;
+  };
+
+  const getSpecificChanges = (keys: (keyof SettingsData)[]): boolean => {
+    if (!settings || !initialSettings) return false; // No changes if one corrupts
+
+    for (const key of keys) {
+      if (settings[key] !== initialSettings[key]) {
+        logger.info(`Change detected for key "${key}":`, {
+          initial: initialSettings[key],
+          current: settings[key],
+        });
+        return true; // Return true as soon as a change is detected
+      }
+    }
+
+    logger.info("No changes detected for specified keys:", keys);
+    return false; // Return false if no changes are detected
   };
 
   useEffect(() => {
