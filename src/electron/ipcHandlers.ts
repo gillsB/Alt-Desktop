@@ -868,7 +868,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
 
       // Convert to video URL
-      const pathRelative = path.join("/background", filePath);
+      const pathRelative = path.join("/backgrounds", filePath);
       const pathResult = getSafeFileUrl(pathRelative);
       logger.info("returning image URL:", pathResult);
       return pathResult;

@@ -195,5 +195,5 @@ export const getSettingsFilePath = (): string => {
 };
 
 export const getBackgroundFilePath = (): string => {
-  return path.join(getBasePath(), "background");
+  return path.join(getBasePath(), "backgrounds");
 };
