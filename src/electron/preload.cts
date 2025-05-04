@@ -87,6 +87,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("convertToVideoFileUrl", filePath),
   getBackgroundImagePath: (filePath) =>
     ipcInvoke("getBackgroundImagePath", filePath),
+  reloadBackground: () => ipcInvoke("reloadBackground"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

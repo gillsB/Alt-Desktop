@@ -138,8 +138,18 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
         setIsLoading(false);
       }
     };
-
     fetchBackgroundSettings();
+
+    const handleReload = () => {
+      logger.info("Received reload event, reloading background settings...");
+      fetchBackgroundSettings(); // Re-fetch the background settings
+    };
+
+    window.electron.on("reloadBackground", handleReload);
+
+    return () => {
+      window.electron.off("reloadBackground", handleReload);
+    };
   }, []);
 
   // Reset retry count when video source changes

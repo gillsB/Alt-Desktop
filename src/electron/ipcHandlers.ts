@@ -877,4 +877,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return null;
     }
   });
+  ipcMainHandle("reloadBackground", async () => {
+    try {
+      logger.info("Sending reloadBackground event to renderer...");
+      mainWindow.webContents.send("reloadBackground");
+      return true;
+    } catch (error) {
+      logger.error("Failed to send reloadBackground event:", error);
+      return false;
+    }
+  });
 }
