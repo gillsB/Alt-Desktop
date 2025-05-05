@@ -821,7 +821,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
-  ipcMain.handle("convertToVideoFileUrl", async (_event, filePath) => {
+  ipcMainHandle("convertToVideoFileUrl", async (filePath: string) => {
     try {
       // Check if the file exists and is a video
       if (!fs.existsSync(filePath)) {
@@ -847,7 +847,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return null;
     }
   });
-  ipcMain.handle("getBackgroundImagePath", async (_event, filePath) => {
+  ipcMainHandle("getBackgroundImagePath", async (filePath: string) => {
     try {
       // Check file extension
       const fileExt = path.extname(filePath).toLowerCase();
