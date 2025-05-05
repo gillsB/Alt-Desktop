@@ -522,6 +522,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         if (!icon.programLink) {
           logger.warn(`No programLink found for icon at [${row}, ${col}]`);
+          openSmallWindow(
+            "No program",
+            `No program path set for icon: ${icon.name}`,
+            ["OK"]
+          );
           return false;
         }
 
@@ -529,6 +534,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         if (!fs.existsSync(launchPath)) {
           logger.warn(`Launch path does not exist: ${launchPath}`);
+          openSmallWindow(
+            "File not exist",
+            `failed to launch ${launchPath} as it does not exist`,
+            ["OK"]
+          );
           return false;
         }
 
