@@ -1,5 +1,5 @@
 import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
@@ -14,6 +14,9 @@ const Settings: React.FC = () => {
   );
   const [isHoveringVideo, setHoveringVideo] = useState(false);
   const [isHoveringImage, setHoveringImage] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const dragCounter = useRef(0);
 
   const handleClose = () => {
     logger.info("Settings window closed");
@@ -162,8 +165,73 @@ const Settings: React.FC = () => {
     logger.info(`Updated setting "${key}" to:`, value);
   };
 
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounter.current++;
+
+    if (dragCounter.current === 1) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounter.current--;
+
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    dragCounter.current = 0;
+    setIsDragging(false);
+
+    const files = event.dataTransfer.files[0];
+    const filePath = window.electron.getFilePath(files);
+    const fileType = await window.electron.getFileType(filePath);
+
+    logger.info("Dropped file path:", filePath);
+    logger.info("Dropped file type:", fileType);
+
+    if (fileType.startsWith("image/")) {
+      logger.info("Dropped file is an image. Updating image background...");
+      setSettings((prev) =>
+        prev ? { ...prev, imageBackground: filePath } : null
+      );
+    } else if (fileType.startsWith("video/")) {
+      logger.info("Dropped file is a video. Updating video background...");
+      setSettings((prev) =>
+        prev ? { ...prev, videoBackground: filePath } : null
+      );
+    } else {
+      logger.warn("Dropped file is neither an image nor a video.");
+      showSmallWindow(
+        "Invalid File Type",
+        "Dropped file is neither image nor video, and will not be used.",
+        ["OK"]
+      );
+    }
+  };
+
   return (
-    <div className="settings-container">
+    <div
+      className="settings-container"
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleFileDrop}
+    >
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
       <div className="settings-content">
         <div className="settings-field">
@@ -209,6 +277,14 @@ const Settings: React.FC = () => {
           </button>
         </div>
       </div>
+      {isDragging && (
+        <div className="drag-overlay">
+          <div className="drag-content">
+            <div className="drag-icon">+</div>
+            <div className="drag-text">Drop image or video file here.</div>
+          </div>
+        </div>
+      )}
       <div className="settings-footer">
         <button className="save-button" onClick={handleSave}>
           Save

@@ -562,6 +562,7 @@ body,
   justify-content: center;
   gap: 10px;
   margin-top: 20px;
+  user-select: none;
 }
 
 .small-window-button {
