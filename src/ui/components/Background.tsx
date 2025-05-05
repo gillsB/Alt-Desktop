@@ -78,7 +78,8 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
 
         if (videoBackground) {
           const fileType = await window.electron.getFileType(videoBackground);
-          if (fileType === "video/mp4") {
+          logger.info("Video attempt File type:", fileType);
+          if (fileType.startsWith("video")) {
             setIsLoading(true);
             const videoFilePath =
               await window.electron.convertToVideoFileUrl(videoBackground);

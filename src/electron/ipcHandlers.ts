@@ -323,7 +323,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           filters: [
             {
               name: "Video",
-              extensions: ["mp4", "webm", "ogg", "mov"],
+              extensions: ["mp4", "webm", "ogg", "mov", "mkv"],
             },
           ],
         });
@@ -831,7 +831,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       // Check file extension
       const fileExt = path.extname(filePath).toLowerCase();
-      const allowedExtensions = [".mp4", ".webm", ".mov", ".ogg"];
+      const allowedExtensions = [".mp4", ".webm", ".mov", ".ogg", ".mkv"];
 
       if (!allowedExtensions.includes(fileExt)) {
         logger.warn(`Not a valid video file: ${filePath}`);

@@ -107,7 +107,7 @@ export function registerVideoFileProtocol(
 
       // Security check: File must be a valid video type
       const ext = path.extname(decodedPath).toLowerCase();
-      const allowedExtensions = [".mp4", ".webm", ".mov", ".ogg"];
+      const allowedExtensions = [".mp4", ".webm", ".mov", ".ogg", ".mkv"];
       if (!allowedExtensions.includes(ext)) {
         logger.warn(`Blocked non-video file request: "${decodedPath}"`);
         performanceMetrics.errors++;
