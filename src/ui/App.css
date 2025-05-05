@@ -94,6 +94,7 @@ header {
   align-items: center;
   justify-content: center;
   -webkit-app-region: no-drag;
+  user-select: none;
 }
 #close:hover {
   background-color: red;
@@ -274,20 +275,24 @@ body,
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
-
 .edit-icon-content {
   flex-grow: 1;
   padding: 10px;
-  overflow: auto;
+  padding-bottom: 10px;
+  margin-bottom: 60px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
   gap: 15px;
+  height: calc(100vh - 60px - 35px);
+  max-height: calc(100vh - 60px - 35px);
+  box-sizing: border-box;
 }
-
 .edit-icon-field {
   display: flex;
   flex-direction: row;
@@ -295,13 +300,12 @@ body,
   gap: 10px;
   width: 100%;
 }
-
 .edit-icon-field label {
   font-weight: bold;
   color: white;
   flex: 0 0 150px;
+  user-select: none;
 }
-
 .edit-icon-field input {
   padding: 8px;
   font-size: 14px;
@@ -310,20 +314,19 @@ body,
   flex: 1;
   box-sizing: border-box;
 }
-
 .edit-icon-footer {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 10px 0;
-  position: absolute;
+  position: fixed;
   bottom: 0;
   width: 100%;
+  height: 60px;
   background-color: #2c2c2c;
   box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
 }
-
 .save-button {
   padding: 10px 20px;
   font-size: 16px;
@@ -336,8 +339,8 @@ body,
   transition: background-color 0.3s ease;
   margin: 0;
   box-sizing: border-box;
+  user-select: none;
 }
-
 .save-button:hover {
   background-color: #0056b3;
 }
@@ -489,6 +492,7 @@ body,
   margin-left: 0.5rem;
   text-align: left;
   flex-grow: 1;
+  user-select: none;
 }
 
 .custom-folder-icon {
@@ -594,13 +598,18 @@ body,
 .settings-content {
   flex-grow: 1;
   padding: 10px;
-  overflow: auto;
+  padding-bottom: 10px;
+  margin-bottom: 60px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
   gap: 15px;
+  height: calc(100vh - 60px - 35px);
+  max-height: calc(100vh - 60px - 35px);
+  box-sizing: border-box;
 }
 
 .settings-field {
@@ -615,6 +624,7 @@ body,
   font-weight: bold;
   color: white;
   flex: 0 0 150px;
+  user-select: none;
 }
 
 .settings-field input {
@@ -631,8 +641,9 @@ body,
   justify-content: center;
   align-items: center;
   padding: 10px 0;
-  position: absolute;
+  position: fixed;
   bottom: 0;
+  height: 60px;
   width: 100%;
   background-color: #2c2c2c;
   box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.2);
