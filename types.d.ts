@@ -30,7 +30,7 @@ type DesktopIconData = {
 type SettingsData = {
   videoBackground: string;
   imageBackground: string;
-  fontSize: number;
+  fontSize?: number;
 };
 
 type SettingKey = keyof SettingsData;

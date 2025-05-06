@@ -276,6 +276,22 @@ const Settings: React.FC = () => {
             )}
           </button>
         </div>
+        <div className="settings-field">
+          <label htmlFor="font-size">Icon font size</label>
+          <input
+            id="font-size"
+            type="number"
+            value={settings?.fontSize}
+            onChange={(e) => {
+              const updatedValue = e.target.value;
+              if (updatedValue === "") {
+                updateSetting("fontSize", undefined);
+              } else {
+                updateSetting("fontSize", Number(updatedValue));
+              }
+            }}
+          />
+        </div>
       </div>
       {isDragging && (
         <div className="drag-overlay">

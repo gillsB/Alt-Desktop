@@ -161,7 +161,7 @@ const DesktopGrid: React.FC = () => {
       try {
         const fontSize = await window.electron.getSetting("fontSize");
         setDefaultFontSize(fontSize || 16); // Fallback to 16 if no value is returned
-        logger.info("Default font size fetched:", fontSize);
+        logger.info("Default font size fetched:", defaultFontSize);
       } catch (error) {
         logger.error("Error fetching default font size:", error);
       }
