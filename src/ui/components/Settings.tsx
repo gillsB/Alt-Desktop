@@ -230,8 +230,21 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleMagnifyingGlassClick = () => {
-    logger.info("Magnifying glass button clicked.");
+  const handleMagnifyingGlassClick = async () => {
+    let filePath = "";
+    // if no imageBackground path set
+    if (!settings?.imageBackground) {
+      // Added subfolder path just to make it open inside "backgrounds folder"
+      filePath = `backgrounds/background`;
+    } else {
+      // Open and highlight current imageBackground path file
+      filePath = `backgrounds/${settings?.imageBackground}`;
+    }
+
+    const success = await window.electron.openInExplorer("image", filePath);
+    if (!success) {
+      logger.error("Failed to open image in explorer:", filePath);
+    }
   };
 
   return (
