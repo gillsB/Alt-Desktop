@@ -54,7 +54,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   logVideoMessage: (level: string, file: string, message: string) => {
     ipcRenderer.send("logVideoMessage", { level, file, message });
   },
-  openFileDialog: (type: string) => ipcInvoke("openFileDialog", type),
+  openFileDialog: (type: string, appDataFilePath?: string) =>
+    ipcInvoke("openFileDialog", type, appDataFilePath),
   saveIconImage: (sourcePath: string, row: number, col: number) =>
     ipcInvoke("saveIconImage", sourcePath, row, col),
   saveBackgroundImage: (sourcePath: string) =>

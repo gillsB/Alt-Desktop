@@ -303,47 +303,57 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
 
+  // optional appDataFilePath parameter to open the dialog in a local appData/Roaming/AltDesktop folder
   ipcMainHandle(
     "openFileDialog",
-    async (type: string): Promise<string | null> => {
+    async (type: string, appDataFilePath?: string): Promise<string | null> => {
       let result: Electron.OpenDialogReturnValue;
-      if (type === "image") {
-        result = await dialog.showOpenDialog({
+
+      try {
+        if (appDataFilePath) {
+          appDataFilePath = path.join(getAppDataPath(), appDataFilePath);
+          logger.info("filePath = ", appDataFilePath);
+        }
+
+        const options: Electron.OpenDialogOptions = {
           properties: ["openFile"],
-          filters: [
+          defaultPath: appDataFilePath || undefined, // Use the provided filePath or just default
+        };
+
+        if (type === "image") {
+          options.filters = [
             {
               name: "Images",
               extensions: ["png", "jpg", "jpeg", "gif", "bmp", "svg", "webp"],
             },
-          ],
-        });
-      } else if (type === "video") {
-        result = await dialog.showOpenDialog({
-          properties: ["openFile"],
-          filters: [
+          ];
+        } else if (type === "video") {
+          options.filters = [
             {
-              name: "Video",
+              name: "Videos",
               extensions: ["mp4", "webm", "ogg", "mov", "mkv"],
             },
-          ],
-        });
-      } else {
-        result = await dialog.showOpenDialog({
-          properties: ["openFile"],
-          filters: [
+          ];
+        } else {
+          options.filters = [
             {
               name: type,
               extensions: ["*"],
             },
-          ],
-        });
-      }
+          ];
+        }
 
-      if (result.canceled || result.filePaths.length === 0) {
-        return null; // No file selected
-      }
+        result = await dialog.showOpenDialog(options);
 
-      return result.filePaths[0]; // Return the selected file path
+        if (result.canceled || result.filePaths.length === 0) {
+          return null; // No file selected
+        }
+
+        return result.filePaths[0]; // Return the selected file path
+      } catch (error) {
+        logger.error(`Error in openFileDialog: ${error}`);
+        return null;
+      }
     }
   );
 

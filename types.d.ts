@@ -66,7 +66,7 @@ interface EventParamMapping {
   openSettings: [];
   editIcon: [number, number];
   reloadWindow: [];
-  openFileDialog: [string];
+  openFileDialog: [string, string?];
   saveIconImage: [string, number, number];
   saveBackgroundImage: [string];
   launchProgram: [number, number];
@@ -150,7 +150,10 @@ interface Window {
     reloadWindow: () => Promise<boolean>;
     logMessage: (level: string, file: string, message: string) => void;
     logVideoMessage: (level: string, file: string, message: string) => void;
-    openFileDialog: (string) => Promise<string | null>;
+    openFileDialog: (
+      type: string,
+      appDataFilePath?: string
+    ) => Promise<string | null>;
     saveIconImage: (
       sourcePath: string,
       row: number,

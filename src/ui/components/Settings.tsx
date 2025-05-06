@@ -235,15 +235,21 @@ const Settings: React.FC = () => {
     // if no imageBackground path set
     if (!settings?.imageBackground) {
       // Added subfolder path just to make it open inside "backgrounds folder"
-      filePath = `backgrounds/background`;
+      filePath = `backgrounds/`;
     } else {
       // Open and highlight current imageBackground path file
       filePath = `backgrounds/${settings?.imageBackground}`;
     }
 
-    const success = await window.electron.openInExplorer("image", filePath);
-    if (!success) {
-      logger.error("Failed to open image in explorer:", filePath);
+    const success = await window.electron.openFileDialog("image", filePath);
+    logger.info("Open file dialog result:", success);
+    if (success) {
+      updateSetting("imageBackground", success);
+    } else {
+      logger.info(
+        "No file selected or dialog closed without selection.",
+        success
+      );
     }
   };
 
@@ -305,6 +311,7 @@ const Settings: React.FC = () => {
             onClick={handleMagnifyingGlassClick}
             onMouseEnter={() => setHoveringMagnifyingGlass(true)}
             onMouseLeave={() => setHoveringMagnifyingGlass(false)}
+            title="Select from previously set background images"
           >
             <MagnifyingGlassIcon
               className={`custom-magnifying-glass-icon ${
