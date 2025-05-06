@@ -1,4 +1,8 @@
-import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
+import {
+  FolderIcon,
+  FolderOpenIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/solid";
 import { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
@@ -14,6 +18,8 @@ const Settings: React.FC = () => {
   );
   const [isHoveringVideo, setHoveringVideo] = useState(false);
   const [isHoveringImage, setHoveringImage] = useState(false);
+  const [isHoveringMagnifyingGlass, setHoveringMagnifyingGlass] =
+    useState(false); // State for magnifying glass hover
   const [isDragging, setIsDragging] = useState(false);
 
   const dragCounter = useRef(0);
@@ -224,6 +230,10 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleMagnifyingGlassClick = () => {
+    logger.info("Magnifying glass button clicked.");
+  };
+
   return (
     <div
       className="settings-container"
@@ -276,6 +286,18 @@ const Settings: React.FC = () => {
             ) : (
               <FolderIcon className="custom-folder-icon" />
             )}
+          </button>
+          <button
+            className="magnifying-glass-button flex items-center gap-2"
+            onClick={handleMagnifyingGlassClick}
+            onMouseEnter={() => setHoveringMagnifyingGlass(true)}
+            onMouseLeave={() => setHoveringMagnifyingGlass(false)}
+          >
+            <MagnifyingGlassIcon
+              className={`custom-magnifying-glass-icon ${
+                isHoveringMagnifyingGlass ? "hovered" : ""
+              }`}
+            />
           </button>
         </div>
         <div className="settings-field">

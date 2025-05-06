@@ -511,6 +511,21 @@ body,
   cursor: pointer;
 }
 
+.magnifying-glass-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.custom-magnifying-glass-icon {
+  width: 24px;
+  height: 24px;
+  color: gray;
+}
+.custom-magnifying-glass-icon.hovered {
+  color: white;
+  outline: 2px solid grey;
+}
+
 .small-window-container {
   position: fixed;
   left: 0;
