@@ -36,6 +36,7 @@ const DesktopGrid: React.FC = () => {
   });
   const [reloadTimestamps, setReloadTimestamps] =
     useState<IconReloadTimestamps>({});
+  const [defaultFontSize, setDefaultFontSize] = useState<number>(16);
 
   // Refers to a square size of the icon box, not the icon's size in pixels.
   const ICON_SIZE = 100;
@@ -154,6 +155,20 @@ const DesktopGrid: React.FC = () => {
 
     logger.info(`Updated icon UI at [${row}, ${col}]`);
   };
+
+  useEffect(() => {
+    const fetchFontSize = async () => {
+      try {
+        const fontSize = await window.electron.getSetting("fontSize");
+        setDefaultFontSize(fontSize || 16); // Fallback to 16 if no value is returned
+        logger.info("Default font size fetched:", fontSize);
+      } catch (error) {
+        logger.error("Error fetching default font size:", error);
+      }
+    };
+
+    fetchFontSize();
+  }, []);
 
   useEffect(() => {
     const fetchIcons = async () => {
@@ -710,7 +725,7 @@ const DesktopGrid: React.FC = () => {
                   title={icon.name}
                   style={{
                     color: icon.fontColor || "white",
-                    fontSize: icon.fontSize || "1rem",
+                    fontSize: icon.fontSize || defaultFontSize,
                   }}
                 >
                   {icon.name}

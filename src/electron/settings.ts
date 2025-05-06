@@ -7,7 +7,7 @@ import { getSettingsFilePath } from "./util.js";
 export const defaultSettings = {
   videoBackground: "",
   imageBackground: "",
-  testKey: true,
+  fontSize: 16,
 };
 
 const logger = createLoggerForFile("settings.ts");
