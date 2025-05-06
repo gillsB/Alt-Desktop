@@ -1,4 +1,8 @@
-import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
+import {
+  FolderIcon,
+  FolderOpenIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/solid";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getDefaultDesktopIcon } from "../../electron/DesktopIcon";
@@ -21,6 +25,7 @@ const EditIcon: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isHoveringImage, setHoveringImage] = useState(false);
   const [isHoveringProgram, setHoveringProgram] = useState(false);
+  const [isHoveringImageGlass, setHoveringImageGlass] = useState(false);
 
   const dragCounter = useRef(0);
 
@@ -301,6 +306,26 @@ const EditIcon: React.FC = () => {
     }
   };
 
+  const handleImageGlassClick = async () => {
+    // if no imageBackground path set
+    if (icon) {
+      const filePath = `data/[${row},${col}]/${icon.image}`;
+
+      const success = await window.electron.openFileDialog("image", filePath);
+      logger.info("Open file dialog result:", success);
+      if (success) {
+        setIcon((prevIcon) =>
+          prevIcon ? { ...prevIcon, image: success } : null
+        );
+      } else {
+        logger.info(
+          "No file selected or dialog closed without selection.",
+          success
+        );
+      }
+    }
+  };
+
   return (
     <div
       className="edit-icon-container"
@@ -354,6 +379,19 @@ const EditIcon: React.FC = () => {
                 ) : (
                   <FolderIcon className="custom-folder-icon" />
                 )}
+              </button>
+              <button
+                className="magnifying-glass-button flex items-center gap-2"
+                onClick={handleImageGlassClick}
+                onMouseEnter={() => setHoveringImageGlass(true)}
+                onMouseLeave={() => setHoveringImageGlass(false)}
+                title="Select from previously set background images"
+              >
+                <MagnifyingGlassIcon
+                  className={`custom-magnifying-glass-icon ${
+                    isHoveringImageGlass ? "hovered" : ""
+                  }`}
+                />
               </button>
             </div>
             <div className="edit-icon-field">
