@@ -307,7 +307,6 @@ const EditIcon: React.FC = () => {
   };
 
   const handleImageGlassClick = async () => {
-    // if no imageBackground path set
     if (icon) {
       const filePath = `data/[${row},${col}]/${icon.image}`;
 
@@ -323,6 +322,8 @@ const EditIcon: React.FC = () => {
           success
         );
       }
+    } else {
+      logger.error("Icon data is missing. (handleImageGlassClick)");
     }
   };
 
