@@ -240,6 +240,7 @@ const Settings: React.FC = () => {
             id="video-background"
             type="text"
             value={settings?.videoBackground || ""}
+            title="Drop a video file on this window to auto set the path."
             onChange={(e) => updateSetting("videoBackground", e.target.value)}
           />
           <button
@@ -260,6 +261,7 @@ const Settings: React.FC = () => {
           <input
             id="image-background"
             type="text"
+            title="Drop an image on this window to auto set the path."
             value={settings?.imageBackground || ""}
             onChange={(e) => updateSetting("imageBackground", e.target.value)}
           />
@@ -282,6 +284,7 @@ const Settings: React.FC = () => {
             id="font-size"
             type="number"
             value={settings?.fontSize}
+            title="Blank for default (16px) 0 to not render names."
             onChange={(e) => {
               const updatedValue = e.target.value;
               if (updatedValue === "") {

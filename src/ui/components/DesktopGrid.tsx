@@ -160,8 +160,13 @@ const DesktopGrid: React.FC = () => {
     const fetchFontSize = async () => {
       try {
         const fontSize = await window.electron.getSetting("fontSize");
-        setDefaultFontSize(fontSize || 16); // Fallback to 16 if no value is returned
-        logger.info("Default font size fetched:", defaultFontSize);
+        if (fontSize === undefined) {
+          setDefaultFontSize(16); // Fallback to 16 if no value is returned
+        } else {
+          setDefaultFontSize(fontSize);
+        }
+
+        logger.info("set defaultFontSize to:", defaultFontSize);
       } catch (error) {
         logger.error("Error fetching default font size:", error);
       }
@@ -719,18 +724,19 @@ const DesktopGrid: React.FC = () => {
                 highlighted={isIconHighlighted(icon.row, icon.col)}
                 forceReload={reloadTimestamp} // Pass the reload timestamp
               />
-              {icon.fontSize !== 0 && (
-                <div
-                  className="desktop-icon-name"
-                  title={icon.name}
-                  style={{
-                    color: icon.fontColor || "white",
-                    fontSize: icon.fontSize || defaultFontSize,
-                  }}
-                >
-                  {icon.name}
-                </div>
-              )}
+              {icon.fontSize !== 0 &&
+                (icon.fontSize || defaultFontSize) !== 0 && (
+                  <div
+                    className="desktop-icon-name"
+                    title={icon.name}
+                    style={{
+                      color: icon.fontColor || "white",
+                      fontSize: icon.fontSize || defaultFontSize,
+                    }}
+                  >
+                    {icon.name}
+                  </div>
+                )}
             </div>
           );
         })}
