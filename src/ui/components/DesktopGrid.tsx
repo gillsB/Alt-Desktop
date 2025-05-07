@@ -283,8 +283,11 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleIconDoubleClick = async (row: number, col: number) => {
-    logger.info("double clicked icon", row, col);
-    await window.electron.launchProgram(row, col);
+    if (iconsMap.get(`${row},${col}`)?.launchDefault === "website") {
+      await window.electron.launchWebsite(row, col);
+    } else {
+      await window.electron.launchProgram(row, col);
+    }
   };
 
   const handleRightClick = (
