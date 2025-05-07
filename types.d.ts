@@ -49,6 +49,7 @@ type DesktopIcon = {
   websiteLink?: string;
   fontColor?: string;
   fontSize?: number;
+  launchDefault: "program" | "website";
 };
 
 // Items/objects being sent from the renderer to the main process
