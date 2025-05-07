@@ -599,12 +599,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         );
 
         if (!icon) {
-          logger.warn(`No icon found at [${row}, ${col}]`);
+          logger.error(`No icon found at [${row}, ${col}]`);
           return false;
         }
 
         if (!icon.websiteLink) {
           logger.warn(`No websiteLink found for icon at [${row}, ${col}]`);
+          openSmallWindow(
+            "No website",
+            `No website link set for icon: ${icon.name}`,
+            ["Ok"]
+          );
           return false;
         }
 
