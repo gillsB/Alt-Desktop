@@ -80,6 +80,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     col: number,
     updates: Partial<DesktopIcon>
   ) => ipcInvoke("previewIconUpdate", row, col, updates),
+  previewBackgroundUpdate: (updates: Partial<SettingsData>) =>
+    ipcInvoke("previewBackgroundUpdate", updates),
   getSettingsData: () => ipcInvoke("getSettingsData"),
   saveSettingsData: (data: SettingsData) => ipcInvoke("saveSettingsData", data),
   getSetting: <T extends SettingKey>(key: T): Promise<SettingsData[T]> =>

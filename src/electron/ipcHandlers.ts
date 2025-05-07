@@ -827,6 +827,21 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle(
+    "previewBackgroundUpdate",
+    async (updates: Partial<SettingsData>) => {
+      try {
+        logger.info(
+          "received previewBackgroundUpdate with updates:",
+          JSON.stringify(updates)
+        );
+        return true;
+      } catch (error) {
+        logger.error("Error handling previewBackgroundUpdate:", error);
+        return false;
+      }
+    }
+  );
   ipcMainHandle("getSettingsData", async (): Promise<SettingsData> => {
     try {
       const settingsFilePath = getSettingsFilePath();

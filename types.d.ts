@@ -78,6 +78,7 @@ interface EventParamMapping {
   openInExplorer: ["image" | "programLink", string];
   showSmallWindow: [string, string, string[]];
   previewIconUpdate: [number, number, Partial<DesktopIcon>];
+  previewBackgroundUpdate: [Partial<SettingsData>];
   isSubWindowActive: [];
   getSettingsData: [];
   saveSettingsData: [SettingsData];
@@ -114,6 +115,7 @@ type EventPayloadMapping = {
   showSmallWindow: string;
   buttonResponse: { windowId: number; buttonText: string | null };
   previewIconUpdate: boolean;
+  previewBackgroundUpdate: boolean;
   isSubWindowActive: boolean;
   getSettingsData: SettingsData;
   saveSettingsData: boolean;
@@ -183,6 +185,9 @@ interface Window {
       row: number,
       col: number,
       updates: Partial<DesktopIcon>
+    ) => Promise<boolean>;
+    previewBackgroundUpdate: (
+      updates: Partial<SettingsData>
     ) => Promise<boolean>;
     getSettingsData: () => Promise<SettingsData>;
     saveSettingsData: (settings: SettingsData) => Promise<boolean>;

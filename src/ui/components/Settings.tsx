@@ -253,6 +253,15 @@ const Settings: React.FC = () => {
     }
   };
 
+  const sendPreviewUpdate = async (updatedFields: Partial<SettingsData>) => {
+    try {
+      await window.electron.previewBackgroundUpdate(updatedFields);
+      logger.info(`Sent preview update for settings:`, updatedFields);
+    } catch (error) {
+      logger.error("Failed to send icon preview update:", error);
+    }
+  };
+
   return (
     <div
       className="settings-container"
@@ -270,7 +279,11 @@ const Settings: React.FC = () => {
             type="text"
             value={settings?.videoBackground || ""}
             title="Drop a video file on this window to auto set the path."
-            onChange={(e) => updateSetting("videoBackground", e.target.value)}
+            onChange={(e) => {
+              const updatedValue = e.target.value;
+              updateSetting("videoBackground", updatedValue);
+              sendPreviewUpdate({ videoBackground: updatedValue });
+            }}
           />
           <button
             className="file-select-button flex items-center gap-2"
