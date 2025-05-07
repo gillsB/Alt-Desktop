@@ -305,7 +305,11 @@ const Settings: React.FC = () => {
             type="text"
             title="Drop an image on this window to auto set the path."
             value={settings?.imageBackground || ""}
-            onChange={(e) => updateSetting("imageBackground", e.target.value)}
+            onChange={(e) => {
+              const updatedValue = e.target.value;
+              updateSetting("imageBackground", updatedValue);
+              sendPreviewUpdate({ imageBackground: updatedValue });
+            }}
           />
           <button
             className="file-select-button flex items-center gap-2"

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createLogger, createVideoLogger } from "../util/uiLogger";
 
-const logger = createLogger("VideoBackground.tsx");
-const videoLogger = createVideoLogger("VideoBackground.tsx");
+const logger = createLogger("Background.tsx");
+const videoLogger = createVideoLogger("Background.tsx");
 
 interface VideoBackgroundProps {
   opacity?: number;
@@ -67,78 +67,80 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    const fetchBackgroundSettings = async () => {
-      try {
-        // First check for video background
-        const videoBackground =
-          await window.electron.getSetting("videoBackground");
-        logger.info("videoBackground setting:", videoBackground);
-        videoLogger.info("videoBackground setting:", videoBackground);
+  const fetchBackgroundSettings = async (overrides?: Partial<SettingsData>) => {
+    try {
+      // First check for video background
+      const videoBackground = overrides?.videoBackground
+        ? overrides.videoBackground
+        : await window.electron.getSetting("videoBackground");
+      logger.info("videoBackground setting:", videoBackground);
+      videoLogger.info("videoBackground setting:", videoBackground);
 
-        if (videoBackground) {
-          const fileType = await window.electron.getFileType(videoBackground);
-          logger.info("Video attempt File type:", fileType);
-          if (fileType.startsWith("video")) {
-            setIsLoading(true);
-            const videoFilePath =
-              await window.electron.convertToVideoFileUrl(videoBackground);
-            logger.info("Converted video file path:", videoFilePath);
-            videoLogger.info("Converted video file path:", videoFilePath);
+      if (videoBackground) {
+        const fileType = await window.electron.getFileType(videoBackground);
+        logger.info("Video attempt File type:", fileType);
+        if (fileType.startsWith("video")) {
+          setIsLoading(true);
+          const videoFilePath =
+            await window.electron.convertToVideoFileUrl(videoBackground);
+          logger.info("Converted video file path:", videoFilePath);
+          videoLogger.info("Converted video file path:", videoFilePath);
 
-            // Add cache busting parameter to prevent browser caching issues
-            const cacheBuster = Date.now();
-            setVideoSrc(`${videoFilePath}?nocache=${cacheBuster}`);
-            setVideoError(false);
-            return; // Exit early if we have a valid video
-          } else {
-            logger.info(
-              `videoBackground ${videoBackground} is not a video file, checking for image fallback.`
-            );
-            videoLogger.info(
-              `videoBackground ${videoBackground} is not a video file, checking for image fallback.`
-            );
-            setVideoSrc(null);
-            setVideoError(true);
-          }
+          // Add cache busting parameter to prevent browser caching issues
+          const cacheBuster = Date.now();
+          setVideoSrc(`${videoFilePath}?nocache=${cacheBuster}`);
+          setVideoError(false);
+          return; // Exit early if we have a valid video
         } else {
-          // No video setting found
-          setVideoError(true);
+          logger.info(
+            `videoBackground ${videoBackground} is not a video file, checking for image fallback.`
+          );
+          videoLogger.info(
+            `videoBackground ${videoBackground} is not a video file, checking for image fallback.`
+          );
           setVideoSrc(null);
+          setVideoError(true);
         }
+      } else {
+        // No video setting found
+        setVideoError(true);
+        setVideoSrc(null);
+      }
 
-        // If we get here, video failed or doesn't exist, check for image background
-        const imageBackground =
-          await window.electron.getSetting("imageBackground");
-        logger.info("imageBackground setting:", imageBackground);
+      // If we get here, video failed or doesn't exist, check for image background
+      const imageBackground = overrides?.imageBackground
+        ? overrides.imageBackground
+        : await window.electron.getSetting("imageBackground");
+      logger.info("imageBackground setting:", imageBackground);
+
+      if (imageBackground) {
         const imageFilePath =
           await window.electron.getBackgroundImagePath(imageBackground);
         logger.info("Converted image file path:", imageFilePath);
 
-        if (imageBackground) {
-          logger.info("Converted image file path:", imageFilePath);
-
-          // Add cache busting parameter
-          const cacheBuster = Date.now();
-          setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
-          setImageError(false);
-          setIsLoading(false);
-        } else {
-          // No image setting found
-          setImageError(true);
-          setImageSrc(null);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        logger.error("Error fetching background settings:", error);
-        videoLogger.error("Error fetching background settings:", error);
-        setVideoSrc(null);
-        setImageSrc(null);
-        setVideoError(true);
+        // Add cache busting parameter
+        const cacheBuster = Date.now();
+        setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
+        setImageError(false);
+        setIsLoading(false);
+      } else {
+        // No image setting found
         setImageError(true);
+        setImageSrc(null);
         setIsLoading(false);
       }
-    };
+    } catch (error) {
+      logger.error("Error fetching background settings:", error);
+      videoLogger.error("Error fetching background settings:", error);
+      setVideoSrc(null);
+      setImageSrc(null);
+      setVideoError(true);
+      setImageError(true);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchBackgroundSettings();
 
     const handleReload = () => {
@@ -146,10 +148,23 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       fetchBackgroundSettings(); // Re-fetch the background settings
     };
 
-    window.electron.on("reloadBackground", handleReload);
-
     return () => {
       window.electron.off("reloadBackground", handleReload);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handlePreview = (...args: unknown[]) => {
+      const updates = args[1] as Partial<SettingsData>; // Extract the second argument as updates
+      logger.info("Received background preview updates:", updates);
+
+      fetchBackgroundSettings(updates); // Fetch with overrides
+    };
+
+    window.electron.on("update-background-preview", handlePreview);
+
+    return () => {
+      window.electron.off("update-background-preview", handlePreview);
     };
   }, []);
 

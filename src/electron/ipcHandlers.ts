@@ -827,14 +827,30 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+
   ipcMainHandle(
     "previewBackgroundUpdate",
-    async (updates: Partial<SettingsData>) => {
+    async (updates: Partial<SettingsData>): Promise<boolean> => {
       try {
         logger.info(
-          "received previewBackgroundUpdate with updates:",
+          "Received previewBackgroundUpdate with updates:",
           JSON.stringify(updates)
         );
+
+        // Ensure updates is not null or undefined
+        if (!updates || typeof updates !== "object") {
+          logger.error("Invalid updates object:", updates);
+          return false;
+        }
+
+        if (mainWindow) {
+          mainWindow.webContents.send("update-background-preview", updates);
+          logger.info(
+            "Sent 'update-background-preview' event to renderer with data:",
+            JSON.stringify(updates)
+          );
+        }
+
         return true;
       } catch (error) {
         logger.error("Error handling previewBackgroundUpdate:", error);
