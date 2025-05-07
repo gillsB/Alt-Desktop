@@ -573,6 +573,28 @@ const EditIcon: React.FC = () => {
                 }}
               />
             </div>
+            <div className="edit-icon-field dropdown-container">
+              <label htmlFor="launch-default">Launch Default</label>
+              <select
+                id="launch-default"
+                value={
+                  icon.launchDefault === "website" ? "Website Link" : "Program"
+                }
+                onChange={(e) => {
+                  const updatedValue =
+                    e.target.value === "Website Link" ? "website" : "program";
+                  setIcon((prevIcon) =>
+                    prevIcon
+                      ? { ...prevIcon, launchDefault: updatedValue }
+                      : null
+                  );
+                  sendPreviewUpdate({ launchDefault: updatedValue });
+                }}
+              >
+                <option value="Program">Program</option>
+                <option value="Website Link">Website Link</option>
+              </select>
+            </div>
           </>
         )}
       </div>
