@@ -279,10 +279,16 @@ const Settings: React.FC = () => {
 
   const sendPreviewUpdate = async (updatedFields: Partial<SettingsData>) => {
     try {
-      await window.electron.previewBackgroundUpdate(updatedFields);
-      logger.info(`Sent preview update for settings:`, updatedFields);
+      const previewData: Partial<SettingsData> = {
+        videoBackground: settings?.videoBackground || undefined,
+        imageBackground: settings?.imageBackground || undefined,
+        ...updatedFields, // Override with any explicitly updated fields
+      };
+
+      await window.electron.previewBackgroundUpdate(previewData);
+      logger.info(`Sent preview update for settings:`, previewData);
     } catch (error) {
-      logger.error("Failed to send icon preview update:", error);
+      logger.error("Failed to send preview update:", error);
     }
   };
 
