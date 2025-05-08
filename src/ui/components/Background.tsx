@@ -32,7 +32,6 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   const [imageError, setImageError] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [suspendCount, setSuspendCount] = useState(0);
   const [performanceMetrics, setPerformanceMetrics] = useState({
@@ -47,7 +46,6 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   const metricsIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const suspendLogThresholdRef = useRef<number>(10); // Log after this many suspend events
   const suspendLogTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const maxRetries = 3;
 
   // New flag to track if "Multiple video suspends detected" has been logged
   const hasLoggedSuspendsRef = useRef<boolean>(false);
@@ -66,6 +64,43 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       }
     };
   }, []);
+
+  const fallbackToImage = async (overrides?: Partial<SettingsData>) => {
+    logger.warn("Falling back to image background");
+    videoLogger.warn("Falling back to image background");
+
+    setVideoError(true);
+    setVideoSrc(null);
+
+    try {
+      // Check for image background
+      const imageBackground = overrides?.imageBackground
+        ? overrides.imageBackground
+        : await window.electron.getSetting("imageBackground");
+      logger.info("imageBackground setting:", imageBackground);
+
+      if (imageBackground) {
+        const imageFilePath =
+          await window.electron.getBackgroundImagePath(imageBackground);
+        logger.info("Converted image file path:", imageFilePath);
+
+        // Add cache busting parameter
+        const cacheBuster = Date.now();
+        setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
+        setImageError(false);
+      } else {
+        logger.warn("No image background found, falling back to solid color.");
+        setImageError(true);
+        setImageSrc(null);
+      }
+    } catch (error) {
+      logger.error("Error fetching image background:", error);
+      setImageError(true);
+      setImageSrc(null);
+    }
+
+    setIsLoading(false);
+  };
 
   const fetchBackgroundSettings = async (overrides?: Partial<SettingsData>) => {
     try {
@@ -90,7 +125,9 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
           const cacheBuster = Date.now();
           setVideoSrc(`${videoFilePath}?nocache=${cacheBuster}`);
           setVideoError(false);
-          return; // Exit early if we have a valid video
+          logger.info("Video source set - attempting to load.");
+
+          return; // Exit early if we have a valid video file path
         } else {
           logger.info(
             `videoBackground ${videoBackground} is not a video file, checking for image fallback.`
@@ -98,37 +135,13 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
           videoLogger.info(
             `videoBackground ${videoBackground} is not a video file, checking for image fallback.`
           );
-          setVideoSrc(null);
-          setVideoError(true);
         }
       } else {
-        // No video setting found
-        setVideoError(true);
-        setVideoSrc(null);
+        logger.warn("No video background found, checking for image fallback.");
       }
 
-      // If we get here, video failed or doesn't exist, check for image background
-      const imageBackground = overrides?.imageBackground
-        ? overrides.imageBackground
-        : await window.electron.getSetting("imageBackground");
-      logger.info("imageBackground setting:", imageBackground);
-
-      if (imageBackground) {
-        const imageFilePath =
-          await window.electron.getBackgroundImagePath(imageBackground);
-        logger.info("Converted image file path:", imageFilePath);
-
-        // Add cache busting parameter
-        const cacheBuster = Date.now();
-        setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
-        setImageError(false);
-        setIsLoading(false);
-      } else {
-        // No image setting found
-        setImageError(true);
-        setImageSrc(null);
-        setIsLoading(false);
-      }
+      // If we get here, video failed or doesn't exist, fall back to image
+      await fallbackToImage(overrides);
     } catch (error) {
       logger.error("Error fetching background settings:", error);
       videoLogger.error("Error fetching background settings:", error);
@@ -147,6 +160,8 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       logger.info("Received reload event, reloading background settings...");
       fetchBackgroundSettings(); // Re-fetch the background settings
     };
+
+    window.electron.on("reloadBackground", handleReload);
 
     return () => {
       window.electron.off("reloadBackground", handleReload);
@@ -171,7 +186,6 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   // Reset retry count when video source changes
   useEffect(() => {
     if (videoSrc) {
-      setRetryCount(0);
       setSuspendCount(0);
       setPerformanceMetrics({
         bufferingEvents: 0,
@@ -371,71 +385,10 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       readyState: video.readyState,
     });
 
-    // If we haven't exceeded max retries, try again
-    if (retryCount < maxRetries && videoSrc) {
-      videoLogger.info(`Retrying video load (${retryCount + 1}/${maxRetries})`);
-      setRetryCount((prev) => prev + 1);
-
-      // Force a reload with a new cache buster
-      const currentSrc = videoSrc.split("?")[0];
-      const newCacheBuster = Date.now();
-
-      if (retryTimerRef.current) {
-        clearTimeout(retryTimerRef.current);
-      }
-
-      // Clear source first
-      setVideoSrc(null);
-
-      // Then set a new source with cache buster after a short delay
-      retryTimerRef.current = setTimeout(() => {
-        if (videoRef.current) {
-          setVideoSrc(`${currentSrc}?nocache=${newCacheBuster}`);
-        }
-      }, 1000);
-    } else {
-      logger.warn(
-        `Max retries (${maxRetries}) reached or no video source. Trying image fallback.`
-      );
-      videoLogger.warn(
-        `Max retries (${maxRetries}) reached or no video source. Trying image fallback.`
-      );
-      setVideoError(true);
-      checkImageBackground();
-    }
-  };
-
-  // Function to check for an image background when video fails
-  const checkImageBackground = async () => {
-    try {
-      // Check for image background if not already checked
-      if (!imageSrc) {
-        const localizedPath =
-          await window.electron.getSetting("imageBackground");
-        const imageBackground =
-          await window.electron.getBackgroundImagePath(localizedPath);
-        logger.info("Falling back to imageBackground:", imageBackground);
-
-        if (imageBackground) {
-          const imageFilePath =
-            await window.electron.getBackgroundImagePath(imageBackground);
-          logger.info("Converted image file path:", imageFilePath);
-
-          // Add cache busting parameter
-          const cacheBuster = Date.now();
-          setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
-          setImageError(false);
-        } else {
-          setImageError(true);
-        }
-      }
-      setIsLoading(false);
-    } catch (error) {
-      logger.error("Error fetching image background:", error);
-      setImageSrc(null);
-      setImageError(true);
-      setIsLoading(false);
-    }
+    logger.warn(`No video source. Trying image fallback.`);
+    videoLogger.warn(`No video source. Trying image fallback.`);
+    setVideoError(true);
+    fallbackToImage();
   };
 
   // Handle image error

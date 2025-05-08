@@ -35,6 +35,7 @@ app.on("ready", () => {
   registerVideoFileProtocol("video-file");
 
   app.commandLine.appendSwitch("enable-transparent-visuals");
+  app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
   const mainWindow = new BrowserWindow({
     show: false,
     transparent: true, // Enables full transparency
