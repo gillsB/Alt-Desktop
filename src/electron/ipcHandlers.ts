@@ -975,6 +975,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "getVideoMetadata",
     async (filePath: string): Promise<string> => {
       try {
+        logger.info(`Retrieving video metadata for: ${filePath}`);
         if (!fs.existsSync(filePath)) {
           logger.error(`File does not exist: ${filePath}`);
           throw new Error(`File does not exist: ${filePath}`);

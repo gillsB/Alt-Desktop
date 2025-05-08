@@ -372,7 +372,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     return video.buffered.end(video.buffered.length - 1) - video.currentTime;
   };
 
-  const handleVideoError = (context = "load") => {
+  const handleVideoError = async (context = "load") => {
     const video = videoRef.current;
     if (!video) return;
 
@@ -384,6 +384,22 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       currentTime: video.currentTime,
       readyState: video.readyState,
     });
+
+    // Log video metadata for debugging
+    if (videoSrc) {
+      try {
+        // Remove "video-file://" protocol if present
+        const sanitizedPath = videoSrc
+          .replace(/^video-file:\/\//, "")
+          .split("?")[0]; // Remove cache buster
+        const metadata = await window.electron.getVideoMetadata(sanitizedPath);
+        logger.info("Video metadata:", metadata);
+        videoLogger.info("Video metadata:", metadata);
+      } catch (error) {
+        logger.error("Error retrieving video metadata:", error);
+        videoLogger.error("Error retrieving video metadata:", error);
+      }
+    }
 
     logger.warn(`No video source. Trying image fallback.`);
     videoLogger.warn(`No video source. Trying image fallback.`);
