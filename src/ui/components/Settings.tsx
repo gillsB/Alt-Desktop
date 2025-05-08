@@ -24,7 +24,31 @@ const Settings: React.FC = () => {
 
   const dragCounter = useRef(0);
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    if (getChanges()) {
+      try {
+        const ret = await showSmallWindow(
+          "Close Without Saving",
+          "Close without saving the changes?",
+          ["Yes", "No"]
+        );
+        if (ret === "Yes") {
+          logger.info("User confirmed to close without saving.");
+          if (getSpecificChanges(["videoBackground", "imageBackground"])) {
+            await window.electron.reloadBackground();
+          }
+          closeWindow();
+        }
+      } catch (error) {
+        logger.error("Error showing close confirmation window:", error);
+      }
+    } else {
+      //no changes
+      closeWindow();
+    }
+  };
+
+  const closeWindow = () => {
     logger.info("Settings window closed");
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
@@ -66,7 +90,7 @@ const Settings: React.FC = () => {
         if (getSpecificChanges(["videoBackground", "imageBackground"])) {
           await window.electron.reloadBackground();
         }
-        handleClose();
+        closeWindow();
       } else {
         logger.error("Failed to save settings.");
 
@@ -76,7 +100,7 @@ const Settings: React.FC = () => {
           ["Yes", "No"]
         );
         if (ret === "Yes") {
-          handleClose();
+          closeWindow();
         }
       }
     } else {
@@ -88,7 +112,7 @@ const Settings: React.FC = () => {
         ["Yes", "No"]
       );
       if (ret === "Yes") {
-        handleClose();
+        closeWindow();
       }
     }
   };
