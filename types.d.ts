@@ -52,6 +52,29 @@ type DesktopIcon = {
   launchDefault: "program" | "website";
 };
 
+type VideoMetadata = {
+  format: {
+    filename: string;
+    duration: number; // Duration in seconds
+    size: number; // File size in bytes
+    bit_rate: number; // Bitrate in bits per second
+    format_name: string; // Format name (e.g., "mp4")
+    format_long_name: string; // Full format name
+  };
+  streams: Array<{
+    codec_name: string; // Codec name (e.g., "h264")
+    codec_type: "video" | "audio"; // Stream type
+    codec_tag_string?: string; // Codec tag string (e.g., "hvc1")
+    codec_tag?: string; // Codec tag (e.g., "0x31637668")
+    width?: number; // Video width (if applicable)
+    height?: number; // Video height (if applicable)
+    duration?: number; // Stream duration in seconds
+    bit_rate?: number; // Stream bitrate in bits per second
+    sample_rate?: number; // Audio sample rate (if applicable)
+    channels?: number; // Number of audio channels (if applicable)
+  }>;
+};
+
 // Items/objects being sent from the renderer to the main process
 interface EventParamMapping {
   statistics: [];
@@ -124,7 +147,7 @@ type EventPayloadMapping = {
   convertToVideoFileUrl: string | null;
   getBackgroundImagePath: string | null;
   reloadBackground: boolean;
-  getVideoMetadata: string | null;
+  getVideoMetadata: VideoMetadata;
 };
 
 type UnsubscribeFunction = () => void;
@@ -197,6 +220,6 @@ interface Window {
     convertToVideoFileUrl: (filePath: string) => Promise<string | null>;
     getBackgroundImagePath: (filePath: string) => Promise<string | null>;
     reloadBackground: () => Promise<boolean>;
-    getVideoMetadata: (filePath: string) => Promise<string | null>;
+    getVideoMetadata: (filePath: string) => Promise<VideoMetadata>;
   };
 }

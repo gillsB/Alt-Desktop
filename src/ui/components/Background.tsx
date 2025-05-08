@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createLogger, createVideoLogger } from "../util/uiLogger";
+import { showSmallWindow } from "../util/uiUtil";
 
 const logger = createLogger("Background.tsx");
 const videoLogger = createVideoLogger("Background.tsx");
@@ -395,6 +396,20 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
         const metadata = await window.electron.getVideoMetadata(sanitizedPath);
         logger.info("Video metadata:", metadata);
         videoLogger.info("Video metadata:", metadata);
+        const videoStream = metadata.streams.find(
+          (stream) => stream.codec_type === "video"
+        );
+        if (videoStream) {
+          if (videoStream.codec_tag_string === "hvc1") {
+            showSmallWindow(
+              "Encoding Error",
+              `Video: ${sanitizedPath} \nuses an unsupported hvc1 encoding and will not work`,
+              ["OK"]
+            );
+          }
+        } else {
+          logger.warn("No video stream found in metadata.");
+        }
       } catch (error) {
         logger.error("Error retrieving video metadata:", error);
         videoLogger.error("Error retrieving video metadata:", error);
