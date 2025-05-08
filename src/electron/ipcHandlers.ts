@@ -1,4 +1,6 @@
 import { dialog, ipcMain, screen, shell } from "electron";
+import ffprobeStatic from "ffprobe-static";
+import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
@@ -26,6 +28,8 @@ import {
 } from "./util.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import { getVideoFileUrl } from "./videoFileProtocol.js";
+
+ffmpeg.setFfprobePath(ffprobeStatic.path);
 
 const logger = createLoggerForFile("ipcHandlers.ts");
 
@@ -967,4 +971,33 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+  ipcMainHandle(
+    "getVideoMetadata",
+    async (filePath: string): Promise<string> => {
+      try {
+        if (!fs.existsSync(filePath)) {
+          logger.error(`File does not exist: ${filePath}`);
+          throw new Error(`File does not exist: ${filePath}`);
+        }
+
+        return new Promise((resolve, reject) => {
+          ffmpeg.ffprobe(filePath, (err, metadata) => {
+            if (err) {
+              logger.error(`Error retrieving video metadata: ${err.message}`);
+              reject(err);
+            } else {
+              logger.info(
+                `Retrieved video metadata for ${filePath}:`,
+                metadata
+              );
+              resolve(JSON.stringify(metadata));
+            }
+          });
+        });
+      } catch (error) {
+        logger.error(`Error in getVideoMetadata for ${filePath}: ${error}`);
+        throw error;
+      }
+    }
+  );
 }
