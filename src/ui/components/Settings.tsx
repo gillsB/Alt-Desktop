@@ -124,6 +124,8 @@ const Settings: React.FC = () => {
       if (type === "video") {
         if (filePath) {
           updateSetting("videoBackground", filePath);
+          sendPreviewUpdate({ videoBackground: filePath });
+          logger.info(`Video background path set to: ${filePath}`);
         }
       } else if (type === "image") {
         if (filePath) {
