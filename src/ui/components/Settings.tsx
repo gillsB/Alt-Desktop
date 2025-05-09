@@ -129,10 +129,10 @@ const Settings: React.FC = () => {
         }
       } else if (type === "image") {
         if (filePath) {
-          // For consistency, we'll only update the path here
-          // The actual saving will happen in handleSave
-          updateSetting("imageBackground", filePath);
-          logger.info(`Image background path set to: ${filePath}`);
+          const savedPath = await window.electron.saveBackgroundImage(filePath);
+          updateSetting("imageBackground", savedPath);
+          sendPreviewUpdate({ imageBackground: savedPath });
+          logger.info(`Image background path set to: ${savedPath}`);
         }
       } else {
         logger.error("Invalid type for file selection:", type);
@@ -238,9 +238,9 @@ const Settings: React.FC = () => {
 
     if (fileType.startsWith("image/")) {
       logger.info("Dropped file is an image. Updating image background...");
-      setSettings((prev) =>
-        prev ? { ...prev, imageBackground: filePath } : null
-      );
+      const savedPath = await window.electron.saveBackgroundImage(filePath);
+      updateSetting("imageBackground", savedPath);
+      sendPreviewUpdate({ imageBackground: savedPath });
     } else if (fileType.startsWith("video/")) {
       logger.info("Dropped file is a video. Updating video background...");
       setSettings((prev) =>
