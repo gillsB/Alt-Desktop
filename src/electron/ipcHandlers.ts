@@ -951,13 +951,22 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return null;
       }
 
-      // Convert to video URL
-      const pathRelative = path.join("/backgrounds", filePath);
-      const pathResult = getSafeFileUrl(pathRelative);
-      logger.info("returning image URL:", pathResult);
+      let pathResult: string;
+
+      // Check if the filePath is an absolute path
+      if (path.isAbsolute(filePath)) {
+        logger.info(`Using absolute file path: ${filePath}`);
+        pathResult = getSafeFileUrl(filePath);
+      } else {
+        // Convert to a relative path within the backgrounds directory
+        const pathRelative = path.join("/backgrounds", filePath);
+        pathResult = getSafeFileUrl(pathRelative);
+      }
+
+      logger.info("Returning image URL:", pathResult);
       return pathResult;
     } catch (error) {
-      logger.error(`Error converting path to video URL: ${error}`);
+      logger.error(`Error converting path to image URL: ${error}`);
       return null;
     }
   });

@@ -38,31 +38,46 @@ export function registerSafeFileProtocol(
   protocol.handle(protocolName, async (req) => {
     try {
       const requestedUrl = new URL(req.url);
-
-      const requestedPath = decodeURIComponent(requestedUrl.pathname).replace(
-        /^\/+/,
-        "" // Remove any leading slashes
-      );
-      logger.info(`Decoded requested path: ${requestedPath}`);
+      const hostname = requestedUrl.hostname;
+      let requestedPath = `${hostname}:${requestedUrl.pathname}`;
+      let isAbsolutePath = false;
+      logger.info(`Requested path: ${requestedPath}`);
 
       // Deliberate special case to return the fallback unknown.png image.
       if (requestedPath === "unknown") {
+        logger.info("Requested path is 'unknown', returning unknown image.");
         return getUnknownImageResponse();
       }
 
-      const appDataBasePath: string = path.join(getAppDataPath());
-
-      // Resolve the full path, ensuring it stays within the AppData directory
-      let fullPath: string = path.resolve(appDataBasePath, requestedPath);
-      logger.info(`Resolved full path: ${fullPath}`);
-      if (!fullPath.startsWith(appDataBasePath)) {
-        logger.warn(`Blocked path traversal attempt:
-          Raw request: ${req.url}
-          Decoded path: ${requestedPath}
-          Resolved path: ${fullPath}
-        `);
-        return fileNotExist(fullPath, "Blocked path traversal attempt");
+      // Check if the hostname is a Windows drive letter
+      if (hostname && hostname.length === 1 && /^[a-zA-Z]$/.test(hostname)) {
+        isAbsolutePath = true;
+        logger.info(
+          `Detected Windows drive letter in hostname: ${hostname}, rebuilding absolute path: ${requestedPath}`
+        );
+      } else {
+        // Normal path handling
+        requestedPath = decodeURIComponent(requestedUrl.pathname);
+        logger.info(`Decoded requested path: ${requestedPath}`);
       }
+
+      let fullPath: string;
+
+      // For absolute paths
+      if (isAbsolutePath) {
+        fullPath = requestedPath;
+        logger.info(`Using absolute file path: ${fullPath}`);
+      } else {
+        const relativePath = requestedPath.startsWith("/")
+          ? requestedPath.substring(1)
+          : requestedPath;
+
+        // Resolve the full path relative to the AppData directory
+        const appDataBasePath: string = path.join(getAppDataPath());
+        fullPath = path.resolve(appDataBasePath, relativePath);
+        logger.info(`Resolved full path relative to AppData: ${fullPath}`);
+      }
+
       // Resolve .lnk files if applicable
       fullPath = resolveShortcut(fullPath);
 
@@ -118,12 +133,12 @@ function fileNotExist(fullPath: string, reason?: string) {
     logger.warn("File not found:", fullPath);
   }
 
+  // Check if the requested file is an image based on the MIME type or fallback to unknown.png
   const mimeType = mime.lookup(fullPath);
-  // Check if the requested file is an image
-  if (mimeType && mimeType.startsWith("image/")) {
+  if (!mimeType || mimeType.startsWith("image/")) {
     return getUnknownImageResponse();
   } else {
-    logger.error("File not found:", fullPath);
+    logger.error("File not found and not an image:", fullPath);
     return new Response("Not Found", { status: 404 });
   }
 }
