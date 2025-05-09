@@ -244,6 +244,7 @@ const Settings: React.FC = () => {
       setSettings((prev) =>
         prev ? { ...prev, videoBackground: filePath } : null
       );
+      sendPreviewUpdate({ videoBackground: filePath });
     } else {
       logger.warn("Dropped file is neither an image nor a video.");
       showSmallWindow(
@@ -269,6 +270,7 @@ const Settings: React.FC = () => {
     logger.info("Open file dialog result:", success);
     if (success) {
       updateSetting("imageBackground", success);
+      sendPreviewUpdate({ imageBackground: success });
     } else {
       logger.info(
         "No file selected or dialog closed without selection.",
