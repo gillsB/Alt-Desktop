@@ -211,6 +211,7 @@ const EditIcon: React.FC = () => {
           setIcon((prevIcon) =>
             prevIcon ? { ...prevIcon, image: savedFilePath } : null
           );
+          sendPreviewUpdate({ image: savedFilePath });
           logger.info(`Image saved to: ${savedFilePath}`);
         }
       } else {
@@ -280,6 +281,7 @@ const EditIcon: React.FC = () => {
         setIcon((prevIcon) =>
           prevIcon ? { ...prevIcon, image: savedFilePath } : null
         );
+        sendPreviewUpdate({ image: savedFilePath });
         logger.info(`Image saved to: ${savedFilePath}`);
       } catch (error) {
         logger.error("Failed to save image:", error);
@@ -313,9 +315,15 @@ const EditIcon: React.FC = () => {
       const success = await window.electron.openFileDialog("image", filePath);
       logger.info("Open file dialog result:", success);
       if (success) {
-        setIcon((prevIcon) =>
-          prevIcon ? { ...prevIcon, image: success } : null
+        const savedFilePath = await window.electron.saveIconImage(
+          success,
+          icon.row,
+          icon.col
         );
+        setIcon((prevIcon) =>
+          prevIcon ? { ...prevIcon, image: savedFilePath } : null
+        );
+        sendPreviewUpdate({ image: savedFilePath });
       } else {
         logger.info(
           "No file selected or dialog closed without selection.",
