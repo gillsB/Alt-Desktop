@@ -282,8 +282,8 @@ const Settings: React.FC = () => {
   const sendPreviewUpdate = async (updatedFields: Partial<SettingsData>) => {
     try {
       const previewData: Partial<SettingsData> = {
-        videoBackground: settings?.videoBackground || undefined,
-        imageBackground: settings?.imageBackground || undefined,
+        videoBackground: settings?.videoBackground ?? "",
+        imageBackground: settings?.imageBackground ?? "",
         ...updatedFields, // Override with any explicitly updated fields
       };
 

@@ -74,11 +74,16 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
     setVideoSrc(null);
 
     try {
-      // Check for image background
-      const imageBackground = overrides?.imageBackground
-        ? overrides.imageBackground
-        : await window.electron.getSetting("imageBackground");
-      logger.info("imageBackground setting:", imageBackground);
+      let imageBackground: string | null = null;
+      if (overrides?.imageBackground === "") {
+        logger.warn("Image background empty");
+      } else {
+        // Check for image background
+        imageBackground = overrides?.imageBackground
+          ? overrides.imageBackground
+          : await window.electron.getSetting("imageBackground");
+        logger.info("imageBackground setting:", imageBackground);
+      }
 
       if (imageBackground) {
         const imageFilePath =
@@ -110,8 +115,6 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       if (overrides?.videoBackground === "") {
         setVideoError(true);
         setVideoSrc(null);
-        await fallbackToImage(overrides);
-        return;
       } else {
         videoBackground = overrides?.videoBackground
           ? overrides.videoBackground
