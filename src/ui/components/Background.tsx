@@ -105,10 +105,19 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
 
   const fetchBackgroundSettings = async (overrides?: Partial<SettingsData>) => {
     try {
+      let videoBackground: string | null = null;
       // First check for video background
-      const videoBackground = overrides?.videoBackground
-        ? overrides.videoBackground
-        : await window.electron.getSetting("videoBackground");
+      if (overrides?.videoBackground === "") {
+        setVideoError(true);
+        setVideoSrc(null);
+        await fallbackToImage(overrides);
+        return;
+      } else {
+        videoBackground = overrides?.videoBackground
+          ? overrides.videoBackground
+          : await window.electron.getSetting("videoBackground");
+      }
+
       logger.info("videoBackground setting:", videoBackground);
       videoLogger.info("videoBackground setting:", videoBackground);
 
