@@ -200,19 +200,11 @@ const EditIcon: React.FC = () => {
         logger.info("Opening file dialog for image selection.");
         const filePath = await window.electron.openFileDialog("image");
         if (filePath) {
-          // Save the file to the appropriate folder
-          const savedFilePath = await window.electron.saveIconImage(
-            filePath,
-            icon.row,
-            icon.col
-          );
-
           // Update the icon's image path
           setIcon((prevIcon) =>
-            prevIcon ? { ...prevIcon, image: savedFilePath } : null
+            prevIcon ? { ...prevIcon, image: filePath } : null
           );
-          sendPreviewUpdate({ image: savedFilePath });
-          logger.info(`Image saved to: ${savedFilePath}`);
+          sendPreviewUpdate({ image: filePath });
         }
       } else {
         logger.info(`Opening file dialog for ${type} selection.`);
@@ -272,17 +264,10 @@ const EditIcon: React.FC = () => {
     if (fileType.startsWith("image/")) {
       try {
         logger.info("Dropped file is an image:");
-        const savedFilePath = await window.electron.saveIconImage(
-          filePath,
-          icon.row,
-          icon.col
-        );
-
         setIcon((prevIcon) =>
-          prevIcon ? { ...prevIcon, image: savedFilePath } : null
+          prevIcon ? { ...prevIcon, image: filePath } : null
         );
-        sendPreviewUpdate({ image: savedFilePath });
-        logger.info(`Image saved to: ${savedFilePath}`);
+        sendPreviewUpdate({ image: filePath });
       } catch (error) {
         logger.error("Failed to save image:", error);
       }

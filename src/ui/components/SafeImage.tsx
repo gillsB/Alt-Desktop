@@ -32,6 +32,18 @@ const getImagePath = (
     return imagePath;
   }
 
+  if (/^[a-zA-Z]:[\\/]/.test(imagePath)) {
+    // Append appdata-file:// to the image path if it is a full path
+    let safeFilePath = `appdata-file://${imagePath.replace(/\\/g, "/")}`;
+
+    // Add cache-busting timestamp if provided
+    if (timestamp) {
+      safeFilePath += `?t=${timestamp}`;
+    }
+
+    return safeFilePath;
+  }
+
   const folderPath = `/data/[${row},${col}]`;
 
   // Encode the image path to handle spaces and special characters
