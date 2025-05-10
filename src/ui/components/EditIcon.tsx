@@ -293,22 +293,17 @@ const EditIcon: React.FC = () => {
     }
   };
 
-  const handleImageGlassClick = async () => {
+  const handleImageMagnifyClick = async () => {
     if (icon) {
-      const filePath = `data/[${row},${col}]/${icon.image}`;
+      const filePath = `data/[${row},${col}]/`;
 
       const success = await window.electron.openFileDialog("image", filePath);
       logger.info("Open file dialog result:", success);
       if (success) {
-        const savedFilePath = await window.electron.saveIconImage(
-          success,
-          icon.row,
-          icon.col
-        );
         setIcon((prevIcon) =>
-          prevIcon ? { ...prevIcon, image: savedFilePath } : null
+          prevIcon ? { ...prevIcon, image: success } : null
         );
-        sendPreviewUpdate({ image: savedFilePath });
+        sendPreviewUpdate({ image: success });
       } else {
         logger.info(
           "No file selected or dialog closed without selection.",
@@ -316,7 +311,7 @@ const EditIcon: React.FC = () => {
         );
       }
     } else {
-      logger.error("Icon data is missing. (handleImageGlassClick)");
+      logger.error("Icon data is missing. (handleImageMagnifyClick)");
     }
   };
 
@@ -376,7 +371,7 @@ const EditIcon: React.FC = () => {
               </button>
               <button
                 className="magnifying-glass-button flex items-center gap-2"
-                onClick={handleImageGlassClick}
+                onClick={handleImageMagnifyClick}
                 onMouseEnter={() => setHoveringImageGlass(true)}
                 onMouseLeave={() => setHoveringImageGlass(false)}
                 title="Select from previously set background images"
