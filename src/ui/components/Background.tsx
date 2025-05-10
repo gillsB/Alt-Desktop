@@ -88,12 +88,17 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       if (imageBackground) {
         const imageFilePath =
           await window.electron.getBackgroundImagePath(imageBackground);
-        logger.info("Converted image file path:", imageFilePath);
+        if (imageFilePath) {
+          logger.info("Converted image file path:", imageFilePath);
 
-        // Add cache busting parameter
-        const cacheBuster = Date.now();
-        setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
-        setImageError(false);
+          // Add cache busting parameter
+          const cacheBuster = Date.now();
+          setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
+          setImageError(false);
+        } else {
+          setImageError(true);
+          setImageSrc(null);
+        }
       } else {
         logger.warn("No image background found, falling back to solid color.");
         setImageError(true);
