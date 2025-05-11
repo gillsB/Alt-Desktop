@@ -1,4 +1,5 @@
-import { app, dialog, ipcMain, screen, shell } from "electron";
+import { spawn } from "child_process";
+import { dialog, ipcMain, screen, shell } from "electron";
 import ffprobeStatic from "ffprobe-static";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
@@ -6,6 +7,7 @@ import mime from "mime-types";
 import path from "path";
 import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
+import { getScriptsPath } from "./pathResolver.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
 import { defaultSettings } from "./settings.js";
 import { openSettingsWindow } from "./settingsWindow.js";
@@ -1038,36 +1040,53 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "extractFileIcon",
     async (filePath: string): Promise<string | null> => {
       try {
-        logger.info(`Extracting file icon for: ${filePath}`);
+        logger.info(`Extracting file icon using executable for: ${filePath}`);
 
         if (!fs.existsSync(filePath)) {
           logger.warn(`File does not exist: ${filePath}`);
           return null;
         }
 
-        // Extract the icon using Electron
-        const icon = await app.getFileIcon(filePath, { size: "large" });
-        if (!icon || icon.isEmpty()) {
-          logger.warn(`Failed to extract icon for: ${filePath}`);
-          return null;
-        }
-
-        const pngBuffer = icon.toPNG();
-
         const targetDir = getAppDataPath();
         if (!fs.existsSync(targetDir)) {
           fs.mkdirSync(targetDir, { recursive: true });
         }
 
-        const iconFileName = `${path.basename(filePath, path.extname(filePath))}.png`;
-        const targetPath = path.join(targetDir, iconFileName);
+        const iconSize = 256;
+        const iconFileName = `${path.basename(filePath, path.extname(filePath))}_${iconSize}.png`;
+        const outputPath = path.join(targetDir, iconFileName);
 
-        fs.writeFileSync(targetPath, pngBuffer);
-        logger.info(`Icon saved to: ${targetPath}`);
+        const executablePath = path.join(getScriptsPath(), "exe_to_image.exe");
 
-        return targetPath;
+        return await new Promise<string | null>((resolve) => {
+          const process = spawn(executablePath, [
+            filePath,
+            outputPath,
+            iconSize.toString(),
+          ]);
+
+          process.stdout.on("data", (data) => {
+            logger.info(`Executable stdout: ${data.toString().trim()}`);
+          });
+
+          process.stderr.on("data", (data) => {
+            logger.error(`Executable stderr: ${data.toString().trim()}`);
+          });
+
+          process.on("close", (code) => {
+            if (code === 0 && fs.existsSync(outputPath)) {
+              logger.info(
+                `Icon successfully extracted and saved to: ${outputPath}`
+              );
+              resolve(outputPath);
+            } else {
+              logger.warn(`Executable failed with code ${code}`);
+              resolve(null);
+            }
+          });
+        });
       } catch (error) {
-        logger.error(`Error extracting file icon for ${filePath}: ${error}`);
+        logger.error(`Error during icon extraction: ${error}`);
         return null;
       }
     }

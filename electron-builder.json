@@ -2,7 +2,11 @@
   "appId": "com.gillsb.alt-desktop",
   "files": ["dist-electron", "dist-react"],
   "icon": "./alt.png",
-  "extraResources": ["dist-electron/preload.cjs", "src/assets/**"],
+  "extraResources": [
+    "dist-electron/preload.cjs",
+    "src/assets/**",
+    "dist/exe_to_image.exe"
+  ],
   "mac": {
     "target": "dmg"
   },

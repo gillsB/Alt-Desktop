@@ -38,3 +38,4 @@ dist-ssr
 # Misc
 back*.mp4
 /archive
+/build
