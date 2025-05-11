@@ -26,6 +26,7 @@ import {
   getSettingsFilePath,
   ipcMainHandle,
   ipcMainOn,
+  resolveShortcut,
   setSubWindowDevtoolsEnabled,
 } from "./util.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
@@ -1040,6 +1041,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "extractFileIcon",
     async (filePath: string): Promise<string | null> => {
       try {
+        filePath = resolveShortcut(filePath);
         logger.info(`Extracting file icon using executable for: ${filePath}`);
 
         if (!fs.existsSync(filePath)) {
@@ -1053,7 +1055,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         }
 
         const iconSize = 256;
-        const iconFileName = `${path.basename(filePath, path.extname(filePath))}_${iconSize}.png`;
+        const iconFileName = `${path.basename(filePath, path.extname(filePath))}.png`;
         const outputPath = path.join(targetDir, iconFileName);
 
         const executablePath = path.join(getScriptsPath(), "exe_to_image.exe");

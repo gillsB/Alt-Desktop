@@ -17,5 +17,5 @@
     "incremental": true
   },
   "include": ["src", "tests", "e2e/example.spec.ts"],
-  "exclude": ["src/electron"],
+  "exclude": ["src/electron"]
 }

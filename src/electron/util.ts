@@ -1,4 +1,4 @@
-import { ipcMain, WebContents, WebFrameMain } from "electron";
+import { ipcMain, shell, WebContents, WebFrameMain } from "electron";
 import fs from "fs";
 import path from "path";
 import { createLoggerForFile } from "./logging.js";
@@ -169,6 +169,24 @@ export const getAppDataPath = (): string => {
   }
   return path.join(appDataPath, "AltDesktop");
 };
+
+/**
+ * Resolves a Windows shortcut (.lnk) to its actual target path.
+ * @param filePath The path to the .lnk file
+ * @returns The resolved target path or the original path if not a shortcut
+ */
+export function resolveShortcut(filePath: string): string {
+  if (process.platform === "win32" && filePath.endsWith(".lnk")) {
+    try {
+      const shortcut = shell.readShortcutLink(filePath);
+      return shortcut.target;
+    } catch (error) {
+      console.error("Failed to resolve shortcut:", error);
+      return filePath; // Fall back to original path if resolution fails
+    }
+  }
+  return filePath;
+}
 
 export const getBasePath = (): string => {
   return getAppDataPath();

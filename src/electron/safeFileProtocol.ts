@@ -1,31 +1,13 @@
-import { protocol, shell } from "electron";
+import { protocol } from "electron";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
 import { URL } from "url";
 import { createLoggerForFile } from "./logging.js";
 import { getAssetPath } from "./pathResolver.js";
-import { getAppDataPath } from "./util.js";
+import { getAppDataPath, resolveShortcut } from "./util.js";
 
 const logger = createLoggerForFile("safeFileProtocol.ts");
-
-/**
- * Resolves a Windows shortcut (.lnk) to its actual target path.
- * @param filePath The path to the .lnk file
- * @returns The resolved target path or the original path if not a shortcut
- */
-function resolveShortcut(filePath: string): string {
-  if (process.platform === "win32" && filePath.endsWith(".lnk")) {
-    try {
-      const shortcut = shell.readShortcutLink(filePath);
-      return shortcut.target;
-    } catch (error) {
-      console.error("Failed to resolve shortcut:", error);
-      return filePath; // Fall back to original path if resolution fails
-    }
-  }
-  return filePath;
-}
 
 /**
  * Registers a custom protocol that safely serves files only from the AppData directory,
