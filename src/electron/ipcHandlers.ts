@@ -1,4 +1,4 @@
-import { dialog, ipcMain, screen, shell } from "electron";
+import { app, dialog, ipcMain, screen, shell } from "electron";
 import ffprobeStatic from "ffprobe-static";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
@@ -26,7 +26,6 @@ import {
   ipcMainOn,
   setSubWindowDevtoolsEnabled,
 } from "./util.js";
-import { extractIcon } from "./utils/iconExtractor.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import { getVideoFileUrl } from "./videoFileProtocol.js";
 
@@ -1039,15 +1038,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "extractFileIcon",
     async (filePath: string): Promise<string | null> => {
       try {
-        if (!filePath || typeof filePath !== "string") {
-          throw new Error("Invalid file path provided");
+        logger.info(`Extracting file icon for: ${filePath}`);
+
+        if (!fs.existsSync(filePath)) {
+          logger.warn(`File does not exist: ${filePath}`);
+          return null;
         }
 
-        // Call the icon extractor function
-        const iconPath = await extractIcon(filePath);
-        return iconPath; // Will be null if extraction failed
+        // Extract the icon using Electron
+        const icon = await app.getFileIcon(filePath, { size: "large" });
+        if (!icon || icon.isEmpty()) {
+          logger.warn(`Failed to extract icon for: ${filePath}`);
+          return null;
+        }
+
+        const pngBuffer = icon.toPNG();
+
+        const targetDir = getAppDataPath();
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        const iconFileName = `${path.basename(filePath, path.extname(filePath))}.png`;
+        const targetPath = path.join(targetDir, iconFileName);
+
+        fs.writeFileSync(targetPath, pngBuffer);
+        logger.info(`Icon saved to: ${targetPath}`);
+
+        return targetPath;
       } catch (error) {
-        console.error("Error in get-file-icon IPC handler:", error);
+        logger.error(`Error extracting file icon for ${filePath}: ${error}`);
         return null;
       }
     }
