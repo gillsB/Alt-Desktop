@@ -1,4 +1,5 @@
 import { dialog, ipcMain, screen, shell } from "electron";
+import extractFileIcon from "extract-file-icon";
 import ffprobeStatic from "ffprobe-static";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
@@ -1030,6 +1031,46 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       } catch (error) {
         logger.error(`Error in getVideoMetadata for ${filePath}: ${error}`);
         throw error;
+      }
+    }
+  );
+
+  ipcMainHandle(
+    "extractFileIcon",
+    async (filePath: string): Promise<string | null> => {
+      try {
+        logger.info(`Extracting file icon for: ${filePath}`);
+
+        // Verify that the file exists
+        if (!fs.existsSync(filePath)) {
+          logger.warn(`File does not exist: ${filePath}`);
+          return null;
+        }
+
+        // Extract the icon as a Buffer
+        const iconBuffer = extractFileIcon(filePath, 256); // 256x256 resolution
+
+        if (!iconBuffer) {
+          logger.warn(`Failed to extract icon for: ${filePath}`);
+          return null;
+        }
+
+        const targetDir = getAppDataPath();
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        const iconFileName = `${path.basename(filePath)}.png`;
+        const targetPath = path.join(targetDir, iconFileName);
+
+        // Save the icon buffer as a PNG file
+        fs.writeFileSync(targetPath, iconBuffer);
+        logger.info(`Icon saved to: ${targetPath}`);
+
+        return targetPath;
+      } catch (error) {
+        logger.error(`Error extracting file icon for ${filePath}: ${error}`);
+        return null;
       }
     }
   );

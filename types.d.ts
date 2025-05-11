@@ -110,6 +110,7 @@ interface EventParamMapping {
   getBackgroundImagePath: [string];
   reloadBackground: [];
   getVideoMetadata: [string];
+  extractFileIcon: [string];
 }
 
 // The returns from the main process to the renderer
@@ -148,6 +149,7 @@ type EventPayloadMapping = {
   getBackgroundImagePath: string | null;
   reloadBackground: boolean;
   getVideoMetadata: VideoMetadata;
+  extractFileIcon: string | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -221,5 +223,6 @@ interface Window {
     getBackgroundImagePath: (filePath: string) => Promise<string | null>;
     reloadBackground: () => Promise<boolean>;
     getVideoMetadata: (filePath: string) => Promise<VideoMetadata>;
+    extractFileIcon: (filePath: string) => Promise<string | null>;
   };
 }
