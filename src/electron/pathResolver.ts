@@ -20,5 +20,5 @@ export function getAssetPath() {
 }
 
 export function getScriptsPath() {
-  return path.join(app.getAppPath(), isDev() ? "." : "..", "/dist/");
+  return path.join(app.getAppPath(), isDev() ? "." : "..", "/src/scripts/bin");
 }

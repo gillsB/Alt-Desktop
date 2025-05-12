@@ -5,7 +5,7 @@
   "extraResources": [
     "dist-electron/preload.cjs",
     "src/assets/**",
-    "dist/exe_to_image.exe"
+    "src/scripts/bin/file_to_image.exe"
   ],
   "mac": {
     "target": "dmg"

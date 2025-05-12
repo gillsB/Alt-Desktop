@@ -1,6 +1,6 @@
 # Alt-Desktop
 
-An extremely customizable Desktop Alternative. Re-write from the ground up in Electron as opposed to the [python build](https://github.com/gillsB/Alternative-Desktop-Python).
+An extremely customizable Windows Desktop Alternative. Re-write from the ground up in Electron as opposed to the [python build](https://github.com/gillsB/Alternative-Desktop-Python).
 
 ## REQ:
 
@@ -22,17 +22,10 @@ npm run dist:win
 npm run dist:linux  
 npm run dis:mac
 
-Testing program (e2e):
-npm run test:e2e
-
-Testing program (unit testing):
-npm run test:unit
+The bare minimum python executable is already included, but if you want to edit it: (Requires python installed with requirements.txt).  
+npm run py
 
 ### Current environment and testing:
 
-Reminder appdata-file:// protocol ONLY works in AppData/Roaming/AltDesktop. All other paths will be rejected.
-
 1. Run the program to build the Appdata/Roaming/AltDesktop and subfolders.
-2. Copy contents of desktopIcons_EXAMPLE.json into Appdata/Roaming/AltDesktop/desktopIcons.json
-3. Add a image.png, image2.png, and image3.png into Appdata/Roaming/AltDesktop/icons folder.  
-   or update the "image": to the full file path or "icons/image_name_here.png"
+2. Create icons via right clicks on desktop.

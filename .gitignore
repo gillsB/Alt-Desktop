@@ -39,3 +39,4 @@ dist-ssr
 back*.mp4
 /archive
 /build
+/pyenv
