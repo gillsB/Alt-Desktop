@@ -1,4 +1,3 @@
-import { spawn } from "child_process";
 import { dialog, ipcMain, screen, shell } from "electron";
 
 import ffprobeStatic from "ffprobe-static";
@@ -8,7 +7,6 @@ import mime from "mime-types";
 import path from "path";
 import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
-import { getScriptsPath } from "./pathResolver.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
 import { defaultSettings } from "./settings.js";
 import { openSettingsWindow } from "./settingsWindow.js";
@@ -27,9 +25,9 @@ import {
   getSettingsFilePath,
   ipcMainHandle,
   ipcMainOn,
-  resolveShortcut,
   setSubWindowDevtoolsEnabled,
 } from "./util.js";
+import { extractFileIcon } from "./utils/extractFileIcon.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import { getVideoFileUrl } from "./videoFileProtocol.js";
 
@@ -1041,60 +1039,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "extractFileIcon",
     async (filePath: string): Promise<string | null> => {
-      try {
-        filePath = resolveShortcut(filePath);
-        logger.info(`Extracting file icon for: ${filePath}`);
-
-        // Verify that the file exists
-        if (!fs.existsSync(filePath)) {
-          logger.warn(`File does not exist: ${filePath}`);
-          return null;
-        }
-
-        const targetDir = getAppDataPath();
-        if (!fs.existsSync(targetDir)) {
-          fs.mkdirSync(targetDir, { recursive: true });
-        }
-
-        const iconSize = 256;
-        const iconFileName = `${path.basename(filePath, path.extname(filePath))}.png`;
-        const outputPath = path.join(targetDir, iconFileName);
-
-        // Get Icon from python script.
-        logger.info(`Falling back to Python executable for: ${filePath}`);
-        const executablePath = path.join(getScriptsPath(), "file_to_image.exe");
-
-        return await new Promise<string | null>((resolve) => {
-          const process = spawn(executablePath, [
-            filePath,
-            outputPath,
-            iconSize.toString(),
-          ]);
-
-          process.stdout.on("data", (data) => {
-            logger.info(`Executable stdout: ${data.toString().trim()}`);
-          });
-
-          process.stderr.on("data", (data) => {
-            logger.error(`Executable stderr: ${data.toString().trim()}`);
-          });
-
-          process.on("close", (code) => {
-            if (code === 0 && fs.existsSync(outputPath)) {
-              logger.info(
-                `Icon successfully extracted and saved to: ${outputPath}`
-              );
-              resolve(outputPath);
-            } else {
-              logger.warn(`Executable failed with code ${code}`);
-              resolve(null);
-            }
-          });
-        });
-      } catch (error) {
-        logger.error(`Error during icon extraction: ${error}`);
-        return null;
-      }
+      return extractFileIcon(filePath);
     }
   );
 }
