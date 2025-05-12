@@ -6,6 +6,7 @@ import { getScriptsPath } from "../pathResolver.js";
 import { getAppDataPath, resolveShortcut } from "../util.js";
 
 const logger = createLoggerForFile("extractFileIcon.ts");
+type FileType = "exe" | "default";
 
 export const extractFileIcon = async (
   filePath: string
@@ -18,6 +19,15 @@ export const extractFileIcon = async (
     if (!fs.existsSync(filePath)) {
       logger.warn(`File does not exist: ${filePath}`);
       return null;
+    }
+
+    let fileType: FileType;
+    const fileExtension = path.extname(filePath).toLowerCase();
+
+    if (fileExtension === ".exe") {
+      fileType = "exe";
+    } else {
+      fileType = "default";
     }
 
     const targetDir = getAppDataPath();
@@ -34,7 +44,11 @@ export const extractFileIcon = async (
     const executablePath = path.join(getScriptsPath(), "file_to_image.exe");
 
     return await new Promise<string | null>((resolve) => {
+      logger.info(
+        `Args for exec: ${fileType}, ${filePath}, ${outputPath}, ${iconSize.toString()}`
+      );
       const process = spawn(executablePath, [
+        fileType,
         filePath,
         outputPath,
         iconSize.toString(),
