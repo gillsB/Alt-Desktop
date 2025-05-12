@@ -1,5 +1,6 @@
 import { spawn } from "child_process";
 import { dialog, ipcMain, screen, shell } from "electron";
+import extractFileIcon from "extract-file-icon";
 import ffprobeStatic from "ffprobe-static";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
@@ -1042,8 +1043,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     async (filePath: string): Promise<string | null> => {
       try {
         filePath = resolveShortcut(filePath);
-        logger.info(`Extracting file icon using executable for: ${filePath}`);
+        logger.info(`Extracting file icon for: ${filePath}`);
 
+        // Verify that the file exists
         if (!fs.existsSync(filePath)) {
           logger.warn(`File does not exist: ${filePath}`);
           return null;
@@ -1058,6 +1060,27 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         const iconFileName = `${path.basename(filePath, path.extname(filePath))}.png`;
         const outputPath = path.join(targetDir, iconFileName);
 
+        // Attempt to extract the icon using extractFileIcon
+        try {
+          const iconBuffer = extractFileIcon(filePath, iconSize);
+
+          if (iconBuffer && iconBuffer.byteLength > 0) {
+            logger.info("buffer length", iconBuffer.byteLength);
+            // Save the icon buffer as a PNG file
+            fs.writeFileSync(outputPath, iconBuffer);
+            logger.info(
+              `Icon successfully extracted and saved to: ${outputPath}`
+            );
+            return outputPath;
+          } else {
+            logger.warn(`extractFileIcon returned null for: ${filePath}`);
+          }
+        } catch (error) {
+          logger.error(`Error using extractFileIcon: ${error}`);
+        }
+
+        // Fallback to using the Python executable
+        logger.info(`Falling back to Python executable for: ${filePath}`);
         const executablePath = path.join(getScriptsPath(), "exe_to_image.exe");
 
         return await new Promise<string | null>((resolve) => {
