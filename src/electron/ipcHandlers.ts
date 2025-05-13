@@ -1038,7 +1038,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "extractFileIcon",
-    async (filePath: string): Promise<string | null> => {
+    async (filePath: string): Promise<string[]> => {
       return extractFileIcon(filePath);
     }
   );

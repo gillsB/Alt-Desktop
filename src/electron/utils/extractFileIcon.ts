@@ -8,9 +8,7 @@ import { getAppDataPath, resolveShortcut } from "../util.js";
 const logger = createLoggerForFile("extractFileIcon.ts");
 type FileType = "exe" | "default";
 
-export const extractFileIcon = async (
-  filePath: string
-): Promise<string | null> => {
+export const extractFileIcon = async (filePath: string): Promise<string[]> => {
   try {
     filePath = resolveShortcut(filePath);
     logger.info(`Extracting file icon for: ${filePath}`);
@@ -18,7 +16,7 @@ export const extractFileIcon = async (
     // Verify that the file exists
     if (!fs.existsSync(filePath)) {
       logger.warn(`File does not exist: ${filePath}`);
-      return null;
+      return [];
     }
 
     let fileType: FileType;
@@ -35,16 +33,21 @@ export const extractFileIcon = async (
       fs.mkdirSync(targetDir, { recursive: true });
     }
 
+    // Collect all found file paths
+    const foundPaths: string[] = [];
+
+    // Check for .ico files in the same folder as filePath and copy them to targetDir
     const folder = path.dirname(filePath);
     const icoFiles = fs
       .readdirSync(folder)
       .filter((f) => path.extname(f).toLowerCase() === ".ico");
-    if (icoFiles.length > 0) {
-      const icoSource = path.join(folder, icoFiles[0]);
-      const icoTarget = path.join(targetDir, icoFiles[0]);
+    icoFiles.forEach((icoFile) => {
+      const icoSource = path.join(folder, icoFile);
+      const icoTarget = path.join(targetDir, icoFile);
       fs.copyFileSync(icoSource, icoTarget);
       logger.info(`Copied .ico file from ${icoSource} to ${icoTarget}`);
-    }
+      foundPaths.push(icoTarget);
+    });
 
     const iconSize = 256;
     const iconFileName = `${path.basename(filePath, path.extname(filePath))}.png`;
@@ -54,7 +57,7 @@ export const extractFileIcon = async (
     logger.info(`Falling back to Python executable for: ${filePath}`);
     const executablePath = path.join(getScriptsPath(), "file_to_image.exe");
 
-    return await new Promise<string | null>((resolve) => {
+    return await new Promise<string[]>((resolve) => {
       logger.info(
         `Args for exec: ${fileType}, ${filePath}, ${outputPath}, ${iconSize.toString()}`
       );
@@ -78,15 +81,15 @@ export const extractFileIcon = async (
           logger.info(
             `Icon successfully extracted and saved to: ${outputPath}`
           );
-          resolve(outputPath);
+          foundPaths.push(outputPath);
         } else {
           logger.warn(`Executable failed with code ${code}`);
-          resolve(null);
         }
+        resolve(foundPaths);
       });
     });
   } catch (error) {
     logger.error(`Error during icon extraction: ${error}`);
-    return null;
+    return [];
   }
 };

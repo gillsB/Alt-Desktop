@@ -149,7 +149,7 @@ type EventPayloadMapping = {
   getBackgroundImagePath: string | null;
   reloadBackground: boolean;
   getVideoMetadata: VideoMetadata;
-  extractFileIcon: string | null;
+  extractFileIcon: string[];
 };
 
 type UnsubscribeFunction = () => void;
@@ -223,6 +223,6 @@ interface Window {
     getBackgroundImagePath: (filePath: string) => Promise<string | null>;
     reloadBackground: () => Promise<boolean>;
     getVideoMetadata: (filePath: string) => Promise<VideoMetadata>;
-    extractFileIcon: (filePath: string) => Promise<string | null>;
+    extractFileIcon: (filePath: string) => Promise<string[]>;
   };
 }
