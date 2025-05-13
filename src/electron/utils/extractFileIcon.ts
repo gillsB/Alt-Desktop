@@ -13,13 +13,13 @@ const https = followRedirects.https;
 
 export const extractFileIcon = async (
   savePath: string,
-  filePath: string,
+  programLink: string,
   webLink: string
 ): Promise<string[]> => {
   try {
-    filePath = resolveShortcut(filePath);
+    programLink = resolveShortcut(programLink);
     logger.info(`directory for save path: ${savePath} `);
-    logger.info(`Extracting file icon for: ${filePath}, ${webLink}`);
+    logger.info(`Extracting file icon for: ${programLink}, ${webLink}`);
 
     // Collect all found file paths
     const foundPaths: string[] = [];
@@ -39,13 +39,13 @@ export const extractFileIcon = async (
     }
 
     // Verify that the file exists
-    if (!fs.existsSync(filePath)) {
-      logger.warn(`File does not exist: ${filePath}`);
+    if (!fs.existsSync(programLink)) {
+      logger.warn(`File does not exist: ${programLink}`);
       return foundPaths;
     }
 
     let fileType: FileType;
-    const fileExtension = path.extname(filePath).toLowerCase();
+    const fileExtension = path.extname(programLink).toLowerCase();
 
     if (fileExtension === ".exe") {
       fileType = "exe";
@@ -53,8 +53,8 @@ export const extractFileIcon = async (
       fileType = "default";
     }
 
-    // Check for .ico files in the same folder as filePath and copy them to targetDir
-    const folder = path.dirname(filePath);
+    // Check for .ico files in the same folder as programLink and copy them to targetDir
+    const folder = path.dirname(programLink);
     const icoFiles = fs
       .readdirSync(folder)
       .filter((f) => path.extname(f).toLowerCase() === ".ico");
@@ -67,20 +67,20 @@ export const extractFileIcon = async (
     });
 
     const iconSize = 256;
-    const iconFileName = `${path.basename(filePath, path.extname(filePath))}.png`;
+    const iconFileName = `${path.basename(programLink, path.extname(programLink))}.png`;
     const outputPath = path.join(targetDir, iconFileName);
 
     // Get Icon from python script.
-    logger.info(`Falling back to Python executable for: ${filePath}`);
+    logger.info(`Falling back to Python executable for: ${programLink}`);
     const executablePath = path.join(getScriptsPath(), "file_to_image.exe");
 
     return await new Promise<string[]>((resolve) => {
       logger.info(
-        `Args for exec: ${fileType}, ${filePath}, ${outputPath}, ${iconSize.toString()}`
+        `Args for exec: ${fileType}, ${programLink}, ${outputPath}, ${iconSize.toString()}`
       );
       const process = spawn(executablePath, [
         fileType,
-        filePath,
+        programLink,
         outputPath,
         iconSize.toString(),
       ]);

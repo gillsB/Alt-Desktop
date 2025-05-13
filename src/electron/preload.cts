@@ -96,9 +96,9 @@ electron.contextBridge.exposeInMainWorld("electron", {
   extractFileIcon: (
     row: number,
     col: number,
-    filePath: string,
+    programLink: string,
     webLink: string
-  ) => ipcInvoke("extractFileIcon", row, col, filePath, webLink),
+  ) => ipcInvoke("extractFileIcon", row, col, programLink, webLink),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

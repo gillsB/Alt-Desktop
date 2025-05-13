@@ -226,7 +226,7 @@ interface Window {
     extractFileIcon: (
       row: number,
       col: number,
-      filePath: string,
+      programLink: string,
       webLink: string
     ) => Promise<string[]>;
   };
