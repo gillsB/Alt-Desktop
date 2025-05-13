@@ -1,6 +1,7 @@
-import { spawn } from "child_process";
+import { execSync, spawn } from "child_process";
 import followRedirects from "follow-redirects";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
 import { getScriptsPath } from "../pathResolver.js";
@@ -116,9 +117,10 @@ async function fetchAndSaveFavicon(
   try {
     const { hostname } = new URL(url);
     const baseName = hostname.replace(/^www\./, "").replace(/\./g, "_");
+    const sanitizedBaseName = baseName.replace(/[^a-zA-Z0-9_]/g, "");
     const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=${size}`;
     logger.info(faviconUrl);
-    const fileName = `favicon_${baseName}.png`;
+    const fileName = `favicon_${sanitizedBaseName}.png`;
     const savePath = path.join(targetDir, fileName);
 
     await new Promise<void>((resolve, reject) => {
@@ -143,6 +145,71 @@ async function fetchAndSaveFavicon(
     return savePath;
   } catch (err) {
     logger.warn(`Failed to download favicon from Google API: ${err}`);
+    // Fallback: try to get browser icon
+    const browserIcon = await browserIconToImage(targetDir, size);
+    if (browserIcon) {
+      logger.info(`Returned browser icon as fallback: ${browserIcon}`);
+      return browserIcon;
+    }
+    return null;
+  }
+}
+
+async function browserIconToImage(
+  targetDir: string,
+  iconSize: number = 256
+): Promise<string | null> {
+  const browserPath = getDefaultBrowserPath();
+  if (!browserPath) return null;
+
+  const iconFileName = `browser_icon.png`;
+  const outputPath = path.join(targetDir, iconFileName);
+
+  const executablePath = path.join(getScriptsPath(), "file_to_image.exe");
+  return await new Promise<string | null>((resolve) => {
+    const process = spawn(executablePath, [
+      "exe",
+      browserPath,
+      outputPath,
+      iconSize.toString(),
+    ]);
+
+    process.on("close", (code) => {
+      if (code === 0 && fs.existsSync(outputPath)) {
+        logger.info(`Browser icon extracted and saved to: ${outputPath}`);
+        resolve(outputPath);
+      } else {
+        logger.warn(`Failed to extract browser icon`);
+        resolve(null);
+      }
+    });
+  });
+}
+
+function getDefaultBrowserPath(): string | null {
+  if (os.platform() !== "win32") return null;
+  try {
+    // Get ProgId for http
+    const progId = execSync(
+      `reg query "HKCU\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\http\\UserChoice" /v ProgId`
+    )
+      .toString()
+      .match(/ProgId\s+REG_SZ\s+([^\s]+)/)?.[1];
+    if (!progId) return null;
+
+    // Get command for ProgId
+    const command = execSync(
+      `reg query "HKCR\\${progId}\\shell\\open\\command" /ve`
+    )
+      .toString()
+      .match(/REG_SZ\s+([^\r\n]+)/)?.[1];
+    if (!command) return null;
+
+    // Extract path in quotes
+    const match = command.match(/"([^"]+)"/);
+    return match ? match[1] : null;
+  } catch (e) {
+    logger.warn("Could not determine default browser: " + e);
     return null;
   }
 }

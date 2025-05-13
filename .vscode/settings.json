@@ -12,6 +12,8 @@
     "ffprobe",
     "frameless",
     "gillsb",
+    "HKCR",
+    "HKCU",
     "keybind",
     "Keybinds",
     "maxsize",
