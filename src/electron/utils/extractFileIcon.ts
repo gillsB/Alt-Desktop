@@ -60,10 +60,8 @@ export const extractFileIcon = async (
       .filter((f) => path.extname(f).toLowerCase() === ".ico");
     icoFiles.forEach((icoFile) => {
       const icoSource = path.join(folder, icoFile);
-      const icoTarget = path.join(targetDir, icoFile);
-      fs.copyFileSync(icoSource, icoTarget);
-      logger.info(`Copied .ico file from ${icoSource} to ${icoTarget}`);
-      foundPaths.push(icoTarget);
+      logger.info(`Found .ico file ${icoSource}`);
+      foundPaths.push(icoSource);
     });
 
     const iconSize = 256;
