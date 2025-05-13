@@ -5,24 +5,26 @@ import os from "os";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
 import { getScriptsPath } from "../pathResolver.js";
-import { getAppDataPath, resolveShortcut } from "../util.js";
+import { resolveShortcut } from "../util.js";
 
 const logger = createLoggerForFile("extractFileIcon.ts");
 type FileType = "exe" | "default";
 const https = followRedirects.https;
 
 export const extractFileIcon = async (
+  savePath: string,
   filePath: string,
   webLink: string
 ): Promise<string[]> => {
   try {
     filePath = resolveShortcut(filePath);
+    logger.info(`directory for save path: ${savePath} `);
     logger.info(`Extracting file icon for: ${filePath}, ${webLink}`);
 
     // Collect all found file paths
     const foundPaths: string[] = [];
 
-    const targetDir = getAppDataPath();
+    const targetDir = savePath;
     if (!fs.existsSync(targetDir)) {
       fs.mkdirSync(targetDir, { recursive: true });
     }

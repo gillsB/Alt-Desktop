@@ -93,8 +93,12 @@ electron.contextBridge.exposeInMainWorld("electron", {
   reloadBackground: () => ipcInvoke("reloadBackground"),
   getVideoMetadata: (filePath: string): Promise<VideoMetadata> =>
     ipcInvoke("getVideoMetadata", filePath),
-  extractFileIcon: (filePath: string, webLink: string) =>
-    ipcInvoke("extractFileIcon", filePath, webLink),
+  extractFileIcon: (
+    row: number,
+    col: number,
+    filePath: string,
+    webLink: string
+  ) => ipcInvoke("extractFileIcon", row, col, filePath, webLink),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

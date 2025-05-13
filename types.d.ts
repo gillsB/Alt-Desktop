@@ -110,7 +110,7 @@ interface EventParamMapping {
   getBackgroundImagePath: [string];
   reloadBackground: [];
   getVideoMetadata: [string];
-  extractFileIcon: [string, string];
+  extractFileIcon: [number, number, string, string];
 }
 
 // The returns from the main process to the renderer
@@ -223,6 +223,11 @@ interface Window {
     getBackgroundImagePath: (filePath: string) => Promise<string | null>;
     reloadBackground: () => Promise<boolean>;
     getVideoMetadata: (filePath: string) => Promise<VideoMetadata>;
-    extractFileIcon: (filePath: string, webLink: string) => Promise<string[]>;
+    extractFileIcon: (
+      row: number,
+      col: number,
+      filePath: string,
+      webLink: string
+    ) => Promise<string[]>;
   };
 }
