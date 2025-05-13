@@ -35,6 +35,17 @@ export const extractFileIcon = async (
       fs.mkdirSync(targetDir, { recursive: true });
     }
 
+    const folder = path.dirname(filePath);
+    const icoFiles = fs
+      .readdirSync(folder)
+      .filter((f) => path.extname(f).toLowerCase() === ".ico");
+    if (icoFiles.length > 0) {
+      const icoSource = path.join(folder, icoFiles[0]);
+      const icoTarget = path.join(targetDir, icoFiles[0]);
+      fs.copyFileSync(icoSource, icoTarget);
+      logger.info(`Copied .ico file from ${icoSource} to ${icoTarget}`);
+    }
+
     const iconSize = 256;
     const iconFileName = `${path.basename(filePath, path.extname(filePath))}.png`;
     const outputPath = path.join(targetDir, iconFileName);
