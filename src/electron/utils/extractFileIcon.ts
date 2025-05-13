@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import followRedirects from "follow-redirects";
 import fs from "fs";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
@@ -7,16 +8,37 @@ import { getAppDataPath, resolveShortcut } from "../util.js";
 
 const logger = createLoggerForFile("extractFileIcon.ts");
 type FileType = "exe" | "default";
+const https = followRedirects.https;
 
-export const extractFileIcon = async (filePath: string): Promise<string[]> => {
+export const extractFileIcon = async (
+  filePath: string,
+  webLink: string
+): Promise<string[]> => {
   try {
     filePath = resolveShortcut(filePath);
-    logger.info(`Extracting file icon for: ${filePath}`);
+    logger.info(`Extracting file icon for: ${filePath}, ${webLink}`);
+
+    // Collect all found file paths
+    const foundPaths: string[] = [];
+
+    const targetDir = getAppDataPath();
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    if (webLink) {
+      if (!/^https?:\/\//i.test(webLink)) {
+        webLink = `https://${webLink}`;
+        logger.info(`Formatted website link to: ${webLink}`);
+      }
+      const faviconPath = await fetchAndSaveFavicon(webLink, targetDir);
+      if (faviconPath) foundPaths.push(faviconPath);
+    }
 
     // Verify that the file exists
     if (!fs.existsSync(filePath)) {
       logger.warn(`File does not exist: ${filePath}`);
-      return [];
+      return foundPaths;
     }
 
     let fileType: FileType;
@@ -27,14 +49,6 @@ export const extractFileIcon = async (filePath: string): Promise<string[]> => {
     } else {
       fileType = "default";
     }
-
-    const targetDir = getAppDataPath();
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
-    }
-
-    // Collect all found file paths
-    const foundPaths: string[] = [];
 
     // Check for .ico files in the same folder as filePath and copy them to targetDir
     const folder = path.dirname(filePath);
@@ -93,3 +107,42 @@ export const extractFileIcon = async (filePath: string): Promise<string[]> => {
     return [];
   }
 };
+
+async function fetchAndSaveFavicon(
+  url: string,
+  targetDir: string,
+  size: number = 256
+): Promise<string | null> {
+  try {
+    const { hostname } = new URL(url);
+    const baseName = hostname.replace(/^www\./, "").replace(/\./g, "_");
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=${size}`;
+    logger.info(faviconUrl);
+    const fileName = `favicon_${baseName}.png`;
+    const savePath = path.join(targetDir, fileName);
+
+    await new Promise<void>((resolve, reject) => {
+      https
+        .get(faviconUrl, (res) => {
+          if (res.statusCode !== 200) {
+            reject(new Error(`Failed to get favicon: ${res.statusCode}`));
+            return;
+          }
+          const fileStream = fs.createWriteStream(savePath);
+          res.pipe(fileStream);
+          fileStream.on("finish", () => {
+            fileStream.close();
+            resolve();
+          });
+          fileStream.on("error", reject);
+        })
+        .on("error", reject);
+    });
+
+    logger.info(`Favicon downloaded from Google API: ${savePath}`);
+    return savePath;
+  } catch (err) {
+    logger.warn(`Failed to download favicon from Google API: ${err}`);
+    return null;
+  }
+}
