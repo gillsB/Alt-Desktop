@@ -191,6 +191,20 @@ const EditIcon: React.FC = () => {
     }
   };
 
+  const handleGenerateIcon = async () => {
+    if (!icon) return;
+    try {
+      await window.electron.extractFileIcon(
+        icon.row,
+        icon.col,
+        icon.programLink ?? "",
+        icon.websiteLink ?? ""
+      );
+    } catch (e) {
+      logger.error("Error during autoGenIcon", e);
+    }
+  };
+
   const handleFileSelect = async (type: string) => {
     if (!icon) return;
 
@@ -595,6 +609,9 @@ const EditIcon: React.FC = () => {
         </div>
       )}
       <div className="edit-icon-footer">
+        <button className="generate-button" onClick={handleGenerateIcon}>
+          Generate icon
+        </button>
         <button className="save-button" onClick={handleSave}>
           Save
         </button>
