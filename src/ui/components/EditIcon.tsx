@@ -194,7 +194,7 @@ const EditIcon: React.FC = () => {
   const handleGenerateIcon = async () => {
     if (!icon) return;
     try {
-      await window.electron.extractFileIcon(
+      await window.electron.generateIcon(
         icon.row,
         icon.col,
         icon.programLink ?? "",

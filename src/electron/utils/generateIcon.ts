@@ -7,11 +7,11 @@ import { createLoggerForFile } from "../logging.js";
 import { getScriptsPath } from "../pathResolver.js";
 import { resolveShortcut } from "../util.js";
 
-const logger = createLoggerForFile("extractFileIcon.ts");
+const logger = createLoggerForFile("generateIcon.ts");
 type FileType = "exe" | "default";
 const https = followRedirects.https;
 
-export const extractFileIcon = async (
+export const generateIcon = async (
   savePath: string,
   programLink: string,
   webLink: string
@@ -19,7 +19,7 @@ export const extractFileIcon = async (
   try {
     programLink = resolveShortcut(programLink);
     logger.info(`directory for save path: ${savePath} `);
-    logger.info(`Extracting file icon for: ${programLink}, ${webLink}`);
+    logger.info(`Extracting file icons for: ${programLink}, ${webLink}`);
 
     // Collect all found file paths
     const foundPaths: string[] = [];

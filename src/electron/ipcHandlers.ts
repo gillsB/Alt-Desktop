@@ -27,7 +27,7 @@ import {
   ipcMainOn,
   setSubWindowDevtoolsEnabled,
 } from "./util.js";
-import { extractFileIcon } from "./utils/extractFileIcon.js";
+import { generateIcon } from "./utils/generateIcon.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import { getVideoFileUrl } from "./videoFileProtocol.js";
 
@@ -1037,7 +1037,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
 
   ipcMainHandle(
-    "extractFileIcon",
+    "generateIcon",
     async (
       row: number,
       col: number,
@@ -1046,7 +1046,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     ): Promise<string[]> => {
       const savePath = path.join(getDataFolderPath(), `[${row},${col}]`);
       logger.info("savePath= ", savePath);
-      return extractFileIcon(savePath, filePath, webLink);
+      return generateIcon(savePath, filePath, webLink);
     }
   );
 }
