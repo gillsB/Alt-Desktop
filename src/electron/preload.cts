@@ -99,6 +99,12 @@ electron.contextBridge.exposeInMainWorld("electron", {
     programLink: string,
     webLink: string
   ) => ipcInvoke("generateIcon", row, col, programLink, webLink),
+  selectIconFromList: (
+    title: string,
+    images: string[],
+    row: number,
+    col: number
+  ) => ipcInvoke("selectIconFromList", title, images, row, col),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

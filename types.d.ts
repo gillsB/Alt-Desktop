@@ -111,6 +111,7 @@ interface EventParamMapping {
   reloadBackground: [];
   getVideoMetadata: [string];
   generateIcon: [number, number, string, string];
+  selectIconFromList: [string, string[], number, number];
 }
 
 // The returns from the main process to the renderer
@@ -150,6 +151,7 @@ type EventPayloadMapping = {
   reloadBackground: boolean;
   getVideoMetadata: VideoMetadata;
   generateIcon: string[];
+  selectIconFromList: string;
 };
 
 type UnsubscribeFunction = () => void;
@@ -229,5 +231,11 @@ interface Window {
       programLink: string,
       webLink: string
     ) => Promise<string[]>;
+    selectIconFromList: (
+      title: string,
+      images: string[],
+      row: number,
+      col: number
+    ) => Promise<string>;
   };
 }

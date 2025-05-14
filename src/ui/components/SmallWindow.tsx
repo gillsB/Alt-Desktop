@@ -41,7 +41,7 @@ const SmallWindow: React.FC = () => {
         </div>
       </header>
       <div className="small-window-content">
-        <p className="small-window-message">{message}</p>
+        <div className="small-window-message">{message}</div>
         <div className="small-window-buttons">
           {buttons.map((button: string, index: number) => (
             <button

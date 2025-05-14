@@ -194,12 +194,19 @@ const EditIcon: React.FC = () => {
   const handleGenerateIcon = async () => {
     if (!icon) return;
     try {
-      await window.electron.generateIcon(
+      const iconPaths = await window.electron.generateIcon(
         icon.row,
         icon.col,
         icon.programLink ?? "",
         icon.websiteLink ?? ""
       );
+      const selectedIcon = await window.electron.selectIconFromList(
+        "Select an icon",
+        iconPaths,
+        icon.row,
+        icon.col
+      );
+      logger.info("Selected icon: ", selectedIcon);
     } catch (e) {
       logger.error("Error during autoGenIcon", e);
     }

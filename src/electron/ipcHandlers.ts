@@ -13,6 +13,7 @@ import { openSettingsWindow } from "./settingsWindow.js";
 import {
   closeActiveSubWindow,
   getActiveSubWindow,
+  openSelectIconWindow,
   openSmallWindow,
   pendingSmallWindowResponses,
 } from "./subWindowManager.js";
@@ -1047,6 +1048,18 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const savePath = path.join(getDataFolderPath(), `[${row},${col}]`);
       logger.info("savePath= ", savePath);
       return generateIcon(savePath, filePath, webLink);
+    }
+  );
+
+  ipcMainHandle(
+    "selectIconFromList",
+    async (
+      title: string,
+      images: string[],
+      row: number,
+      col: number
+    ): Promise<string> => {
+      return openSelectIconWindow(title, images, row, col);
     }
   );
 }

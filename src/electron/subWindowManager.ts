@@ -126,7 +126,7 @@ export function openSmallWindow(
       // Create a new small window
       const smallWindow = new BrowserWindow({
         width: 400,
-        height: 200,
+        height: 350,
         title: "Small Window",
         parent: mainWindow,
         modal: false,
@@ -193,6 +193,101 @@ export function openSmallWindow(
       logger.info(`Created small window with title: ${title}`);
     } catch (error) {
       logger.error(`Error opening small window: ${error}`);
+      reject(error);
+    }
+  });
+}
+
+/**
+ * Opens a select icon window with the specified options and returns a promise that resolves with the selected icon.
+ *
+ * @param {string} title - The title of the select icon window.
+ * @param {string[]} images - The list of image URLs to display in the window.
+ * @param {number} row - The number of rows to arrange the images.
+ * @param {number} col - The number of columns to arrange the images.
+ * @returns {Promise<string>} A promise that resolves with the selected icon URL.
+ */
+export function openSelectIconWindow(
+  title: string,
+  images: string[],
+  row: number,
+  col: number
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      // Find the main window
+      const allWindows = BrowserWindow.getAllWindows();
+      mainWindow =
+        allWindows.find((win) => win.title === "AltDesktop") ||
+        (allWindows.length > 0 ? allWindows[0] : null);
+
+      if (!mainWindow) {
+        logger.error(
+          "No windows found when trying to create select icon window"
+        );
+        reject(new Error("No main window found"));
+        return;
+      }
+
+      // Create a new select icon window
+      const selectWindow = new BrowserWindow({
+        width: 420,
+        height: 350,
+        title: "Select Icon",
+        parent: mainWindow,
+        modal: false,
+        resizable: false,
+        frame: false,
+        backgroundColor: "#00000000",
+        show: false,
+        webPreferences: {
+          preload: getPreloadPath(),
+          webSecurity: true,
+        },
+      });
+      selectWindow.webContents.openDevTools({ mode: "detach" });
+
+      // Store the promise callbacks in the map with the window ID as the key
+      pendingSmallWindowResponses.set(selectWindow.id, { resolve, reject });
+
+      // Encode the images array and windowId as query parameters
+      const encodedImages = encodeURIComponent(JSON.stringify(images));
+      const windowId = selectWindow.id;
+
+      let selectWindowUrl: string;
+      if (isDev()) {
+        selectWindowUrl = `http://localhost:5123/#/select-icon?title=${encodeURIComponent(
+          title
+        )}&images=${encodedImages}&row=${row}&col=${col}&windowId=${windowId}`;
+      } else {
+        selectWindowUrl = `${pathToFileURL(getUIPath()).toString()}#/select-icon?title=${encodeURIComponent(
+          title
+        )}&images=${encodedImages}&row=${row}&col=${col}&windowId=${windowId}`;
+      }
+
+      logger.info(`Loading select icon window URL: ${selectWindowUrl}`);
+      selectWindow.loadURL(selectWindowUrl);
+
+      // Only show the window once it's ready to prevent flashing
+      selectWindow.once("ready-to-show", () => {
+        selectWindow.show();
+      });
+
+      // Handle window close without a selection
+      selectWindow.on("closed", () => {
+        logger.info("Select icon window closed");
+        if (pendingSmallWindowResponses.has(selectWindow.id)) {
+          const pendingResponse = pendingSmallWindowResponses.get(
+            selectWindow.id
+          );
+          pendingSmallWindowResponses.delete(selectWindow.id);
+          if (pendingResponse) {
+            pendingResponse.resolve(""); // No selection
+          }
+        }
+      });
+    } catch (error) {
+      logger.error(`Error opening select icon window: ${error}`);
       reject(error);
     }
   });
