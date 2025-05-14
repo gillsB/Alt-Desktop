@@ -779,6 +779,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "buttonResponse",
     (payload: { windowId: number; buttonText: string | null }) => {
       const { windowId, buttonText } = payload;
+      mainWindow?.focus();
 
       logger.info(
         `Received button response in main process: ${buttonText} from window ${windowId}`
