@@ -2,7 +2,7 @@ import { BrowserWindow } from "electron";
 import { pathToFileURL } from "url";
 import { createLoggerForFile } from "./logging.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
-import { isDev } from "./util.js";
+import { isDev, smallWindowDevtoolsEnabled } from "./util.js";
 
 const logger = createLoggerForFile("subWindowManager.ts");
 let mainWindow: BrowserWindow | null = null; // Store the main window reference
@@ -190,6 +190,10 @@ export function openSmallWindow(
         }
       });
 
+      if (isDev() && smallWindowDevtoolsEnabled()) {
+        smallWindow.webContents.openDevTools({ mode: "detach" });
+      }
+
       logger.info(`Created small window with title: ${title}`);
     } catch (error) {
       logger.error(`Error opening small window: ${error}`);
@@ -245,7 +249,6 @@ export function openSelectIconWindow(
           webSecurity: true,
         },
       });
-      selectWindow.webContents.openDevTools({ mode: "detach" });
 
       // Store the promise callbacks in the map with the window ID as the key
       pendingSmallWindowResponses.set(selectWindow.id, { resolve, reject });
@@ -286,6 +289,10 @@ export function openSelectIconWindow(
           }
         }
       });
+
+      if (isDev() && smallWindowDevtoolsEnabled()) {
+        selectWindow.webContents.openDevTools({ mode: "detach" });
+      }
     } catch (error) {
       logger.error(`Error opening select icon window: ${error}`);
       reject(error);

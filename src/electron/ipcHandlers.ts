@@ -26,6 +26,7 @@ import {
   getSettingsFilePath,
   ipcMainHandle,
   ipcMainOn,
+  setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
 } from "./util.js";
 import { generateIcon } from "./utils/generateIcon.js";
@@ -131,6 +132,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       case "DISABLE_SUBWINDOW_DEVTOOLS":
         logger.info(`HeaderAction DISABLE_SUBWINDOW_DEVTOOLS`);
         setSubWindowDevtoolsEnabled(false);
+        break;
+      case "ENABLE_SMALLWINDOW_DEVTOOLS":
+        logger.info(`HeaderAction ENABLE_SMALLWINDOW_DEVTOOLS`);
+        setSmallWindowDevtoolsEnabled(true);
+        break;
+      case "DISABLE_SMALLWINDOW_DEVTOOLS":
+        logger.info(`HeaderAction DISABLE_SMALLWINDOW_DEVTOOLS`);
+        setSmallWindowDevtoolsEnabled(false);
         break;
     }
   });

@@ -7,7 +7,9 @@ const logger = createLogger("Header.tsx");
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [subWindowDevtoolsChecked, setSubWindowDevtoolsChecked] =
-    useState(false); // State for the checkbox
+    useState(false);
+  const [smallWindowDevtoolsChecked, setSmallWindowDevtoolsChecked] =
+    useState(false);
   const devMode = process.env.NODE_ENV === "development";
 
   const settingsClicked = async () => {
@@ -39,7 +41,7 @@ export function Header() {
               </button>
               <div className="checkbox-container">
                 <label>
-                  Subwindow tools
+                  subWindow tools
                   <input
                     type="checkbox"
                     checked={subWindowDevtoolsChecked}
@@ -47,14 +49,38 @@ export function Header() {
                       const isChecked = e.target.checked;
                       setSubWindowDevtoolsChecked(isChecked);
                       if (isChecked) {
-                        logger.info("Subwindow devtools enabled.");
+                        logger.info("subWindow devtools enabled.");
                         window.electron.sendHeaderAction(
                           "ENABLE_SUBWINDOW_DEVTOOLS"
                         );
                       } else {
-                        logger.info("Subwindow devtools disabled.");
+                        logger.info("subWindow devtools disabled.");
                         window.electron.sendHeaderAction(
                           "DISABLE_SUBWINDOW_DEVTOOLS"
+                        );
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="checkbox-container">
+                <label>
+                  smallWindow tools
+                  <input
+                    type="checkbox"
+                    checked={smallWindowDevtoolsChecked}
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      setSmallWindowDevtoolsChecked(isChecked);
+                      if (isChecked) {
+                        logger.info("smallWindow devtools enabled.");
+                        window.electron.sendHeaderAction(
+                          "ENABLE_SMALLWINDOW_DEVTOOLS"
+                        );
+                      } else {
+                        logger.info("smallWindow devtools disabled.");
+                        window.electron.sendHeaderAction(
+                          "DISABLE_SMALLWINDOW_DEVTOOLS"
                         );
                       }
                     }}

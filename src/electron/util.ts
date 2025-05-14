@@ -7,6 +7,7 @@ import { getAllowedUrls } from "./subWindowManager.js";
 const logger = createLoggerForFile("util.ts");
 
 let isSubWindowDevtoolsEnabled = false;
+let isSmallWindowDevtoolsEnabled = false;
 
 export function isDev(): boolean {
   return process.env.NODE_ENV === "development";
@@ -17,6 +18,13 @@ export function setSubWindowDevtoolsEnabled(enabled: boolean): void {
 }
 export function subWindowDevtoolsEnabled(): boolean {
   return isSubWindowDevtoolsEnabled;
+}
+
+export function setSmallWindowDevtoolsEnabled(enabled: boolean): void {
+  isSmallWindowDevtoolsEnabled = enabled;
+}
+export function smallWindowDevtoolsEnabled(): boolean {
+  return isSmallWindowDevtoolsEnabled;
 }
 
 /**
