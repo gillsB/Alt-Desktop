@@ -194,12 +194,15 @@ const EditIcon: React.FC = () => {
   const handleGenerateIcon = async () => {
     if (!icon) return;
     try {
-      const iconPaths = await window.electron.generateIcon(
+      let iconPaths = await window.electron.generateIcon(
         icon.row,
         icon.col,
         icon.programLink ?? "",
         icon.websiteLink ?? ""
       );
+      if (icon.image && !iconPaths.includes(icon.image)) {
+        iconPaths = [icon.image, ...iconPaths];
+      }
       const selectedIcon = await window.electron.selectIconFromList(
         "Select an icon",
         iconPaths,
