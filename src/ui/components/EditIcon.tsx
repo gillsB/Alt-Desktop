@@ -119,9 +119,8 @@ const EditIcon: React.FC = () => {
       logger.error("Icon data is missing. (closeWindow)");
       return;
     }
-    if (await window.electron.reloadIcon(icon.row, icon.col)) {
-      logger.info("Icon reloaded successfully.");
-    }
+    await window.electron.reloadIcon(icon.row, icon.col);
+    logger.info("reloaded icon before closing");
 
     // close subwindow
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");

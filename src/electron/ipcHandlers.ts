@@ -260,22 +260,24 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           (icon) => icon.row === row && icon.col === col
         );
 
+        // Notify the renderer process to reload the icon
+        if (mainWindow) {
+          logger.info(
+            `Sending reload request to renderer for icon at [${row}, ${col}]`
+          );
+          mainWindow.webContents.send("reload-icon", { row, col, icon });
+        }
+
         if (icon) {
           logger.info(
             `Reloaded icon at [${row}, ${col}]: ${JSON.stringify(icon)}`
           );
 
-          // Notify the renderer process to reload the icon
-          if (mainWindow) {
-            logger.info(
-              `Sending reload request to renderer for icon at [${row}, ${col}]`
-            );
-            mainWindow.webContents.send("reload-icon", { row, col, icon });
-          }
-
           return true;
         } else {
-          logger.warn(`No icon found at [${row}, ${col}] to reload.`);
+          logger.warn(
+            `No icon found at [${row}, ${col}] to reload. (sent null response)`
+          );
           return false; // Icon not found
         }
       } catch (error) {

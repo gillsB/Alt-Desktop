@@ -151,6 +151,13 @@ const DesktopGrid: React.FC = () => {
         newMap.set(iconKey, updatedIcon);
         return newMap;
       });
+    } else {
+      // remove icon from map
+      setIconsMap((prevMap) => {
+        const newMap = new Map(prevMap);
+        newMap.delete(iconKey);
+        return newMap;
+      });
     }
 
     logger.info(`Updated icon UI at [${row}, ${col}]`);
@@ -602,18 +609,38 @@ const DesktopGrid: React.FC = () => {
     logger.info(`Received preview update for icon [${row}, ${col}]`);
     logger.info("Updates:", updates);
 
-    // Update the icon in the map with the preview changes
     setIconsMap((prevMap) => {
       const newMap = new Map(prevMap);
       const key = `${row},${col}`;
       const currentIcon = prevMap.get(key);
 
       if (currentIcon) {
-        // Create updated icon by merging current icon with preview updates
+        // Merge updates into existing icon
         const updatedIcon = { ...currentIcon, ...updates };
         newMap.set(key, updatedIcon);
 
-        // Force a reload of the image if the image path was updated
+        if (updates.image) {
+          setReloadTimestamps((prev) => ({
+            ...prev,
+            [key]: Date.now(),
+          }));
+        }
+      } else {
+        // Create a new temporary icon for preview
+        const tempIcon: DesktopIcon = {
+          row,
+          col,
+          name: updates.name || "",
+          image: updates.image || "",
+          fontColor: updates.fontColor || "white",
+          fontSize: updates.fontSize || 16,
+          width: updates.width || 64,
+          height: updates.height || 64,
+          launchDefault: updates.launchDefault ?? "program",
+          ...updates,
+        };
+        newMap.set(key, tempIcon);
+
         if (updates.image) {
           setReloadTimestamps((prev) => ({
             ...prev,
