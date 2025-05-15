@@ -60,7 +60,7 @@ const getImagePath = (
   }
 
   // Check if the path ends with a typical image extension
-  const isImageExtension = /\.(png|jpg|jpeg|gif|bmp|svg|webp|lnk)$/i.test(
+  const isImageExtension = /\.(png|jpg|jpeg|gif|bmp|svg|webp|lnk|ico)$/i.test(
     imagePath
   );
 

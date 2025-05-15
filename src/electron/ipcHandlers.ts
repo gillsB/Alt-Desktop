@@ -340,7 +340,16 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           options.filters = [
             {
               name: "Images",
-              extensions: ["png", "jpg", "jpeg", "gif", "bmp", "svg", "webp"],
+              extensions: [
+                "png",
+                "jpg",
+                "jpeg",
+                "gif",
+                "bmp",
+                "svg",
+                "webp",
+                "ico",
+              ],
             },
           ];
         } else if (type === "video") {
@@ -955,6 +964,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         ".svg",
         ".webp",
         ".lnk",
+        ".ico",
       ];
 
       if (!allowedExtensions.includes(fileExt)) {
