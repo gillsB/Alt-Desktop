@@ -1079,7 +1079,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       row: number,
       col: number
     ): Promise<string> => {
-      return openSelectIconWindow(title, images, row, col);
+      const ret = await openSelectIconWindow(title, images, row, col);
+      if (ret === "Close") {
+        //Closes without selecting an icon return empty string.
+        return "";
+      } else {
+        return ret;
+      }
     }
   );
 }

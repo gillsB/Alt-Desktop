@@ -212,7 +212,7 @@ const EditIcon: React.FC = () => {
           icon.row,
           icon.col
         );
-        logger.info("Selected icon: ", selectedIcon);
+        logger.info(`Selected icon: ${selectedIcon}`);
       } else if (iconPaths.length === 1) {
         selectedIcon = iconPaths[0];
         logger.info(
@@ -222,7 +222,14 @@ const EditIcon: React.FC = () => {
       } else {
         logger.warn("No icon paths available.");
       }
-      // You can now use selectedIcon as needed
+      if (selectedIcon) {
+        setIcon((prevIcon) =>
+          prevIcon ? { ...prevIcon, image: selectedIcon } : null
+        );
+        sendPreviewUpdate({ image: selectedIcon });
+      } else {
+        logger.info("No selected icon");
+      }
     } catch (e) {
       logger.error("Error during autoGenIcon", e);
     }
