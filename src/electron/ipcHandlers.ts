@@ -396,7 +396,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         logger.info("Source already in target directory, skipping copy.");
         return path.basename(sourcePath);
       }
-
       // Check for existing files with the same name or name with a counter
       const filesInDir = fs.readdirSync(targetDir);
       for (const file of filesInDir) {
@@ -431,7 +430,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         targetPath = path.join(targetDir, localFileName);
         counter++;
       }
-
       try {
         fs.copyFileSync(sourcePath, targetPath);
         logger.info(`Image saved to: ${targetPath}`);

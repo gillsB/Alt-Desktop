@@ -135,13 +135,10 @@ const EditIcon: React.FC = () => {
 
     try {
       // Check if the image path looks like a full file path
-      const validExtensions = /\.(png|jpg|jpeg|gif|bmp|svg|webp)$/i;
+      const fileType = await window.electron.getFileType(icon.image);
       const driveLetterRegex = /^[a-zA-Z]:[\\/]/;
 
-      if (
-        validExtensions.test(icon.image) &&
-        driveLetterRegex.test(icon.image)
-      ) {
+      if (fileType.startsWith("image/") && driveLetterRegex.test(icon.image)) {
         logger.info(`Resolving full file path for image: ${icon.image}`);
         try {
           const savedFilePath = await window.electron.saveIconImage(
@@ -169,6 +166,10 @@ const EditIcon: React.FC = () => {
           }
           return; // Stop saving if the image resolution fails
         }
+      } else if (driveLetterRegex.test(icon.image)) {
+        logger.warn(
+          `SaveIconImage failed with ${icon.image}, external drive detected but fileType not image ${fileType}`
+        );
       }
 
       // Save the icon data
