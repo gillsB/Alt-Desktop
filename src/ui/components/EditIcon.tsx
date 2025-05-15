@@ -203,13 +203,26 @@ const EditIcon: React.FC = () => {
       if (icon.image && !iconPaths.includes(icon.image)) {
         iconPaths = [icon.image, ...iconPaths];
       }
-      const selectedIcon = await window.electron.selectIconFromList(
-        "Select an icon",
-        iconPaths,
-        icon.row,
-        icon.col
-      );
-      logger.info("Selected icon: ", selectedIcon);
+
+      let selectedIcon: string | undefined;
+      if (iconPaths.length > 1) {
+        selectedIcon = await window.electron.selectIconFromList(
+          "Select an icon",
+          iconPaths,
+          icon.row,
+          icon.col
+        );
+        logger.info("Selected icon: ", selectedIcon);
+      } else if (iconPaths.length === 1) {
+        selectedIcon = iconPaths[0];
+        logger.info(
+          "Only one icon path available, auto-selected: ",
+          selectedIcon
+        );
+      } else {
+        logger.warn("No icon paths available.");
+      }
+      // You can now use selectedIcon as needed
     } catch (e) {
       logger.error("Error during autoGenIcon", e);
     }
