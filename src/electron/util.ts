@@ -196,6 +196,16 @@ export function resolveShortcut(filePath: string): string {
   return filePath;
 }
 
+/**
+ * Escapes special characters in a string for use in a regular expression.
+ *
+ * @param {string} str - The string to escape.
+ * @returns {string} The escaped string.
+ */
+export function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export const getBasePath = (): string => {
   return getAppDataPath();
 };
