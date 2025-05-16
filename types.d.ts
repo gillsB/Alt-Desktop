@@ -33,6 +33,7 @@ type SettingsData = {
   videoBackground: string;
   imageBackground: string;
   fontSize?: number;
+  defaultIconSize?: number;
 };
 
 type SettingKey = keyof SettingsData;

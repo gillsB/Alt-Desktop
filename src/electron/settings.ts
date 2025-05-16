@@ -8,6 +8,7 @@ export const defaultSettings = {
   videoBackground: "",
   imageBackground: "",
   fontSize: 16,
+  defaultIconSize: 64,
 };
 
 const logger = createLoggerForFile("settings.ts");
