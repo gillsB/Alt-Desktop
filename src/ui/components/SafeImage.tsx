@@ -109,7 +109,19 @@ const SafeImageComponent: React.FC<{
   highlighted = false,
   forceReload = 0,
 }) => {
-  const DEFAULT_MAX_SIZE = 64; // Default maximum width/height for the image
+  // Add state for defaultIconSize and fetch it on mount
+  const [defaultIconSize, setDefaultIconSize] = useState<number>(64);
+
+  useEffect(() => {
+    const fetchIconSize = async () => {
+      if (window.electron?.getSetting) {
+        const iconSize = await window.electron.getSetting("defaultIconSize");
+        setDefaultIconSize(iconSize ?? 64);
+      }
+    };
+    fetchIconSize();
+  }, []);
+
   const [imageSrc, setImageSrc] = useState<string>(() =>
     getImagePath(row, col, originalImage, forceReload || undefined)
   );
@@ -117,8 +129,8 @@ const SafeImageComponent: React.FC<{
     width: number;
     height: number;
   }>({
-    width: width || DEFAULT_MAX_SIZE,
-    height: height || DEFAULT_MAX_SIZE,
+    width: width || defaultIconSize,
+    height: height || defaultIconSize,
   });
   const [imageError, setImageError] = useState(false);
 
@@ -132,8 +144,8 @@ const SafeImageComponent: React.FC<{
       );
       setImageSrc(""); // discard cached image
       setImageDimensions({
-        width: width || DEFAULT_MAX_SIZE,
-        height: height || DEFAULT_MAX_SIZE,
+        width: width || defaultIconSize,
+        height: height || defaultIconSize,
       });
       return;
     }
@@ -167,20 +179,20 @@ const SafeImageComponent: React.FC<{
         // Only width is defined, calculate height based on aspect ratio
         setImageDimensions({
           width,
-          height: Math.min(Math.round(width / aspectRatio), DEFAULT_MAX_SIZE),
+          height: Math.min(Math.round(width / aspectRatio), defaultIconSize),
         });
       } else if (height) {
         // Only height is defined, calculate width based on aspect ratio
         setImageDimensions({
-          width: Math.min(Math.round(height * aspectRatio), DEFAULT_MAX_SIZE),
+          width: Math.min(Math.round(height * aspectRatio), defaultIconSize),
           height,
         });
       } else {
         // Neither width nor height is defined, use default size
         const imageWidth =
-          aspectRatio > 1 ? DEFAULT_MAX_SIZE : DEFAULT_MAX_SIZE * aspectRatio;
+          aspectRatio > 1 ? defaultIconSize : defaultIconSize * aspectRatio;
         const imageHeight =
-          aspectRatio > 1 ? DEFAULT_MAX_SIZE / aspectRatio : DEFAULT_MAX_SIZE;
+          aspectRatio > 1 ? defaultIconSize / aspectRatio : defaultIconSize;
 
         setImageDimensions({
           width: Math.round(imageWidth),
@@ -201,21 +213,20 @@ const SafeImageComponent: React.FC<{
       }
     };
 
-    // Set the src after attaching event handlers
     img.src = newImageSrc;
 
     return () => {
       img.onload = null;
       img.onerror = null;
     };
-  }, [row, col, originalImage, forceReload, width, height]);
+  }, [row, col, originalImage, forceReload, width, height, defaultIconSize]);
 
   return (
     <div
       className={`${className} ${highlighted ? "highlighted-icon" : ""} safe-image-container`}
       style={{
-        width: width || DEFAULT_MAX_SIZE,
-        height: height || DEFAULT_MAX_SIZE,
+        width: width || defaultIconSize,
+        height: height || defaultIconSize,
       }}
     >
       {imageSrc ? (

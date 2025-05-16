@@ -37,6 +37,7 @@ const DesktopGrid: React.FC = () => {
   const [reloadTimestamps, setReloadTimestamps] =
     useState<IconReloadTimestamps>({});
   const [defaultFontSize, setDefaultFontSize] = useState<number>(16);
+  const [defaultIconSize, setDefaultIconSize] = useState<number>(64);
 
   // Refers to a square size of the icon box, not the icon's size in pixels.
   const ICON_SIZE = 100;
@@ -180,6 +181,14 @@ const DesktopGrid: React.FC = () => {
     };
 
     fetchFontSize();
+  }, []);
+
+  useEffect(() => {
+    const fetchIconSize = async () => {
+      const iconSize = await window.electron.getSetting("defaultIconSize");
+      setDefaultIconSize(iconSize ?? 64);
+    };
+    fetchIconSize();
   }, []);
 
   useEffect(() => {
@@ -634,8 +643,8 @@ const DesktopGrid: React.FC = () => {
           image: updates.image || "",
           fontColor: updates.fontColor || "white",
           fontSize: updates.fontSize || 16,
-          width: updates.width || 64,
-          height: updates.height || 64,
+          width: updates.width || defaultIconSize,
+          height: updates.height || defaultIconSize,
           launchDefault: updates.launchDefault ?? "program",
           ...updates,
         };
@@ -738,8 +747,8 @@ const DesktopGrid: React.FC = () => {
                   icon.row * (ICON_SIZE + ICON_VERTICAL_PADDING) +
                   (icon.offsetY || 0) +
                   ICON_ROOT_OFFSET_TOP,
-                width: icon.width || 64,
-                height: icon.height || 64,
+                width: icon.width || defaultIconSize,
+                height: icon.height || defaultIconSize,
               }}
               onClick={() => handleIconClick(icon.row, icon.col)}
               onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
