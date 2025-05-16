@@ -21,47 +21,40 @@ export function registerSafeFileProtocol(
     try {
       const requestedUrl = new URL(req.url);
       const hostname = requestedUrl.hostname;
-      let requestedPath = `${hostname}:${requestedUrl.pathname}`;
-      let isAbsolutePath = false;
-      logger.info(`Requested path: ${requestedPath}`);
 
       // Deliberate special case to return the fallback unknown.png image.
-      if (requestedPath === "unknown") {
+      if (hostname === "unknown") {
         logger.info("Requested path is 'unknown', returning unknown image.");
         return getUnknownImageResponse();
       }
 
-      // Check if the hostname is a Windows drive letter
-      if (hostname && hostname.length === 1 && /^[a-zA-Z]$/.test(hostname)) {
-        isAbsolutePath = true;
-        logger.info(
-          `Detected Windows drive letter in hostname: ${hostname}, rebuilding absolute path: ${requestedPath}`
-        );
-      } else {
-        // Normal path handling
-        requestedPath = decodeURIComponent(requestedUrl.pathname);
-        logger.info(`Decoded requested path: ${requestedPath}`);
-      }
-
       let fullPath: string;
 
-      // For absolute paths
-      if (isAbsolutePath) {
-        fullPath = requestedPath;
-        logger.info(`Using absolute file path: ${fullPath}`);
+      // Check if this is a Windows drive path
+      if (hostname && hostname.length === 1 && /^[a-zA-Z]$/.test(hostname)) {
+        // This is a Windows absolute path
+        // Reconstruct the full path and properly decode it
+        const pathPart = decodeURIComponent(requestedUrl.pathname);
+        fullPath = `${hostname}:${pathPart}`;
+        logger.info(`Windows absolute path detected: ${fullPath}`);
       } else {
-        const relativePath = requestedPath.startsWith("/")
-          ? requestedPath.substring(1)
-          : requestedPath;
+        // Normal path handling for relative paths
+        let relativePath = decodeURIComponent(requestedUrl.pathname);
+        // Remove leading slash if present
+        relativePath = relativePath.startsWith("/")
+          ? relativePath.substring(1)
+          : relativePath;
 
         // Resolve the full path relative to the AppData directory
         const appDataBasePath: string = path.join(getAppDataPath());
         fullPath = path.resolve(appDataBasePath, relativePath);
-        logger.info(`Resolved full path relative to AppData: ${fullPath}`);
+        logger.info(`Resolved relative path to AppData: ${fullPath}`);
       }
 
       // Resolve .lnk files if applicable
       fullPath = resolveShortcut(fullPath);
+
+      logger.info(`Attempting to access file: ${fullPath}`);
 
       // Check if the resolved file exists
       if (!fs.existsSync(fullPath)) {

@@ -33,14 +33,20 @@ const getImagePath = (
   }
 
   if (/^[a-zA-Z]:[\\/]/.test(imagePath)) {
-    // Append appdata-file:// to the image path if it is a full path
-    let safeFilePath = `appdata-file://${imagePath.replace(/\\/g, "/")}`;
+    // For Windows absolute paths, don't encode the drive letter and colon
+    // but DO encode the rest of the path
+    const driveLetter = imagePath.substring(0, 2); // e.g., "C:"
+    const remainingPath = imagePath.substring(2).replace(/\\/g, "/");
+
+    // Create a properly formatted URL without double-encoding
+    let safeFilePath = `appdata-file://${driveLetter}${remainingPath}`;
 
     // Add cache-busting timestamp if provided
     if (timestamp) {
       safeFilePath += `?t=${timestamp}`;
     }
 
+    logger.info(`Generated URL for absolute path: ${safeFilePath}`);
     return safeFilePath;
   }
 
@@ -114,8 +120,11 @@ const SafeImageComponent: React.FC<{
     width: width || DEFAULT_MAX_SIZE,
     height: height || DEFAULT_MAX_SIZE,
   });
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
+    setImageError(false);
+
     // Handle special cases for " " or "none"
     if (originalImage === " " || originalImage.toLowerCase() === "none") {
       logger.info(
@@ -142,10 +151,11 @@ const SafeImageComponent: React.FC<{
     }
 
     const img = new Image();
-    img.src = newImageSrc;
 
     img.onload = () => {
       logger.info(`Image loaded successfully: ${newImageSrc}`);
+      setImageError(false);
+
       if (width && height) {
         setImageDimensions({ width, height });
         return;
@@ -179,9 +189,20 @@ const SafeImageComponent: React.FC<{
       }
     };
 
-    img.onerror = () => {
-      logger.error(`Failed to load image: ${newImageSrc}`);
+    img.onerror = (e) => {
+      logger.error(`Failed to load image: ${newImageSrc}`, e);
+      setImageError(true);
+
+      // Try loading the unknown image
+      const unknownSrc = getUnknownAssetPath(Date.now());
+      if (newImageSrc !== unknownSrc) {
+        logger.info(`Falling back to unknown image: ${unknownSrc}`);
+        setImageSrc(unknownSrc);
+      }
     };
+
+    // Set the src after attaching event handlers
+    img.src = newImageSrc;
 
     return () => {
       img.onload = null;
@@ -191,26 +212,44 @@ const SafeImageComponent: React.FC<{
 
   return (
     <div
-      className={`${className} ${highlighted ? "highlighted-icon" : ""}`}
+      className={`${className} ${highlighted ? "highlighted-icon" : ""} safe-image-container`}
       style={{
-        // Container is always fixed size when no width/height provided
         width: width || DEFAULT_MAX_SIZE,
         height: height || DEFAULT_MAX_SIZE,
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
       }}
     >
-      <div
-        style={{
-          width: imageDimensions.width,
-          height: imageDimensions.height,
-          backgroundImage: imageSrc ? `url(${imageSrc})` : "none",
-          backgroundSize: width && height ? "100% 100%" : "contain",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      />
+      {imageSrc ? (
+        <div
+          className="safe-image-inner"
+          style={{
+            width: imageDimensions.width,
+            height: imageDimensions.height,
+          }}
+        >
+          <img
+            src={imageSrc}
+            alt=""
+            className="safe-image-img"
+            onError={(e) => {
+              logger.error(`Error loading image in img tag: ${imageSrc}`);
+              if (!imageError) {
+                const timestamp = Date.now();
+                const retryUrl = imageSrc.includes("?")
+                  ? `${imageSrc}&retry=${timestamp}`
+                  : `${imageSrc}?retry=${timestamp}`;
+                (e.target as HTMLImageElement).src = retryUrl;
+              }
+            }}
+          />
+        </div>
+      ) : (
+        <div
+          style={{
+            width: imageDimensions.width,
+            height: imageDimensions.height,
+          }}
+        />
+      )}
     </div>
   );
 };
