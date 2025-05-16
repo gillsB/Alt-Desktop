@@ -38,9 +38,17 @@ const DesktopGrid: React.FC = () => {
     useState<IconReloadTimestamps>({});
   const [defaultFontSize, setDefaultFontSize] = useState<number>(16);
   const [defaultIconSize, setDefaultIconSize] = useState<number>(64);
+  const [iconBox, setIconBox] = useState<number>(100);
 
-  // Refers to a square size of the icon box, not the icon's size in pixels.
-  const ICON_SIZE = 100;
+  // iconBox refers to the rectangular size (width) of the icon box, not the icon's size in pixels.
+  useEffect(() => {
+    const fetchIconBox = async () => {
+      const iconSize = await window.electron.getSetting("defaultIconSize");
+      logger.info("iconBoxSize = ", (iconSize ?? 64) * 1.5625);
+      setIconBox((iconSize ?? 64) * 1.5);
+    };
+    fetchIconBox();
+  }, []);
 
   // These padding values affect essentially only the root position of the icons
   // This is not padding between icons
@@ -683,7 +691,7 @@ const DesktopGrid: React.FC = () => {
               style={{
                 position: "absolute",
                 top:
-                  rowIndex * (ICON_SIZE + ICON_VERTICAL_PADDING) +
+                  rowIndex * (iconBox + ICON_VERTICAL_PADDING) +
                   ICON_ROOT_OFFSET_TOP,
                 left: 0,
                 width: "100%",
@@ -702,7 +710,7 @@ const DesktopGrid: React.FC = () => {
                 position: "absolute",
                 top: 0,
                 left:
-                  colIndex * (ICON_SIZE + ICON_HORIZONTAL_PADDING) +
+                  colIndex * (iconBox + ICON_HORIZONTAL_PADDING) +
                   ICON_ROOT_OFFSET_LEFT,
                 width: "1px",
                 height: "100%",
@@ -718,13 +726,13 @@ const DesktopGrid: React.FC = () => {
             style={{
               position: "absolute",
               left:
-                highlightBox.col * (ICON_SIZE + ICON_HORIZONTAL_PADDING) +
+                highlightBox.col * (iconBox + ICON_HORIZONTAL_PADDING) +
                 ICON_ROOT_OFFSET_LEFT,
               top:
-                highlightBox.row * (ICON_SIZE + ICON_VERTICAL_PADDING) +
+                highlightBox.row * (iconBox + ICON_VERTICAL_PADDING) +
                 ICON_ROOT_OFFSET_TOP,
-              width: ICON_SIZE,
-              height: ICON_SIZE + ICON_VERTICAL_PADDING,
+              width: iconBox,
+              height: iconBox + ICON_VERTICAL_PADDING,
             }}
           />
         )}
@@ -740,11 +748,11 @@ const DesktopGrid: React.FC = () => {
               className="desktop-icon"
               style={{
                 left:
-                  icon.col * (ICON_SIZE + ICON_HORIZONTAL_PADDING) +
+                  icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
                   (icon.offsetX || 0) +
                   ICON_ROOT_OFFSET_LEFT,
                 top:
-                  icon.row * (ICON_SIZE + ICON_VERTICAL_PADDING) +
+                  icon.row * (iconBox + ICON_VERTICAL_PADDING) +
                   (icon.offsetY || 0) +
                   ICON_ROOT_OFFSET_TOP,
                 width: icon.width || defaultIconSize,
@@ -890,10 +898,10 @@ const DesktopGrid: React.FC = () => {
   function getRowColFromXY(x: number, y: number): [number, number] {
     // Calculate the row and column based on the X,Y coordinates
     const calculatedRow = Math.floor(
-      (y - ICON_ROOT_OFFSET_TOP - 1) / (ICON_SIZE + ICON_VERTICAL_PADDING)
+      (y - ICON_ROOT_OFFSET_TOP - 1) / (iconBox + ICON_VERTICAL_PADDING)
     );
     const calculatedCol = Math.floor(
-      (x - ICON_ROOT_OFFSET_LEFT - 1) / (ICON_SIZE + ICON_HORIZONTAL_PADDING)
+      (x - ICON_ROOT_OFFSET_LEFT - 1) / (iconBox + ICON_HORIZONTAL_PADDING)
     );
 
     const validRow = Math.max(0, Math.min(calculatedRow, numRows - 1));
