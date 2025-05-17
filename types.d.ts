@@ -32,7 +32,7 @@ type DesktopIconData = {
 type SettingsData = {
   videoBackground: string;
   imageBackground: string;
-  fontSize?: number;
+  defaultFontSize?: number;
   defaultIconSize?: number;
 };
 

@@ -374,14 +374,14 @@ const Settings: React.FC = () => {
           <input
             id="font-size"
             type="number"
-            value={settings?.fontSize}
+            value={settings?.defaultFontSize}
             title="Blank for default (16px) 0 to not render names."
             onChange={(e) => {
               const updatedValue = e.target.value;
               if (updatedValue === "") {
-                updateSetting("fontSize", undefined);
+                updateSetting("defaultFontSize", undefined);
               } else {
-                updateSetting("fontSize", Number(updatedValue));
+                updateSetting("defaultFontSize", Number(updatedValue));
               }
             }}
           />

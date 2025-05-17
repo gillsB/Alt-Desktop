@@ -7,7 +7,7 @@ import { getSettingsFilePath } from "./util.js";
 export const defaultSettings = {
   videoBackground: "",
   imageBackground: "",
-  fontSize: 16,
+  defaultFontSize: 16,
   defaultIconSize: 64,
 };
 

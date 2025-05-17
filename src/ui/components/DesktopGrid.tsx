@@ -175,7 +175,7 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     const fetchFontSize = async () => {
       try {
-        const fontSize = await window.electron.getSetting("fontSize");
+        const fontSize = await window.electron.getSetting("defaultFontSize");
         if (fontSize === undefined) {
           setDefaultFontSize(16); // Fallback to 16 if no value is returned
         } else {
