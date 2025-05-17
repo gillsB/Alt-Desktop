@@ -124,13 +124,13 @@ const Settings: React.FC = () => {
       if (type === "video") {
         if (filePath) {
           updateSetting("videoBackground", filePath);
-          sendPreviewUpdate({ videoBackground: filePath });
+          sendPreviewBackgroundUpdate({ videoBackground: filePath });
           logger.info(`Video background path set to: ${filePath}`);
         }
       } else if (type === "image") {
         if (filePath) {
           updateSetting("imageBackground", filePath);
-          sendPreviewUpdate({ imageBackground: filePath });
+          sendPreviewBackgroundUpdate({ imageBackground: filePath });
           logger.info(`Image background path set to: ${filePath}`);
         }
       } else {
@@ -238,13 +238,13 @@ const Settings: React.FC = () => {
     if (fileType.startsWith("image/")) {
       logger.info("Dropped file is an image. Updating image background...");
       updateSetting("imageBackground", filePath);
-      sendPreviewUpdate({ imageBackground: filePath });
+      sendPreviewBackgroundUpdate({ imageBackground: filePath });
     } else if (fileType.startsWith("video/")) {
       logger.info("Dropped file is a video. Updating video background...");
       setSettings((prev) =>
         prev ? { ...prev, videoBackground: filePath } : null
       );
-      sendPreviewUpdate({ videoBackground: filePath });
+      sendPreviewBackgroundUpdate({ videoBackground: filePath });
     } else {
       logger.warn("Dropped file is neither an image nor a video.");
       showSmallWindow(
@@ -270,7 +270,7 @@ const Settings: React.FC = () => {
     logger.info("Open file dialog result:", success);
     if (success) {
       updateSetting("imageBackground", success);
-      sendPreviewUpdate({ imageBackground: success });
+      sendPreviewBackgroundUpdate({ imageBackground: success });
     } else {
       logger.info(
         "No file selected or dialog closed without selection.",
@@ -279,7 +279,9 @@ const Settings: React.FC = () => {
     }
   };
 
-  const sendPreviewUpdate = async (updatedFields: Partial<SettingsData>) => {
+  const sendPreviewBackgroundUpdate = async (
+    updatedFields: Partial<SettingsData>
+  ) => {
     try {
       const previewData: Partial<SettingsData> = {
         videoBackground: settings?.videoBackground ?? "",
@@ -314,7 +316,7 @@ const Settings: React.FC = () => {
             onChange={(e) => {
               const updatedValue = e.target.value;
               updateSetting("videoBackground", updatedValue);
-              sendPreviewUpdate({ videoBackground: updatedValue });
+              sendPreviewBackgroundUpdate({ videoBackground: updatedValue });
             }}
           />
           <button
@@ -340,7 +342,7 @@ const Settings: React.FC = () => {
             onChange={(e) => {
               const updatedValue = e.target.value;
               updateSetting("imageBackground", updatedValue);
-              sendPreviewUpdate({ imageBackground: updatedValue });
+              sendPreviewBackgroundUpdate({ imageBackground: updatedValue });
             }}
           />
           <button
