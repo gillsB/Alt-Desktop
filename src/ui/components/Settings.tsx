@@ -296,6 +296,23 @@ const Settings: React.FC = () => {
     }
   };
 
+  const sendPreviewGridUpdate = async (
+    updatedFields: Partial<SettingsData>
+  ) => {
+    try {
+      const previewData: Partial<SettingsData> = {
+        defaultFontSize: settings?.defaultFontSize ?? 16,
+        defaultIconSize: settings?.defaultIconSize ?? 64,
+        ...updatedFields, // Override with any explicitly updated fields
+      };
+
+      await window.electron.previewGridUpdate(previewData);
+      logger.info(`Sent preview update for settings:`, previewData);
+    } catch (error) {
+      logger.error("Failed to send preview update:", error);
+    }
+  };
+
   return (
     <div
       className="settings-container"
@@ -382,8 +399,14 @@ const Settings: React.FC = () => {
               const updatedValue = e.target.value;
               if (updatedValue === "") {
                 updateSetting("defaultIconSize", undefined);
+                sendPreviewGridUpdate({
+                  defaultIconSize: 64,
+                });
               } else {
                 updateSetting("defaultIconSize", Number(updatedValue));
+                sendPreviewGridUpdate({
+                  defaultIconSize: Number(updatedValue),
+                });
               }
             }}
           />
@@ -399,8 +422,14 @@ const Settings: React.FC = () => {
               const updatedValue = e.target.value;
               if (updatedValue === "") {
                 updateSetting("defaultFontSize", undefined);
+                sendPreviewGridUpdate({
+                  defaultFontSize: 16,
+                });
               } else {
                 updateSetting("defaultFontSize", Number(updatedValue));
+                sendPreviewGridUpdate({
+                  defaultFontSize: Number(updatedValue),
+                });
               }
             }}
           />

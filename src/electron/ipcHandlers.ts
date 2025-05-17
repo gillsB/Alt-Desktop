@@ -857,7 +857,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
-
   ipcMainHandle(
     "previewBackgroundUpdate",
     async (updates: Partial<SettingsData>): Promise<boolean> => {
@@ -884,6 +883,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return true;
       } catch (error) {
         logger.error("Error handling previewBackgroundUpdate:", error);
+        return false;
+      }
+    }
+  );
+  ipcMainHandle(
+    "previewGridUpdate",
+    async (updates: Partial<SettingsData>): Promise<boolean> => {
+      try {
+        logger.info(
+          "Received previewGridUpdate with updates:",
+          JSON.stringify(updates)
+        );
+
+        // Ensure updates is not null or undefined
+        if (!updates || typeof updates !== "object") {
+          logger.error("Invalid updates object:", updates);
+          return false;
+        }
+
+        if (mainWindow) {
+          mainWindow.webContents.send("update-grid-preview", updates);
+          logger.info(
+            "Sent 'update-grid-preview' event to renderer with data:",
+            JSON.stringify(updates)
+          );
+        }
+
+        return true;
+      } catch (error) {
+        logger.error("Error handling previewGridUpdate:", error);
         return false;
       }
     }

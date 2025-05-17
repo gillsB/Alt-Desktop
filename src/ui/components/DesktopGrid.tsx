@@ -472,6 +472,20 @@ const DesktopGrid: React.FC = () => {
   };
 
   useEffect(() => {
+    const handlePreview = (...args: unknown[]) => {
+      const updates = args[1] as Partial<SettingsData>; // Extract the second argument as updates
+      logger.info("Received background preview updates:", updates);
+      // just logging for now
+    };
+
+    window.electron.on("update-background-preview", handlePreview);
+
+    return () => {
+      window.electron.off("update-background-preview", handlePreview);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleSettingsUpdated = () => {
       // Re-fetch settings and icon data
       fetchFontSize();
