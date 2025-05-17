@@ -38,17 +38,9 @@ const DesktopGrid: React.FC = () => {
     useState<IconReloadTimestamps>({});
   const [defaultFontSize, setDefaultFontSize] = useState<number>(16);
   const [defaultIconSize, setDefaultIconSize] = useState<number>(64);
-  const [iconBox, setIconBox] = useState<number>(100);
 
   // iconBox refers to the rectangular size (width) of the icon box, not the icon's size in pixels.
-  useEffect(() => {
-    const fetchIconBox = async () => {
-      const iconSize = await window.electron.getSetting("defaultIconSize");
-      logger.info("iconBoxSize = ", (iconSize ?? 64) * 1.5625);
-      setIconBox((iconSize ?? 64) * 1.5);
-    };
-    fetchIconBox();
-  }, []);
+  const iconBox = defaultIconSize * 1.5625;
 
   // These padding values affect essentially only the root position of the icons
   // This is not padding between icons
@@ -172,70 +164,65 @@ const DesktopGrid: React.FC = () => {
     logger.info(`Updated icon UI at [${row}, ${col}]`);
   };
 
+  // Render the desktop grid on launch
   useEffect(() => {
-    const fetchFontSize = async () => {
-      try {
-        const fontSize = await window.electron.getSetting("defaultFontSize");
-        if (fontSize === undefined) {
-          setDefaultFontSize(16); // Fallback to 16 if no value is returned
-        } else {
-          setDefaultFontSize(fontSize);
-        }
-
-        logger.info("set defaultFontSize to:", defaultFontSize);
-      } catch (error) {
-        logger.error("Error fetching default font size:", error);
-      }
-    };
-
-    fetchFontSize();
-  }, []);
-
-  useEffect(() => {
-    const fetchIconSize = async () => {
-      const iconSize = await window.electron.getSetting("defaultIconSize");
-      setDefaultIconSize(iconSize ?? 64);
-    };
     fetchIconSize();
-  }, []);
-
-  useEffect(() => {
-    const fetchIcons = async () => {
-      try {
-        const data = await window.electron.getDesktopIconData();
-        logger.info("Fetched icons:", data.icons);
-
-        // Create an array of promises for ensuring folders
-        const folderPromises = data.icons.map(async (icon: DesktopIcon) => {
-          // Ensure data folder exists for each icon
-          const success = await window.electron.ensureDataFolder(
-            icon.row,
-            icon.col
-          );
-          if (!success) {
-            logger.warn(
-              `Failed to create data folder for icon at [${icon.row}, ${icon.col}]`
-            );
-          }
-          return icon;
-        });
-
-        // Wait for all folder creation promises to resolve
-        const processedIcons = await Promise.all(folderPromises);
-
-        const newMap = new Map<string, DesktopIcon>();
-        processedIcons.forEach((icon: DesktopIcon) => {
-          newMap.set(`${icon.row},${icon.col}`, icon);
-        });
-
-        setIconsMap(newMap);
-      } catch (error) {
-        logger.error("Error loading icons:", error);
-      }
-    };
-
+    fetchFontSize();
     fetchIcons();
   }, []);
+
+  const fetchFontSize = async () => {
+    try {
+      const fontSize = await window.electron.getSetting("defaultFontSize");
+      if (fontSize === undefined) {
+        setDefaultFontSize(16); // Fallback to 16 if no value is returned
+      } else {
+        setDefaultFontSize(fontSize);
+      }
+
+      logger.info("set defaultFontSize to:", defaultFontSize);
+    } catch (error) {
+      logger.error("Error fetching default font size:", error);
+    }
+  };
+  const fetchIconSize = async () => {
+    const iconSize = await window.electron.getSetting("defaultIconSize");
+    logger.info("set defaultIconSize to:", iconSize);
+    setDefaultIconSize(iconSize ?? 64);
+  };
+  const fetchIcons = async () => {
+    try {
+      const data = await window.electron.getDesktopIconData();
+      logger.info("Fetched icons:", data.icons);
+
+      // Create an array of promises for ensuring folders
+      const folderPromises = data.icons.map(async (icon: DesktopIcon) => {
+        // Ensure data folder exists for each icon
+        const success = await window.electron.ensureDataFolder(
+          icon.row,
+          icon.col
+        );
+        if (!success) {
+          logger.warn(
+            `Failed to create data folder for icon at [${icon.row}, ${icon.col}]`
+          );
+        }
+        return icon;
+      });
+
+      // Wait for all folder creation promises to resolve
+      const processedIcons = await Promise.all(folderPromises);
+
+      const newMap = new Map<string, DesktopIcon>();
+      processedIcons.forEach((icon: DesktopIcon) => {
+        newMap.set(`${icon.row},${icon.col}`, icon);
+      });
+
+      setIconsMap(newMap);
+    } catch (error) {
+      logger.error("Error loading icons:", error);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -484,6 +471,20 @@ const DesktopGrid: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const handleSettingsUpdated = () => {
+      // Re-fetch settings and icon data
+      fetchFontSize();
+      fetchIconSize();
+      fetchIcons();
+    };
+
+    window.electron.on("settings-updated", handleSettingsUpdated);
+
+    return () => {
+      window.electron.off("settings-updated", handleSettingsUpdated);
+    };
+  }, []);
   const handleReloadDesktop = async () => {
     try {
       // Call the Electron API to reload the icon
