@@ -767,10 +767,10 @@ const DesktopGrid: React.FC = () => {
                 row={icon.row}
                 col={icon.col}
                 originalImage={icon.image}
-                width={icon.width}
-                height={icon.height}
+                width={icon.width || defaultIconSize}
+                height={icon.height || defaultIconSize}
                 highlighted={isIconHighlighted(icon.row, icon.col)}
-                forceReload={reloadTimestamp} // Pass the reload timestamp
+                forceReload={reloadTimestamp}
               />
               {icon.fontSize !== 0 &&
                 (icon.fontSize || defaultFontSize) !== 0 && (

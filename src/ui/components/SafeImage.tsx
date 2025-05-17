@@ -98,7 +98,7 @@ const SafeImageComponent: React.FC<{
   height?: number;
   className?: string;
   highlighted?: boolean;
-  forceReload?: number; // New prop to force reload - timestamp value
+  forceReload?: number;
 }> = ({
   row,
   col,
@@ -109,18 +109,8 @@ const SafeImageComponent: React.FC<{
   highlighted = false,
   forceReload = 0,
 }) => {
-  // Add state for defaultIconSize and fetch it on mount
-  const [defaultIconSize, setDefaultIconSize] = useState<number>(64);
-
-  useEffect(() => {
-    const fetchIconSize = async () => {
-      if (window.electron?.getSetting) {
-        const iconSize = await window.electron.getSetting("defaultIconSize");
-        setDefaultIconSize(iconSize ?? 64);
-      }
-    };
-    fetchIconSize();
-  }, []);
+  // Fallback if width and height are not provided
+  const defaultIconSize = width || height || 64;
 
   const [imageSrc, setImageSrc] = useState<string>(() =>
     getImagePath(row, col, originalImage, forceReload || undefined)
