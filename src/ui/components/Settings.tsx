@@ -370,6 +370,23 @@ const Settings: React.FC = () => {
           </button>
         </div>
         <div className="settings-field">
+          <label htmlFor="icon-size">Default icon size</label>
+          <input
+            id="icon-size"
+            type="number"
+            value={settings?.defaultIconSize}
+            title="Blank for default (64px)"
+            onChange={(e) => {
+              const updatedValue = e.target.value;
+              if (updatedValue === "") {
+                updateSetting("defaultIconSize", undefined);
+              } else {
+                updateSetting("defaultIconSize", Number(updatedValue));
+              }
+            }}
+          />
+        </div>
+        <div className="settings-field">
           <label htmlFor="font-size">Icon font size</label>
           <input
             id="font-size"
