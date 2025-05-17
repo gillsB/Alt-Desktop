@@ -171,10 +171,12 @@ const DesktopGrid: React.FC = () => {
     fetchIcons();
   }, []);
 
-  const fetchFontSize = async () => {
+  const fetchFontSize = async (override?: number) => {
     try {
       const fontSize = await window.electron.getSetting("defaultFontSize");
-      if (fontSize === undefined) {
+      if (override) {
+        setDefaultFontSize(override);
+      } else if (fontSize === undefined) {
         setDefaultFontSize(16); // Fallback to 16 if no value is returned
       } else {
         setDefaultFontSize(fontSize);
@@ -185,8 +187,13 @@ const DesktopGrid: React.FC = () => {
       logger.error("Error fetching default font size:", error);
     }
   };
-  const fetchIconSize = async () => {
-    const iconSize = await window.electron.getSetting("defaultIconSize");
+  const fetchIconSize = async (override?: number) => {
+    let iconSize: number | undefined;
+    if (override) {
+      iconSize = override;
+    } else {
+      iconSize = await window.electron.getSetting("defaultIconSize");
+    }
     logger.info("set defaultIconSize to:", iconSize);
     setDefaultIconSize(iconSize ?? 64);
   };
@@ -474,14 +481,15 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     const handlePreview = (...args: unknown[]) => {
       const updates = args[1] as Partial<SettingsData>; // Extract the second argument as updates
-      logger.info("Received background preview updates:", updates);
-      // just logging for now
+      logger.info("Received grid preview updates:", updates);
+      fetchFontSize(updates["defaultFontSize"]);
+      fetchIconSize(updates["defaultIconSize"]);
     };
 
-    window.electron.on("update-background-preview", handlePreview);
+    window.electron.on("update-grid-preview", handlePreview);
 
     return () => {
-      window.electron.off("update-background-preview", handlePreview);
+      window.electron.off("update-grid-preview", handlePreview);
     };
   }, []);
 
@@ -490,7 +498,6 @@ const DesktopGrid: React.FC = () => {
       // Re-fetch settings and icon data
       fetchFontSize();
       fetchIconSize();
-      fetchIcons();
     };
 
     window.electron.on("settings-updated", handleSettingsUpdated);
