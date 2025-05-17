@@ -8,7 +8,7 @@ import path from "path";
 import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
-import { defaultSettings } from "./settings.js";
+import { defaultSettings, ensureDefaultSettings } from "./settings.js";
 import { openSettingsWindow } from "./settingsWindow.js";
 import {
   closeActiveSubWindow,
@@ -909,6 +909,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           "utf-8"
         );
         logger.info("Settings data saved successfully.");
+        ensureDefaultSettings(); // Add back any missing default settings
         return true;
       } catch (error) {
         logger.error("Error saving settings data:", error);
