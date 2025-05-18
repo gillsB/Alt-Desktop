@@ -480,7 +480,6 @@ const EditIcon: React.FC = () => {
                   onChange={(e) =>
                     setIcon({ ...icon, fontColor: e.target.value })
                   }
-                  onClick={() => colorInputRef.current?.click()}
                 />
                 <div
                   className="color-preview"
