@@ -34,6 +34,7 @@ type SettingsData = {
   imageBackground: string;
   defaultFontSize?: number;
   defaultIconSize?: number;
+  defaultFontColor?: string;
 };
 
 type SettingKey = keyof SettingsData;

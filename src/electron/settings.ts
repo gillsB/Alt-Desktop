@@ -9,6 +9,7 @@ export const defaultSettings = {
   imageBackground: "",
   defaultFontSize: 16,
   defaultIconSize: 64,
+  defaultFontColor: "#FFFFFF",
 };
 
 const logger = createLoggerForFile("settings.ts");

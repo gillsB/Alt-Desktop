@@ -38,6 +38,7 @@ const DesktopGrid: React.FC = () => {
     useState<IconReloadTimestamps>({});
   const [defaultFontSize, setDefaultFontSize] = useState<number>(16);
   const [defaultIconSize, setDefaultIconSize] = useState<number>(64);
+  const [defaultFontColor, setDefaultFontColor] = useState<string>("white");
 
   // iconBox refers to the rectangular size (width) of the icon box, not the icon's size in pixels.
   const iconBox = defaultIconSize * 1.5625;
@@ -169,6 +170,7 @@ const DesktopGrid: React.FC = () => {
     fetchIconSize();
     fetchFontSize();
     fetchIcons();
+    fetchFontColor();
   }, []);
 
   const fetchFontSize = async (override?: number) => {
@@ -196,6 +198,16 @@ const DesktopGrid: React.FC = () => {
     }
     logger.info("set defaultIconSize to:", iconSize);
     setDefaultIconSize(iconSize ?? 64);
+  };
+  const fetchFontColor = async (override?: string) => {
+    let color: string | undefined;
+    if (override) {
+      color = override;
+    } else {
+      color = await window.electron.getSetting("defaultFontColor");
+    }
+    logger.info("set defaultFontColor to:", color);
+    setDefaultFontColor(color ?? "#FFFFFF");
   };
   const fetchIcons = async () => {
     try {
@@ -672,7 +684,7 @@ const DesktopGrid: React.FC = () => {
           col,
           name: updates.name || "",
           image: updates.image || "",
-          fontColor: updates.fontColor || "white",
+          fontColor: updates.fontColor || defaultFontColor,
           fontSize: updates.fontSize || 16,
           width: updates.width || defaultIconSize,
           height: updates.height || defaultIconSize,
@@ -800,7 +812,7 @@ const DesktopGrid: React.FC = () => {
                     className="desktop-icon-name"
                     title={icon.name}
                     style={{
-                      color: icon.fontColor || "white",
+                      color: icon.fontColor || defaultFontColor,
                       fontSize: icon.fontSize || defaultFontSize,
                     }}
                   >
