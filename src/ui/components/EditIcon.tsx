@@ -26,10 +26,9 @@ const EditIcon: React.FC = () => {
   const [isHoveringImage, setHoveringImage] = useState(false);
   const [isHoveringProgram, setHoveringProgram] = useState(false);
   const [isHoveringImageGlass, setHoveringImageGlass] = useState(false);
-  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
 
   const dragCounter = useRef(0);
-  const colorPickerRef = useRef<HTMLDivElement>(null);
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const originalIcon = useRef<DesktopIcon | null>(null);
 
@@ -74,23 +73,6 @@ const EditIcon: React.FC = () => {
 
     fetchIcon();
   }, [row, col]);
-
-  // Click outside to close color picker
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        colorPickerRef.current &&
-        !colorPickerRef.current.contains(event.target as Node)
-      ) {
-        setIsColorPickerOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   const getChanges = (): boolean => {
     if (!icon || !originalIcon.current) {
@@ -378,28 +360,6 @@ const EditIcon: React.FC = () => {
     }
   };
 
-  const handleColorChange = (color: string) => {
-    if (!icon) return;
-    setIcon({ ...icon, fontColor: color });
-    sendPreviewUpdate({ fontColor: color });
-  };
-
-  // Predefined color options
-  const colorOptions = [
-    "#ffffff", // White
-    "#000000", // Black
-    "#ff0000", // Red
-    "#00ff00", // Green
-    "#0000ff", // Blue
-    "#ffff00", // Yellow
-    "#00ffff", // Cyan
-    "#ff00ff", // Magenta
-    "#ffa500", // Orange
-    "#800080", // Purple
-    "#008080", // Teal
-    "#808080", // Gray
-  ];
-
   return (
     <div
       className="edit-icon-container"
@@ -520,38 +480,23 @@ const EditIcon: React.FC = () => {
                   onChange={(e) =>
                     setIcon({ ...icon, fontColor: e.target.value })
                   }
-                  onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
+                  onClick={() => colorInputRef.current?.click()}
                 />
                 <div
                   className="color-preview"
-                  style={{ backgroundColor: icon.fontColor || "#FFFFFF" }} //change this when defaultColor is added
-                  onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
+                  style={{ backgroundColor: icon.fontColor || "#FFFFFF" }}
+                  onClick={() => colorInputRef.current?.click()}
+                />
+                <input
+                  ref={colorInputRef}
+                  type="color"
+                  value={icon.fontColor}
+                  onChange={(e) => {
+                    setIcon({ ...icon, fontColor: e.target.value });
+                    sendPreviewUpdate({ fontColor: e.target.value });
+                  }}
                 />
               </div>
-              {isColorPickerOpen && (
-                <div ref={colorPickerRef} className="color-picker">
-                  {colorOptions.map((color) => (
-                    <div
-                      key={color}
-                      className="color-swatch"
-                      onClick={() => {
-                        handleColorChange(color);
-                        setIsColorPickerOpen(false);
-                      }}
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  ))}
-                  <div className="color-picker-input">
-                    <input
-                      type="color"
-                      value={icon.fontColor}
-                      onChange={(e) => handleColorChange(e.target.value)}
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
             <div className="edit-icon-field">
               <label htmlFor="font-size">Font Size</label>
