@@ -415,7 +415,7 @@ const Settings: React.FC = () => {
           />
         </div>
         <div className="settings-field">
-          <label htmlFor="font-size">Icon font size</label>
+          <label htmlFor="font-size">Default Icon font size</label>
           <input
             id="font-size"
             type="number"
