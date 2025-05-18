@@ -4,7 +4,7 @@ export const DEFAULT_DESKTOP_ICON: DesktopIcon = {
   col: -1,
   name: "",
   image: "",
-  fontColor: "white",
+  fontColor: "",
   launchDefault: "program",
 };
 

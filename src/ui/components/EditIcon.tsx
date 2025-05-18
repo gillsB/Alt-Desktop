@@ -32,6 +32,18 @@ const EditIcon: React.FC = () => {
 
   const originalIcon = useRef<DesktopIcon | null>(null);
 
+  const [fontColorDefault, setFontColorDefault] = useState<string | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    const fetchFontColorDefault = async () => {
+      const color = await window.electron.getSetting("defaultFontColor");
+      setFontColorDefault(color);
+    };
+    fetchFontColorDefault();
+  }, []);
+
   useEffect(() => {
     const fetchIcon = async () => {
       if (!row || !col) {
@@ -483,7 +495,9 @@ const EditIcon: React.FC = () => {
                 />
                 <div
                   className="color-preview"
-                  style={{ backgroundColor: icon.fontColor || "#FFFFFF" }}
+                  style={{
+                    backgroundColor: icon.fontColor || fontColorDefault,
+                  }}
                   onClick={() => colorInputRef.current?.click()}
                 />
                 <input
