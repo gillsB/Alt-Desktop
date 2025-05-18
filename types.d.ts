@@ -113,6 +113,7 @@ interface EventParamMapping {
   convertToVideoFileUrl: [string];
   getBackgroundImagePath: [string];
   reloadBackground: [];
+  reloadGrid: [];
   getVideoMetadata: [string];
   generateIcon: [number, number, string, string];
   selectIconFromList: [string, string[], number, number];
@@ -154,6 +155,7 @@ type EventPayloadMapping = {
   convertToVideoFileUrl: string | null;
   getBackgroundImagePath: string | null;
   reloadBackground: boolean;
+  reloadGrid: boolean;
   getVideoMetadata: VideoMetadata;
   generateIcon: string[];
   selectIconFromList: string;
@@ -230,6 +232,7 @@ interface Window {
     convertToVideoFileUrl: (filePath: string) => Promise<string | null>;
     getBackgroundImagePath: (filePath: string) => Promise<string | null>;
     reloadBackground: () => Promise<boolean>;
+    reloadGrid: () => Promise<boolean>;
     getVideoMetadata: (filePath: string) => Promise<VideoMetadata>;
     generateIcon: (
       row: number,

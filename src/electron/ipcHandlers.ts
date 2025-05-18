@@ -1030,11 +1030,21 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle("reloadBackground", async () => {
     try {
-      logger.info("Sending reloadBackground event to renderer...");
-      mainWindow.webContents.send("reloadBackground");
+      logger.info("Sending reload-background event to renderer...");
+      mainWindow.webContents.send("reload-background");
       return true;
     } catch (error) {
-      logger.error("Failed to send reloadBackground event:", error);
+      logger.error("Failed to send reload-background event:", error);
+      return false;
+    }
+  });
+  ipcMainHandle("reloadGrid", async () => {
+    try {
+      logger.info("Sending reload-grid event to renderer...");
+      mainWindow.webContents.send("reload-grid");
+      return true;
+    } catch (error) {
+      logger.error("Failed to send reload-grid event:", error);
       return false;
     }
   });

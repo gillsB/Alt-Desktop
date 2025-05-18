@@ -37,6 +37,9 @@ const Settings: React.FC = () => {
           if (getSpecificChanges(["videoBackground", "imageBackground"])) {
             await window.electron.reloadBackground();
           }
+          if (getSpecificChanges(["defaultIconSize", "defaultFontSize"])) {
+            await window.electron.reloadGrid();
+          }
           closeWindow();
         }
       } catch (error) {
