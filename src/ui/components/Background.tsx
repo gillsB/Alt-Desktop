@@ -179,10 +179,10 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       fetchBackgroundSettings(); // Re-fetch the background settings
     };
 
-    window.electron.on("reloadBackground", handleReload);
+    window.electron.on("reload-background", handleReload);
 
     return () => {
-      window.electron.off("reloadBackground", handleReload);
+      window.electron.off("reload-background", handleReload);
     };
   }, []);
 

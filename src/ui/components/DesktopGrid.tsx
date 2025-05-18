@@ -494,16 +494,17 @@ const DesktopGrid: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleSettingsUpdated = () => {
+    const handleReloadGrid = () => {
       // Re-fetch settings and icon data
       fetchFontSize();
       fetchIconSize();
+      fetchIcons();
     };
 
-    window.electron.on("settings-updated", handleSettingsUpdated);
+    window.electron.on("reload-grid", handleReloadGrid);
 
     return () => {
-      window.electron.off("settings-updated", handleSettingsUpdated);
+      window.electron.off("reload-grid", handleReloadGrid);
     };
   }, []);
   const handleReloadDesktop = async () => {

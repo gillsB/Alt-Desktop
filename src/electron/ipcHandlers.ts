@@ -939,7 +939,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         );
         logger.info("Settings data saved successfully.");
         ensureDefaultSettings(); // Add back any missing default settings
-        mainWindow.webContents.send("settings-updated");
+        mainWindow.webContents.send("reload-grid");
         return true;
       } catch (error) {
         logger.error("Error saving settings data:", error);
