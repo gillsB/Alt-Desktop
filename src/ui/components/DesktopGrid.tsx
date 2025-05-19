@@ -494,9 +494,15 @@ const DesktopGrid: React.FC = () => {
     const handlePreview = (...args: unknown[]) => {
       const updates = args[1] as Partial<SettingsData>; // Extract the second argument as updates
       logger.info("Received grid preview updates:", updates);
-      fetchFontSize(updates["defaultFontSize"]);
-      fetchIconSize(updates["defaultIconSize"]);
-      fetchFontColor(updates["defaultFontColor"]);
+
+      // Updates should be passed back one field at a time.
+      if (updates["defaultIconSize"]) {
+        fetchIconSize(updates["defaultIconSize"]);
+      } else if (updates["defaultFontSize"]) {
+        fetchFontSize(updates["defaultFontSize"]);
+      } else if (updates["defaultFontColor"]) {
+        fetchFontColor(updates["defaultFontColor"]);
+      }
     };
 
     window.electron.on("update-grid-preview", handlePreview);

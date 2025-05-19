@@ -306,8 +306,6 @@ const Settings: React.FC = () => {
   ) => {
     try {
       const previewData: Partial<SettingsData> = {
-        defaultFontSize: settings?.defaultFontSize ?? 16,
-        defaultIconSize: settings?.defaultIconSize ?? 64,
         ...updatedFields, // Override with any explicitly updated fields
       };
 
@@ -453,12 +451,12 @@ const Settings: React.FC = () => {
                   updateSetting("defaultFontColor", undefined);
                   sendPreviewGridUpdate({
                     defaultFontColor: "#FFFFFF",
-                  }); // TODO not implemented yet
+                  });
                 } else {
                   updateSetting("defaultFontColor", String(updatedValue));
                   sendPreviewGridUpdate({
                     defaultFontColor: String(updatedValue),
-                  }); // TODO not implemented yet
+                  });
                 }
               }}
             />
@@ -475,7 +473,7 @@ const Settings: React.FC = () => {
               value={settings?.defaultFontColor}
               onChange={(e) => {
                 updateSetting("defaultFontColor", e.target.value);
-                sendPreviewGridUpdate({ defaultFontColor: e.target.value }); // TODO not implemented yet
+                sendPreviewGridUpdate({ defaultFontColor: e.target.value });
               }}
             />
           </div>
