@@ -327,7 +327,7 @@ const Settings: React.FC = () => {
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
       <div className="settings-content">
         <div className="settings-field">
-          <label htmlFor="video-background">Video Background path</label>
+          <label htmlFor="video-background">Video Background Path</label>
           <input
             id="video-background"
             type="text"
@@ -353,7 +353,7 @@ const Settings: React.FC = () => {
           </button>
         </div>
         <div className="settings-field">
-          <label htmlFor="image-background">Image Background path</label>
+          <label htmlFor="image-background">Image Background Path</label>
           <input
             id="image-background"
             type="text"
@@ -392,7 +392,7 @@ const Settings: React.FC = () => {
           </button>
         </div>
         <div className="settings-field">
-          <label htmlFor="icon-size">Default icon size</label>
+          <label htmlFor="icon-size">Default Icon Size</label>
           <input
             id="icon-size"
             type="number"
@@ -415,7 +415,7 @@ const Settings: React.FC = () => {
           />
         </div>
         <div className="settings-field">
-          <label htmlFor="font-size">Default Icon font size</label>
+          <label htmlFor="font-size">Default Icon Font Size</label>
           <input
             id="font-size"
             type="number"
@@ -433,6 +433,29 @@ const Settings: React.FC = () => {
                 sendPreviewGridUpdate({
                   defaultFontSize: Number(updatedValue),
                 });
+              }
+            }}
+          />
+        </div>
+        <div className="settings-field">
+          <label htmlFor="font-color">Default Icon Font Color</label>
+          <input
+            id="font-color"
+            type="text"
+            value={settings?.defaultFontColor}
+            title="Blank for default (white)"
+            onChange={(e) => {
+              const updatedValue = e.target.value;
+              if (updatedValue === "") {
+                updateSetting("defaultFontColor", undefined);
+                sendPreviewGridUpdate({
+                  defaultFontColor: "#FFFFFF",
+                }); // not implemented yet
+              } else {
+                updateSetting("defaultFontColor", String(updatedValue));
+                sendPreviewGridUpdate({
+                  defaultFontColor: String(updatedValue),
+                }); // not implemented yet
               }
             }}
           />
