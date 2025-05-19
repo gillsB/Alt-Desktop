@@ -197,14 +197,17 @@ const Settings: React.FC = () => {
     key: K,
     value: SettingsData[K]
   ) => {
-    setSettings((prev) => {
-      if (!prev) return null; // Handle null state gracefully
-      return {
-        ...prev,
-        [key]: value, // Update only the targeted field
-      };
-    });
-    logger.info(`Updated setting "${key}" to:`, value);
+    try {
+      setSettings((prev) => {
+        if (!prev) return null; // Handle null state gracefully
+        return {
+          ...prev,
+          [key]: value, // Update only the targeted field
+        };
+      });
+    } catch (error) {
+      logger.error("Error updating setting:", error);
+    }
   };
 
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
@@ -315,7 +318,6 @@ const Settings: React.FC = () => {
       };
 
       await window.electron.previewGridUpdate(previewData);
-      logger.info(`Sent preview update for settings:`, previewData);
     } catch (error) {
       logger.error("Failed to send preview update:", error);
     }

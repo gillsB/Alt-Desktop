@@ -155,7 +155,6 @@ const SafeImageComponent: React.FC<{
     const img = new Image();
 
     img.onload = () => {
-      logger.info(`Image loaded successfully: ${newImageSrc}`);
       setImageError(false);
 
       if (width && height) {

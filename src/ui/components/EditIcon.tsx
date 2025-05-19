@@ -344,7 +344,6 @@ const EditIcon: React.FC = () => {
         icon.col,
         updatedFields
       );
-      logger.info(`Sent preview update for [${icon.row},${icon.col}]`);
     } catch (error) {
       logger.error("Failed to send icon preview update:", error);
     }

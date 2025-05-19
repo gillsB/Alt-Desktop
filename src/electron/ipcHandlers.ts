@@ -824,15 +824,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       updates: Partial<DesktopIcon>
     ): Promise<boolean> => {
       try {
-        logger.info(
-          `Received previewIconUpdate for icon at [${row}, ${col}] with updates: ${JSON.stringify(
-            updates
-          )}`
-        );
-
         // Ensure updates is not null or undefined
         if (!updates || typeof updates !== "object") {
-          logger.error("Invalid updates object:", updates);
+          logger.error("Invalid Icon updates object:", updates);
           return false;
         }
 
@@ -843,9 +837,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             col,
             updates, // Ensure this is the correct object
           });
-          logger.info(
-            `Sent 'update-icon-preview' event to renderer for [${row}, ${col}]`
-          );
         }
 
         return true;

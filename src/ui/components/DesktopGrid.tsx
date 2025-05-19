@@ -183,31 +183,35 @@ const DesktopGrid: React.FC = () => {
       } else {
         setDefaultFontSize(fontSize);
       }
-
-      logger.info("set defaultFontSize to:", defaultFontSize);
     } catch (error) {
       logger.error("Error fetching default font size:", error);
     }
   };
   const fetchIconSize = async (override?: number) => {
-    let iconSize: number | undefined;
-    if (override) {
-      iconSize = override;
-    } else {
-      iconSize = await window.electron.getSetting("defaultIconSize");
+    try {
+      let iconSize: number | undefined;
+      if (override) {
+        iconSize = override;
+      } else {
+        iconSize = await window.electron.getSetting("defaultIconSize");
+      }
+      setDefaultIconSize(iconSize ?? 64);
+    } catch (error) {
+      logger.error("Error fetching default icon size:", error);
     }
-    logger.info("set defaultIconSize to:", iconSize);
-    setDefaultIconSize(iconSize ?? 64);
   };
   const fetchFontColor = async (override?: string) => {
-    let color: string | undefined;
-    if (override) {
-      color = override;
-    } else {
-      color = await window.electron.getSetting("defaultFontColor");
+    try {
+      let color: string | undefined;
+      if (override) {
+        color = override;
+      } else {
+        color = await window.electron.getSetting("defaultFontColor");
+      }
+      setDefaultFontColor(color ?? "#FFFFFF");
+    } catch (error) {
+      logger.error("Error fetching default font color:", error);
     }
-    logger.info("set defaultFontColor to:", color);
-    setDefaultFontColor(color ?? "#FFFFFF");
   };
   const fetchIcons = async () => {
     try {
@@ -493,15 +497,17 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     const handlePreview = (...args: unknown[]) => {
       const updates = args[1] as Partial<SettingsData>; // Extract the second argument as updates
-      logger.info("Received grid preview updates:", updates);
+      if (updates["defaultFontColor"]) {
+        fetchFontColor(updates["defaultFontColor"]);
+      } else {
+        logger.info("Received grid preview updates:", updates);
+      }
 
       // Updates should be passed back one field at a time.
       if (updates["defaultIconSize"]) {
         fetchIconSize(updates["defaultIconSize"]);
       } else if (updates["defaultFontSize"]) {
         fetchFontSize(updates["defaultFontSize"]);
-      } else if (updates["defaultFontColor"]) {
-        fetchFontColor(updates["defaultFontColor"]);
       }
     };
 
@@ -666,8 +672,12 @@ const DesktopGrid: React.FC = () => {
       updates,
     }: { row: number; col: number; updates: Partial<DesktopIcon> }
   ) => {
-    logger.info(`Received preview update for icon [${row}, ${col}]`);
-    logger.info("Updates:", updates);
+    // Font color changes can be extremely frequent, so ignore them for logging.
+    if (!updates["fontColor"]) {
+      logger.info(
+        `Received preview update for icon [${row}, ${col}], updates: ${JSON.stringify(updates)}`
+      );
+    }
 
     setIconsMap((prevMap) => {
       const newMap = new Map(prevMap);
