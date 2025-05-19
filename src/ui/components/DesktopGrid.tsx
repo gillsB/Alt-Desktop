@@ -518,6 +518,7 @@ const DesktopGrid: React.FC = () => {
       fetchFontSize();
       fetchIconSize();
       fetchIcons();
+      fetchFontColor();
     };
 
     window.electron.on("reload-grid", handleReloadGrid);
