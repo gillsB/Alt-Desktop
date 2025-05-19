@@ -301,7 +301,6 @@ const Settings: React.FC = () => {
       };
 
       await window.electron.previewBackgroundUpdate(previewData);
-      logger.info(`Sent preview update for settings:`, previewData);
     } catch (error) {
       logger.error("Failed to send preview update:", error);
     }

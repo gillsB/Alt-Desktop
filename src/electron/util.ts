@@ -125,12 +125,10 @@ export function ipcWebContentsSend<Key extends keyof EventPayloadMapping>(
 export function validateEventFrame(frame: WebFrameMain) {
   const allowedUrls = getAllowedUrls();
 
-  logger.info(
-    `frame URL: ${frame.url} Allowed URLs: ${JSON.stringify(allowedUrls)}`
-  );
-
   if (!allowedUrls.some((url) => frame.url.startsWith(url))) {
-    logger.error(`Malicious event from unknown source: ${frame.url}`);
+    logger.error(
+      `Malicious event from unknown source: ${frame.url} Allowed URLs: ${JSON.stringify(allowedUrls)}`
+    );
     throw new Error("Malicious event");
   }
 }
@@ -152,8 +150,6 @@ export const ensureFileExists = (
       );
       fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2), "utf-8");
       logger.info("File created successfully.");
-    } else {
-      logger.info("File already exists:", filePath);
     }
     return true;
   } catch (error) {

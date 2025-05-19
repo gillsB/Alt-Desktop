@@ -36,7 +36,6 @@ export function registerSafeFileProtocol(
         // Reconstruct the full path and properly decode it
         const pathPart = decodeURIComponent(requestedUrl.pathname);
         fullPath = `${hostname}:${pathPart}`;
-        logger.info(`Windows absolute path detected: ${fullPath}`);
       } else {
         // Normal path handling for relative paths
         let relativePath = decodeURIComponent(requestedUrl.pathname);
@@ -48,13 +47,10 @@ export function registerSafeFileProtocol(
         // Resolve the full path relative to the AppData directory
         const appDataBasePath: string = path.join(getAppDataPath());
         fullPath = path.resolve(appDataBasePath, relativePath);
-        logger.info(`Resolved relative path to AppData: ${fullPath}`);
       }
 
       // Resolve .lnk files if applicable
       fullPath = resolveShortcut(fullPath);
-
-      logger.info(`Attempting to access file: ${fullPath}`);
 
       // Check if the resolved file exists
       if (!fs.existsSync(fullPath)) {
@@ -103,7 +99,12 @@ export function getSafeFileUrl(
  */
 function fileNotExist(fullPath: string, reason?: string) {
   if (reason) {
-    logger.warn("Returning as: File not Found due to reason: ", reason);
+    logger.warn(
+      "Returning as: File not Found due to reason: ",
+      reason,
+      " fullPath:",
+      fullPath
+    );
   } else {
     logger.warn("File not found:", fullPath);
   }

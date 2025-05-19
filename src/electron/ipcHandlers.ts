@@ -891,11 +891,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "previewGridUpdate",
     async (updates: Partial<SettingsData>): Promise<boolean> => {
       try {
-        logger.info(
-          "Received previewGridUpdate with updates:",
-          JSON.stringify(updates)
-        );
-
         // Ensure updates is not null or undefined
         if (!updates || typeof updates !== "object") {
           logger.error("Invalid updates object:", updates);
@@ -904,10 +899,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         if (mainWindow) {
           mainWindow.webContents.send("update-grid-preview", updates);
-          logger.info(
-            "Sent 'update-grid-preview' event to renderer with data:",
-            JSON.stringify(updates)
-          );
         }
 
         return true;
