@@ -496,6 +496,7 @@ const DesktopGrid: React.FC = () => {
       logger.info("Received grid preview updates:", updates);
       fetchFontSize(updates["defaultFontSize"]);
       fetchIconSize(updates["defaultIconSize"]);
+      fetchFontColor(updates["defaultFontColor"]);
     };
 
     window.electron.on("update-grid-preview", handlePreview);
