@@ -18,12 +18,14 @@ const getImagePath = (
   imagePath: string,
   timestamp?: number
 ) => {
+  if (imagePath === " " || imagePath.toLowerCase() === "none") {
+    return ""; // Return empty string for special cases
+  }
+
   // If path already matches valid protocols return it.
   if (
     imagePath.startsWith("appdata-file://") ||
-    imagePath.startsWith("src/assets/") ||
-    imagePath === " " || // This is special case for no icon image.
-    imagePath.toLowerCase() === "none"
+    imagePath.startsWith("src/assets/")
   ) {
     // Add cache-busting timestamp if provided
     if (timestamp && !imagePath.includes("?t=")) {
@@ -123,12 +125,19 @@ const SafeImageComponent: React.FC<{
     height: height || defaultIconSize,
   });
   const [imageError, setImageError] = useState(false);
+  const [isEmptyImage, setIsEmptyImage] = useState(
+    originalImage === " " || originalImage.toLowerCase() === "none"
+  );
 
   useEffect(() => {
     setImageError(false);
 
-    // Handle special cases for " " or "none"
-    if (originalImage === " " || originalImage.toLowerCase() === "none") {
+    // Check if this is an empty image case
+    const isEmpty =
+      originalImage === " " || originalImage.toLowerCase() === "none";
+    setIsEmptyImage(isEmpty);
+
+    if (isEmpty) {
       logger.info(
         `Icon ${row},${col} is a special case, user wants empty image`
       );
@@ -218,7 +227,7 @@ const SafeImageComponent: React.FC<{
         height: height || defaultIconSize,
       }}
     >
-      {imageSrc ? (
+      {!isEmptyImage && imageSrc ? (
         <div
           className="safe-image-inner"
           style={{

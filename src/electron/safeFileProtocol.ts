@@ -23,7 +23,7 @@ export function registerSafeFileProtocol(
       const hostname = requestedUrl.hostname;
 
       // Deliberate special case to return the fallback unknown.png image.
-      if (hostname === "unknown") {
+      if (requestedUrl.pathname === "/unknown" || hostname === "unknown") {
         logger.info("Requested path is 'unknown', returning unknown image.");
         return getUnknownImageResponse();
       }
