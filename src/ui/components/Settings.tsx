@@ -24,6 +24,8 @@ const Settings: React.FC = () => {
 
   const dragCounter = useRef(0);
 
+  const colorInputRef = useRef<HTMLInputElement>(null);
+
   const handleClose = async () => {
     if (getChanges()) {
       try {
@@ -439,26 +441,44 @@ const Settings: React.FC = () => {
         </div>
         <div className="settings-field">
           <label htmlFor="font-color">Default Icon Font Color</label>
-          <input
-            id="font-color"
-            type="text"
-            value={settings?.defaultFontColor}
-            title="Blank for default (white)"
-            onChange={(e) => {
-              const updatedValue = e.target.value;
-              if (updatedValue === "") {
-                updateSetting("defaultFontColor", undefined);
-                sendPreviewGridUpdate({
-                  defaultFontColor: "#FFFFFF",
-                }); // not implemented yet
-              } else {
-                updateSetting("defaultFontColor", String(updatedValue));
-                sendPreviewGridUpdate({
-                  defaultFontColor: String(updatedValue),
-                }); // not implemented yet
-              }
-            }}
-          />
+          <div className="color-input-container">
+            <input
+              id="font-color"
+              type="text"
+              value={settings?.defaultFontColor}
+              title="Click box for selector. Blank for default (white)"
+              onChange={(e) => {
+                const updatedValue = e.target.value;
+                if (updatedValue === "") {
+                  updateSetting("defaultFontColor", undefined);
+                  sendPreviewGridUpdate({
+                    defaultFontColor: "#FFFFFF",
+                  }); // TODO not implemented yet
+                } else {
+                  updateSetting("defaultFontColor", String(updatedValue));
+                  sendPreviewGridUpdate({
+                    defaultFontColor: String(updatedValue),
+                  }); // TODO not implemented yet
+                }
+              }}
+            />
+            <div
+              className="color-preview"
+              style={{
+                backgroundColor: settings?.defaultFontColor || "#FFFFFF",
+              }}
+              onClick={() => colorInputRef.current?.click()}
+            />
+            <input
+              ref={colorInputRef}
+              type="color"
+              value={settings?.defaultFontColor}
+              onChange={(e) => {
+                updateSetting("defaultFontColor", e.target.value);
+                sendPreviewGridUpdate({ defaultFontColor: e.target.value }); // TODO not implemented yet
+              }}
+            />
+          </div>
         </div>
       </div>
       {isDragging && (
