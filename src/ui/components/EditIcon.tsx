@@ -488,9 +488,11 @@ const EditIcon: React.FC = () => {
                   id="font-color"
                   type="text"
                   value={icon.fontColor}
-                  onChange={(e) =>
-                    setIcon({ ...icon, fontColor: e.target.value })
-                  }
+                  title="Leave blank for default font color (in settings)"
+                  onChange={(e) => {
+                    setIcon({ ...icon, fontColor: e.target.value });
+                    sendPreviewUpdate({ fontColor: e.target.value });
+                  }}
                 />
                 <div
                   className="color-preview"
