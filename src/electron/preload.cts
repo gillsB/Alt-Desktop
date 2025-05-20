@@ -108,6 +108,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     row: number,
     col: number
   ) => ipcInvoke("selectIconFromList", title, images, row, col),
+  resetAllIconsFontColor: () => ipcInvoke("resetAllIconsFontColor"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

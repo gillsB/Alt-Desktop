@@ -118,6 +118,7 @@ interface EventParamMapping {
   getVideoMetadata: [string];
   generateIcon: [number, number, string, string];
   selectIconFromList: [string, string[], number, number];
+  resetAllIconsFontColor: [];
 }
 
 // The returns from the main process to the renderer
@@ -160,6 +161,7 @@ type EventPayloadMapping = {
   getVideoMetadata: VideoMetadata;
   generateIcon: string[];
   selectIconFromList: string;
+  resetAllIconsFontColor: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -247,5 +249,6 @@ interface Window {
       row: number,
       col: number
     ) => Promise<string>;
+    resetAllIconsFontColor: () => Promise<boolean>;
   };
 }

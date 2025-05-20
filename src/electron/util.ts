@@ -193,6 +193,38 @@ export function resolveShortcut(filePath: string): string {
 }
 
 /**
+ * Resets the fontColor of all icons in desktopIcons.json to an empty string.
+ * Returns true if successful, false otherwise.
+ */
+export function resetAllIconsFontColor(): boolean {
+  try {
+    const filePath = getDesktopIconsFilePath();
+    if (!fs.existsSync(filePath)) {
+      logger.warn(`desktopIcons.json does not exist at: ${filePath}`);
+      return false;
+    }
+    const data = fs.readFileSync(filePath, "utf-8");
+    const desktopData: DesktopIconData = JSON.parse(data);
+
+    if (Array.isArray(desktopData.icons)) {
+      desktopData.icons = desktopData.icons.map((icon) => ({
+        ...icon,
+        fontColor: "",
+      }));
+      fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2), "utf-8");
+      logger.info("All icon fontColor values reset to empty string.");
+      return true;
+    } else {
+      logger.warn("No icons array found in desktopIcons.json.");
+      return false;
+    }
+  } catch (error) {
+    logger.error("Failed to reset all icon fontColor values:", error);
+    return false;
+  }
+}
+
+/**
  * Escapes special characters in a string for use in a regular expression.
  *
  * @param {string} str - The string to escape.

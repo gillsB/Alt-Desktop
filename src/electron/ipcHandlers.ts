@@ -27,6 +27,7 @@ import {
   getSettingsFilePath,
   ipcMainHandle,
   ipcMainOn,
+  resetAllIconsFontColor,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
 } from "./util.js";
@@ -1115,4 +1116,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+
+  ipcMainHandle("resetAllIconsFontColor", async () => {
+    return resetAllIconsFontColor();
+  });
 }

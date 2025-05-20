@@ -491,11 +491,24 @@ const Settings: React.FC = () => {
               onClick={async () => {
                 const ret = await showSmallWindow(
                   "Reset All Icon Font Colors",
-                  "Do you want to reset ALL ICONS to use the default font color?",
+                  "Do you want to reset ALL ICONS to use the default font color? This does not require a save, and CANNOT be undone.",
                   ["Yes", "No"]
                 );
                 if (ret === "Yes") {
                   logger.info("Send request to reset all icons font color");
+                  try {
+                    const result =
+                      await window.electron.resetAllIconsFontColor();
+                    await window.electron.reloadGrid();
+                    if (!result) {
+                      logger.error("Failed to reset all icons font color.");
+                    }
+                  } catch (error) {
+                    logger.error(
+                      "Failed to reset all icons font color:",
+                      error
+                    );
+                  }
                 } else {
                   logger.info("User canceled the reset action.");
                 }
