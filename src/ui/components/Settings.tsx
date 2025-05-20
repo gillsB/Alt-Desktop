@@ -491,7 +491,7 @@ const Settings: React.FC = () => {
               onClick={async () => {
                 const ret = await showSmallWindow(
                   "Reset All Icon Font Colors",
-                  "Do you want to reset ALL ICONS to use the default font color? This does not require a save, and CANNOT be undone.",
+                  "Do you want to reset **ALL ICONS**\n to use the default font color? \nThis does not require a save,\nand **CANNOT be undone.**",
                   ["Yes", "No"]
                 );
                 if (ret === "Yes") {

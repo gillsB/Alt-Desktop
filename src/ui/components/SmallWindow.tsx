@@ -1,4 +1,5 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
 import { useLocation } from "react-router-dom";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
@@ -41,7 +42,9 @@ const SmallWindow: React.FC = () => {
         </div>
       </header>
       <div className="small-window-content">
-        <div className="small-window-message">{message}</div>
+        <div className="small-window-message">
+          <ReactMarkdown>{message}</ReactMarkdown>
+        </div>
         <div className="small-window-buttons">
           {buttons.map((button: string, index: number) => (
             <button
