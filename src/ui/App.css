@@ -1,16 +1,28 @@
 .main-header {
-  width: 100%;
-  text-align: right;
-  padding: 0;
-  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 2rem;
   background-color: #181818;
   -webkit-app-region: drag;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  height: 2rem;
+  box-sizing: border-box;
+  z-index: 100;
+  width: 100%;
+  padding: 0 1rem;
 }
-
+.hover-opacity-item {
+  height: 50px;
+  width: 100%;
+  border: 1px solid black;
+  position: fixed;
+  left: 0;
+  background-color: transparent;
+  z-index: 10;
+  box-sizing: border-box;
+}
 /* Devtools */
 .menu-container {
   position: relative;
@@ -250,17 +262,6 @@ body,
 .context-menu .menu-item:hover {
   background-color: #555;
   cursor: pointer;
-}
-
-.hover-opacity-item {
-  height: 50px;
-  width: 100%;
-  border: 1px solid black;
-  position: fixed;
-  left: 0;
-  background-color: transparent;
-  z-index: 10;
-  box-sizing: border-box;
 }
 .edit-icon-container {
   position: fixed;

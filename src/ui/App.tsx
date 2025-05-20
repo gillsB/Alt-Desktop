@@ -21,9 +21,9 @@ const App: React.FC = () => {
           path="/"
           element={
             <div className="App">
-              <Header />
               <div className="main">
                 <HoverOpacityItem setVideoOpacity={setVideoOpacity} />
+                <Header />
                 <VideoBackground opacity={videoOpacity} />
                 <DesktopGrid />
               </div>

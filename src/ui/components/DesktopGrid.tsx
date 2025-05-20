@@ -335,7 +335,7 @@ const DesktopGrid: React.FC = () => {
 
     setContextMenu({
       x,
-      y: headerAdjustY(y),
+      y,
       type,
       icon:
         type === "icon" && row !== undefined && col !== undefined
@@ -355,10 +355,9 @@ const DesktopGrid: React.FC = () => {
     e.preventDefault();
     const { clientX: x, clientY: y } = e;
     // React.MouseEvent returns global coordinates, so we need to adjust them to local coordinates
-    const adjustedY = headerAdjustY(y);
 
     // Calculate the nearest grid slot
-    const [validRow, validCol] = getRowColFromXY(x, adjustedY);
+    const [validRow, validCol] = getRowColFromXY(x, y);
     showHighlightAt(validRow, validCol);
 
     // Check if an icon exists at the calculated row and column
@@ -368,7 +367,7 @@ const DesktopGrid: React.FC = () => {
       // If an icon exists, set the context menu to "icon" type
       setContextMenu({
         x,
-        y: headerAdjustY(y),
+        y,
         type: "icon",
         icon: existingIcon,
       });
@@ -379,7 +378,7 @@ const DesktopGrid: React.FC = () => {
       // Otherwise, set the context menu to "desktop" type
       setContextMenu({
         x,
-        y: headerAdjustY(y),
+        y,
         type: "desktop",
         icon: null,
       });
@@ -638,8 +637,7 @@ const DesktopGrid: React.FC = () => {
 
     const menuElement = contextMenuRef.current;
     const menuRect = menuElement.getBoundingClientRect();
-    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-    const viewportHeight = window.innerHeight - headerHeight;
+    const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
 
     // Get current position from style
@@ -961,18 +959,5 @@ const DesktopGrid: React.FC = () => {
     const validCol = Math.max(0, Math.min(calculatedCol, numCols - 1));
     return [validRow, validCol];
   }
-
-  /**
-   * Adjusts the Y coordinate based on the header height only.
-   * Use this for global coordinate conversion to to desktop coordinates.
-   *
-   * @param {number} Y - The original Y coordinate.
-   * @returns {number} - The adjusted Y coordinate adjusted for header height.
-   */
-  function headerAdjustY(Y: number): number {
-    const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-    return Y - headerHeight;
-  }
 };
-
 export default DesktopGrid;
