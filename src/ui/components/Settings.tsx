@@ -473,16 +473,36 @@ const Settings: React.FC = () => {
                 backgroundColor: settings?.defaultFontColor || "#FFFFFF",
               }}
               onClick={() => colorInputRef.current?.click()}
-            />
-            <input
-              ref={colorInputRef}
-              type="color"
-              value={settings?.defaultFontColor}
-              onChange={(e) => {
-                updateSetting("defaultFontColor", e.target.value);
-                sendPreviewGridUpdate({ defaultFontColor: e.target.value });
+            >
+              <input
+                ref={colorInputRef}
+                type="color"
+                value={settings?.defaultFontColor}
+                onChange={(e) => {
+                  updateSetting("defaultFontColor", e.target.value);
+                  sendPreviewGridUpdate({ defaultFontColor: e.target.value });
+                }}
+              />
+            </div>
+            <button
+              type="button"
+              className="default-font-color-btn"
+              title="Reset All icons to default font color"
+              onClick={async () => {
+                const ret = await showSmallWindow(
+                  "Reset All Icon Font Colors",
+                  "Do you want to reset ALL ICONS to use the default font color?",
+                  ["Yes", "No"]
+                );
+                if (ret === "Yes") {
+                  logger.info("Send request to reset all icons font color");
+                } else {
+                  logger.info("User canceled the reset action.");
+                }
               }}
-            />
+            >
+              Reset All Icons
+            </button>
           </div>
         </div>
       </div>
