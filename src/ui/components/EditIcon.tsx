@@ -499,17 +499,29 @@ const EditIcon: React.FC = () => {
                   style={{
                     backgroundColor: icon.fontColor || fontColorDefault,
                   }}
-                  onClick={() => colorInputRef.current?.click()}
-                />
-                <input
-                  ref={colorInputRef}
-                  type="color"
-                  value={icon.fontColor}
-                  onChange={(e) => {
-                    setIcon({ ...icon, fontColor: e.target.value });
-                    sendPreviewUpdate({ fontColor: e.target.value });
+                >
+                  <input
+                    ref={colorInputRef}
+                    type="color"
+                    value={icon.fontColor}
+                    onChange={(e) => {
+                      setIcon({ ...icon, fontColor: e.target.value });
+                      sendPreviewUpdate({ fontColor: e.target.value });
+                    }}
+                    tabIndex={-1}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="default-font-color-btn"
+                  onClick={() => {
+                    setIcon({ ...icon, fontColor: "" });
+                    sendPreviewUpdate({ fontColor: "" });
                   }}
-                />
+                  title="Reset to default font color"
+                >
+                  Default
+                </button>
               </div>
             </div>
             <div className="edit-icon-field">
