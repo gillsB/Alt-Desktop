@@ -21,7 +21,7 @@ export function Header() {
   };
 
   return (
-    <header>
+    <header className="main-header">
       {devMode && (
         <div className="menu-container">
           <button

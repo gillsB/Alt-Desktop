@@ -1,4 +1,4 @@
-header {
+.main-header {
   width: 100%;
   text-align: right;
   padding: 0;
@@ -582,16 +582,17 @@ body,
 }
 
 .subwindow-header {
-  position: sticky;
-  top: 0;
   width: 100%;
+  text-align: right;
+  padding: 0;
+  box-sizing: border-box;
   background-color: #181818;
+  -webkit-app-region: drag;
   z-index: 10;
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 2rem;
-  box-sizing: border-box;
 }
 
 .small-window-container {

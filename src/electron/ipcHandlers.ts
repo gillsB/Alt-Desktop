@@ -241,8 +241,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       subWindow.setBounds({ x, y, width, height });
 
       subWindow.focus();
-    } else {
-      logger.info("No active subwindow found.");
     }
     return subWindow !== null; // Return true if a subwindow is active
   });

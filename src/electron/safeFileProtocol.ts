@@ -60,7 +60,6 @@ export function registerSafeFileProtocol(
 
       // Read the file content for existing files
       const fileContent = fs.readFileSync(fullPath);
-      logger.info(`Successfully read file: ${fullPath}`);
       return new Response(fileContent, {
         status: 200,
         headers: {
