@@ -4,12 +4,13 @@ import { createLoggerForFile } from "./logging.js";
 import { openSmallWindow } from "./subWindowManager.js";
 import { getSettingsFilePath } from "./util.js";
 
-export const defaultSettings = {
+export const defaultSettings: SettingsData = {
   videoBackground: "",
   imageBackground: "",
   defaultFontSize: 16,
   defaultIconSize: 64,
   defaultFontColor: "#FFFFFF",
+  headerType: "windowed",
 };
 
 const logger = createLoggerForFile("settings.ts");
