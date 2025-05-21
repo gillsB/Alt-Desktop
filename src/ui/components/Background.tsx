@@ -448,15 +448,6 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
 
   const videoStyle: React.CSSProperties = {
     opacity: isLoading ? 0 : opacity, // Hide video until it's ready
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    pointerEvents: "none", // Prevent interaction with the video
-    background: "transparent",
-    zIndex: -1,
   };
 
   const imageStyle: React.CSSProperties = {
@@ -486,26 +477,28 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   // Case 1: Video is available and working
   if (videoSrc && !videoError) {
     return (
-      <video
-        id="video-bg"
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        loop
-        style={videoStyle}
-        src={videoSrc}
-        onError={() => handleVideoError("initial")}
-        // Force crossOrigin to anonymous for better browser handling
-        crossOrigin="anonymous"
-        // Additional event handlers for better debugging and performance logging
-        onLoadStart={() => videoLogger.info("Video load started")}
-        onStalled={() => videoLogger.warn("Video playback stalled")}
-        onCanPlayThrough={() => {
-          videoLogger.info("Video can play through without buffering");
-          setIsLoading(false);
-        }}
-      ></video>
+      <div className="video-background">
+        <video
+          id="video-bg"
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          loop
+          style={videoStyle}
+          src={videoSrc}
+          onError={() => handleVideoError("initial")}
+          // Force crossOrigin to anonymous for better browser handling
+          crossOrigin="anonymous"
+          // Additional event handlers for better debugging and performance logging
+          onLoadStart={() => videoLogger.info("Video load started")}
+          onStalled={() => videoLogger.warn("Video playback stalled")}
+          onCanPlayThrough={() => {
+            videoLogger.info("Video can play through without buffering");
+            setIsLoading(false);
+          }}
+        ></video>
+      </div>
     );
   }
 
