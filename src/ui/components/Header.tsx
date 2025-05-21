@@ -1,11 +1,11 @@
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
-import { forwardRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "../styles/Header.css";
 import { createLogger } from "../util/uiLogger";
 
 const logger = createLogger("Header.tsx");
 
-export const Header = forwardRef<HTMLDivElement, object>((props, ref) => {
+export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerType, setHeaderType] = useState("WINDOWED");
   const [subWindowDevtoolsChecked, setSubWindowDevtoolsChecked] =
@@ -99,7 +99,7 @@ export const Header = forwardRef<HTMLDivElement, object>((props, ref) => {
       : "windowed-header");
 
   return (
-    <header ref={ref} className={headerClass}>
+    <header className={headerClass}>
       {devMode && (
         <div className="menu-container">
           <button
@@ -194,6 +194,4 @@ export const Header = forwardRef<HTMLDivElement, object>((props, ref) => {
       </div>
     </header>
   );
-});
-
-Header.displayName = "Header";
+}

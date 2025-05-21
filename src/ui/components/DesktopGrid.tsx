@@ -730,10 +730,7 @@ const DesktopGrid: React.FC = () => {
 
   return (
     <>
-      <div
-        style={{ position: "relative", width: "100vw", height: "100vh" }}
-        onContextMenu={handleDesktopRightClick}
-      >
+      <div className="desktop-grid" onContextMenu={handleDesktopRightClick}>
         {/* Conditionally render horizontal grid lines */}
         {showGrid &&
           Array.from({ length: numRows + 1 }).map((_, rowIndex) => (
