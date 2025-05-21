@@ -96,6 +96,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("getBackgroundImagePath", filePath),
   reloadBackground: () => ipcInvoke("reloadBackground"),
   reloadGrid: () => ipcInvoke("reloadGrid"),
+  reloadHeader: () => ipcInvoke("reloadHeader"),
   getVideoMetadata: (filePath: string): Promise<VideoMetadata> =>
     ipcInvoke("getVideoMetadata", filePath),
   generateIcon: (

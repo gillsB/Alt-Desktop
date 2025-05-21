@@ -1050,6 +1050,16 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+  ipcMainHandle("reloadHeader", async () => {
+    try {
+      logger.info("Sending reload-header event to renderer...");
+      mainWindow.webContents.send("reload-header");
+      return true;
+    } catch (error) {
+      logger.error("Failed to send reload-grid event:", error);
+      return false;
+    }
+  });
   ipcMainHandle(
     "getVideoMetadata",
     async (filePath: string): Promise<VideoMetadata> => {

@@ -48,6 +48,9 @@ const Settings: React.FC = () => {
           ) {
             await window.electron.reloadGrid();
           }
+          if (getSpecificChanges(["headerType"])) {
+            await window.electron.reloadHeader();
+          }
           closeWindow();
         }
       } catch (error) {

@@ -23,6 +23,20 @@ export function Header() {
     }
   };
 
+  // Listen for header reload updates from the main process
+  useEffect(() => {
+    const handleReload = () => {
+      fetchHeaderType();
+    };
+
+    window.electron.on("reload-header", handleReload);
+
+    return () => {
+      window.electron.off("reload-header", handleReload);
+    };
+  }, []);
+
+  // Listen for header preview updates from the main process
   useEffect(() => {
     const handlePreview = (...args: unknown[]) => {
       const updates = args[1] as Partial<SettingsData>;
@@ -38,6 +52,7 @@ export function Header() {
     };
   }, []);
 
+  // Fetch the header type from settings when the component mounts
   useEffect(() => {
     fetchHeaderType();
   }, []);
