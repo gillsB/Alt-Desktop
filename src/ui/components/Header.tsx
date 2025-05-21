@@ -1,11 +1,14 @@
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import "../styles/BorderlessHeader.css";
+import "../styles/WindowedHeader.css";
 import { createLogger } from "../util/uiLogger";
 
 const logger = createLogger("Header.tsx");
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerType, setHeaderType] = useState("WINDOWED");
   const [subWindowDevtoolsChecked, setSubWindowDevtoolsChecked] =
     useState(false);
   const [smallWindowDevtoolsChecked, setSmallWindowDevtoolsChecked] =
@@ -20,8 +23,28 @@ export function Header() {
     }
   };
 
+  useEffect(() => {
+    const fetchHeaderType = async () => {
+      const fetchedType = await window.electron.getSetting("headerType");
+      if (fetchedType) {
+        setHeaderType(fetchedType);
+      } else {
+        logger.error(
+          "Failed to fetch header type from settings defaulting to WINDOWED."
+        );
+        setHeaderType("WINDOWED");
+      }
+    };
+    fetchHeaderType();
+  }, []);
+
+  // Dynamically set the header class based on headerType
+  const headerClass =
+    "main-header " +
+    (headerType === "BORDERLESS" ? "borderless-header" : "windowed-header");
+
   return (
-    <header className="main-header">
+    <header className={headerClass}>
       {devMode && (
         <div className="menu-container">
           <button

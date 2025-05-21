@@ -1,18 +1,3 @@
-.main-header {
-  position: fixed;
-  top: 0;
-  right: 0;
-  height: 2rem;
-  background-color: #181818;
-  -webkit-app-region: drag;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  box-sizing: border-box;
-  z-index: 100;
-  width: 100%;
-  padding: 0 1rem;
-}
 .hover-opacity-item {
   height: 50px;
   width: 100%;

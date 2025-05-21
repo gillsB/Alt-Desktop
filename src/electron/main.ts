@@ -45,7 +45,9 @@ app.on("ready", () => {
     webPreferences: {
       // preload function to allow only specific functions to communicate with from the ui.
       preload: getPreloadPath(),
-      webSecurity: true, //default is True, but to be sure it remains such.
+      webSecurity: true,
+      contextIsolation: true,
+      nodeIntegration: false,
     },
     frame: false,
     title: "AltDesktop",
