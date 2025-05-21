@@ -4,6 +4,7 @@ import { registerIpcHandlers } from "./ipcHandlers.js";
 import { createLoggerForFile } from "./logging.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
+import { getSetting } from "./settings.js";
 import { getActiveSubWindow } from "./subWindowManager.js";
 import { createTray } from "./tray.js";
 import { isDev } from "./util.js";
@@ -74,6 +75,20 @@ app.on("ready", () => {
 
   createTray(mainWindow);
   handleCloseEvents(mainWindow);
+
+  mainWindow.on("maximize", async () => {
+    const headerType = await getSetting("headerType");
+    if (headerType === "BORDERLESS") {
+      mainWindow.setResizable(false);
+    }
+  });
+
+  mainWindow.on("unmaximize", async () => {
+    const headerType = await getSetting("headerType");
+    if (headerType === "BORDERLESS") {
+      mainWindow.setResizable(true);
+    }
+  });
 });
 
 function handleCloseEvents(mainWindow: BrowserWindow) {

@@ -1,7 +1,14 @@
-import { ipcMain, shell, WebContents, WebFrameMain } from "electron";
+import {
+  BrowserWindow,
+  ipcMain,
+  shell,
+  WebContents,
+  WebFrameMain,
+} from "electron";
 import fs from "fs";
 import path from "path";
 import { createLoggerForFile } from "./logging.js";
+import { getSetting } from "./settings.js";
 import { getAllowedUrls } from "./subWindowManager.js";
 
 const logger = createLoggerForFile("util.ts");
@@ -223,6 +230,15 @@ export function resetAllIconsFontColor(): boolean {
     return false;
   }
 }
+
+export const updateHeader = async (mainWindow: BrowserWindow) => {
+  const headerType = await getSetting("headerType");
+  if (headerType === "BORDERLESS" && mainWindow.isMaximized()) {
+    mainWindow.setResizable(false);
+  } else {
+    mainWindow.setResizable(true);
+  }
+};
 
 /**
  * Escapes special characters in a string for use in a regular expression.

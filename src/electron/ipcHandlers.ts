@@ -30,6 +30,7 @@ import {
   resetAllIconsFontColor,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
+  updateHeader,
 } from "./util.js";
 import { generateIcon } from "./utils/generateIcon.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
@@ -942,6 +943,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         logger.info("Settings data saved successfully.");
         ensureDefaultSettings(); // Add back any missing default settings
         mainWindow.webContents.send("reload-grid");
+        updateHeader(mainWindow);
         return true;
       } catch (error) {
         logger.error("Error saving settings data:", error);
