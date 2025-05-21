@@ -12,6 +12,7 @@ export function Header() {
     useState(false);
   const [smallWindowDevtoolsChecked, setSmallWindowDevtoolsChecked] =
     useState(false);
+  const [isMaximized, setIsMaximized] = useState(true);
   const devMode = process.env.NODE_ENV === "development";
 
   const settingsClicked = async () => {
@@ -56,6 +57,23 @@ export function Header() {
     fetchHeaderType();
   }, []);
 
+  useEffect(() => {
+    const handleMaximized = () => {
+      setIsMaximized(true);
+    };
+    const handleUnmaximized = () => {
+      setIsMaximized(false);
+    };
+
+    window.electron.on("window-maximized", handleMaximized);
+    window.electron.on("window-unmaximized", handleUnmaximized);
+
+    return () => {
+      window.electron.off("window-maximized", handleMaximized);
+      window.electron.off("window-unmaximized", handleUnmaximized);
+    };
+  }, []);
+
   const fetchHeaderType = async (overrides?: HeaderType) => {
     if (overrides) {
       setHeaderType(overrides);
@@ -72,10 +90,13 @@ export function Header() {
     }
   };
 
-  // Dynamically set the header class based on headerType
   const headerClass =
     "main-header " +
-    (headerType === "BORDERLESS" ? "borderless-header" : "windowed-header");
+    (headerType === "BORDERLESS"
+      ? isMaximized
+        ? "borderless-header"
+        : "windowed-header"
+      : "windowed-header");
 
   return (
     <header className={headerClass}>

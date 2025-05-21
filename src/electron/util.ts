@@ -231,6 +231,11 @@ export function resetAllIconsFontColor(): boolean {
   }
 }
 
+/**
+ * Updates the resizability of the main window based on the header type.
+ * Only false if the header type is "BORDERLESS" and the window is maximized. Otherwise, True.
+ * @param mainWindow The main window of the application.
+ */
 export const updateHeader = async (mainWindow: BrowserWindow) => {
   const headerType = await getSetting("headerType");
   if (headerType === "BORDERLESS" && mainWindow.isMaximized()) {

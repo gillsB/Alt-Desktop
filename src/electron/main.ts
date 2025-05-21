@@ -81,6 +81,7 @@ app.on("ready", () => {
     if (headerType === "BORDERLESS") {
       mainWindow.setResizable(false);
     }
+    mainWindow.webContents.send("window-maximized");
   });
 
   mainWindow.on("unmaximize", async () => {
@@ -88,6 +89,7 @@ app.on("ready", () => {
     if (headerType === "BORDERLESS") {
       mainWindow.setResizable(true);
     }
+    mainWindow.webContents.send("window-unmaximized");
   });
 });
 

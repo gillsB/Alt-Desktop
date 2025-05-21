@@ -22,12 +22,14 @@
     "onefile",
     "pyinstaller",
     "regedit",
+    "resizability",
     "SMALLWINDOW",
     "statfs",
     "tailable",
     "taskkill",
     "transpiles",
     "unmaximize",
+    "unmaximized",
     "unsub",
     "viewports"
   ]
