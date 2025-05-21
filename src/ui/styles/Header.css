@@ -35,11 +35,12 @@
 
 .header-hotspot {
   position: fixed;
-  top: 0;
+  top: 2rem;
   right: 0;
-  width: 15%;
-  height: 80px;
+  height: 100px;
   z-index: 99;
+  pointer-events: auto;
+  background: transparent;
 }
 
 .hover-opacity-item {
@@ -51,9 +52,9 @@
   z-index: 10;
   box-sizing: border-box;
 }
-.header-hotspot:hover + header,
-header:hover,
-.hover-opacity-item:hover ~ header {
+.header-hotspot:hover + .main-header,
+.main-header:hover,
+.hover-opacity-item:hover ~ .main-header {
   opacity: 1;
   pointer-events: auto;
 }

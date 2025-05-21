@@ -91,6 +91,8 @@ app.on("ready", () => {
     }
     mainWindow.webContents.send("window-unmaximized");
   });
+
+  //mainWindow.webContents.openDevTools();
 });
 
 function handleCloseEvents(mainWindow: BrowserWindow) {
