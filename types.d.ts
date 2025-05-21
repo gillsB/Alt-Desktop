@@ -110,6 +110,7 @@ interface EventParamMapping {
   previewIconUpdate: [number, number, Partial<DesktopIcon>];
   previewBackgroundUpdate: [Partial<SettingsData>];
   previewGridUpdate: [Partial<SettingsData>];
+  previewHeaderUpdate: [Partial<SettingsData>];
   isSubWindowActive: [];
   getSettingsData: [];
   saveSettingsData: [SettingsData];
@@ -152,6 +153,7 @@ type EventPayloadMapping = {
   buttonResponse: { windowId: number; buttonText: string | null };
   previewIconUpdate: boolean;
   previewBackgroundUpdate: boolean;
+  previewHeaderUpdate: boolean;
   previewGridUpdate: boolean;
   isSubWindowActive: boolean;
   getSettingsData: SettingsData;
@@ -232,6 +234,7 @@ interface Window {
       updates: Partial<SettingsData>
     ) => Promise<boolean>;
     previewGridUpdate: (updates: Partial<SettingsData>) => Promise<boolean>;
+    previewHeaderUpdate: (updates: Partial<SettingsData>) => Promise<boolean>;
     getSettingsData: () => Promise<SettingsData>;
     saveSettingsData: (settings: SettingsData) => Promise<boolean>;
     getSetting<T extends SettingKey>(key: T): Promise<SettingsData[T]>;

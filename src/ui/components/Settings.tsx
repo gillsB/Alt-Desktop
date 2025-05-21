@@ -322,6 +322,19 @@ const Settings: React.FC = () => {
       logger.error("Failed to send preview update:", error);
     }
   };
+  const sendPreviewHeaderUpdate = async (
+    updatedFields: Partial<SettingsData>
+  ) => {
+    try {
+      const previewData: Partial<SettingsData> = {
+        ...updatedFields, // Override with any explicitly updated fields
+      };
+
+      await window.electron.previewHeaderUpdate(previewData);
+    } catch (error) {
+      logger.error("Failed to send preview update:", error);
+    }
+  };
 
   return (
     <div
@@ -526,7 +539,7 @@ const Settings: React.FC = () => {
             onChange={(e) => {
               const selected = e.target.value as "WINDOWED" | "BORDERLESS";
               updateSetting("headerType", selected);
-              sendPreviewGridUpdate({ headerType: selected });
+              sendPreviewHeaderUpdate({ headerType: selected });
             }}
           >
             <option value="WINDOWED">Windowed</option>

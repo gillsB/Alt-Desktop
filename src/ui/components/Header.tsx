@@ -24,7 +24,28 @@ export function Header() {
   };
 
   useEffect(() => {
-    const fetchHeaderType = async () => {
+    const handlePreview = (...args: unknown[]) => {
+      const updates = args[1] as Partial<SettingsData>;
+
+      logger.info("Received Header preview updates:", updates);
+      fetchHeaderType(updates.headerType);
+    };
+
+    window.electron.on("update-header-preview", handlePreview);
+
+    return () => {
+      window.electron.off("update-header-preview", handlePreview);
+    };
+  }, []);
+
+  useEffect(() => {
+    fetchHeaderType();
+  }, []);
+
+  const fetchHeaderType = async (overrides?: HeaderType) => {
+    if (overrides) {
+      setHeaderType(overrides);
+    } else {
       const fetchedType = await window.electron.getSetting("headerType");
       if (fetchedType) {
         setHeaderType(fetchedType);
@@ -34,9 +55,8 @@ export function Header() {
         );
         setHeaderType("WINDOWED");
       }
-    };
-    fetchHeaderType();
-  }, []);
+    }
+  };
 
   // Dynamically set the header class based on headerType
   const headerClass =

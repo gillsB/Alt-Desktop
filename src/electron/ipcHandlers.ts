@@ -898,6 +898,27 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle(
+    "previewHeaderUpdate",
+    async (updates: Partial<SettingsData>): Promise<boolean> => {
+      try {
+        // Ensure header is not null or undefined
+        if (!updates || typeof updates !== "object") {
+          logger.error("Invalid header object:", updates);
+          return false;
+        }
+
+        if (mainWindow) {
+          mainWindow.webContents.send("update-header-preview", updates);
+        }
+
+        return true;
+      } catch (error) {
+        logger.error("Error handling previewHeaderUpdate:", error);
+        return false;
+      }
+    }
+  );
   ipcMainHandle("getSettingsData", async (): Promise<SettingsData> => {
     try {
       const settingsFilePath = getSettingsFilePath();
