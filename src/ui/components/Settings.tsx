@@ -518,6 +518,21 @@ const Settings: React.FC = () => {
             </button>
           </div>
         </div>
+        <div className="settings-field window-type">
+          <label htmlFor="window-type">Window Type</label>
+          <select
+            id="window-type"
+            value={settings?.headerType || "WINDOWED"}
+            onChange={(e) => {
+              const selected = e.target.value as "WINDOWED" | "BORDERLESS";
+              updateSetting("headerType", selected);
+              sendPreviewGridUpdate({ headerType: selected });
+            }}
+          >
+            <option value="WINDOWED">Windowed</option>
+            <option value="BORDERLESS">Borderless</option>
+          </select>
+        </div>
       </div>
       {isDragging && (
         <div className="drag-overlay">

@@ -25,7 +25,7 @@ type HeaderAction =
 
 type SubWindowAction = "EDIT_ICON" | "CLOSE_SUBWINDOW";
 
-type HeaderType = "windowed" | "borderless";
+type HeaderType = "WINDOWED" | "BORDERLESS";
 
 type DesktopIconData = {
   icons: DesktopIcon[];
