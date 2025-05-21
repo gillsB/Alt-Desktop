@@ -1,7 +1,6 @@
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
-import "../styles/BorderlessHeader.css";
-import "../styles/WindowedHeader.css";
+import "../styles/Header.css";
 import { createLogger } from "../util/uiLogger";
 
 const logger = createLogger("Header.tsx");

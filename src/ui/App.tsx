@@ -23,6 +23,7 @@ const App: React.FC = () => {
             <div className="App">
               <div className="main">
                 <HoverOpacityItem setVideoOpacity={setVideoOpacity} />
+                <div className="header-hotspot"></div>
                 <Header />
                 <VideoBackground opacity={videoOpacity} />
                 <DesktopGrid />

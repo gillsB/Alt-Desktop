@@ -1,0 +1,63 @@
+.borderless-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 2rem;
+  background-color: #181818;
+  -webkit-app-region: drag;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  box-sizing: border-box;
+  z-index: 100;
+  width: auto;
+  padding: 0 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.windowed-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 2rem;
+  background-color: #181818;
+  -webkit-app-region: drag;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  box-sizing: border-box;
+  z-index: 100;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+.header-hotspot {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 15%;
+  height: 80px;
+  z-index: 99;
+}
+.header-hotspot:hover + header,
+header:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+.hover-opacity-item {
+  height: 2rem;
+  width: 100%;
+  border: 1px solid black;
+  position: fixed;
+  left: 0;
+  background-color: transparent;
+  z-index: 10;
+  box-sizing: border-box;
+}
+.header-hotspot:hover + header,
+header:hover,
+.hover-opacity-item:hover ~ header {
+  opacity: 1;
+  pointer-events: auto;
+}
