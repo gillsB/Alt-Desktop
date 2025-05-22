@@ -38,9 +38,11 @@ app.on("ready", () => {
 
   registerVideoFileProtocol("video-file");
 
+  const transparency = getSetting("windowType") === "BORDERLESS" ? true : false;
+
   const mainWindow = new BrowserWindow({
     show: false,
-    transparent: true, // Enables full transparency
+    transparent: transparency,
     backgroundColor: "#00000000", // Ensures no default background color
     hasShadow: false,
     webPreferences: {
