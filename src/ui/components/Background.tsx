@@ -6,7 +6,7 @@ import { showSmallWindow } from "../util/uiUtil";
 const logger = createLogger("Background.tsx");
 const videoLogger = createVideoLogger("Background.tsx");
 
-interface VideoBackgroundProps {
+interface BackgroundProps {
   opacity?: number;
   fallbackColor?: string;
   logLevel?: "verbose" | "normal";
@@ -22,9 +22,9 @@ interface VideoBackgroundProps {
  * @param {number} [opacity=1] - The opacity of the background.
  * @param {string} [fallbackColor="#87BEC5"] - The fallback background color if both video and image fail.
  * @param {string} [logLevel="normal"] - Controls verbosity of video events logging.
- * @returns {JSX.Element} The VideoBackground component.
+ * @returns {JSX.Element} The Background component.
  */
-const VideoBackground: React.FC<VideoBackgroundProps> = ({
+const Background: React.FC<BackgroundProps> = ({
   opacity = 1,
   fallbackColor = "#87BEC5",
   logLevel = "normal",
@@ -507,4 +507,4 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   return <div className="fallback" style={fallbackStyle}></div>;
 };
 
-export default VideoBackground;
+export default Background;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Route, HashRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
-import VideoBackground from "./components/Background";
+import Background from "./components/Background";
 import DesktopGrid from "./components/DesktopGrid";
 import EditIcon from "./components/EditIcon";
 import { Header } from "./components/Header";
@@ -25,7 +25,7 @@ const App: React.FC = () => {
                 <HoverOpacityItem setVideoOpacity={setVideoOpacity} />
                 <Header />
                 <DesktopGrid />
-                <VideoBackground opacity={videoOpacity} />
+                <Background opacity={videoOpacity} />
               </div>
             </div>
           }
