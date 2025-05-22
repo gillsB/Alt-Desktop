@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import "../styles/Background.css";
 import { createLogger, createVideoLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
 
@@ -452,26 +453,10 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
 
   const imageStyle: React.CSSProperties = {
     opacity: isLoading ? 0 : opacity, // Hide image until it's ready
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    pointerEvents: "none", // Prevent interaction with the image
-    background: "transparent",
-    zIndex: -1,
   };
 
   const fallbackStyle: React.CSSProperties = {
     backgroundColor: fallbackColor,
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    opacity,
-    zIndex: -1,
   };
 
   // Case 1: Video is available and working
@@ -505,19 +490,21 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
   // Case 2: Video failed, try image background
   if (imageSrc && !imageError) {
     return (
-      <img
-        id="image-bg"
-        ref={imageRef}
-        src={imageSrc}
-        style={imageStyle}
-        onError={handleImageError}
-        alt="Background"
-      />
+      <div className="image-background">
+        <img
+          id="image-bg"
+          ref={imageRef}
+          src={imageSrc}
+          style={imageStyle}
+          onError={handleImageError}
+          alt="Background"
+        />
+      </div>
     );
   }
 
   // Case 3: Both video and image failed or don't exist, use fallback color
-  return <div style={fallbackStyle}></div>;
+  return <div className="fallback" style={fallbackStyle}></div>;
 };
 
 export default VideoBackground;
