@@ -7,7 +7,7 @@ const logger = createLogger("Header.tsx");
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [headerType, setHeaderType] = useState("WINDOWED");
+  const [windowType, setWindowType] = useState("WINDOWED");
   const [subWindowDevtoolsChecked, setSubWindowDevtoolsChecked] =
     useState(false);
   const [smallWindowDevtoolsChecked, setSmallWindowDevtoolsChecked] =
@@ -26,7 +26,7 @@ export function Header() {
   // Listen for header reload updates from the main process
   useEffect(() => {
     const handleReload = () => {
-      fetchHeaderType();
+      fetchWindowType();
     };
 
     window.electron.on("reload-header", handleReload);
@@ -42,7 +42,7 @@ export function Header() {
       const updates = args[1] as Partial<SettingsData>;
 
       logger.info("Received Header preview updates:", updates);
-      fetchHeaderType(updates.headerType);
+      fetchWindowType(updates.windowType);
     };
 
     window.electron.on("update-header-preview", handlePreview);
@@ -54,7 +54,7 @@ export function Header() {
 
   // Fetch the header type from settings when the component mounts
   useEffect(() => {
-    fetchHeaderType();
+    fetchWindowType();
   }, []);
 
   useEffect(() => {
@@ -74,25 +74,25 @@ export function Header() {
     };
   }, []);
 
-  const fetchHeaderType = async (overrides?: HeaderType) => {
+  const fetchWindowType = async (overrides?: WindowType) => {
     if (overrides) {
-      setHeaderType(overrides);
+      setWindowType(overrides);
     } else {
-      const fetchedType = await window.electron.getSetting("headerType");
+      const fetchedType = await window.electron.getSetting("windowType");
       if (fetchedType) {
-        setHeaderType(fetchedType);
+        setWindowType(fetchedType);
       } else {
         logger.error(
           "Failed to fetch header type from settings defaulting to WINDOWED."
         );
-        setHeaderType("WINDOWED");
+        setWindowType("WINDOWED");
       }
     }
   };
 
   const headerClass =
     "main-header " +
-    (headerType === "BORDERLESS"
+    (windowType === "BORDERLESS"
       ? isMaximized
         ? "borderless-header"
         : "windowed-header"

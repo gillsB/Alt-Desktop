@@ -77,16 +77,16 @@ app.on("ready", () => {
   handleCloseEvents(mainWindow);
 
   mainWindow.on("maximize", async () => {
-    const headerType = await getSetting("headerType");
-    if (headerType === "BORDERLESS") {
+    const windowType = await getSetting("windowType");
+    if (windowType === "BORDERLESS") {
       mainWindow.setResizable(false);
     }
     mainWindow.webContents.send("window-maximized");
   });
 
   mainWindow.on("unmaximize", async () => {
-    const headerType = await getSetting("headerType");
-    if (headerType === "BORDERLESS") {
+    const windowType = await getSetting("windowType");
+    if (windowType === "BORDERLESS") {
       mainWindow.setResizable(true);
     }
     mainWindow.webContents.send("window-unmaximized");

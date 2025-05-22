@@ -237,8 +237,8 @@ export function resetAllIconsFontColor(): boolean {
  * @param mainWindow The main window of the application.
  */
 export const updateHeader = async (mainWindow: BrowserWindow) => {
-  const headerType = await getSetting("headerType");
-  if (headerType === "BORDERLESS" && mainWindow.isMaximized()) {
+  const windowType = await getSetting("windowType");
+  if (windowType === "BORDERLESS" && mainWindow.isMaximized()) {
     mainWindow.setResizable(false);
   } else {
     mainWindow.setResizable(true);

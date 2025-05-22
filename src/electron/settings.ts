@@ -10,7 +10,7 @@ export const defaultSettings: SettingsData = {
   defaultFontSize: 16,
   defaultIconSize: 64,
   defaultFontColor: "#FFFFFF",
-  headerType: "WINDOWED",
+  windowType: "WINDOWED",
 };
 
 const logger = createLoggerForFile("settings.ts");

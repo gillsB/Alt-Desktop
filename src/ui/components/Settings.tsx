@@ -48,7 +48,7 @@ const Settings: React.FC = () => {
           ) {
             await window.electron.reloadGrid();
           }
-          if (getSpecificChanges(["headerType"])) {
+          if (getSpecificChanges(["windowType"])) {
             await window.electron.reloadHeader();
           }
           closeWindow();
@@ -538,11 +538,11 @@ const Settings: React.FC = () => {
           <label htmlFor="window-type">Window Type</label>
           <select
             id="window-type"
-            value={settings?.headerType || "WINDOWED"}
+            value={settings?.windowType || "WINDOWED"}
             onChange={(e) => {
               const selected = e.target.value as "WINDOWED" | "BORDERLESS";
-              updateSetting("headerType", selected);
-              sendPreviewHeaderUpdate({ headerType: selected });
+              updateSetting("windowType", selected);
+              sendPreviewHeaderUpdate({ windowType: selected });
             }}
           >
             <option value="WINDOWED">Windowed</option>

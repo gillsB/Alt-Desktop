@@ -25,7 +25,7 @@ type HeaderAction =
 
 type SubWindowAction = "EDIT_ICON" | "CLOSE_SUBWINDOW";
 
-type HeaderType = "WINDOWED" | "BORDERLESS";
+type WindowType = "WINDOWED" | "BORDERLESS";
 
 type DesktopIconData = {
   icons: DesktopIcon[];
@@ -37,7 +37,7 @@ type SettingsData = {
   defaultFontSize?: number;
   defaultIconSize?: number;
   defaultFontColor?: string;
-  headerType?: HeaderType;
+  windowType?: WindowType;
 };
 
 type SettingKey = keyof SettingsData;
