@@ -9,7 +9,7 @@ const logger = createLogger("DesktopGrid.tsx");
 interface ContextMenu {
   x: number;
   y: number;
-  type: "desktop" | "icon";
+  type: "desktop" | "icon" | "hideIcons";
   icon?: DesktopIcon | null;
 }
 
@@ -371,7 +371,7 @@ const DesktopGrid: React.FC = () => {
     // Check if an icon exists at the calculated row and column
     const existingIcon = getIcon(validRow, validCol);
 
-    if (existingIcon) {
+    if (existingIcon && showIcons) {
       // If an icon exists, set the context menu to "icon" type
       setContextMenu({
         x,
@@ -383,15 +383,15 @@ const DesktopGrid: React.FC = () => {
         `Desktop right click nearest icon exists at row: ${validRow}, col: ${validCol}`
       );
     } else {
-      // Otherwise, set the context menu to "desktop" type
       setContextMenu({
         x,
         y,
-        type: "desktop",
+        type: showIcons ? "desktop" : "hideIcons",
         icon: null,
       });
       logger.info(
-        `Desktop right click empty icon slot at row: ${validRow}, col: ${validCol}`
+        "Desktop right click at icon slot at row: " +
+          `${validRow}, col:${validCol}, type: ${showIcons ? "desktop" : "hideIcons"}`
       );
     }
   };
@@ -859,16 +859,14 @@ const DesktopGrid: React.FC = () => {
             position: "absolute",
           }}
         >
-          {contextMenu.type === "desktop" ? (
+          {contextMenu.type === "desktop" && (
             <>
               <div className="menu-item" onClick={() => handleEditIcon()}>
                 New Icon
               </div>
+              <div className="menu-separator" />
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings
-              </div>
-              <div className="menu-item" onClick={handleReloadDesktop}>
-                Reload Desktop
               </div>
               <div className="menu-item" onClick={toggleIcons}>
                 Show Icons{showIcons ? "✔ " : ""}
@@ -876,8 +874,31 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-item" onClick={toggleGrid}>
                 Show Grid{showGrid ? "✔ " : ""}
               </div>
+              <div className="menu-separator" />
+              <div className="menu-item" onClick={handleReloadDesktop}>
+                Reload Desktop
+              </div>
             </>
-          ) : (
+          )}
+          {contextMenu.type === "hideIcons" && (
+            <>
+              <div className="menu-item" onClick={toggleIcons}>
+                Show Icons
+              </div>
+              <div className="menu-separator" />
+              <div className="menu-item" onClick={handleOpenSettings}>
+                Settings
+              </div>
+              <div className="menu-item" onClick={toggleGrid}>
+                Show Grid{showGrid ? "✔ " : ""}
+              </div>
+              <div className="menu-separator" />
+              <div className="menu-item" onClick={handleReloadDesktop}>
+                Reload Desktop
+              </div>
+            </>
+          )}
+          {contextMenu.type === "icon" && (
             <>
               <div
                 className="menu-item"
@@ -887,6 +908,7 @@ const DesktopGrid: React.FC = () => {
               >
                 Edit {contextMenu.icon?.name}
               </div>
+              <div className="menu-separator" />
               <div
                 className="menu-item has-submenu"
                 onMouseEnter={() => setShowLaunchSubmenu(true)}
@@ -938,6 +960,7 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-item" onClick={handleReloadIcon}>
                 Reload Icon
               </div>
+              <div className="menu-separator" />
               <div className="menu-item" onClick={handleDeleteIcon}>
                 Delete
               </div>
