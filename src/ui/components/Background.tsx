@@ -120,7 +120,7 @@ const Background: React.FC<BackgroundProps> = ({
     return () => {
       window.electron.off("update-background-preview", handlePreview);
     };
-  }, [videoBackgroundPath, imageBackgroundPath]);
+  }, []);
 
   useEffect(() => {
     if (videoBackgroundPath) {
