@@ -27,6 +27,7 @@ const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
+  const [showIcons, setShowIcons] = useState(true); // State to toggle icons visibility
   const [showLaunchSubmenu, setShowLaunchSubmenu] = useState(false); // State for submenu visibility
   const [showOpenSubmenu, setShowOpenSubmenu] = useState(false); // State for submenu visibility
   const [highlightBox, setHighlightBox] = useState<HighlightPosition>({
@@ -61,6 +62,12 @@ const DesktopGrid: React.FC = () => {
   const toggleGrid = () => {
     setShowGrid((prev) => !prev);
     setContextMenu(null); // Close the context menu after toggling
+    hideHighlightBox();
+  };
+
+  const toggleIcons = () => {
+    setShowIcons((prev) => !prev);
+    setContextMenu(null);
     hideHighlightBox();
   };
 
@@ -788,55 +795,58 @@ const DesktopGrid: React.FC = () => {
         )}
 
         {/* Render desktop icons */}
-        {Array.from(iconsMap.values()).map((icon) => {
-          const iconKey = `${icon.row},${icon.col}`;
-          const reloadTimestamp = reloadTimestamps[iconKey] || 0;
+        {showIcons &&
+          Array.from(iconsMap.values()).map((icon) => {
+            const iconKey = `${icon.row},${icon.col}`;
+            const reloadTimestamp = reloadTimestamps[iconKey] || 0;
 
-          return (
-            <div
-              key={`${icon.row}-${icon.col}`}
-              className="desktop-icon"
-              style={{
-                left:
-                  icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
-                  (icon.offsetX || 0) +
-                  ICON_ROOT_OFFSET_LEFT,
-                top:
-                  icon.row * (iconBox + ICON_VERTICAL_PADDING) +
-                  (icon.offsetY || 0) +
-                  ICON_ROOT_OFFSET_TOP,
-                width: icon.width || defaultIconSize,
-                height: icon.height || defaultIconSize,
-              }}
-              onClick={() => handleIconClick(icon.row, icon.col)}
-              onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
-              onContextMenu={(e) => handleIconRightClick(e, icon.row, icon.col)}
-            >
-              <SafeImage
-                row={icon.row}
-                col={icon.col}
-                originalImage={icon.image}
-                width={icon.width || defaultIconSize}
-                height={icon.height || defaultIconSize}
-                highlighted={isIconHighlighted(icon.row, icon.col)}
-                forceReload={reloadTimestamp}
-              />
-              {icon.fontSize !== 0 &&
-                (icon.fontSize || defaultFontSize) !== 0 && (
-                  <div
-                    className="desktop-icon-name"
-                    title={icon.name}
-                    style={{
-                      color: icon.fontColor || defaultFontColor,
-                      fontSize: icon.fontSize || defaultFontSize,
-                    }}
-                  >
-                    {icon.name}
-                  </div>
-                )}
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={`${icon.row}-${icon.col}`}
+                className="desktop-icon"
+                style={{
+                  left:
+                    icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+                    (icon.offsetX || 0) +
+                    ICON_ROOT_OFFSET_LEFT,
+                  top:
+                    icon.row * (iconBox + ICON_VERTICAL_PADDING) +
+                    (icon.offsetY || 0) +
+                    ICON_ROOT_OFFSET_TOP,
+                  width: icon.width || defaultIconSize,
+                  height: icon.height || defaultIconSize,
+                }}
+                onClick={() => handleIconClick(icon.row, icon.col)}
+                onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
+                onContextMenu={(e) =>
+                  handleIconRightClick(e, icon.row, icon.col)
+                }
+              >
+                <SafeImage
+                  row={icon.row}
+                  col={icon.col}
+                  originalImage={icon.image}
+                  width={icon.width || defaultIconSize}
+                  height={icon.height || defaultIconSize}
+                  highlighted={isIconHighlighted(icon.row, icon.col)}
+                  forceReload={reloadTimestamp}
+                />
+                {icon.fontSize !== 0 &&
+                  (icon.fontSize || defaultFontSize) !== 0 && (
+                    <div
+                      className="desktop-icon-name"
+                      title={icon.name}
+                      style={{
+                        color: icon.fontColor || defaultFontColor,
+                        fontSize: icon.fontSize || defaultFontSize,
+                      }}
+                    >
+                      {icon.name}
+                    </div>
+                  )}
+              </div>
+            );
+          })}
       </div>
 
       {contextMenu && (
@@ -860,8 +870,11 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-item" onClick={handleReloadDesktop}>
                 Reload Desktop
               </div>
+              <div className="menu-item" onClick={toggleIcons}>
+                Show Icons{showIcons ? "✔ " : ""}
+              </div>
               <div className="menu-item" onClick={toggleGrid}>
-                {showGrid ? "✔ " : ""}Show Grid
+                Show Grid{showGrid ? "✔ " : ""}
               </div>
             </>
           ) : (
