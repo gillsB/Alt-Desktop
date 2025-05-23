@@ -95,6 +95,15 @@ const Settings: React.FC = () => {
 
       logger.info("Saving settings data to file:", updatedSettings);
 
+      if (settings?.windowType === "BORDERLESS") {
+        await window.electron.showSmallWindow(
+          "Restart Required",
+          "Borderless mode uses a transparency effect when hovering the original header area.\n" +
+            " This requires a restart to take effect.",
+          ["Okay"]
+        );
+      }
+
       // Save the updated settings data
       if (await window.electron.saveSettingsData(updatedSettings)) {
         logger.info("Settings saved successfully.");
