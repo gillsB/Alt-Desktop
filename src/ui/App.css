@@ -127,6 +127,23 @@ body,
   background-color: #555;
   cursor: pointer;
 }
+.menu-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  padding: 8px 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.menu-checkbox input[type="checkbox"] {
+  accent-color: #8099b4;
+  width: 1em;
+  height: 1em;
+  margin: 0;
+  cursor: pointer;
+}
+
 .edit-icon-container {
   position: fixed;
   left: 0;

@@ -868,9 +868,14 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings
               </div>
-              <div className="menu-item" onClick={toggleIcons}>
-                Show Icons{showIcons ? "✔ " : ""}
-              </div>
+              <label className="menu-checkbox">
+                Show Icons
+                <input
+                  type="checkbox"
+                  checked={showIcons}
+                  onChange={toggleIcons}
+                />
+              </label>
               <div className="menu-item" onClick={toggleGrid}>
                 Show Grid{showGrid ? "✔ " : ""}
               </div>
@@ -882,9 +887,14 @@ const DesktopGrid: React.FC = () => {
           )}
           {contextMenu.type === "hideIcons" && (
             <>
-              <div className="menu-item" onClick={toggleIcons}>
+              <label className="menu-checkbox">
                 Show Icons
-              </div>
+                <input
+                  type="checkbox"
+                  checked={showIcons}
+                  onChange={toggleIcons}
+                />
+              </label>
               <div className="menu-separator" />
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings
