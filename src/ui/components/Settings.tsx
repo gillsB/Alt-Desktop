@@ -6,7 +6,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
-import { showSmallWindow } from "../util/uiUtil";
+import { isAbsolutePath, showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("Settings.tsx");
@@ -80,7 +80,10 @@ const Settings: React.FC = () => {
       const updatedSettings = { ...settings };
 
       // Save the image background if it exists
-      if (updatedSettings.imageBackground) {
+      if (
+        updatedSettings.imageBackground &&
+        isAbsolutePath(updatedSettings.imageBackground)
+      ) {
         try {
           const savedPath = await window.electron.saveBackgroundImage(
             updatedSettings.imageBackground

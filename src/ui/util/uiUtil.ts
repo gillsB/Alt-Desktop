@@ -27,3 +27,15 @@ export async function showSmallWindow(
     return "Error";
   }
 }
+/**
+ *
+ * @param p - The path to check.
+ * @returns {boolean} - True if the path is absolute, false otherwise.
+ */
+export function isAbsolutePath(p: string) {
+  // Windows absolute: starts with X:\ or X:/, or UNC \\server\share
+  if (/^[a-zA-Z]:[\\/]/.test(p) || /^\\\\/.test(p)) return true;
+  // Unix absolute: starts with /
+  if (p.startsWith("/")) return true;
+  return false;
+}
