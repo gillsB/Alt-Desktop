@@ -876,9 +876,14 @@ const DesktopGrid: React.FC = () => {
                   onChange={toggleIcons}
                 />
               </label>
-              <div className="menu-item" onClick={toggleGrid}>
-                Show Grid{showGrid ? "✔ " : ""}
-              </div>
+              <label className="menu-checkbox">
+                Show Grid
+                <input
+                  type="checkbox"
+                  checked={showGrid}
+                  onChange={toggleGrid}
+                />
+              </label>
               <div className="menu-separator" />
               <div className="menu-item" onClick={handleReloadDesktop}>
                 Reload Desktop
@@ -899,9 +904,14 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings
               </div>
-              <div className="menu-item" onClick={toggleGrid}>
-                Show Grid{showGrid ? "✔ " : ""}
-              </div>
+              <label className="menu-checkbox">
+                Show Grid
+                <input
+                  type="checkbox"
+                  checked={showGrid}
+                  onChange={toggleGrid}
+                />
+              </label>
               <div className="menu-separator" />
               <div className="menu-item" onClick={handleReloadDesktop}>
                 Reload Desktop
