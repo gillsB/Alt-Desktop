@@ -42,6 +42,8 @@ const Background: React.FC<BackgroundProps> = ({
     playbackStartTime: 0,
     lastSuspendTime: 0,
   });
+  const [videoBackgroundPath, setVideoBackgroundPath] = useState<string>("");
+  const [imageBackgroundPath, setImageBackgroundPath] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -67,24 +69,92 @@ const Background: React.FC<BackgroundProps> = ({
     };
   }, []);
 
-  const fallbackToImage = async (overrides?: Partial<SettingsData>) => {
-    logger.warn("Falling back to image background");
-    videoLogger.warn("Falling back to image background");
+  useEffect(() => {
+    const fetchFromSettings = async () => {
+      const videoPath = await window.electron.getSetting("videoBackground");
+      const imagePath = await window.electron.getSetting("imageBackground");
+      setVideoBackgroundPath(videoPath || "");
+      setImageBackgroundPath(imagePath || "");
+    };
+    fetchFromSettings();
+    videoLogger.info("videoBackgroundPath = ", videoBackgroundPath);
+    videoLogger.info("imageBackgroundPath = ", imageBackgroundPath);
 
-    setVideoError(true);
-    setVideoSrc(null);
+    window.electron.on("reload-background", fetchFromSettings);
+
+    return () => {
+      window.electron.off("reload-background", fetchFromSettings);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handlePreview = (...args: unknown[]) => {
+      const updates = args[1] as Partial<SettingsData>;
+      logger.info("Received background preview updates:", updates);
+      videoLogger.info("Received background preview updates:", updates);
+
+      if (
+        typeof updates.videoBackground === "string" &&
+        updates.videoBackground !== videoBackgroundPath
+      ) {
+        setVideoBackgroundPath(updates.videoBackground);
+        videoLogger.info(
+          "videoBackgroundPath updated to",
+          updates.videoBackground
+        );
+      }
+      if (
+        typeof updates.imageBackground === "string" &&
+        updates.imageBackground !== imageBackgroundPath
+      ) {
+        setImageBackgroundPath(updates.imageBackground);
+        videoLogger.info(
+          "imageBackgroundPath updated to",
+          updates.imageBackground
+        );
+      }
+    };
+
+    window.electron.on("update-background-preview", handlePreview);
+
+    return () => {
+      window.electron.off("update-background-preview", handlePreview);
+    };
+  }, [videoBackgroundPath, imageBackgroundPath]);
+
+  useEffect(() => {
+    if (videoBackgroundPath) {
+      fetchVideoBackground(); // This will only reload video
+    }
+  }, [videoBackgroundPath]);
+
+  useEffect(() => {
+    if (imageBackgroundPath) {
+      fetchImageBackground(); // This will only reload image
+    }
+  }, [imageBackgroundPath]);
+
+  useEffect(() => {
+    if (videoError) {
+      fetchImageBackground();
+    }
+  }, [videoError]);
+
+  const fetchImageBackground = async () => {
+    logger.info("Fetching image background");
+    videoLogger.info("Fetching image background");
+
+    if (!videoError) {
+      logger.info("Video background is not an error, skipping image fetch.");
+      videoLogger.info(
+        "Video background is not an error, skipping image fetch."
+      );
+      return;
+    }
 
     try {
-      let imageBackground: string | null = null;
-      if (overrides?.imageBackground === "") {
-        logger.warn("Image background empty");
-      } else {
-        // Check for image background
-        imageBackground = overrides?.imageBackground
-          ? overrides.imageBackground
-          : await window.electron.getSetting("imageBackground");
-        logger.info("imageBackground setting:", imageBackground);
-      }
+      const imageBackground = imageBackgroundPath;
+      logger.info("imageBackground setting:", imageBackground);
 
       if (imageBackground) {
         const imageFilePath =
@@ -114,19 +184,9 @@ const Background: React.FC<BackgroundProps> = ({
     setIsLoading(false);
   };
 
-  const fetchBackgroundSettings = async (overrides?: Partial<SettingsData>) => {
+  const fetchVideoBackground = async () => {
     try {
-      let videoBackground: string | null = null;
-      // First check for video background
-      if (overrides?.videoBackground === "") {
-        setVideoError(true);
-        setVideoSrc(null);
-      } else {
-        videoBackground = overrides?.videoBackground
-          ? overrides.videoBackground
-          : await window.electron.getSetting("videoBackground");
-      }
-
+      const videoBackground = videoBackgroundPath;
       logger.info("videoBackground setting:", videoBackground);
       videoLogger.info("videoBackground setting:", videoBackground);
 
@@ -145,8 +205,7 @@ const Background: React.FC<BackgroundProps> = ({
           setVideoSrc(`${videoFilePath}?nocache=${cacheBuster}`);
           setVideoError(false);
           logger.info("Video source set - attempting to load.");
-
-          return; // Exit early if we have a valid video file path
+          return;
         } else {
           logger.info(
             `videoBackground ${videoBackground} is not a video file, checking for image fallback.`
@@ -158,49 +217,14 @@ const Background: React.FC<BackgroundProps> = ({
       } else {
         logger.warn("No video background found, checking for image fallback.");
       }
-
-      // If we get here, video failed or doesn't exist, fall back to image
-      await fallbackToImage(overrides);
     } catch (error) {
       logger.error("Error fetching background settings:", error);
       videoLogger.error("Error fetching background settings:", error);
-      setVideoSrc(null);
-      setImageSrc(null);
-      setVideoError(true);
-      setImageError(true);
-      setIsLoading(false);
     }
+    setVideoSrc(null);
+    setVideoError(true);
+    setIsLoading(false);
   };
-
-  useEffect(() => {
-    fetchBackgroundSettings();
-
-    const handleReload = () => {
-      logger.info("Received reload event, reloading background settings...");
-      fetchBackgroundSettings(); // Re-fetch the background settings
-    };
-
-    window.electron.on("reload-background", handleReload);
-
-    return () => {
-      window.electron.off("reload-background", handleReload);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handlePreview = (...args: unknown[]) => {
-      const updates = args[1] as Partial<SettingsData>; // Extract the second argument as updates
-      logger.info("Received background preview updates:", updates);
-
-      fetchBackgroundSettings(updates); // Fetch with overrides
-    };
-
-    window.electron.on("update-background-preview", handlePreview);
-
-    return () => {
-      window.electron.off("update-background-preview", handlePreview);
-    };
-  }, []);
 
   // Reset retry count when video source changes
   useEffect(() => {
@@ -437,7 +461,6 @@ const Background: React.FC<BackgroundProps> = ({
     logger.warn(`No video source. Trying image fallback.`);
     videoLogger.warn(`No video source. Trying image fallback.`);
     setVideoError(true);
-    fallbackToImage();
   };
 
   // Handle image error

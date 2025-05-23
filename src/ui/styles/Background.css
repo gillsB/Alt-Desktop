@@ -17,6 +17,7 @@
   object-fit: cover;
   pointer-events: none;
   z-index: -1;
+  user-select: none;
 }
 
 .image-background {
@@ -38,6 +39,7 @@
   object-fit: cover;
   pointer-events: none;
   z-index: -1;
+  user-select: none;
 }
 .fallback {
   position: absolute;
