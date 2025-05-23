@@ -124,6 +124,7 @@ interface EventParamMapping {
   generateIcon: [number, number, string, string];
   selectIconFromList: [string, string[], number, number];
   resetAllIconsFontColor: [];
+  desktopSetShowIcons: [boolean];
 }
 
 // The returns from the main process to the renderer
@@ -169,6 +170,7 @@ type EventPayloadMapping = {
   generateIcon: string[];
   selectIconFromList: string;
   resetAllIconsFontColor: boolean;
+  desktopSetShowIcons: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -259,5 +261,6 @@ interface Window {
       col: number
     ) => Promise<string>;
     resetAllIconsFontColor: () => Promise<boolean>;
+    desktopSetShowIcons: (showIcons: boolean) => Promise<boolean>;
   };
 }

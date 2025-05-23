@@ -317,6 +317,28 @@ const DesktopGrid: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleDesktopSetShowIcon = (
+      _: Electron.IpcRendererEvent,
+      showIcon: boolean
+    ) => {
+      logger.info("Received set-show-icons event:", showIcon);
+      setShowIcons(showIcon);
+    };
+
+    window.electron.on(
+      "set-show-icons",
+      handleDesktopSetShowIcon as (...args: unknown[]) => void
+    );
+
+    return () => {
+      window.electron.off(
+        "set-show-icons",
+        handleDesktopSetShowIcon as (...args: unknown[]) => void
+      );
+    };
+  }, []);
+
   const handleIconClick = (row: number, col: number) => {
     const icon = getIcon(row, col);
     if (!icon) return iconsMap; // No update if icon doesn't exist

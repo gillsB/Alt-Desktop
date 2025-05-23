@@ -1151,4 +1151,15 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("resetAllIconsFontColor", async () => {
     return resetAllIconsFontColor();
   });
+
+  ipcMainHandle("desktopSetShowIcons", async (showIcons: boolean) => {
+    try {
+      logger.info(`Setting showIcons to: ${showIcons}`);
+      mainWindow?.webContents.send("set-show-icons", showIcons);
+      return true;
+    } catch (error) {
+      logger.error("Error in desktopSetShowIcons:", error);
+      return false;
+    }
+  });
 }
