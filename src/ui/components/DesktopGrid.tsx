@@ -61,6 +61,7 @@ const DesktopGrid: React.FC = () => {
   const toggleGrid = () => {
     setShowGrid((prev) => !prev);
     setContextMenu(null); // Close the context menu after toggling
+    hideHighlightBox();
   };
 
   /**
@@ -550,6 +551,7 @@ const DesktopGrid: React.FC = () => {
       logger.error(`Failed to open settings`, error);
     }
     setContextMenu(null);
+    hideHighlightBox();
   };
 
   const handleLaunchSubmenuClick = async (option: string) => {
