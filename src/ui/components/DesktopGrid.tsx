@@ -575,6 +575,7 @@ const DesktopGrid: React.FC = () => {
 
   const handleOpenSettings = async () => {
     try {
+      setShowIcons(true);
       await window.electron.openSettings();
     } catch (error) {
       logger.error(`Failed to open settings`, error);

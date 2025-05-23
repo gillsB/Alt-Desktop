@@ -19,6 +19,7 @@ export function Header() {
     if (await window.electron.isSubWindowActive()) {
       return;
     } else {
+      await window.electron.desktopSetShowIcons(true);
       window.electron.openSettings();
     }
   };
