@@ -6,7 +6,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
-import { isAbsolutePath, showSmallWindow } from "../util/uiUtil";
+import { showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("Settings.tsx");
@@ -16,14 +16,12 @@ const Settings: React.FC = () => {
   const [initialSettings, setInitialSettings] = useState<SettingsData | null>(
     null
   );
-  const [isHoveringVideo, setHoveringVideo] = useState(false);
-  const [isHoveringImage, setHoveringImage] = useState(false);
+  const [isHoveringBackground, setHoveringBackground] = useState(false);
   const [isHoveringMagnifyingGlass, setHoveringMagnifyingGlass] =
-    useState(false); // State for magnifying glass hover
+    useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const dragCounter = useRef(0);
-
   const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleClose = async () => {
@@ -36,7 +34,7 @@ const Settings: React.FC = () => {
         );
         if (ret === "Yes") {
           logger.info("User confirmed to close without saving.");
-          if (getSpecificChanges(["videoBackground", "imageBackground"])) {
+          if (getSpecificChanges(["background"])) {
             await window.electron.reloadBackground();
           }
           if (
@@ -79,23 +77,6 @@ const Settings: React.FC = () => {
       // Create a copy of the current settings to work with
       const updatedSettings = { ...settings };
 
-      // Save the image background if it exists
-      if (
-        updatedSettings.imageBackground &&
-        isAbsolutePath(updatedSettings.imageBackground)
-      ) {
-        try {
-          const savedPath = await window.electron.saveBackgroundImage(
-            updatedSettings.imageBackground
-          );
-          // Update our local copy rather than the state
-          updatedSettings.imageBackground = savedPath;
-          logger.info(`Image background saved and updated to: ${savedPath}`);
-        } catch (error) {
-          logger.error("Failed to save image background:", error);
-        }
-      }
-
       logger.info("Saving settings data to file:", updatedSettings);
 
       if (
@@ -116,7 +97,7 @@ const Settings: React.FC = () => {
         // Update the state once after everything is done
         setSettings(updatedSettings);
         // Reload the background if background value changes were made
-        if (getSpecificChanges(["videoBackground", "imageBackground"])) {
+        if (getSpecificChanges(["background"])) {
           await window.electron.reloadBackground();
         }
         closeWindow();
@@ -146,27 +127,16 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleFileSelect = async (type: string) => {
+  const handleFileSelect = async () => {
     try {
-      // Open a file dialog to select a file
-      const filePath = await window.electron.openFileDialog(type);
-      if (type === "video") {
-        if (filePath) {
-          updateSetting("videoBackground", filePath);
-          sendPreviewBackgroundUpdate({ videoBackground: filePath });
-          logger.info(`Video background path set to: ${filePath}`);
-        }
-      } else if (type === "image") {
-        if (filePath) {
-          updateSetting("imageBackground", filePath);
-          sendPreviewBackgroundUpdate({ imageBackground: filePath });
-          logger.info(`Image background path set to: ${filePath}`);
-        }
-      } else {
-        logger.error("Invalid type for file selection:", type);
+      const filePath = await window.electron.openFileDialog("all"); // Accept both image/video
+      if (filePath) {
+        updateSetting("background", filePath);
+        sendPreviewBackgroundUpdate({ background: filePath });
+        logger.info(`Background path set to: ${filePath}`);
       }
     } catch (error) {
-      logger.error(`Failed to select or save ${type}:`, error);
+      logger.error(`Failed to select or save background:`, error);
     }
   };
 
@@ -267,16 +237,10 @@ const Settings: React.FC = () => {
     logger.info("Dropped file path:", filePath);
     logger.info("Dropped file type:", fileType);
 
-    if (fileType.startsWith("image/")) {
-      logger.info("Dropped file is an image. Updating image background...");
-      updateSetting("imageBackground", filePath);
-      sendPreviewBackgroundUpdate({ imageBackground: filePath });
-    } else if (fileType.startsWith("video/")) {
-      logger.info("Dropped file is a video. Updating video background...");
-      setSettings((prev) =>
-        prev ? { ...prev, videoBackground: filePath } : null
-      );
-      sendPreviewBackgroundUpdate({ videoBackground: filePath });
+    if (fileType.startsWith("image/") || fileType.startsWith("video/")) {
+      logger.info("Dropped file is an image or video. Updating background...");
+      updateSetting("background", filePath);
+      sendPreviewBackgroundUpdate({ background: filePath });
     } else {
       logger.warn("Dropped file is neither an image nor a video.");
       showSmallWindow(
@@ -289,20 +253,17 @@ const Settings: React.FC = () => {
 
   const handleMagnifyingGlassClick = async () => {
     let filePath = "";
-    // if no imageBackground path set
-    if (!settings?.imageBackground) {
-      // Added subfolder path just to make it open inside "backgrounds folder"
+    if (!settings?.background) {
       filePath = `backgrounds/`;
     } else {
-      // Open and highlight current imageBackground path file
-      filePath = `backgrounds/${settings?.imageBackground}`;
+      filePath = `backgrounds/${settings?.background}`;
     }
 
-    const success = await window.electron.openFileDialog("image", filePath);
+    const success = await window.electron.openFileDialog("all", filePath);
     logger.info("Open file dialog result:", success);
     if (success) {
-      updateSetting("imageBackground", success);
-      sendPreviewBackgroundUpdate({ imageBackground: success });
+      updateSetting("background", success);
+      sendPreviewBackgroundUpdate({ background: success });
     } else {
       logger.info(
         "No file selected or dialog closed without selection.",
@@ -316,11 +277,9 @@ const Settings: React.FC = () => {
   ) => {
     try {
       const previewData: Partial<SettingsData> = {
-        videoBackground: settings?.videoBackground ?? "",
-        imageBackground: settings?.imageBackground ?? "",
-        ...updatedFields, // Override with any explicitly updated fields
+        background: settings?.background ?? "",
+        ...updatedFields,
       };
-
       await window.electron.previewBackgroundUpdate(previewData);
     } catch (error) {
       logger.error("Failed to send preview update:", error);
@@ -365,51 +324,25 @@ const Settings: React.FC = () => {
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
       <div className="settings-content">
         <div className="settings-field">
-          <label htmlFor="video-background">Video Background Path</label>
+          <label htmlFor="background-path">Background Path</label>
           <input
-            id="video-background"
+            id="background-path"
             type="text"
-            value={settings?.videoBackground || ""}
-            title="Drop a video file on this window to auto set the path."
+            value={settings?.background || ""}
+            title="Drop an image or video file on this window to auto set the path."
             onChange={(e) => {
               const updatedValue = e.target.value;
-              updateSetting("videoBackground", updatedValue);
-              sendPreviewBackgroundUpdate({ videoBackground: updatedValue });
+              updateSetting("background", updatedValue);
+              sendPreviewBackgroundUpdate({ background: updatedValue });
             }}
           />
           <button
             className="file-select-button flex items-center gap-2"
-            onClick={() => handleFileSelect("video")}
-            onMouseEnter={() => setHoveringVideo(true)}
-            onMouseLeave={() => setHoveringVideo(false)}
+            onClick={handleFileSelect}
+            onMouseEnter={() => setHoveringBackground(true)}
+            onMouseLeave={() => setHoveringBackground(false)}
           >
-            {isHoveringVideo ? (
-              <FolderOpenIcon className="custom-folder-icon" />
-            ) : (
-              <FolderIcon className="custom-folder-icon" />
-            )}
-          </button>
-        </div>
-        <div className="settings-field">
-          <label htmlFor="image-background">Image Background Path</label>
-          <input
-            id="image-background"
-            type="text"
-            title="Drop an image on this window to auto set the path."
-            value={settings?.imageBackground || ""}
-            onChange={(e) => {
-              const updatedValue = e.target.value;
-              updateSetting("imageBackground", updatedValue);
-              sendPreviewBackgroundUpdate({ imageBackground: updatedValue });
-            }}
-          />
-          <button
-            className="file-select-button flex items-center gap-2"
-            onClick={() => handleFileSelect("image")}
-            onMouseEnter={() => setHoveringImage(true)}
-            onMouseLeave={() => setHoveringImage(false)}
-          >
-            {isHoveringImage ? (
+            {isHoveringBackground ? (
               <FolderOpenIcon className="custom-folder-icon" />
             ) : (
               <FolderIcon className="custom-folder-icon" />
@@ -420,7 +353,7 @@ const Settings: React.FC = () => {
             onClick={handleMagnifyingGlassClick}
             onMouseEnter={() => setHoveringMagnifyingGlass(true)}
             onMouseLeave={() => setHoveringMagnifyingGlass(false)}
-            title="Select from previously set background images"
+            title="Select from previously set backgrounds"
           >
             <MagnifyingGlassIcon
               className={`custom-magnifying-glass-icon ${

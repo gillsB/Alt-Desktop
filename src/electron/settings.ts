@@ -5,8 +5,7 @@ import { openSmallWindow } from "./subWindowManager.js";
 import { getSettingsFilePath } from "./util.js";
 
 export const defaultSettings: SettingsData = {
-  videoBackground: "",
-  imageBackground: "",
+  background: "",
   defaultFontSize: 16,
   defaultIconSize: 64,
   defaultFontColor: "#FFFFFF",
