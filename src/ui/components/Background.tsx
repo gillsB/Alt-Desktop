@@ -326,7 +326,7 @@ const Background: React.FC<BackgroundProps> = ({
           ) {
             showSmallWindow(
               "Encoding Error",
-              `Video: ${sanitizedPath} \nuses a likely unsupported ${videoStream.codec_tag_string} encoding`,
+              `Video: ${sanitizedPath} \nuses a likely unsupported ${videoStream.codec_tag_string} encoding.`,
               ["OK"]
             );
             videoLogger.error(
@@ -335,9 +335,8 @@ const Background: React.FC<BackgroundProps> = ({
           } else {
             showSmallWindow(
               "Video Error",
-              `Video: ${sanitizedPath}
-Codec: ${videoStream.codec_name} . Container Tag: ${videoStream.codec_tag_string}.
-This codec combination may not be supported by your system or the Electron video player`,
+              `Video: ${sanitizedPath} Codec: ${videoStream.codec_name}. Container Tag: ${videoStream.codec_tag_string}.` +
+                " This codec combination may not be supported by your system or the Electron video player.",
               ["OK"]
             );
             videoLogger.error(
