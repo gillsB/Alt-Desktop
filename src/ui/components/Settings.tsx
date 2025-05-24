@@ -1,8 +1,4 @@
-import {
-  FolderIcon,
-  FolderOpenIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/solid";
+import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
 import { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
@@ -17,8 +13,6 @@ const Settings: React.FC = () => {
     null
   );
   const [isHoveringBackground, setHoveringBackground] = useState(false);
-  const [isHoveringMagnifyingGlass, setHoveringMagnifyingGlass] =
-    useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const dragCounter = useRef(0);
@@ -251,27 +245,6 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleMagnifyingGlassClick = async () => {
-    let filePath = "";
-    if (!settings?.background) {
-      filePath = `backgrounds/`;
-    } else {
-      filePath = `backgrounds/${settings?.background}`;
-    }
-
-    const success = await window.electron.openFileDialog("all", filePath);
-    logger.info("Open file dialog result:", success);
-    if (success) {
-      updateSetting("background", success);
-      sendPreviewBackgroundUpdate({ background: success });
-    } else {
-      logger.info(
-        "No file selected or dialog closed without selection.",
-        success
-      );
-    }
-  };
-
   const sendPreviewBackgroundUpdate = async (
     updatedFields: Partial<SettingsData>
   ) => {
@@ -347,19 +320,6 @@ const Settings: React.FC = () => {
             ) : (
               <FolderIcon className="custom-folder-icon" />
             )}
-          </button>
-          <button
-            className="magnifying-glass-button flex items-center gap-2"
-            onClick={handleMagnifyingGlassClick}
-            onMouseEnter={() => setHoveringMagnifyingGlass(true)}
-            onMouseLeave={() => setHoveringMagnifyingGlass(false)}
-            title="Select from previously set backgrounds"
-          >
-            <MagnifyingGlassIcon
-              className={`custom-magnifying-glass-icon ${
-                isHoveringMagnifyingGlass ? "hovered" : ""
-              }`}
-            />
           </button>
         </div>
         <div className="settings-field">
