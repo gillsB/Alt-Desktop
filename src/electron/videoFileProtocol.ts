@@ -194,7 +194,14 @@ export function registerVideoFileProtocol(
 
         // Handle stream errors
         stream.on("error", (err) => {
-          logger.error(`Error reading file stream range: ${err.message}`);
+          if (err.message === "The operation was aborted") {
+            logger.info(
+              `Stream aborted (likely due to user swapping video background) ${err.message}`
+            );
+          } else {
+            logger.error(`Error reading file stream range: ${err.message}`);
+          }
+
           performanceMetrics.errors++;
           fileHandleCache.delete(cacheKey);
         });
