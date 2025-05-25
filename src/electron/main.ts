@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Menu, protocol } from "electron";
 import { ensureAppDataFiles } from "./appDataSetup.js";
+import { openEditBackgroundWindow } from "./editBackgroundWindow.js";
 import { registerIpcHandlers } from "./ipcHandlers.js";
 import { createLoggerForFile } from "./logging.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
@@ -94,6 +95,7 @@ app.on("ready", () => {
     mainWindow.webContents.send("window-unmaximized");
   });
 
+  openEditBackgroundWindow();
   //mainWindow.webContents.openDevTools();
 });
 
