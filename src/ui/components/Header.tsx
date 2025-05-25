@@ -1,4 +1,4 @@
-import { Cog6ToothIcon } from "@heroicons/react/24/solid";
+import { Cog6ToothIcon, ComputerDesktopIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import "../styles/Header.css";
 import { createLogger } from "../util/uiLogger";
@@ -15,6 +15,9 @@ export function Header() {
   const [isMaximized, setIsMaximized] = useState(true);
   const devMode = process.env.NODE_ENV === "development";
 
+  const backgroundClicked = async () => {
+    logger.info("Background button clicked.");
+  };
   const settingsClicked = async () => {
     if (await window.electron.isSubWindowActive()) {
       return;
@@ -171,6 +174,9 @@ export function Header() {
         </div>
       )}
       <div className="window-controls">
+        <button id="background" onClick={backgroundClicked} title="Background">
+          <ComputerDesktopIcon className="background-icon" />
+        </button>
         <button id="settings" onClick={settingsClicked} title="Settings">
           <Cog6ToothIcon className="settings-icon" />
         </button>
