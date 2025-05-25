@@ -894,7 +894,7 @@ const DesktopGrid: React.FC = () => {
               </div>
               <div className="menu-separator" />
               <div className="menu-item" onClick={handleOpenBackground}>
-                Background
+                Edit Background
               </div>
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings
@@ -934,7 +934,7 @@ const DesktopGrid: React.FC = () => {
               </label>
               <div className="menu-separator" />
               <div className="menu-item" onClick={handleOpenBackground}>
-                Background
+                Edit Background
               </div>
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings

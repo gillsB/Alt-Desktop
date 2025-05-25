@@ -15,7 +15,7 @@ export function Header() {
   const [isMaximized, setIsMaximized] = useState(true);
   const devMode = process.env.NODE_ENV === "development";
 
-  const backgroundClicked = async () => {
+  const editBackgroundClicked = async () => {
     logger.info("Background button clicked.");
   };
   const settingsClicked = async () => {
@@ -174,8 +174,12 @@ export function Header() {
         </div>
       )}
       <div className="window-controls">
-        <button id="background" onClick={backgroundClicked} title="Background">
-          <ComputerDesktopIcon className="background-icon" />
+        <button
+          id="background"
+          onClick={editBackgroundClicked}
+          title="Background"
+        >
+          <ComputerDesktopIcon className="edit-background-icon" />
         </button>
         <button id="settings" onClick={settingsClicked} title="Settings">
           <Cog6ToothIcon className="settings-icon" />
