@@ -583,6 +583,11 @@ const DesktopGrid: React.FC = () => {
     setContextMenu(null);
     hideHighlightBox();
   };
+  const handleOpenBackground = async () => {
+    logger.info("clicked background context menu item");
+    setContextMenu(null);
+    hideHighlightBox();
+  };
 
   const handleLaunchSubmenuClick = async (option: string) => {
     if (contextMenu && contextMenu?.icon) {
@@ -888,9 +893,13 @@ const DesktopGrid: React.FC = () => {
                 New Icon
               </div>
               <div className="menu-separator" />
+              <div className="menu-item" onClick={handleOpenBackground}>
+                Background
+              </div>
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings
               </div>
+              <div className="menu-separator" />
               <label className="menu-checkbox">
                 Show Icons
                 <input
@@ -924,9 +933,13 @@ const DesktopGrid: React.FC = () => {
                 />
               </label>
               <div className="menu-separator" />
+              <div className="menu-item" onClick={handleOpenBackground}>
+                Background
+              </div>
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings
               </div>
+              <div className="menu-separator" />
               <label className="menu-checkbox">
                 Show Grid
                 <input
