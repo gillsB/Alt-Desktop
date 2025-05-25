@@ -1,8 +1,8 @@
 import { BrowserWindow } from "electron";
 import { pathToFileURL } from "url";
-import { createLoggerForFile } from "./logging.js";
-import { getPreloadPath, getUIPath } from "./pathResolver.js";
-import { isDev, smallWindowDevtoolsEnabled } from "./util.js";
+import { createLoggerForFile } from "../logging.js";
+import { getPreloadPath, getUIPath } from "../pathResolver.js";
+import { isDev, smallWindowDevtoolsEnabled } from "../utils/util.js";
 
 const logger = createLoggerForFile("subWindowManager.ts");
 let mainWindow: BrowserWindow | null = null; // Store the main window reference

@@ -1,6 +1,6 @@
 import { BrowserWindow, globalShortcut } from "electron";
 import { createLoggerForFile } from "./logging.js";
-import { getActiveSubWindow } from "./subWindowManager.js";
+import { getActiveSubWindow } from "./windows/subWindowManager.js";
 
 const logger = createLoggerForFile("windowState.ts");
 

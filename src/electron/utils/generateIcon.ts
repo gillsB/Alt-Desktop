@@ -5,7 +5,7 @@ import os from "os";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
 import { getScriptsPath } from "../pathResolver.js";
-import { resolveShortcut } from "../util.js";
+import { resolveShortcut } from "./util.js";
 
 const logger = createLoggerForFile("generateIcon.ts");
 type FileType = "exe" | "default";

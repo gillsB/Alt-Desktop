@@ -2,7 +2,7 @@ import { spawn } from "child_process";
 import { shell } from "electron";
 import fs from "fs";
 import { createLoggerForFile } from "../logging.js";
-import { openSmallWindow } from "../subWindowManager.js";
+import { openSmallWindow } from "../windows/subWindowManager.js";
 
 const logger = createLoggerForFile("safeSpawn.ts");
 

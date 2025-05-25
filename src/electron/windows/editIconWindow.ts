@@ -1,5 +1,5 @@
+import { isDev, subWindowDevtoolsEnabled } from "../utils/util.js";
 import { openSubWindow } from "./subWindowManager.js";
-import { isDev, subWindowDevtoolsEnabled } from "./util.js";
 
 export function openEditIconWindow(row: number, col: number) {
   const options = {

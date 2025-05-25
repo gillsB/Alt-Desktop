@@ -1,8 +1,8 @@
 import { app } from "electron";
 import fs from "fs";
 import { createLoggerForFile } from "./logging.js";
-import { openSmallWindow } from "./subWindowManager.js";
-import { getSettingsFilePath } from "./util.js";
+import { getSettingsFilePath } from "./utils/util.js";
+import { openSmallWindow } from "./windows/subWindowManager.js";
 
 export const defaultSettings: SettingsData = {
   background: "",

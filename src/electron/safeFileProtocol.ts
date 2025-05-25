@@ -5,7 +5,7 @@ import path from "path";
 import { URL } from "url";
 import { createLoggerForFile } from "./logging.js";
 import { getAssetPath } from "./pathResolver.js";
-import { getAppDataPath, resolveShortcut } from "./util.js";
+import { getAppDataPath, resolveShortcut } from "./utils/util.js";
 
 const logger = createLoggerForFile("safeFileProtocol.ts");
 

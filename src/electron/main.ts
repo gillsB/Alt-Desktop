@@ -5,10 +5,10 @@ import { createLoggerForFile } from "./logging.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { getSetting } from "./settings.js";
-import { getActiveSubWindow } from "./subWindowManager.js";
 import { createTray } from "./tray.js";
-import { isDev } from "./util.js";
+import { isDev } from "./utils/util.js";
 import { registerVideoFileProtocol } from "./videoFileProtocol.js";
+import { getActiveSubWindow } from "./windows/subWindowManager.js";
 import { handleWindowState, registerWindowKeybinds } from "./windowState.js";
 
 const logger = createLoggerForFile("main.ts");

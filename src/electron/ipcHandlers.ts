@@ -5,19 +5,11 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
-import { openEditBackgroundWindow } from "./editBackgroundWindow.js";
-import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
 import { defaultSettings, ensureDefaultSettings } from "./settings.js";
-import { openSettingsWindow } from "./settingsWindow.js";
-import {
-  closeActiveSubWindow,
-  getActiveSubWindow,
-  openSelectIconWindow,
-  openSmallWindow,
-  pendingSmallWindowResponses,
-} from "./subWindowManager.js";
+import { generateIcon } from "./utils/generateIcon.js";
+import { safeSpawn } from "./utils/safeSpawn.js";
 import {
   ensureFileExists,
   escapeRegExp,
@@ -32,10 +24,18 @@ import {
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
   updateHeader,
-} from "./util.js";
-import { generateIcon } from "./utils/generateIcon.js";
-import { safeSpawn } from "./utils/safeSpawn.js";
+} from "./utils/util.js";
 import { getVideoFileUrl } from "./videoFileProtocol.js";
+import { openEditBackgroundWindow } from "./windows/editBackgroundWindow.js";
+import { openEditIconWindow } from "./windows/editIconWindow.js";
+import { openSettingsWindow } from "./windows/settingsWindow.js";
+import {
+  closeActiveSubWindow,
+  getActiveSubWindow,
+  openSelectIconWindow,
+  openSmallWindow,
+  pendingSmallWindowResponses,
+} from "./windows/subWindowManager.js";
 
 ffmpeg.setFfprobePath(ffprobeStatic.path);
 

@@ -7,9 +7,9 @@ import {
 } from "electron";
 import fs from "fs";
 import path from "path";
-import { createLoggerForFile } from "./logging.js";
-import { getSetting } from "./settings.js";
-import { getAllowedUrls } from "./subWindowManager.js";
+import { createLoggerForFile } from "../logging.js";
+import { getSetting } from "../settings.js";
+import { getAllowedUrls } from "../windows/subWindowManager.js";
 
 const logger = createLoggerForFile("util.ts");
 
@@ -281,4 +281,8 @@ export const getSettingsFilePath = (): string => {
 
 export const getBackgroundFilePath = (): string => {
   return path.join(getBasePath(), "backgrounds");
+};
+
+export const getBackgroundsFilePath = (): string => {
+  return path.join(getBasePath(), "backgrounds.json");
 };
