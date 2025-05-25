@@ -124,6 +124,7 @@ interface EventParamMapping {
   selectIconFromList: [string, string[], number, number];
   resetAllIconsFontColor: [];
   desktopSetShowIcons: [boolean];
+  openEditBackground: [];
 }
 
 // The returns from the main process to the renderer
@@ -170,6 +171,7 @@ type EventPayloadMapping = {
   selectIconFromList: string;
   resetAllIconsFontColor: boolean;
   desktopSetShowIcons: boolean;
+  openEditBackground: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -193,6 +195,7 @@ interface Window {
     isSubWindowActive: () => Promise<boolean>;
     reloadIcon: (row: number, col: number) => Promise<boolean>;
     openSettings: () => Promise<boolean>;
+    openEditBackground: () => Promise<boolean>;
     editIcon: (row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;

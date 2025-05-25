@@ -5,6 +5,7 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
+import { openEditBackgroundWindow } from "./editBackgroundWindow.js";
 import { openEditIconWindow } from "./editIconWindow.js";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
@@ -292,6 +293,16 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     try {
       logger.info(`ipcMainHandle openSettings called`);
       openSettingsWindow();
+      return true;
+    } catch (error) {
+      logger.error(`Error opening settings window: ${error}`);
+      return false;
+    }
+  });
+  ipcMainHandle("openEditBackground", async (): Promise<boolean> => {
+    try {
+      logger.info(`ipcMainHandle openEditBackground called`);
+      openEditBackgroundWindow();
       return true;
     } catch (error) {
       logger.error(`Error opening settings window: ${error}`);

@@ -16,7 +16,11 @@ export function Header() {
   const devMode = process.env.NODE_ENV === "development";
 
   const editBackgroundClicked = async () => {
-    logger.info("Background button clicked.");
+    if (await window.electron.isSubWindowActive()) {
+      return;
+    } else {
+      window.electron.openEditBackground();
+    }
   };
   const settingsClicked = async () => {
     if (await window.electron.isSubWindowActive()) {

@@ -583,8 +583,13 @@ const DesktopGrid: React.FC = () => {
     setContextMenu(null);
     hideHighlightBox();
   };
-  const handleOpenBackground = async () => {
+  const handleOpenEditBackground = async () => {
     logger.info("clicked background context menu item");
+    try {
+      await window.electron.openEditBackground();
+    } catch (error) {
+      logger.error(`Failed to open edit background`, error);
+    }
     setContextMenu(null);
     hideHighlightBox();
   };
@@ -893,7 +898,7 @@ const DesktopGrid: React.FC = () => {
                 New Icon
               </div>
               <div className="menu-separator" />
-              <div className="menu-item" onClick={handleOpenBackground}>
+              <div className="menu-item" onClick={handleOpenEditBackground}>
                 Edit Background
               </div>
               <div className="menu-item" onClick={handleOpenSettings}>
@@ -933,7 +938,7 @@ const DesktopGrid: React.FC = () => {
                 />
               </label>
               <div className="menu-separator" />
-              <div className="menu-item" onClick={handleOpenBackground}>
+              <div className="menu-item" onClick={handleOpenEditBackground}>
                 Edit Background
               </div>
               <div className="menu-item" onClick={handleOpenSettings}>
