@@ -41,6 +41,15 @@ type SettingsData = {
 
 type SettingKey = keyof SettingsData;
 
+type BackgroundSummary = {
+  id: string;
+  name: string;
+  filePath: string;
+  description: string;
+  iconPath: string;
+  tags: string[];
+};
+
 type DesktopIcon = {
   row: number;
   col: number;
@@ -125,6 +134,7 @@ interface EventParamMapping {
   resetAllIconsFontColor: [];
   desktopSetShowIcons: [boolean];
   openEditBackground: [];
+  getBackgroundSummaries: [];
 }
 
 // The returns from the main process to the renderer
@@ -172,6 +182,7 @@ type EventPayloadMapping = {
   resetAllIconsFontColor: boolean;
   desktopSetShowIcons: boolean;
   openEditBackground: boolean;
+  getBackgroundSummaries: BackgroundSummary[];
 };
 
 type UnsubscribeFunction = () => void;
@@ -264,5 +275,6 @@ interface Window {
     ) => Promise<string>;
     resetAllIconsFontColor: () => Promise<boolean>;
     desktopSetShowIcons: (showIcons: boolean) => Promise<boolean>;
+    getBackgroundSummaries: () => Promise<BackgroundSummary[]>;
   };
 }

@@ -15,6 +15,7 @@ import {
   escapeRegExp,
   getAppDataPath,
   getBackgroundFilePath,
+  getBackgroundsFilePath,
   getDataFolderPath,
   getDesktopIconsFilePath,
   getSettingsFilePath,
@@ -1172,5 +1173,55 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       logger.error("Error in desktopSetShowIcons:", error);
       return false;
     }
+  });
+  ipcMainHandle("getBackgroundSummaries", async () => {
+    const backgroundsFile = getBackgroundsFilePath();
+    const baseDir = getBackgroundFilePath();
+
+    const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
+    const { backgrounds } = JSON.parse(raw);
+
+    const entries = Object.entries(backgrounds)
+      .sort(([, a], [, b]) => Number(b) - Number(a)) // newest first
+      .slice(0, 10); // return first 10 (for now)
+
+    const results = [];
+    for (const [id] of entries) {
+      const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
+      const bgJsonPath = path.join(baseDir, folderPath, "bg.json");
+      try {
+        const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
+        const bg = JSON.parse(rawBg);
+        // TODO make sure this works for other master paths as well (currently doesn't attempt)
+        let filePath = "";
+        if (bg.public.filename) {
+          filePath = path.join(
+            getBackgroundFilePath(),
+            folderPath,
+            bg.public.filename
+          );
+        }
+        let iconPath = "";
+        if (bg.public.icon) {
+          iconPath = path.join(
+            getBackgroundFilePath(),
+            folderPath,
+            bg.public.icon
+          );
+        }
+        results.push({
+          id,
+          name: bg.public?.name,
+          filePath: filePath,
+          description: bg.public?.description,
+          iconPath: iconPath,
+          tags: [...(bg.public?.tags ?? []), ...(bg.local?.tags ?? [])],
+        });
+      } catch (e) {
+        logger.warn(`Failed to read bg.json for ${id}:`, e);
+      }
+    }
+
+    return results;
   });
 }

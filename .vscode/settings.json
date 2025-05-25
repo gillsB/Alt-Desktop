@@ -27,6 +27,7 @@
     "resizability",
     "SMALLWINDOW",
     "statfs",
+    "subfolders",
     "tailable",
     "taskkill",
     "transpiles",

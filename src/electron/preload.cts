@@ -115,6 +115,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   resetAllIconsFontColor: () => ipcInvoke("resetAllIconsFontColor"),
   desktopSetShowIcons: (showIcons: boolean) =>
     ipcInvoke("desktopSetShowIcons", showIcons),
+  getBackgroundSummaries: () => ipcInvoke("getBackgroundSummaries"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
