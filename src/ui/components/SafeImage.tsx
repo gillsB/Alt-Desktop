@@ -13,9 +13,9 @@ const logger = createLogger("safeImage.tsx");
  * @returns A safe file URL or fallback image path
  */
 const getImagePath = (
-  row: number,
-  col: number,
   imagePath: string,
+  row?: number,
+  col?: number,
   timestamp?: number
 ) => {
   if (imagePath === " " || imagePath.toLowerCase() === "none") {
@@ -34,6 +34,28 @@ const getImagePath = (
     return imagePath;
   }
 
+  // If row and col are provided, use the old logic for folderPath
+  if (typeof row === "number" && typeof col === "number") {
+    const folderPath = `/data/[${row},${col}]`;
+    const encodedImagePath = encodeURIComponent(imagePath).replace(
+      /[()]/g,
+      (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
+    );
+    let safeFilePath = `appdata-file://${folderPath}/${encodedImagePath}`;
+    if (timestamp) {
+      safeFilePath += `?t=${timestamp}`;
+    }
+    // Check extension
+    const isImageExtension = /\.(png|jpg|jpeg|gif|bmp|svg|webp|lnk|ico)$/i.test(
+      imagePath
+    );
+    if (!isImageExtension) {
+      return getUnknownAssetPath(timestamp);
+    }
+    return safeFilePath;
+  }
+
+  // Otherwise, treat as absolute path (Windows or otherwise)
   if (/^[a-zA-Z]:[\\/]/.test(imagePath)) {
     // For Windows absolute paths, don't encode the drive letter and colon
     // but DO encode the rest of the path
@@ -47,22 +69,12 @@ const getImagePath = (
     if (timestamp) {
       safeFilePath += `?t=${timestamp}`;
     }
-
     logger.info(`Generated URL for absolute path: ${safeFilePath}`);
     return safeFilePath;
   }
 
-  const folderPath = `/data/[${row},${col}]`;
-
-  // Encode the image path to handle spaces and special characters
-  const encodedImagePath = encodeURIComponent(imagePath).replace(
-    /[()]/g,
-    (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
-  );
-
-  let safeFilePath = `appdata-file://${folderPath}/${encodedImagePath}`;
-
-  // Add cache-busting timestamp if provided
+  // Fallback: just encode and use as protocol path
+  let safeFilePath = imagePath;
   if (timestamp) {
     safeFilePath += `?t=${timestamp}`;
   }
@@ -93,18 +105,18 @@ const getUnknownAssetPath = (timestamp?: number) => {
  * SafeImage component that handles image loading with fallback
  */
 const SafeImageComponent: React.FC<{
-  row: number;
-  col: number;
-  originalImage: string;
+  imagePath: string;
+  row?: number;
+  col?: number;
   width?: number;
   height?: number;
   className?: string;
   highlighted?: boolean;
   forceReload?: number;
 }> = ({
+  imagePath,
   row,
   col,
-  originalImage,
   width,
   height,
   className = "desktop-icon-image",
@@ -114,9 +126,7 @@ const SafeImageComponent: React.FC<{
   // Fallback if width and height are not provided
   const defaultIconSize = width || height || 64;
 
-  const [imageSrc, setImageSrc] = useState<string>(() =>
-    getImagePath(row, col, originalImage, forceReload || undefined)
-  );
+  const [imageSrc, setImageSrc] = useState<string>(() => "");
   const [imageDimensions, setImageDimensions] = useState<{
     width: number;
     height: number;
@@ -125,34 +135,25 @@ const SafeImageComponent: React.FC<{
     height: height || defaultIconSize,
   });
   const [imageError, setImageError] = useState(false);
-  const [isEmptyImage, setIsEmptyImage] = useState(
-    originalImage === " " || originalImage.toLowerCase() === "none"
+  const [isEmptyImage] = useState(
+    imagePath === " " || imagePath.toLowerCase() === "none"
   );
 
   useEffect(() => {
     setImageError(false);
 
-    // Check if this is an empty image case
-    const isEmpty =
-      originalImage === " " || originalImage.toLowerCase() === "none";
-    setIsEmptyImage(isEmpty);
-
-    if (isEmpty) {
+    if (isEmptyImage && row && col) {
       logger.info(
         `Icon ${row},${col} is a special case, user wants empty image`
       );
       setImageSrc(""); // discard cached image
-      setImageDimensions({
-        width: width || defaultIconSize,
-        height: height || defaultIconSize,
-      });
       return;
     }
 
     const newImageSrc = getImagePath(
+      imagePath,
       row,
       col,
-      originalImage,
       forceReload || undefined
     );
 
@@ -217,7 +218,7 @@ const SafeImageComponent: React.FC<{
       img.onload = null;
       img.onerror = null;
     };
-  }, [row, col, originalImage, forceReload, width, height, defaultIconSize]);
+  }, [imagePath, row, col, forceReload, width, height, defaultIconSize]);
 
   return (
     <div

@@ -858,7 +858,7 @@ const DesktopGrid: React.FC = () => {
                 <SafeImage
                   row={icon.row}
                   col={icon.col}
-                  originalImage={icon.image}
+                  imagePath={icon.image}
                   width={icon.width || defaultIconSize}
                   height={icon.height || defaultIconSize}
                   highlighted={isIconHighlighted(icon.row, icon.col)}

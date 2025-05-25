@@ -67,7 +67,7 @@ const SelectIconWindow: React.FC = () => {
               <SafeImage
                 row={row}
                 col={col}
-                originalImage={img}
+                imagePath={img}
                 width={64}
                 height={64}
               />
