@@ -9,7 +9,10 @@ import fs from "fs";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
 import { getSetting } from "../settings.js";
-import { getAllowedUrls } from "../windows/subWindowManager.js";
+import {
+  getAllowedUrls,
+  openSmallWindow,
+} from "../windows/subWindowManager.js";
 
 const logger = createLoggerForFile("util.ts");
 
@@ -253,6 +256,84 @@ export const updateHeader = async (mainWindow: BrowserWindow) => {
  */
 export function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Indexes all background folders in the AppData/Roaming/AltDesktop/backgrounds directory.
+ * It reads the directory, checks for subfolders containing a bg.json file, if found adds them to backgrounds.json.
+ */
+export async function indexBackgrounds() {
+  const backgroundsDir = getBackgroundFilePath();
+  const backgroundsJsonPath = getBackgroundsFilePath();
+
+  // Read all entries in the backgrounds directory
+  const entries = await fs.promises.readdir(backgroundsDir, {
+    withFileTypes: true,
+  });
+
+  // Find subfolders with a bg.json file
+  const subfoldersWithBgJson: string[] = [];
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const subfolderPath = path.join(backgroundsDir, entry.name);
+      const bgJsonPath = path.join(subfolderPath, "bg.json");
+      if (fs.existsSync(bgJsonPath)) {
+        subfoldersWithBgJson.push(entry.name);
+      }
+    }
+  }
+
+  // Check if backgrounds.json exists
+  if (!fs.existsSync(backgroundsJsonPath)) {
+    const errorMsg =
+      `backgrounds.json does not exist at: ${backgroundsJsonPath}` +
+      "Restore backgrounds.json or restart program to build backgrounds.json";
+    logger.error(errorMsg);
+    await openSmallWindow("Backgrounds Error", errorMsg, ["Okay"]);
+    throw new Error(errorMsg);
+  }
+
+  // Read and validate backgrounds.json
+  let backgroundsData: { backgrounds: Record<string, number> };
+  const raw = await fs.promises.readFile(backgroundsJsonPath, "utf-8");
+  try {
+    backgroundsData = JSON.parse(raw);
+    if (
+      typeof backgroundsData.backgrounds !== "object" ||
+      backgroundsData.backgrounds === null
+    ) {
+      const errorMsg = `"backgrounds" object missing or invalid in backgrounds.json`;
+      logger.error(errorMsg);
+      await openSmallWindow("Backgrounds Error", errorMsg, ["Okay"]);
+      throw new Error(errorMsg);
+    }
+  } catch (e) {
+    const errorMsg = `Failed to parse backgrounds.json: ${e}`;
+    logger.error(errorMsg);
+    await openSmallWindow("Backgrounds Error", errorMsg, ["Okay"]);
+    throw new Error(errorMsg);
+  }
+
+  // Add new backgrounds if not already present
+  let updated = false;
+  const now = Math.floor(Date.now() / 1000);
+  for (const folderName of subfoldersWithBgJson) {
+    if (!(folderName in backgroundsData.backgrounds)) {
+      logger.info(`Adding new background: ${folderName}`);
+      backgroundsData.backgrounds[folderName] = now;
+      updated = true;
+    }
+  }
+
+  // Write back if updated
+  if (updated) {
+    await fs.promises.writeFile(
+      backgroundsJsonPath,
+      JSON.stringify(backgroundsData, null, 2),
+      "utf-8"
+    );
+    logger.info("updated backgrounds.json with new backgrounds.");
+  }
 }
 
 export const getBasePath = (): string => {

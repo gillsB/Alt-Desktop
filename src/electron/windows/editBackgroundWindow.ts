@@ -1,4 +1,8 @@
-import { isDev, subWindowDevtoolsEnabled } from "../utils/util.js";
+import {
+  indexBackgrounds,
+  isDev,
+  subWindowDevtoolsEnabled,
+} from "../utils/util.js";
 import { openSubWindow } from "./subWindowManager.js";
 
 export function openEditBackgroundWindow() {
@@ -14,6 +18,8 @@ export function openEditBackgroundWindow() {
     subWindowHash,
     "Edit Background"
   );
+
+  indexBackgrounds();
 
   if (isDev() && subWindowDevtoolsEnabled()) {
     settingsWindow.webContents.openDevTools({ mode: "detach" });

@@ -6,7 +6,7 @@ import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { getSetting } from "./settings.js";
 import { createTray } from "./tray.js";
-import { isDev } from "./utils/util.js";
+import { indexBackgrounds, isDev } from "./utils/util.js";
 import { registerVideoFileProtocol } from "./videoFileProtocol.js";
 import { getActiveSubWindow } from "./windows/subWindowManager.js";
 import { handleWindowState, registerWindowKeybinds } from "./windowState.js";
@@ -77,6 +77,8 @@ app.on("ready", () => {
 
   createTray(mainWindow);
   handleCloseEvents(mainWindow);
+
+  indexBackgrounds();
 
   mainWindow.on("maximize", async () => {
     const windowType = await getSetting("windowType");

@@ -29,3 +29,12 @@ npm run py
 
 1. Run the program to build the Appdata/Roaming/AltDesktop and subfolders.
 2. Create icons via right clicks on desktop.
+
+### Current Backgrounds.json testing:
+
+1. Run the program once to build directories
+2. take the folder "000001" from PLACE_IN_BACKGROUNDS and place them at AppData/Roaming/AltDesktop/backgrounds
+3. Re-launch the program (or open Edit Background) and it should add the folder "000001": 1748... (unix time) to your "backgrounds" object in backgrounds.json (AppData/Roaming/AltDesktop).
+
+This is temporary until I include a background as a "default" included or add the ability to make your own backgrounds like this.  
+For now the Settings "Background Path" is still in full command of the actual background displaying but in the future you will essentially choose from saved backgrounds, or create a new background from a video/image.
