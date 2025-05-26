@@ -66,40 +66,43 @@ const EditBackground: React.FC = () => {
             </div>
           ))}
         </div>
-        <div className="background-details-panel">
-          {selected.length === 0 ? (
-            <div>Select a background to view details.</div>
-          ) : (
-            selected.map((bg) => (
+        {selected.length > 0 && (
+          <div className="background-details-panel">
+            {selected.map((bg) => (
               <div key={bg.id}>
-                <h3>{bg.name || bg.id}</h3>
-                <div className="details-row">
-                  <label>Description</label>
-                  <textarea value={bg.description || ""} readOnly rows={2} />
-                </div>
-                <div className="details-row">
-                  <label>File Path</label>
-                  <input value={bg.filePath || ""} readOnly />
-                </div>
-                <div className="details-row">
-                  <label>Tags</label>
-                  <input value={bg.tags?.join(", ") || ""} readOnly />
-                </div>
                 {bg.iconPath && (
                   <div className="details-row">
-                    <label>Icon</label>
                     <SafeImage
                       imagePath={bg.iconPath}
-                      width={64}
-                      height={64}
+                      width={128}
+                      height={128}
                       className="panel-icon"
                     />
                   </div>
                 )}
+                <h3>{bg.name || bg.id}</h3>
+                <div className="details-row">
+                  <label>Description</label>
+                  <div className="details-value">
+                    {bg.description || <em>No description</em>}
+                  </div>
+                </div>
+                <div className="details-row">
+                  <label>File Path</label>
+                  <div className="details-value">
+                    {bg.filePath || <em>None</em>}
+                  </div>
+                </div>
+                <div className="details-row">
+                  <label>Tags</label>
+                  <div className="details-value">
+                    {bg.tags?.join(", ") || <em>None</em>}
+                  </div>
+                </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

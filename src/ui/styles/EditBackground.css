@@ -107,7 +107,7 @@
 }
 
 .background-details-panel {
-  width: 340px;
+  width: 240px;
   background: #33333d;
   border-left: 1px solid #333;
   padding: 32px 24px;
@@ -116,6 +116,8 @@
   flex-direction: column;
   gap: 18px;
   overflow-y: auto;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .background-details-panel h3 {
@@ -150,4 +152,10 @@
 
 .background-details-panel .details-row:last-child {
   margin-bottom: 0;
+}
+
+.background-details-panel .details-row .panel-icon {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
