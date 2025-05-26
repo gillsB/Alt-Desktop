@@ -7,7 +7,7 @@ import { openSubWindow } from "./subWindowManager.js";
 
 export function openEditBackgroundWindow() {
   const options = {
-    width: 600,
+    width: 800,
     height: 660,
     frame: false,
   };

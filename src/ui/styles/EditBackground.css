@@ -1,0 +1,132 @@
+.edit-background-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background: #232323;
+  color: #fff;
+  overflow: hidden;
+}
+.edit-background-root > .subwindow-header {
+  flex: 0 0 auto;
+  z-index: 2;
+}
+
+.edit-background-content {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.background-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 18px;
+  padding: 32px 24px;
+  flex: 1 1 0;
+  overflow-y: auto;
+  background: #232323;
+  align-items: start;
+  grid-auto-rows: min-content;
+}
+
+.background-grid-item {
+  background: #2c2c2c;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #0004;
+  padding: 8px 6px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  user-select: none;
+  width: fit-content;
+  min-width: 0;
+  max-width: 140px;
+}
+
+.background-grid-item.selected {
+  border: 2px solid #007bff;
+  box-shadow: 0 0 12px #007bff88;
+  background: #1a1a2c;
+}
+
+.background-grid-item .background-icon {
+  margin-bottom: 2px;
+  display: block;
+}
+
+.background-grid-item h4 {
+  margin: 0;
+  font-size: 1rem;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  max-width: 120px;
+}
+
+.background-grid-item p {
+  margin: 0 0 2px 0;
+  font-size: 0.85rem;
+  color: #bdbdbd;
+  text-align: center;
+  word-break: break-word;
+}
+
+.background-details-panel {
+  width: 340px;
+  background: #33333d;
+  border-left: 1px solid #333;
+  padding: 32px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+}
+
+.background-details-panel h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.background-details-panel label {
+  font-weight: 600;
+  color: #bdbdbd;
+  margin-bottom: 2px;
+  display: block;
+}
+
+.background-details-panel textarea,
+.background-details-panel input {
+  width: 100%;
+  background: #23233a;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.background-details-panel .details-row {
+  margin-bottom: 12px;
+}
+
+.background-details-panel .details-row:last-child {
+  margin-bottom: 0;
+}
