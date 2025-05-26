@@ -27,13 +27,21 @@ const EditBackground: React.FC = () => {
       });
   }, []);
 
-  const handleSelect = (id: string, e: React.MouseEvent) => {
+  const handleSelect = async (id: string, e: React.MouseEvent) => {
+    // Used for selecting multiple files, not sure if this will be allowed or what to do with this.
     if (e.ctrlKey || e.metaKey) {
       setSelectedIds((prev) =>
         prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
       );
     } else {
       setSelectedIds([id]);
+      // Find the selected background and send preview update
+      const bg = summaries.find((bg) => bg.id === id);
+      if (bg?.filePath) {
+        await window.electron.previewBackgroundUpdate({
+          background: bg.filePath,
+        });
+      }
     }
   };
 
