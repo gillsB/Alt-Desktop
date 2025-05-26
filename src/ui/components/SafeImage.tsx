@@ -36,23 +36,25 @@ const getImagePath = (
 
   // If row and col are provided, use the old logic for folderPath
   if (typeof row === "number" && typeof col === "number") {
-    const folderPath = `/data/[${row},${col}]`;
-    const encodedImagePath = encodeURIComponent(imagePath).replace(
-      /[()]/g,
-      (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
-    );
-    let safeFilePath = `appdata-file://${folderPath}/${encodedImagePath}`;
-    if (timestamp) {
-      safeFilePath += `?t=${timestamp}`;
+    // If imagePath is a local path, append the /data/[row,col]
+    if (!/^[a-zA-Z]:[\\/]/.test(imagePath)) {
+      const folderPath = `/data/[${row},${col}]`;
+      const encodedImagePath = encodeURIComponent(imagePath).replace(
+        /[()]/g,
+        (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
+      );
+      let safeFilePath = `appdata-file://${folderPath}/${encodedImagePath}`;
+      if (timestamp) {
+        safeFilePath += `?t=${timestamp}`;
+      }
+      // Check extension
+      const isImageExtension =
+        /\.(png|jpg|jpeg|gif|bmp|svg|webp|lnk|ico)$/i.test(imagePath);
+      if (!isImageExtension) {
+        return getUnknownAssetPath(timestamp);
+      }
+      return safeFilePath;
     }
-    // Check extension
-    const isImageExtension = /\.(png|jpg|jpeg|gif|bmp|svg|webp|lnk|ico)$/i.test(
-      imagePath
-    );
-    if (!isImageExtension) {
-      return getUnknownAssetPath(timestamp);
-    }
-    return safeFilePath;
   }
 
   // Otherwise, treat as absolute path (Windows or otherwise)

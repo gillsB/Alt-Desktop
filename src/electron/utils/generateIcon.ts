@@ -96,7 +96,7 @@ export const generateIcon = async (
           logger.info(
             `Icon successfully extracted and saved to: ${outputPath}`
           );
-          foundPaths.push(outputPath);
+          foundPaths.push(iconFileName);
         } else {
           logger.warn(`Executable failed with code ${code}`);
         }
