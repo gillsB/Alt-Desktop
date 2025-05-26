@@ -69,7 +69,6 @@ const getImagePath = (
     if (timestamp) {
       safeFilePath += `?t=${timestamp}`;
     }
-    logger.info(`Generated URL for absolute path: ${safeFilePath}`);
     return safeFilePath;
   }
 
@@ -158,7 +157,6 @@ const SafeImageComponent: React.FC<{
     );
 
     if (newImageSrc !== imageSrc) {
-      logger.info(`Updating imageSrc to: ${newImageSrc}`);
       setImageSrc(newImageSrc);
     }
 

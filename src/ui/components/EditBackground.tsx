@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { SafeImage } from "./SafeImage";
@@ -58,8 +57,8 @@ const EditBackground: React.FC = () => {
               {bg.iconPath && (
                 <SafeImage
                   imagePath={bg.iconPath}
-                  width={128}
-                  height={128}
+                  width={200}
+                  height={200}
                   className="background-icon"
                 />
               )}
@@ -93,7 +92,7 @@ const EditBackground: React.FC = () => {
                       imagePath={bg.iconPath}
                       width={64}
                       height={64}
-                      className="background-icon"
+                      className="panel-icon"
                     />
                   </div>
                 )}
