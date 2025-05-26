@@ -25,23 +25,38 @@ const EditBackground: React.FC = () => {
       .catch((err) => {
         logger.error("Failed to fetch background summaries:", err);
       });
+    onLaunchSelect();
   }, []);
 
-  const handleSelect = async (id: string, e: React.MouseEvent) => {
-    // Used for selecting multiple files, not sure if this will be allowed or what to do with this.
-    if (e.ctrlKey || e.metaKey) {
-      setSelectedIds((prev) =>
-        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-      );
+  const onLaunchSelect = async () => {
+    const savedBackground = await window.electron.getSetting("background");
+    if (savedBackground) {
+      handleSelect(savedBackground);
     } else {
-      setSelectedIds([id]);
-      // Find the selected background and send preview update
-      const bg = summaries.find((bg) => bg.id === id);
-      if (bg?.filePath) {
-        await window.electron.previewBackgroundUpdate({
-          background: bg.id,
-        });
+      logger.info("No saved background found");
+    }
+  };
+
+  const handleSelect = async (id: string, e?: React.MouseEvent) => {
+    // Used for selecting multiple files, not sure if this will be allowed or what to do with this.
+    if (e) {
+      if (e.ctrlKey || e.metaKey) {
+        setSelectedIds((prev) =>
+          prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+        return;
       }
+    }
+
+    // Find the selected background, select it, and update the preview
+    const bg = summaries.find((bg) => bg.id === id);
+    if (bg) {
+      setSelectedIds([id]);
+    }
+    if (bg?.filePath) {
+      await window.electron.previewBackgroundUpdate({
+        background: bg.id,
+      });
     }
   };
 
