@@ -81,7 +81,7 @@ def default_icon_to_image(file_path, output_path, icon_size, retries=5):
             hicon = None
 
     if not hicon:
-        return "assets/images/unknown.png"
+        return ""
         
         
     

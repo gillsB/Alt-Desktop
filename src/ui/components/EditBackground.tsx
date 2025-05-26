@@ -57,8 +57,6 @@ const EditBackground: React.FC = () => {
               {bg.iconPath && (
                 <SafeImage
                   imagePath={bg.iconPath}
-                  width={200}
-                  height={200}
                   className="background-icon"
                 />
               )}

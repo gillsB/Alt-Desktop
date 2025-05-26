@@ -22,7 +22,7 @@ export function registerSafeFileProtocol(
       const requestedUrl = new URL(req.url);
       const hostname = requestedUrl.hostname;
 
-      // Deliberate special case to return the fallback unknown.png image.
+      // Deliberate special case to return the fallback unknown.svg image.
       if (requestedUrl.pathname === "/unknown" || hostname === "unknown") {
         logger.info("Requested path is 'unknown', returning unknown image.");
         return getUnknownImageResponse();
@@ -92,7 +92,7 @@ export function getSafeFileUrl(
 
 /**
  * Handles the case when a requested file doesn't exist.
- * Returns a fallback image path "src/assets/unknown.png" if it's an image file; otherwise, returns a 404 error.
+ * Returns a fallback image path "src/assets/unknown.svg" if it's an image file; otherwise, returns a 404 error.
  * @param fullPath The full path of the requested file.
  * @returns The fallback response for a non-existent file.
  */
@@ -108,7 +108,7 @@ function fileNotExist(fullPath: string, reason?: string) {
     logger.warn("File not found:", fullPath);
   }
 
-  // Check if the requested file is an image based on the MIME type or fallback to unknown.png
+  // Check if the requested file is an image based on the MIME type or fallback to unknown.svg
   const mimeType = mime.lookup(fullPath);
   if (!mimeType || mimeType.startsWith("image/")) {
     return getUnknownImageResponse();
@@ -119,12 +119,12 @@ function fileNotExist(fullPath: string, reason?: string) {
 }
 
 /**
- * Returns the fallback image "unknown.png" as a Response with status 200.
- * @returns A Response containing the unknown.png file.
+ * Returns the fallback image "unknown.svg" as a Response with status 200.
+ * @returns A Response containing the unknown.svg file.
  */
 export function getUnknownImageResponse(): Response {
-  const fallbackImagePath = path.join(getAssetPath(), "unknown.png");
-  logger.info("Returning unknown.png from:", fallbackImagePath);
+  const fallbackImagePath = path.join(getAssetPath(), "unknown.svg");
+  logger.info("Returning unknown.svg from:", fallbackImagePath);
   try {
     const fileContent = fs.readFileSync(fallbackImagePath);
     return new Response(fileContent, {
@@ -135,7 +135,7 @@ export function getUnknownImageResponse(): Response {
       },
     });
   } catch (error) {
-    logger.error(`Failed to read unknown.png: ${error}`);
+    logger.error(`Failed to read unknown.svg: ${error}`);
     return new Response("Internal Server Error", { status: 500 });
   }
 }
