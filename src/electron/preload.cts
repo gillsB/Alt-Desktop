@@ -116,6 +116,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   desktopSetShowIcons: (showIcons: boolean) =>
     ipcInvoke("desktopSetShowIcons", showIcons),
   getBackgroundSummaries: () => ipcInvoke("getBackgroundSummaries"),
+  idToFilePath: (id: string) => ipcInvoke("idToFilePath", id),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

@@ -39,7 +39,7 @@ const EditBackground: React.FC = () => {
       const bg = summaries.find((bg) => bg.id === id);
       if (bg?.filePath) {
         await window.electron.previewBackgroundUpdate({
-          background: bg.filePath,
+          background: bg.id,
         });
       }
     }

@@ -68,7 +68,8 @@ const Background: React.FC<BackgroundProps> = ({
   useEffect(() => {
     const fetchFromSettings = async () => {
       const bgPath = await window.electron.getSetting("background");
-      setBackgroundPath(bgPath || "");
+      const filePath = await convertIDToFilePath(bgPath);
+      setBackgroundPath(filePath || "");
       logger.info("Background path:", bgPath);
     };
     fetchFromSettings();
@@ -80,15 +81,20 @@ const Background: React.FC<BackgroundProps> = ({
     };
   }, []);
 
+  const convertIDToFilePath = async (id: string) => {
+    return await window.electron.idToFilePath(id);
+  };
+
   useEffect(() => {
-    const handlePreview = (...args: unknown[]) => {
+    const handlePreview = async (...args: unknown[]) => {
       const updates = args[1] as Partial<SettingsData>;
       if (
         typeof updates.background === "string" &&
         updates.background !== backgroundPath
       ) {
         logger.info("Updating background to:", updates.background);
-        setBackgroundPath(updates.background);
+        const filePath = await convertIDToFilePath(updates.background);
+        setBackgroundPath(filePath || "");
       }
     };
     window.electron.on("update-background-preview", handlePreview);

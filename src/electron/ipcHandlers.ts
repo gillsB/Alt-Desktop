@@ -1224,4 +1224,21 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
     return results;
   });
+  ipcMainHandle("idToFilePath", async (id: string) => {
+    try {
+      const baseDir = getBackgroundFilePath();
+      const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
+      const bgJsonPath = path.join(baseDir, folderPath, "bg.json");
+      if (!fs.existsSync(bgJsonPath)) return null;
+      const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
+      const bg = JSON.parse(rawBg);
+      if (bg.public && bg.public.filename) {
+        return path.join(baseDir, folderPath, bg.public.filename);
+      }
+      return null;
+    } catch (e) {
+      logger.warn(`Failed to resolve filePath for id ${id}:`, e);
+      return null;
+    }
+  });
 }

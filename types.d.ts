@@ -135,6 +135,7 @@ interface EventParamMapping {
   desktopSetShowIcons: [boolean];
   openEditBackground: [];
   getBackgroundSummaries: [];
+  idToFilePath: [string];
 }
 
 // The returns from the main process to the renderer
@@ -183,6 +184,7 @@ type EventPayloadMapping = {
   desktopSetShowIcons: boolean;
   openEditBackground: boolean;
   getBackgroundSummaries: BackgroundSummary[];
+  idToFilePath: string | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -276,5 +278,6 @@ interface Window {
     resetAllIconsFontColor: () => Promise<boolean>;
     desktopSetShowIcons: (showIcons: boolean) => Promise<boolean>;
     getBackgroundSummaries: () => Promise<BackgroundSummary[]>;
+    idToFilePath: (id: string) => Promise<string | null>;
   };
 }
