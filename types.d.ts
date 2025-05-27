@@ -134,7 +134,7 @@ interface EventParamMapping {
   selectIconFromList: [string, string[], number, number];
   resetAllIconsFontColor: [];
   desktopSetShowIcons: [boolean];
-  openEditBackground: [];
+  openBackgroundSelect: [];
   getBackgroundSummaries: [];
   idToFilePath: [string];
   resolveShortcut: [string];
@@ -186,7 +186,7 @@ type EventPayloadMapping = {
   selectIconFromList: string;
   resetAllIconsFontColor: boolean;
   desktopSetShowIcons: boolean;
-  openEditBackground: boolean;
+  openBackgroundSelect: boolean;
   getBackgroundSummaries: BackgroundSummary[];
   idToFilePath: string | null;
   resolveShortcut: string;
@@ -213,7 +213,7 @@ interface Window {
     isSubWindowActive: () => Promise<boolean>;
     reloadIcon: (row: number, col: number) => Promise<boolean>;
     openSettings: () => Promise<boolean>;
-    openEditBackground: () => Promise<boolean>;
+    openBackgroundSelect: () => Promise<boolean>;
     editIcon: (row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;

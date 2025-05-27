@@ -28,7 +28,7 @@ import {
   updateHeader,
 } from "./utils/util.js";
 import { getVideoFileUrl } from "./videoFileProtocol.js";
-import { openEditBackgroundWindow } from "./windows/editBackgroundWindow.js";
+import { openBackgroundSelectWindow } from "./windows/backgroundSelectWindow.js";
 import { openEditIconWindow } from "./windows/editIconWindow.js";
 import { openSettingsWindow } from "./windows/settingsWindow.js";
 import {
@@ -301,10 +301,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
-  ipcMainHandle("openEditBackground", async (): Promise<boolean> => {
+  ipcMainHandle("openBackgroundSelect", async (): Promise<boolean> => {
     try {
-      logger.info(`ipcMainHandle openEditBackground called`);
-      openEditBackgroundWindow();
+      logger.info(`ipcMainHandle openBackgroundSelect called`);
+      openBackgroundSelectWindow();
       return true;
     } catch (error) {
       logger.error(`Error opening settings window: ${error}`);

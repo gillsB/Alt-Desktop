@@ -15,11 +15,11 @@ export function Header() {
   const [isMaximized, setIsMaximized] = useState(true);
   const devMode = process.env.NODE_ENV === "development";
 
-  const editBackgroundClicked = async () => {
+  const backgroundSelectClicked = async () => {
     if (await window.electron.isSubWindowActive()) {
       return;
     } else {
-      window.electron.openEditBackground();
+      window.electron.openBackgroundSelect();
     }
   };
   const settingsClicked = async () => {
@@ -180,10 +180,10 @@ export function Header() {
       <div className="window-controls">
         <button
           id="background"
-          onClick={editBackgroundClicked}
+          onClick={backgroundSelectClicked}
           title="Background"
         >
-          <ComputerDesktopIcon className="edit-background-icon" />
+          <ComputerDesktopIcon className="background-select-icon" />
         </button>
         <button id="settings" onClick={settingsClicked} title="Settings">
           <Cog6ToothIcon className="settings-icon" />

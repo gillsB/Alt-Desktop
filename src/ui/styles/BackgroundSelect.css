@@ -1,4 +1,4 @@
-.edit-background-root {
+.background-select-root {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -7,12 +7,12 @@
   color: #fff;
   overflow: hidden;
 }
-.edit-background-root > .subwindow-header {
+.background-select-root > .subwindow-header {
   flex: 0 0 auto;
   z-index: 2;
 }
 
-.edit-background-content {
+.background-select-content {
   display: flex;
   flex-direction: row;
   flex: 1 1 0;

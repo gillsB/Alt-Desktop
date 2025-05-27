@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Route, HashRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 import Background from "./components/Background";
+import BackgroundSelect from "./components/BackgroundSelect";
 import DesktopGrid from "./components/DesktopGrid";
-import EditBackground from "./components/EditBackground";
 import EditIcon from "./components/EditIcon";
 import { Header } from "./components/Header";
 import HoverOpacityItem from "./components/HoverOpacityItem";
@@ -36,7 +36,7 @@ const App: React.FC = () => {
         <Route path="/small-window" element={<SmallWindow />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/select-icon" element={<SelectIconWindow />} />
-        <Route path="/edit-background" element={<EditBackground />} />
+        <Route path="/background-select" element={<BackgroundSelect />} />
       </Routes>
     </Router>
   );

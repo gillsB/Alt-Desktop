@@ -40,7 +40,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   isSubWindowActive: () => ipcInvoke("isSubWindowActive"),
   reloadIcon: (row, col) => ipcInvoke("reloadIcon", row, col),
   openSettings: () => ipcInvoke("openSettings"),
-  openEditBackground: () => ipcInvoke("openEditBackground"),
+  openBackgroundSelect: () => ipcInvoke("openBackgroundSelect"),
   editIcon: (row, col) => ipcInvoke("editIcon", row, col),
   on: (channel: string, callback: (...args: unknown[]) => void) => {
     electron.ipcRenderer.on(channel, callback);

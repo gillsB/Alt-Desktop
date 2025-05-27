@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "../App.css";
-import "../styles/EditBackground.css";
+import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
-const logger = createLogger("EditBackground.tsx");
+const logger = createLogger("BackgroundSelect.tsx");
 
-const EditBackground: React.FC = () => {
+const BackgroundSelect: React.FC = () => {
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [contextMenu, setContextMenu] = useState<{
@@ -108,9 +108,9 @@ const EditBackground: React.FC = () => {
   const selected = summaries.filter((bg) => selectedIds.includes(bg.id));
 
   return (
-    <div className="edit-background-root">
-      <SubWindowHeader title="Edit Backgrounds" onClose={handleClose} />
-      <div className="edit-background-content">
+    <div className="background-select-root">
+      <SubWindowHeader title="Background Select" onClose={handleClose} />
+      <div className="background-select-content">
         <div className="background-grid">
           {summaries.map((bg) => (
             <div
@@ -187,4 +187,4 @@ const EditBackground: React.FC = () => {
   );
 };
 
-export default EditBackground;
+export default BackgroundSelect;
