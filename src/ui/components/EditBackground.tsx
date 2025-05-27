@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { SafeImage } from "./SafeImage";
@@ -9,6 +10,11 @@ const logger = createLogger("EditBackground.tsx");
 const EditBackground: React.FC = () => {
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    backgroundId: string;
+  } | null>(null);
 
   const handleClose = async () => {
     logger.info("EditBackground window closed");
@@ -46,6 +52,17 @@ const EditBackground: React.FC = () => {
     }
   }, [summaries]);
 
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setContextMenu(null);
+    };
+
+    if (contextMenu) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [contextMenu]);
+
   const handleSelect = async (id: string, e?: React.MouseEvent) => {
     // Used for selecting multiple files, not sure if this will be allowed or what to do with this.
     if (e) {
@@ -73,6 +90,20 @@ const EditBackground: React.FC = () => {
     }
   };
 
+  const handleContextMenu = (e: React.MouseEvent, backgroundId: string) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      backgroundId,
+    });
+  };
+
+  const handleOpenFolder = async (backgroundId: string) => {
+    logger.info(`Open Folder for background ${backgroundId}`);
+    setContextMenu(null);
+  };
+
   const selected = summaries.filter((bg) => selectedIds.includes(bg.id));
 
   return (
@@ -88,6 +119,7 @@ const EditBackground: React.FC = () => {
                 (selectedIds.includes(bg.id) ? " selected" : "")
               }
               onClick={(e) => handleSelect(bg.id, e)}
+              onContextMenu={(e) => handleContextMenu(e, bg.id)}
               tabIndex={0}
             >
               {bg.iconPath && (
@@ -132,6 +164,24 @@ const EditBackground: React.FC = () => {
           </div>
         )}
       </div>
+
+      {contextMenu && (
+        <div
+          className="context-menu"
+          style={{
+            left: contextMenu.x,
+            top: contextMenu.y,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className="menu-item"
+            onClick={() => handleOpenFolder(contextMenu.backgroundId)}
+          >
+            Open Folder
+          </div>
+        </div>
+      )}
     </div>
   );
 };
