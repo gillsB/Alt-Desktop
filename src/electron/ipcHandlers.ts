@@ -1203,14 +1203,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
         const bg = JSON.parse(rawBg);
         // TODO make sure this works for other master paths as well (currently doesn't attempt)
-        let filePath = "";
-        if (bg.public.filename) {
-          filePath = path.join(
-            getBackgroundFilePath(),
-            folderPath,
-            bg.public.filename
-          );
-        }
         let iconPath = "";
         if (bg.public.icon) {
           iconPath = path.join(
@@ -1222,7 +1214,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         results.push({
           id,
           name: bg.public?.name,
-          filePath: filePath,
           description: bg.public?.description,
           iconPath: iconPath,
           tags: [...(bg.public?.tags ?? []), ...(bg.local?.tags ?? [])],

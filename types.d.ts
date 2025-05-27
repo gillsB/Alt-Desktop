@@ -44,7 +44,6 @@ type SettingKey = keyof SettingsData;
 type BackgroundSummary = {
   id: string;
   name: string;
-  filePath: string;
   description: string;
   iconPath: string;
   tags: string[];

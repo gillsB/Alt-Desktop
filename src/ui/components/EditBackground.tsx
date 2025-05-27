@@ -66,7 +66,7 @@ const EditBackground: React.FC = () => {
       logger.warn(`Background with id ${id} not found in summaries`);
       return;
     }
-    if (bg?.filePath) {
+    if (bg?.id) {
       await window.electron.previewBackgroundUpdate({
         background: bg.id,
       });
@@ -119,12 +119,6 @@ const EditBackground: React.FC = () => {
                   <label>Description</label>
                   <div className="details-value">
                     {bg.description || <em>No description</em>}
-                  </div>
-                </div>
-                <div className="details-row">
-                  <label>File Path</label>
-                  <div className="details-value">
-                    {bg.filePath || <em>None</em>}
                   </div>
                 </div>
                 <div className="details-row">
