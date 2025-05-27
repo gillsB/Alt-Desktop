@@ -70,7 +70,7 @@ const Background: React.FC<BackgroundProps> = ({
       const bgPath = await window.electron.getSetting("background");
       const filePath = await convertIDToFilePath(bgPath);
       setBackgroundPath(filePath || "");
-      logger.info("Background path:", bgPath);
+      logger.info("Background reloaded with path:", bgPath);
     };
     fetchFromSettings();
 

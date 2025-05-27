@@ -944,12 +944,22 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle(
     "saveSettingsData",
-    async (data: SettingsData): Promise<boolean> => {
+    async (data: Partial<SettingsData>): Promise<boolean> => {
       try {
+        logger.info("SaveSettingsData called with data:", JSON.stringify(data));
         const settingsFilePath = getSettingsFilePath();
+        // Read current settings
+        let currentSettings: SettingsData = defaultSettings;
+        if (fs.existsSync(settingsFilePath)) {
+          currentSettings = JSON.parse(
+            fs.readFileSync(settingsFilePath, "utf-8")
+          );
+        }
+        // Merge only the provided keys/values
+        const newSettings = { ...currentSettings, ...data };
         fs.writeFileSync(
           settingsFilePath,
-          JSON.stringify(data, null, 2),
+          JSON.stringify(newSettings, null, 2),
           "utf-8"
         );
         logger.info("Settings data saved successfully.");

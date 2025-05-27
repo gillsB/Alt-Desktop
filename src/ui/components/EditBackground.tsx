@@ -6,36 +6,45 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
 
-const handleClose = () => {
-  logger.info("EditBackground window closed");
-  window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
-};
-
 const EditBackground: React.FC = () => {
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const handleClose = async () => {
+    logger.info("EditBackground window closed");
+    await window.electron.saveSettingsData({ background: selectedIds[0] });
+    await window.electron.reloadBackground();
+    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+  };
 
   useEffect(() => {
     window.electron
       .getBackgroundSummaries()
       .then((result) => {
         setSummaries(result);
-        logger.info("Loaded background summaries", result);
+        logger.info(
+          "Loaded background summary IDs",
+          result.map((bg) => bg.id)
+        );
       })
       .catch((err) => {
         logger.error("Failed to fetch background summaries:", err);
       });
-    onLaunchSelect();
   }, []);
 
-  const onLaunchSelect = async () => {
-    const savedBackground = await window.electron.getSetting("background");
-    if (savedBackground) {
-      handleSelect(savedBackground);
-    } else {
-      logger.info("No saved background found");
+  useEffect(() => {
+    // Only run when summaries are loaded
+    if (summaries.length > 0) {
+      (async () => {
+        const savedBackground = await window.electron.getSetting("background");
+        if (savedBackground) {
+          handleSelect(savedBackground);
+        } else {
+          logger.info("No saved background found");
+        }
+      })();
     }
-  };
+  }, [summaries]);
 
   const handleSelect = async (id: string, e?: React.MouseEvent) => {
     // Used for selecting multiple files, not sure if this will be allowed or what to do with this.
@@ -50,8 +59,12 @@ const EditBackground: React.FC = () => {
 
     // Find the selected background, select it, and update the preview
     const bg = summaries.find((bg) => bg.id === id);
+    logger.info("Selected background:", bg);
     if (bg) {
       setSelectedIds([id]);
+    } else {
+      logger.warn(`Background with id ${id} not found in summaries`);
+      return;
     }
     if (bg?.filePath) {
       await window.electron.previewBackgroundUpdate({
