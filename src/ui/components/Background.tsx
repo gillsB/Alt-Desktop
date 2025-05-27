@@ -20,13 +20,13 @@ interface BackgroundProps {
  *
  * @component
  * @param {number} [opacity=1] - The opacity of the background.
- * @param {string} [fallbackColor="#87BEC5"] - The fallback background color if both video and image fail.
+ * @param {string} [fallbackColor="#2c2c2c"] - The fallback background color if both video and image fail.
  * @param {string} [logLevel="normal"] - Controls verbosity of video events logging.
  * @returns {JSX.Element} The Background component.
  */
 const Background: React.FC<BackgroundProps> = ({
   opacity = 1,
-  fallbackColor = "#87BEC5",
+  fallbackColor = "#2c2c2c",
   logLevel = "verbose",
 }) => {
   const [backgroundPath, setBackgroundPath] = useState<string>("");
@@ -68,9 +68,17 @@ const Background: React.FC<BackgroundProps> = ({
   useEffect(() => {
     const fetchFromSettings = async () => {
       const bgPath = await window.electron.getSetting("background");
-      const filePath = await convertIDToFilePath(bgPath);
+      let filePath = await convertIDToFilePath(bgPath);
+      if (filePath) {
+        // Always resolve shortcut if the file is a shortcut
+        const fileType = await window.electron.getFileType(filePath);
+        if (fileType === "application/x-ms-shortcut") {
+          const resolved = await window.electron.resolveShortcut(filePath);
+          if (resolved) filePath = resolved;
+        }
+      }
       setBackgroundPath(filePath || "");
-      logger.info("Background reloaded with path:", bgPath);
+      logger.info("Background reloaded with path:", filePath);
     };
     fetchFromSettings();
 
@@ -93,7 +101,15 @@ const Background: React.FC<BackgroundProps> = ({
         updates.background !== backgroundPath
       ) {
         logger.info("Updating background to:", updates.background);
-        const filePath = await convertIDToFilePath(updates.background);
+        let filePath = await convertIDToFilePath(updates.background);
+        if (filePath) {
+          // Always resolve shortcut if the file is a shortcut
+          const fileType = await window.electron.getFileType(filePath);
+          if (fileType === "application/x-ms-shortcut") {
+            const resolved = await window.electron.resolveShortcut(filePath);
+            if (resolved) filePath = resolved;
+          }
+        }
         setBackgroundPath(filePath || "");
       }
     };
@@ -121,15 +137,13 @@ const Background: React.FC<BackgroundProps> = ({
         setIsVideo(true);
         const videoFilePath =
           await window.electron.convertToVideoFileUrl(backgroundPath);
-        const cacheBuster = Date.now();
-        setVideoSrc(`${videoFilePath}?nocache=${cacheBuster}`);
+        setVideoSrc(`${videoFilePath}?nocache=${Date.now()}`);
         logger.info("Video source set");
       } else if (fileType.startsWith("image")) {
         setIsVideo(false);
         const imageFilePath =
           await window.electron.getBackgroundImagePath(backgroundPath);
-        const cacheBuster = Date.now();
-        setImageSrc(`${imageFilePath}?nocache=${cacheBuster}`);
+        setImageSrc(`${imageFilePath}?nocache=${Date.now()}`);
         logger.info("Image source set");
       } else {
         // File type is invalid or file does not exist

@@ -1,4 +1,4 @@
-import electron, { ipcRenderer, webUtils } from "electron";
+import electron, { webUtils } from "electron";
 
 interface DesktopIcon {
   row: number;
@@ -49,12 +49,10 @@ electron.contextBridge.exposeInMainWorld("electron", {
     electron.ipcRenderer.off(channel, callback);
   },
   reloadWindow: () => ipcInvoke("reloadWindow"),
-  logMessage: (level: string, file: string, message: string) => {
-    ipcRenderer.send("logMessage", { level, file, message });
-  },
-  logVideoMessage: (level: string, file: string, message: string) => {
-    ipcRenderer.send("logVideoMessage", { level, file, message });
-  },
+  logMessage: (level: string, file: string, message: string) =>
+    ipcInvoke("logMessage", level, file, message),
+  logVideoMessage: (level: string, file: string, message: string) =>
+    ipcInvoke("logVideoMessage", level, file, message),
   openFileDialog: (type: string, appDataFilePath?: string) =>
     ipcInvoke("openFileDialog", type, appDataFilePath),
   saveIconImage: (sourcePath: string, row: number, col: number) =>
@@ -117,6 +115,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("desktopSetShowIcons", showIcons),
   getBackgroundSummaries: () => ipcInvoke("getBackgroundSummaries"),
   idToFilePath: (id: string) => ipcInvoke("idToFilePath", id),
+  resolveShortcut: (filePath: string) => ipcInvoke("resolveShortcut", filePath),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

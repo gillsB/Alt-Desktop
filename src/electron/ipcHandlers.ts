@@ -1,4 +1,4 @@
-import { dialog, ipcMain, screen, shell } from "electron";
+import { dialog, screen, shell } from "electron";
 
 import ffprobeStatic from "ffprobe-static";
 import ffmpeg from "fluent-ffmpeg";
@@ -22,6 +22,7 @@ import {
   ipcMainHandle,
   ipcMainOn,
   resetAllIconsFontColor,
+  resolveShortcut,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
   updateHeader,
@@ -540,7 +541,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
 
   // Handle log messages from the renderer process
-  ipcMain.on("logMessage", (event, { level, file, message }) => {
+  ipcMainHandle("logMessage", async (level, file, message) => {
     switch (level) {
       case "info":
         baseLogger.info({ message, file });
@@ -557,8 +558,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       default:
         baseLogger.info({ message, file });
     }
+    return true;
   });
-  ipcMain.on("logVideoMessage", (event, { level, file, message }) => {
+  ipcMainHandle("logVideoMessage", async (level, file, message) => {
     switch (level) {
       case "info":
         videoLogger.info({ message, file });
@@ -575,6 +577,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       default:
         videoLogger.info({ message, file });
     }
+    return true;
   });
 
   ipcMainHandle(
@@ -995,7 +998,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         logger.warn(`Video file does not exist: ${filePath}`);
         return null;
       }
-
       // Check file extension
       const fileExt = path.extname(filePath).toLowerCase();
       const allowedExtensions = [".mp4", ".webm", ".mov", ".ogg", ".mkv"];
@@ -1242,4 +1244,22 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return null;
     }
   });
+
+  ipcMainHandle(
+    "resolveShortcut",
+    async (filePath: string): Promise<string> => {
+      try {
+        // Check if the file exists
+        if (!fs.existsSync(filePath)) {
+          logger.warn(`File does not exist: ${filePath}`);
+          return "";
+        }
+        filePath = resolveShortcut(filePath);
+        return filePath;
+      } catch (error) {
+        logger.error(`Error resolving file path: ${error}`);
+        return "";
+      }
+    }
+  );
 }

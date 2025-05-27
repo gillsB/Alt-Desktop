@@ -104,6 +104,8 @@ interface EventParamMapping {
   openSettings: [];
   editIcon: [number, number];
   reloadWindow: [];
+  logMessage: [string, string, string];
+  logVideoMessage: [string, string, string];
   openFileDialog: [string, string?];
   saveIconImage: [string, number, number];
   saveBackgroundImage: [string];
@@ -135,6 +137,7 @@ interface EventParamMapping {
   openEditBackground: [];
   getBackgroundSummaries: [];
   idToFilePath: [string];
+  resolveShortcut: [string];
 }
 
 // The returns from the main process to the renderer
@@ -152,6 +155,8 @@ type EventPayloadMapping = {
   openSettings: boolean;
   editIcon: boolean;
   reloadWindow: boolean;
+  logMessage: boolean;
+  logVideoMessage: boolean;
   openFileDialog: string | null;
   saveIconImage: string;
   saveBackgroundImage: string;
@@ -184,6 +189,7 @@ type EventPayloadMapping = {
   openEditBackground: boolean;
   getBackgroundSummaries: BackgroundSummary[];
   idToFilePath: string | null;
+  resolveShortcut: string;
 };
 
 type UnsubscribeFunction = () => void;
@@ -278,5 +284,6 @@ interface Window {
     desktopSetShowIcons: (showIcons: boolean) => Promise<boolean>;
     getBackgroundSummaries: () => Promise<BackgroundSummary[]>;
     idToFilePath: (id: string) => Promise<string | null>;
+    resolveShortcut: (filePath: string) => Promise<string>;
   };
 }
