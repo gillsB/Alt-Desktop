@@ -376,7 +376,7 @@ const DesktopGrid: React.FC = () => {
 
   const handleDesktopRightClick = async (e: React.MouseEvent) => {
     // If a subwindow is active, do not show the context menu
-    if (await window.electron.isSubWindowActive()) {
+    if (await window.electron.getSubWindowTitle()) {
       logger.info(
         "Subwindow is open, nulled request for contextMenu (desktop click)."
       );
@@ -424,7 +424,7 @@ const DesktopGrid: React.FC = () => {
     col: number
   ) => {
     // If a subwindow is active, do not show the context menu
-    if (await window.electron.isSubWindowActive()) {
+    if (await window.electron.getSubWindowTitle()) {
       logger.info(
         "Subwindow is open, nulled request for contextMenu(Icon click)."
       );
@@ -441,7 +441,7 @@ const DesktopGrid: React.FC = () => {
 
   const handleEditIcon = async (row?: number, col?: number) => {
     // If a subwindow is active, do not open a new one
-    if (await window.electron.isSubWindowActive()) {
+    if (await window.electron.getSubWindowTitle()) {
       logger.info("Subwindow is already open, not opening a new one.");
       return;
     }

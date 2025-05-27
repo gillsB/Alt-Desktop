@@ -7,7 +7,7 @@ import { isDev, smallWindowDevtoolsEnabled } from "../utils/util.js";
 const logger = createLoggerForFile("subWindowManager.ts");
 let mainWindow: BrowserWindow | null = null; // Store the main window reference
 
-let activeSubWindow: BrowserWindow | null = null;
+let activeSubWindow: CustomBrowserWindow | null = null;
 const smallWindows: BrowserWindow[] = []; // Store multiple small windows
 const allowedUrls: string[] = []; // Start with an empty list
 
@@ -67,7 +67,8 @@ export function openSubWindow(
       webSecurity: true,
       ...options.webPreferences, // Allow overriding webPreferences
     },
-  });
+  }) as CustomBrowserWindow;
+  activeSubWindow.customTitle = title;
 
   // Generate the subwindow URL
   let subWindowUrl: string;
@@ -300,7 +301,7 @@ export function openSelectIconWindow(
   });
 }
 
-export function getActiveSubWindow(): BrowserWindow | null {
+export function getActiveSubWindow(): CustomBrowserWindow | null {
   return activeSubWindow;
 }
 

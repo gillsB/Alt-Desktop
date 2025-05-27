@@ -89,6 +89,10 @@ type VideoMetadata = {
   }>;
 };
 
+interface CustomBrowserWindow extends Electron.BrowserWindow {
+  customTitle?: string;
+}
+
 // Items/objects being sent from the renderer to the main process
 interface EventParamMapping {
   statistics: [];
@@ -120,7 +124,7 @@ interface EventParamMapping {
   previewBackgroundUpdate: [Partial<SettingsData>];
   previewGridUpdate: [Partial<SettingsData>];
   previewHeaderUpdate: [Partial<SettingsData>];
-  isSubWindowActive: [];
+  getSubWindowTitle: [];
   getSettingsData: [];
   saveSettingsData: [SettingsData];
   getSetting: [SettingKey];
@@ -172,7 +176,7 @@ type EventPayloadMapping = {
   previewBackgroundUpdate: boolean;
   previewHeaderUpdate: boolean;
   previewGridUpdate: boolean;
-  isSubWindowActive: boolean;
+  getSubWindowTitle: string;
   getSettingsData: SettingsData;
   saveSettingsData: boolean;
   getSetting: SettingsData[SettingKey];
@@ -210,7 +214,7 @@ interface Window {
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
     getDesktopIcon: (row: number, col: number) => Promise<DesktopIcon | null>;
-    isSubWindowActive: () => Promise<boolean>;
+    getSubWindowTitle: () => Promise<string>;
     reloadIcon: (row: number, col: number) => Promise<boolean>;
     openSettings: () => Promise<boolean>;
     openBackgroundSelect: () => Promise<boolean>;

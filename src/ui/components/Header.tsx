@@ -16,14 +16,14 @@ export function Header() {
   const devMode = process.env.NODE_ENV === "development";
 
   const backgroundSelectClicked = async () => {
-    if (await window.electron.isSubWindowActive()) {
+    if (await window.electron.getSubWindowTitle()) {
       return;
     } else {
       window.electron.openBackgroundSelect();
     }
   };
   const settingsClicked = async () => {
-    if (await window.electron.isSubWindowActive()) {
+    if (await window.electron.getSubWindowTitle()) {
       return;
     } else {
       await window.electron.desktopSetShowIcons(true);
