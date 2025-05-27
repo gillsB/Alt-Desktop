@@ -851,9 +851,10 @@ const DesktopGrid: React.FC = () => {
                 }}
                 onClick={() => handleIconClick(icon.row, icon.col)}
                 onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
-                onContextMenu={(e) =>
-                  handleIconRightClick(e, icon.row, icon.col)
-                }
+                onContextMenu={(e) => {
+                  e.stopPropagation();
+                  handleIconRightClick(e, icon.row, icon.col);
+                }}
               >
                 <SafeImage
                   row={icon.row}
