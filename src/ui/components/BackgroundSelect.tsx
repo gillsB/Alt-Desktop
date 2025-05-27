@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
@@ -15,6 +15,9 @@ const BackgroundSelect: React.FC = () => {
     y: number;
     backgroundId: string;
   } | null>(null);
+
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
 
   const handleClose = async () => {
     logger.info("EditBackground window closed");
@@ -105,10 +108,52 @@ const BackgroundSelect: React.FC = () => {
     setContextMenu(null);
   };
 
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounter.current = 0;
+    setIsDragging(false);
+
+    const files = event.dataTransfer.files;
+    if (files && files.length > 0) {
+      const filePath = window.electron.getFilePath(files[0]);
+      logger.info("Dropped file path:", filePath);
+    }
+  };
+
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dragCounter.current++;
+    if (dragCounter.current === 1) {
+      setIsDragging(true);
+    }
+  };
+
   const selected = summaries.filter((bg) => selectedIds.includes(bg.id));
 
   return (
-    <div className="background-select-root">
+    <div
+      className="background-select-root"
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleFileDrop}
+    >
       <SubWindowHeader title="Background Select" onClose={handleClose} />
       <div className="background-select-content">
         <div className="background-grid">
@@ -165,7 +210,14 @@ const BackgroundSelect: React.FC = () => {
           </div>
         )}
       </div>
-
+      {isDragging && (
+        <div className="drag-overlay">
+          <div className="drag-content">
+            <div className="drag-icon">+</div>
+            <div className="drag-text">Drop Image/Video here.</div>
+          </div>
+        </div>
+      )}
       {contextMenu && (
         <div
           className="context-menu"
