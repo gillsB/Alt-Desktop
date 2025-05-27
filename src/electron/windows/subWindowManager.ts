@@ -2,7 +2,7 @@ import { BrowserWindow } from "electron";
 import { pathToFileURL } from "url";
 import { createLoggerForFile } from "../logging.js";
 import { getPreloadPath, getUIPath } from "../pathResolver.js";
-import { isDev, smallWindowDevtoolsEnabled } from "../utils/util.js";
+import { isDev, smallWindowDevtoolsEnabled, subWindowDevtoolsEnabled } from "../utils/util.js";
 
 const logger = createLoggerForFile("subWindowManager.ts");
 let mainWindow: BrowserWindow | null = null; // Store the main window reference
@@ -95,6 +95,64 @@ export function openSubWindow(
   logger.info(`Created subwindow with URL: ${subWindowUrl}`);
 
   return activeSubWindow;
+}
+
+/**
+ * Opens an EditBackground window.
+ * @param {Electron.BrowserWindowConstructorOptions} options - The window options.
+ * @param {string} hash - The hash/query for the window (should include filePath).
+ * @param {string} [title="Edit Background"] - The window title.
+ * @returns {BrowserWindow}
+ */
+export function openEditBackgroundWindow(
+  options: Electron.BrowserWindowConstructorOptions,
+  hash: string,
+  title: string = "Edit Background"
+): BrowserWindow {
+  // Find the main window
+  const allWindows = BrowserWindow.getAllWindows();
+  const mainWindow =
+    allWindows.find((win) => win.title === "AltDesktop") ||
+    (allWindows.length > 0 ? allWindows[0] : null);
+
+  if (!mainWindow) {
+    throw new Error("No main window found");
+  }
+
+  const editWindow = new BrowserWindow({
+    ...options,
+    title,
+    parent: mainWindow,
+    modal: false,
+    backgroundColor: "#00000000",
+    show: false,
+    skipTaskbar: false,
+    webPreferences: {
+      preload: getPreloadPath(),
+      webSecurity: true,
+      ...options.webPreferences,
+    },
+  });
+
+  // Compose the URL
+  let editWindowUrl: string;
+  if (isDev()) {
+    editWindowUrl = `http://localhost:5123/#/${hash}`;
+    editWindow.loadURL(editWindowUrl);
+  } else {
+    editWindowUrl = pathToFileURL(getUIPath()).toString() + `#/${hash}`;
+    editWindow.loadFile(getUIPath(), { hash });
+  }
+
+  editWindow.once("ready-to-show", () => {
+    editWindow.show();
+    editWindow.focus();
+    if (isDev() && subWindowDevtoolsEnabled()) {
+      editWindow.webContents.openDevTools({ mode: "detach" });
+    }
+  });
+
+  return editWindow;
 }
 
 /**

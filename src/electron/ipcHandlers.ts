@@ -29,6 +29,7 @@ import {
 } from "./utils/util.js";
 import { getVideoFileUrl } from "./videoFileProtocol.js";
 import { openBackgroundSelectWindow } from "./windows/backgroundSelectWindow.js";
+import { openEditBackground } from "./windows/editBackgroundWindow.js";
 import { openEditIconWindow } from "./windows/editIconWindow.js";
 import { openSettingsWindow } from "./windows/settingsWindow.js";
 import {
@@ -689,6 +690,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return "";
       }
 
+      const stat = fs.statSync(filePath);
+      if (stat.isDirectory()) {
+        return "directory";
+      }
+
       const mimeType = mime.lookup(filePath);
       if (!mimeType) {
         logger.warn(`Could not determine file type for: ${filePath}`);
@@ -1270,6 +1276,19 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       } catch (error) {
         logger.error(`Error resolving file path: ${error}`);
         return "";
+      }
+    }
+  );
+
+  ipcMainHandle(
+    "openEditBackground",
+    async (filePath: string): Promise<boolean> => {
+      try {
+        openEditBackground(filePath);
+        return true;
+      } catch (error) {
+        logger.error(`Error opening EditBackground window: ${error}`);
+        return false;
       }
     }
   );

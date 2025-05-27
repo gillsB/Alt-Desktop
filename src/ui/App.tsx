@@ -4,6 +4,7 @@ import "./App.css";
 import Background from "./components/Background";
 import BackgroundSelect from "./components/BackgroundSelect";
 import DesktopGrid from "./components/DesktopGrid";
+import EditBackground from "./components/EditBackground";
 import EditIcon from "./components/EditIcon";
 import { Header } from "./components/Header";
 import HoverOpacityItem from "./components/HoverOpacityItem";
@@ -37,6 +38,7 @@ const App: React.FC = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/select-icon" element={<SelectIconWindow />} />
         <Route path="/background-select" element={<BackgroundSelect />} />
+        <Route path="/edit-background" element={<EditBackground />} />
       </Routes>
     </Router>
   );

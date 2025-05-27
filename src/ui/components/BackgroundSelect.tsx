@@ -129,10 +129,23 @@ const BackgroundSelect: React.FC = () => {
     setIsDragging(false);
 
     const files = event.dataTransfer.files;
-    if (files && files.length > 0) {
-      const filePath = window.electron.getFilePath(files[0]);
-      logger.info("Dropped file path:", filePath);
+    if (!files || files.length === 0) return;
+
+    if (files.length > 1) {
+      logger.warn("Please drop only one file at a time.");
+      await window.electron.showSmallWindow(
+        "Drop File",
+        "Please only drop 1 file at a time",
+        ["OK"]
+      );
+      return;
     }
+
+    const filePath = window.electron.getFilePath(files[0]);
+    logger.info("Dropped file path:", filePath);
+    logger.info(await window.electron.getFileType(filePath));
+
+    await window.electron.openEditBackground(filePath);
   };
 
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {

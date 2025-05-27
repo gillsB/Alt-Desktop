@@ -142,6 +142,7 @@ interface EventParamMapping {
   getBackgroundSummaries: [];
   idToFilePath: [string];
   resolveShortcut: [string];
+  openEditBackground: [string];
 }
 
 // The returns from the main process to the renderer
@@ -194,6 +195,7 @@ type EventPayloadMapping = {
   getBackgroundSummaries: BackgroundSummary[];
   idToFilePath: string | null;
   resolveShortcut: string;
+  openEditBackground: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -289,5 +291,6 @@ interface Window {
     getBackgroundSummaries: () => Promise<BackgroundSummary[]>;
     idToFilePath: (id: string) => Promise<string | null>;
     resolveShortcut: (filePath: string) => Promise<string>;
+    openEditBackground: (filePath: string) => Promise<boolean>;
   };
 }
