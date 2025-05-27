@@ -236,16 +236,19 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     if (subWindow) {
       title = subWindow.customTitle || "";
       logger.info(`Subwindow ${title} is active`);
-      // Re-center the subwindow
-      const { width, height } = subWindow.getBounds();
-      const { width: screenWidth, height: screenHeight } =
-        screen.getPrimaryDisplay().workAreaSize;
 
-      const x = Math.round((screenWidth - width) / 2);
-      const y = Math.round((screenHeight - height) / 2);
+      // Get the mainWindow's current bounds and find the display it's on
+      const mainWindowBounds = mainWindow.getBounds();
+      const display = screen.getDisplayMatching(mainWindowBounds);
+
+      // Center the subWindow on that display
+      const { width, height } = subWindow.getBounds();
+      const { x: dx, y: dy, width: dw, height: dh } = display.workArea;
+
+      const x = Math.round(dx + (dw - width) / 2);
+      const y = Math.round(dy + (dh - height) / 2);
 
       subWindow.setBounds({ x, y, width, height });
-
       subWindow.focus();
     }
     return title; // Return the title, or ""
