@@ -114,7 +114,7 @@ interface EventParamMapping {
   getFilePath: [File];
   getFileType: [string];
   deleteIcon: [number, number];
-  openInExplorer: ["image" | "programLink", string];
+  openInExplorer: ["image" | "programLink" | "background", string];
   showSmallWindow: [string, string, string[]];
   previewIconUpdate: [number, number, Partial<DesktopIcon>];
   previewBackgroundUpdate: [Partial<SettingsData>];
@@ -237,7 +237,7 @@ interface Window {
     getFileType: (filepath: string) => Promise<string>;
     deleteIcon: (row: number, col: number) => Promise<boolean>;
     openInExplorer: (
-      type: "image" | "programLink",
+      type: "image" | "programLink" | "background",
       filePath: string
     ) => Promise<boolean>;
     showSmallWindow: (

@@ -752,12 +752,18 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "openInExplorer",
     async (
-      type: "image" | "programLink",
+      type: "image" | "programLink" | "background",
       filePath: string
     ): Promise<boolean> => {
       try {
+        // TODO update this for different master paths when added.
+        if (type === "background") {
+          filePath = path.join(getBackgroundFilePath(), filePath);
+          shell.openPath(filePath);
+          logger.info(`Opened ${type} in Explorer: ${filePath}`);
+          return true;
+        }
         let resolvedPath = filePath;
-        logger.info("resolvedPath", resolvedPath);
 
         if (type === "image") {
           // Resolve the localized app-data file path

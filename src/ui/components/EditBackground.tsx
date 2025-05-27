@@ -101,6 +101,7 @@ const EditBackground: React.FC = () => {
 
   const handleOpenFolder = async (backgroundId: string) => {
     logger.info(`Open Folder for background ${backgroundId}`);
+    await window.electron.openInExplorer("background", backgroundId);
     setContextMenu(null);
   };
 
