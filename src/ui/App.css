@@ -422,14 +422,7 @@ body,
   }
 }
 
-.header-title {
-  font-size: 1rem;
-  color: white;
-  margin-left: 0.5rem;
-  text-align: left;
-  flex-grow: 1;
-  user-select: none;
-}
+
 
 .custom-folder-icon {
   width: 24px;
@@ -460,20 +453,6 @@ body,
 .custom-magnifying-glass-icon.hovered {
   color: white;
   outline: 2px solid grey;
-}
-
-.subwindow-header {
-  width: 100%;
-  text-align: right;
-  padding: 0;
-  box-sizing: border-box;
-  background-color: #181818;
-  -webkit-app-region: drag;
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 2rem;
 }
 
 .small-window-container {
