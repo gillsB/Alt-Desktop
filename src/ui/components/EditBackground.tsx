@@ -11,9 +11,10 @@ const EditBackground: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const filePath = params.get("filePath") || undefined;
 
+  //TODO make this re-call BackgroundSelect, and default to newly added (if saved) EditBackground
   const handleClose = () => {
-    logger.info("closing EditBackground.");
-    window.close();
+    logger.info("Closing EditBackground");
+    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
 
   return (

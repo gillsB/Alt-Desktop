@@ -1,5 +1,4 @@
-import { openEditBackgroundWindow } from "./subWindowManager.js";
-
+import { openSubWindow } from "./subWindowManager.js";
 /**
  * Opens the EditBackground window for the given file path.
  * @param {string} filePath
@@ -12,8 +11,6 @@ export function openEditBackground(filePath: string) {
     frame: false,
     resizable: true,
   };
-
-  // Use a unique hash for each file (to allow multiple windows)
   const hash = `edit-background?filePath=${encodeURIComponent(filePath)}`;
-  return openEditBackgroundWindow(options, hash, "Edit Background");
+  return openSubWindow(options, hash, "Edit Background");
 }

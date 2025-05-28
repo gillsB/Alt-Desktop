@@ -2,7 +2,11 @@ import { BrowserWindow } from "electron";
 import { pathToFileURL } from "url";
 import { createLoggerForFile } from "../logging.js";
 import { getPreloadPath, getUIPath } from "../pathResolver.js";
-import { isDev, smallWindowDevtoolsEnabled, subWindowDevtoolsEnabled } from "../utils/util.js";
+import {
+  isDev,
+  smallWindowDevtoolsEnabled,
+  subWindowDevtoolsEnabled,
+} from "../utils/util.js";
 
 const logger = createLoggerForFile("subWindowManager.ts");
 let mainWindow: BrowserWindow | null = null; // Store the main window reference
@@ -29,130 +33,88 @@ logger.info(`Added main window URL to allowed list: ${mainWindowUrl}`);
 
 /**
  * Opens a subwindow with the specified options and hash.
+ * If a subwindow is already open, it will be closed first, and the new subwindow will be created
+ * only after the previous one is fully destroyed. Only allow calling this when closing the current
+ * subWindow is fine by you.
  *
  * @param {Electron.BrowserWindowConstructorOptions} options - The options for the subwindow.
  * @param {string} subWindowHash - The hash to append to the subwindow URL.
  * @param {string} [title="SubWindow"] - The title of the subwindow.
+ * @returns {BrowserWindow | null} The created BrowserWindow instance,
+ * or null if another subwindow was open and is being closed (the new window will be created asynchronously).
+ *
  */
 export function openSubWindow(
   options: Electron.BrowserWindowConstructorOptions,
   subWindowHash: string,
   title: string = "SubWindow"
-): BrowserWindow {
-  // Properly close any existing subwindow
-  closeActiveSubWindow();
+): BrowserWindow | null {
+  // Helper to actually create the window
+  const createWindow = () => {
+    // Find the main window
+    const allWindows = BrowserWindow.getAllWindows();
+    mainWindow =
+      allWindows.find(
+        (activeSubWindow) => activeSubWindow.title === "AltDesktop"
+      ) || (allWindows.length > 0 ? allWindows[0] : null);
 
-  // Find the main window - get the first window if there's no specific "AltDesktop" titled window
-  const allWindows = BrowserWindow.getAllWindows();
-  mainWindow =
-    allWindows.find((win) => win.title === "AltDesktop") ||
-    (allWindows.length > 0 ? allWindows[0] : null);
-
-  if (!mainWindow) {
-    logger.error("No windows found when trying to create subwindow");
-    throw new Error("No main window found");
-  }
-
-  // Create a new subwindow
-  activeSubWindow = new BrowserWindow({
-    ...options,
-    title, // Set the title of the subwindow
-    parent: mainWindow, // Set the parent to the main window
-    modal: false,
-    skipTaskbar: true, // Hide the subwindow from the taskbar
-    backgroundColor: "#00000000", // Fully transparent this must be set or windows will flash white on restore.
-    show: false, // Don't show the window initially to prevent flashing
-    webPreferences: {
-      preload: getPreloadPath(),
-      webSecurity: true,
-      ...options.webPreferences, // Allow overriding webPreferences
-    },
-  }) as CustomBrowserWindow;
-  activeSubWindow.customTitle = title;
-
-  // Generate the subwindow URL
-  let subWindowUrl: string;
-  if (isDev()) {
-    subWindowUrl = `http://localhost:5123/#/${subWindowHash}`;
-    activeSubWindow.loadURL(subWindowUrl);
-  } else {
-    subWindowUrl = pathToFileURL(getUIPath()).toString() + `#/${subWindowHash}`;
-    activeSubWindow.loadFile(getUIPath(), { hash: subWindowHash });
-  }
-
-  // Add the subwindow URL to the allow-list
-  addAllowedUrl(subWindowUrl);
-
-  // Only show the window once it's ready to prevent flashing
-  activeSubWindow.once("ready-to-show", () => {
-    if (activeSubWindow) {
-      activeSubWindow.show();
-      activeSubWindow.focus();
+    if (!mainWindow) {
+      logger.error("No windows found when trying to create subwindow");
+      throw new Error("No main window found");
     }
-  });
 
-  // Log the creation of the subwindow
-  logger.info(`Created subwindow with URL: ${subWindowUrl}`);
+    activeSubWindow = new BrowserWindow({
+      ...options,
+      title, // Set the title of the subwindow
+      parent: mainWindow, // Set the parent to the main window
+      modal: false,
+      skipTaskbar: true, // Hide the subwindow from the taskbar
+      backgroundColor: "#00000000", // Fully transparent this must be set or windows will flash white on restore.
+      show: false, // Don't show the window initially to prevent flashing
+      webPreferences: {
+        preload: getPreloadPath(),
+        webSecurity: true,
+        ...options.webPreferences,
+      },
+    }) as CustomBrowserWindow;
+    activeSubWindow.customTitle = title;
 
-  return activeSubWindow;
-}
-
-/**
- * Opens an EditBackground window.
- * @param {Electron.BrowserWindowConstructorOptions} options - The window options.
- * @param {string} hash - The hash/query for the window (should include filePath).
- * @param {string} [title="Edit Background"] - The window title.
- * @returns {BrowserWindow}
- */
-export function openEditBackgroundWindow(
-  options: Electron.BrowserWindowConstructorOptions,
-  hash: string,
-  title: string = "Edit Background"
-): BrowserWindow {
-  // Find the main window
-  const allWindows = BrowserWindow.getAllWindows();
-  const mainWindow =
-    allWindows.find((win) => win.title === "AltDesktop") ||
-    (allWindows.length > 0 ? allWindows[0] : null);
-
-  if (!mainWindow) {
-    throw new Error("No main window found");
-  }
-
-  const editWindow = new BrowserWindow({
-    ...options,
-    title,
-    parent: mainWindow,
-    modal: false,
-    backgroundColor: "#00000000",
-    show: false,
-    skipTaskbar: false,
-    webPreferences: {
-      preload: getPreloadPath(),
-      webSecurity: true,
-      ...options.webPreferences,
-    },
-  });
-
-  // Compose the URL
-  let editWindowUrl: string;
-  if (isDev()) {
-    editWindowUrl = `http://localhost:5123/#/${hash}`;
-    editWindow.loadURL(editWindowUrl);
-  } else {
-    editWindowUrl = pathToFileURL(getUIPath()).toString() + `#/${hash}`;
-    editWindow.loadFile(getUIPath(), { hash });
-  }
-
-  editWindow.once("ready-to-show", () => {
-    editWindow.show();
-    editWindow.focus();
-    if (isDev() && subWindowDevtoolsEnabled()) {
-      editWindow.webContents.openDevTools({ mode: "detach" });
+    // Generate the subwindow URL
+    let subWindowUrl: string;
+    if (isDev()) {
+      subWindowUrl = `http://localhost:5123/#/${subWindowHash}`;
+      activeSubWindow.loadURL(subWindowUrl);
+    } else {
+      subWindowUrl =
+        pathToFileURL(getUIPath()).toString() + `#/${subWindowHash}`;
+      activeSubWindow.loadFile(getUIPath(), { hash: subWindowHash });
     }
-  });
 
-  return editWindow;
+    addAllowedUrl(subWindowUrl);
+
+    activeSubWindow.once("ready-to-show", () => {
+      activeSubWindow!.show();
+      activeSubWindow!.focus();
+      if (isDev() && subWindowDevtoolsEnabled()) {
+        activeSubWindow?.webContents.openDevTools({ mode: "detach" });
+      }
+    });
+
+    logger.info(`Created subwindow with URL: ${subWindowUrl}`);
+
+    return activeSubWindow;
+  };
+
+  // If there is an active subwindow, close it and wait for it to be destroyed before creating the new one
+  if (activeSubWindow) {
+    closeActiveSubWindow(() => {
+      createWindow();
+    });
+    // Return null for now, but subWindow will be created.
+    return null;
+  } else {
+    return createWindow();
+  }
 }
 
 /**
@@ -363,33 +325,38 @@ export function getActiveSubWindow(): CustomBrowserWindow | null {
   return activeSubWindow;
 }
 
-export function closeActiveSubWindow(): void {
+export function closeActiveSubWindow(onClosed?: () => void): void {
   if (activeSubWindow) {
     mainWindow?.focus();
-    // Get the URL of the active subwindow
     const subWindowUrl = activeSubWindow.webContents.getURL();
     logger.info(`Closing active subwindow with URL: ${subWindowUrl}`);
-
-    // Remove the URL from the allowed list
     removeAllowedUrl(subWindowUrl);
 
-    // To prevent flashing, hide the window first before closing it
     if (!activeSubWindow.isDestroyed()) {
       activeSubWindow.hide();
 
-      // Use a small timeout to ensure the window is hidden before destroying
+      // Listen for the 'closed' event to ensure the window is fully destroyed
+      activeSubWindow.once("closed", () => {
+        activeSubWindow = null;
+        if (onClosed) onClosed();
+      });
+
       setTimeout(() => {
         if (activeSubWindow && !activeSubWindow.isDestroyed()) {
-          activeSubWindow.destroy(); // Use destroy instead of close for cleaner removal
+          activeSubWindow.destroy();
         }
-        activeSubWindow = null;
+        // If the window was already destroyed in the meantime, call the callback
+        // (the 'closed' event will not fire if already destroyed)
+        if (activeSubWindow === null && onClosed) onClosed();
       }, 50);
     } else {
       activeSubWindow = null;
+      if (onClosed) onClosed();
     }
+  } else if (onClosed) {
+    onClosed();
   }
 }
-
 export function addAllowedUrl(url: string): void {
   if (!allowedUrls.includes(url)) {
     allowedUrls.push(url);

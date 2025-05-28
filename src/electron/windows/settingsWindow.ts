@@ -1,4 +1,3 @@
-import { isDev, subWindowDevtoolsEnabled } from "../utils/util.js";
 import { openSubWindow } from "./subWindowManager.js";
 
 export function openSettingsWindow() {
@@ -9,9 +8,5 @@ export function openSettingsWindow() {
   };
 
   const subWindowHash = `settings`;
-  const settingsWindow = openSubWindow(options, subWindowHash, "Settings");
-
-  if (isDev() && subWindowDevtoolsEnabled()) {
-    settingsWindow.webContents.openDevTools({ mode: "detach" });
-  }
+  return openSubWindow(options, subWindowHash, "Settings");
 }
