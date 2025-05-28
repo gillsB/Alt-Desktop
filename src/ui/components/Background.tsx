@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../styles/Background.css";
 import { createLogger, createVideoLogger } from "../util/uiLogger";
-import { showSmallWindow } from "../util/uiUtil";
+import { isAbsolutePath, showSmallWindow } from "../util/uiUtil";
 
 const logger = createLogger("Background.tsx");
 const videoLogger = createVideoLogger("Background.tsx");
@@ -101,7 +101,10 @@ const Background: React.FC<BackgroundProps> = ({
         updates.background !== backgroundPath
       ) {
         logger.info("Updating background to:", updates.background);
-        let filePath = await convertIDToFilePath(updates.background);
+        let filePath = updates.background;
+        if (filePath && !isAbsolutePath(filePath)) {
+          filePath = (await convertIDToFilePath(filePath)) || "";
+        }
         if (filePath) {
           // Always resolve shortcut if the file is a shortcut
           const fileType = await window.electron.getFileType(filePath);

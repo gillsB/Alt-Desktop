@@ -31,6 +31,13 @@ const EditBackground: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const previewFilePath = async () => {
+      await window.electron.previewBackgroundUpdate({ background: filePath });
+    };
+    previewFilePath();
+  }, [filePath]);
+
   const handleTagToggle = (tag: string) => {
     setPublicTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
@@ -46,6 +53,7 @@ const EditBackground: React.FC = () => {
   //TODO make this re-call BackgroundSelect, and default to newly added (if saved) EditBackground
   const handleClose = () => {
     logger.info("Closing EditBackground");
+    window.electron.reloadBackground();
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
 
