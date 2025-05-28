@@ -1,0 +1,127 @@
+.edit-background-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #2c2c2c;
+  border: none;
+  color: white;
+  z-index: 1000;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-background-content {
+  flex-grow: 1;
+  padding: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 60px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+  gap: 15px;
+  height: calc(100vh - 60px - 35px);
+  max-height: calc(100vh - 60px - 35px);
+  box-sizing: border-box;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.edit-field label {
+  font-weight: bold;
+  color: white;
+  flex: 0 0 150px;
+  user-select: none;
+  margin-bottom: 0;
+}
+
+.edit-field input[type="text"],
+.edit-field textarea {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex: 1;
+  box-sizing: border-box;
+  color: #fff;
+  resize: vertical;
+  width: 100%;
+}
+
+.edit-field input[disabled] {
+  opacity: 0.7;
+}
+
+.edit-field img {
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #181828;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  margin-left: 10px;
+}
+
+/* --- Tag buttons --- */
+.tag,
+.tag-selected {
+  border: none;
+  border-radius: 16px;
+  padding: 4px 14px;
+  font-size: 0.95rem;
+  margin: 2px 0;
+  background: #111111;
+  color: #bdbdbd;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.tag-selected {
+  background: #007bff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.tag:hover:not(.tag-selected) {
+  background: #404063;
+  color: #fff;
+}
+.icon-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.icon-path-input {
+  flex: 1;
+}
+
+.icon-preview {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #181828;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -1,15 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import "../App.css";
+import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
 
+const PUBLIC_TAGS = ["These", "Are", "Official", "Tags", "Only"];
+//These are local tags and would not be shared with bg.json (unique to user).
+const PERSONAL_TAGS = ["These", "Are", "local", "Tags"];
+
 const EditBackground: React.FC = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const filePath = params.get("filePath") || undefined;
+  const filePath = params.get("filePath") || "";
+
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [publicTags, setPublicTags] = useState<string[]>([]);
+  const [personalTags, setPersonalTags] = useState<string[]>([]);
+
+  const handleTagToggle = (tag: string) => {
+    setPublicTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handlePersonalTagToggle = (tag: string) => {
+    setPersonalTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
 
   //TODO make this re-call BackgroundSelect, and default to newly added (if saved) EditBackground
   const handleClose = () => {
@@ -18,13 +39,67 @@ const EditBackground: React.FC = () => {
   };
 
   return (
-    <div className="settings-container">
+    <div className="edit-background-container">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
-      <div className="settings-content">
+      <div className="edit-background-content">
         <h2>Edit Background</h2>
-        <div>
-          <strong>Dropped file:</strong>
-          <pre>{filePath ?? "(none)"}</pre>
+        <div className="edit-field">
+          <label>Name:</label>
+          <input
+            type="text"
+            value={name}
+            placeholder="Background name"
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div className="edit-field">
+          <label>File Name:</label>
+          <input type="text" value={filePath} />
+        </div>
+        <div className="edit-field">
+          <label>Icon:</label>
+          <div className="icon-input-row">
+            <input type="text" className="icon-path-input" />
+          </div>
+        </div>
+        <div className="edit-field">
+          <label>Description:</label>
+          <textarea
+            value={description}
+            placeholder="Short description"
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
+          />
+        </div>
+        <div className="edit-field">
+          <label>Public Tags:</label>
+          <div className="tag-row">
+            {PUBLIC_TAGS.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                className={publicTags.includes(tag) ? "tag-selected" : "tag"}
+                onClick={() => handleTagToggle(tag)}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="edit-field">
+          <label>Personal Tags:</label>
+          <div className="tag-row">
+            {PERSONAL_TAGS.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                className={personalTags.includes(tag) ? "tag-selected" : "tag"}
+                onClick={() => handlePersonalTagToggle(tag)}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
