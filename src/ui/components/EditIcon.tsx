@@ -8,7 +8,7 @@ import { useLocation } from "react-router-dom";
 import { getDefaultDesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
-import { showSmallWindow } from "../util/uiUtil";
+import { fileNameNoExt, showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditIcon.tsx");
@@ -268,10 +268,14 @@ const EditIcon: React.FC = () => {
         const filePath = await window.electron.openFileDialog("File");
         if (filePath) {
           // Update the icon's program link
-          setIcon((prevIcon) =>
-            prevIcon ? { ...prevIcon, programLink: filePath } : null
-          );
-          logger.info(`Program link updated to: ${filePath}`);
+          setIcon((prevIcon) => {
+            if (!prevIcon) return null;
+            const updatedIcon = { ...prevIcon, programLink: filePath };
+            if (!prevIcon.name || prevIcon.name.trim() === "") {
+              updatedIcon.name = fileNameNoExt(filePath);
+            }
+            return updatedIcon;
+          });
         }
       }
     } catch (error) {
@@ -330,9 +334,14 @@ const EditIcon: React.FC = () => {
       }
     } else {
       logger.info("Dropped file is not an image:");
-      setIcon((prevIcon) =>
-        prevIcon ? { ...prevIcon, programLink: filePath } : null
-      );
+      setIcon((prevIcon) => {
+        if (!prevIcon) return null;
+        const updatedIcon = { ...prevIcon, programLink: filePath };
+        if (!prevIcon.name || prevIcon.name.trim() === "") {
+          updatedIcon.name = fileNameNoExt(filePath);
+        }
+        return updatedIcon;
+      });
     }
   };
 

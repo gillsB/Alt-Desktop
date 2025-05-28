@@ -39,3 +39,13 @@ export function isAbsolutePath(p: string) {
   if (p.startsWith("/")) return true;
   return false;
 }
+
+/**
+ * 
+ * @param filePath full file path or partial path
+ * @returns file name without extensions.
+ */
+export function fileNameNoExt(filePath: string) {
+  const fileName = filePath.split(/[\\/]/).pop() || "";
+  return fileName.replace(/\.[^/.]+$/, "");
+}
