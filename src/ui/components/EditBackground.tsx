@@ -1,24 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
+import { fileNameNoExt } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
 
 const PUBLIC_TAGS = ["These", "Are", "Official", "Tags", "Only"];
-//These are local tags and would not be shared with bg.json (unique to user).
+//These are local tags and would not be shared with bg.json (made by user).
 const PERSONAL_TAGS = ["These", "Are", "local", "Tags"];
 
 const EditBackground: React.FC = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const filePath = params.get("filePath") || "";
+  const rawParam = params.get("filePath");
+  const initFilePath = !rawParam || rawParam === "undefined" ? "" : rawParam;
+  logger.info("initFilePath = ", initFilePath);
 
   const [name, setName] = useState("");
+  const [filePath, setFilePath] = useState("");
   const [description, setDescription] = useState("");
   const [publicTags, setPublicTags] = useState<string[]>([]);
   const [personalTags, setPersonalTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (initFilePath != "") {
+      setFilePath(initFilePath);
+      setName(fileNameNoExt(initFilePath));
+    }
+  }, []);
 
   const handleTagToggle = (tag: string) => {
     setPublicTags((prev) =>
@@ -53,13 +64,22 @@ const EditBackground: React.FC = () => {
           />
         </div>
         <div className="edit-field">
-          <label>File Name:</label>
-          <input type="text" value={filePath} />
+          <label>File Path:</label>
+          <input
+            type="text"
+            value={filePath}
+            placeholder="Drop an image or video on this field to set"
+            onChange={(e) => setFilePath(e.target.value)}
+          />
         </div>
         <div className="edit-field">
           <label>Icon:</label>
           <div className="icon-input-row">
-            <input type="text" className="icon-path-input" />
+            <input
+              type="text"
+              className="icon-path-input"
+              placeholder="Drop an image on this field to set"
+            />
           </div>
         </div>
         <div className="edit-field">
