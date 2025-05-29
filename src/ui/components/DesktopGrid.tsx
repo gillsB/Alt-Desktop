@@ -29,6 +29,7 @@ const DesktopGrid: React.FC = () => {
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
   const [showIcons, setShowIcons] = useState(true); // State to toggle icons visibility
+  const [showIconNames, setShowIconNames] = useState(true); // State to toggle icon names visibility
   const [showLaunchSubmenu, setShowLaunchSubmenu] = useState(false); // State for submenu visibility
   const [showOpenSubmenu, setShowOpenSubmenu] = useState(false); // State for submenu visibility
   const [highlightBox, setHighlightBox] = useState<HighlightPosition>({
@@ -68,6 +69,12 @@ const DesktopGrid: React.FC = () => {
 
   const toggleIcons = () => {
     setShowIcons((prev) => !prev);
+    setContextMenu(null);
+    hideHighlightBox();
+  };
+
+  const toggleIconNames = () => {
+    setShowIconNames((prev) => !prev);
     setContextMenu(null);
     hideHighlightBox();
   };
@@ -325,6 +332,7 @@ const DesktopGrid: React.FC = () => {
     ) => {
       logger.info("Received set-show-icons event:", showIcon);
       setShowIcons(showIcon);
+      setShowIconNames(showIcon);
     };
 
     window.electron.on(
@@ -577,6 +585,7 @@ const DesktopGrid: React.FC = () => {
   const handleOpenSettings = async () => {
     try {
       setShowIcons(true);
+      setShowIconNames(true);
       await window.electron.openSettings();
     } catch (error) {
       logger.error(`Failed to open settings`, error);
@@ -867,6 +876,7 @@ const DesktopGrid: React.FC = () => {
                   forceReload={reloadTimestamp}
                 />
                 {icon.fontSize !== 0 &&
+                  showIconNames &&
                   (icon.fontSize || defaultFontSize) !== 0 && (
                     <div
                       className="desktop-icon-name"
@@ -913,6 +923,14 @@ const DesktopGrid: React.FC = () => {
                   type="checkbox"
                   checked={showIcons}
                   onChange={toggleIcons}
+                />
+              </label>
+              <label className="menu-checkbox">
+                Show Icon Names
+                <input
+                  type="checkbox"
+                  checked={showIconNames}
+                  onChange={toggleIconNames}
                 />
               </label>
               <label className="menu-checkbox">
