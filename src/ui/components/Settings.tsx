@@ -288,15 +288,15 @@ const Settings: React.FC = () => {
 
   return (
     <div
-      className="settings-container"
+      className="subwindow-container"
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleFileDrop}
     >
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
-      <div className="settings-content">
-        <div className="settings-field">
+      <div className="subwindow-content">
+        <div className="subwindow-field">
           <label htmlFor="background-path">Background Path</label>
           <input
             id="background-path"
@@ -322,7 +322,7 @@ const Settings: React.FC = () => {
             )}
           </button>
         </div>
-        <div className="settings-field">
+        <div className="subwindow-field">
           <label htmlFor="icon-size">Default Icon Size</label>
           <input
             id="icon-size"
@@ -345,7 +345,7 @@ const Settings: React.FC = () => {
             }}
           />
         </div>
-        <div className="settings-field">
+        <div className="subwindow-field">
           <label htmlFor="font-size">Default Icon Font Size</label>
           <input
             id="font-size"
@@ -368,7 +368,7 @@ const Settings: React.FC = () => {
             }}
           />
         </div>
-        <div className="settings-field">
+        <div className="subwindow-field">
           <label htmlFor="font-color">Default Icon Font Color</label>
           <div className="color-input-container">
             <input
@@ -442,7 +442,7 @@ const Settings: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="settings-field window-type">
+        <div className="subwindow-field dropdown-container">
           <label htmlFor="window-type">Window Type</label>
           <select
             id="window-type"
@@ -466,7 +466,7 @@ const Settings: React.FC = () => {
           </div>
         </div>
       )}
-      <div className="settings-footer">
+      <div className="subwindow-footer">
         <button className="save-button" onClick={handleSave}>
           Save
         </button>

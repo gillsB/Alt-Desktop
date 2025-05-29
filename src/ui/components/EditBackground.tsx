@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { fileNameNoExt } from "../util/uiUtil";
@@ -58,11 +59,10 @@ const EditBackground: React.FC = () => {
   };
 
   return (
-    <div className="edit-background-container">
+    <div className="subwindow-container">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
-      <div className="edit-background-content">
-        <h2>Edit Background</h2>
-        <div className="edit-field">
+      <div className="subwindow-content">
+        <div className="subwindow-field">
           <label>Name:</label>
           <input
             type="text"
@@ -71,7 +71,7 @@ const EditBackground: React.FC = () => {
             onChange={(e) => setName(e.target.value)}
           />
         </div>
-        <div className="edit-field">
+        <div className="subwindow-field">
           <label>File Path:</label>
           <input
             type="text"
@@ -80,7 +80,7 @@ const EditBackground: React.FC = () => {
             onChange={(e) => setFilePath(e.target.value)}
           />
         </div>
-        <div className="edit-field">
+        <div className="subwindow-field">
           <label>Icon:</label>
           <div className="icon-input-row">
             <input
@@ -90,7 +90,7 @@ const EditBackground: React.FC = () => {
             />
           </div>
         </div>
-        <div className="edit-field">
+        <div className="subwindow-field">
           <label>Description:</label>
           <textarea
             value={description}
@@ -99,7 +99,7 @@ const EditBackground: React.FC = () => {
             rows={2}
           />
         </div>
-        <div className="edit-field">
+        <div className="subwindow-field">
           <label>Public Tags:</label>
           <div className="tag-row">
             {PUBLIC_TAGS.map((tag) => (
@@ -114,7 +114,7 @@ const EditBackground: React.FC = () => {
             ))}
           </div>
         </div>
-        <div className="edit-field">
+        <div className="subwindow-field">
           <label>Personal Tags:</label>
           <div className="tag-row">
             {PERSONAL_TAGS.map((tag) => (

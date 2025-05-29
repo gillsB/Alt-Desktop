@@ -382,7 +382,7 @@ const EditIcon: React.FC = () => {
 
   return (
     <div
-      className="edit-icon-container"
+      className="subwindow-container"
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -392,12 +392,12 @@ const EditIcon: React.FC = () => {
         title={`Editing [${row},${col}]`}
         onClose={handleClose}
       />
-      <div className="edit-icon-content">
+      <div className="subwindow-content">
         {loading && <div>Loading...</div>}
         {error && <div>Error: {error}</div>}
         {!loading && !error && icon && (
           <>
-            <div className="edit-icon-field">
+            <div className="subwindow-field">
               <label htmlFor="icon-name">Icon Name</label>
               <input
                 id="icon-name"
@@ -410,7 +410,7 @@ const EditIcon: React.FC = () => {
                 }}
               />
             </div>
-            <div className="edit-icon-field">
+            <div className="subwindow-field">
               <label htmlFor="image-path">Image Path</label>
               <input
                 id="image-path"
@@ -448,7 +448,7 @@ const EditIcon: React.FC = () => {
                 />
               </button>
             </div>
-            <div className="edit-icon-field">
+            <div className="subwindow-field">
               <label htmlFor="program-path">Program Path</label>
               <input
                 id="program-path"
@@ -475,7 +475,7 @@ const EditIcon: React.FC = () => {
                 )}
               </button>
             </div>
-            <div className="edit-icon-field">
+            <div className="subwindow-field">
               <label htmlFor="website-path">Website Link</label>
               <input
                 id="website-link"
@@ -490,7 +490,7 @@ const EditIcon: React.FC = () => {
                 }
               />
             </div>
-            <div className="edit-icon-field" style={{ position: "relative" }}>
+            <div className="subwindow-field" style={{ position: "relative" }}>
               <label htmlFor="font-color">Font Color</label>
               <div className="color-input-container">
                 <input
@@ -533,7 +533,7 @@ const EditIcon: React.FC = () => {
                 </button>
               </div>
             </div>
-            <div className="edit-icon-field">
+            <div className="subwindow-field">
               <label htmlFor="font-size">Font Size</label>
               <input
                 id="font-size"
@@ -558,7 +558,7 @@ const EditIcon: React.FC = () => {
                 }}
               />
             </div>
-            <div className="edit-icon-field">
+            <div className="subwindow-field">
               <label htmlFor="offset-x">Offset X</label>
               <input
                 id="offset-x"
@@ -583,7 +583,7 @@ const EditIcon: React.FC = () => {
                 }}
               />
             </div>
-            <div className="edit-icon-field">
+            <div className="subwindow-field">
               <label htmlFor="offset-y">Offset Y</label>
               <input
                 id="offset-y"
@@ -608,7 +608,7 @@ const EditIcon: React.FC = () => {
                 }}
               />
             </div>
-            <div className="edit-icon-field">
+            <div className="subwindow-field">
               <label htmlFor="icon-width">Icon width</label>
               <input
                 id="icon-width"
@@ -633,7 +633,7 @@ const EditIcon: React.FC = () => {
                 }}
               />
             </div>
-            <div className="edit-icon-field">
+            <div className="subwindow-field">
               <label htmlFor="icon-height">Icon height</label>
               <input
                 id="icon-height"
@@ -658,7 +658,7 @@ const EditIcon: React.FC = () => {
                 }}
               />
             </div>
-            <div className="edit-icon-field dropdown-container">
+            <div className="subwindow-field dropdown-container">
               <label htmlFor="launch-default">Launch Default</label>
               <select
                 id="launch-default"
@@ -691,7 +691,7 @@ const EditIcon: React.FC = () => {
           </div>
         </div>
       )}
-      <div className="edit-icon-footer">
+      <div className="subwindow-footer">
         <button className="generate-button" onClick={handleGenerateIcon}>
           Generate icon
         </button>
