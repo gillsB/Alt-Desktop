@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getDefaultDesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
+import "../styles/EditIcon.css";
 import { createLogger } from "../util/uiLogger";
 import { fileNameNoExt, showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";

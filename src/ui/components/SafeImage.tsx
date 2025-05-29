@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "../styles/SafeImage.css";
 import { createLogger } from "../util/uiLogger";
 
 const logger = createLogger("safeImage.tsx");

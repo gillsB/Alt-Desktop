@@ -55,7 +55,9 @@ const EditBackground: React.FC = () => {
   const handleClose = () => {
     logger.info("Closing EditBackground");
     window.electron.reloadBackground();
-    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+    // TODO make sure to save settings to new background if user wants to apply it before calling this
+    //re-open BackgroundSelect
+    window.electron.openBackgroundSelect();
   };
 
   return (

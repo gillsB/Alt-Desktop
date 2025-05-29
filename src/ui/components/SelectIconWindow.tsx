@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import "../App.css";
+import "../styles/SmallWindow.css";
 import { createLogger } from "../util/uiLogger";
 import { SafeImage } from "./SafeImage";
 

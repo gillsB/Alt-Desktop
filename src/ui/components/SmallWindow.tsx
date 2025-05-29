@@ -1,7 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { useLocation } from "react-router-dom";
-import "../App.css";
+import "../styles/SmallWindow.css";
 import { createLogger } from "../util/uiLogger";
 
 const logger = createLogger("SmallWindow.tsx");
