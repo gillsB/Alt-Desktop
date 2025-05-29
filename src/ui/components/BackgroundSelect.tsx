@@ -181,12 +181,7 @@ const BackgroundSelect: React.FC = () => {
               onContextMenu={(e) => handleContextMenu(e, bg.id)}
               tabIndex={0}
             >
-              {bg.iconPath && (
-                <SafeImage
-                  imagePath={bg.iconPath}
-                  className="background-icon"
-                />
-              )}
+              <SafeImage imagePath={bg.iconPath} className="background-icon" />
               <h4>{bg.name || bg.id}</h4>
             </div>
           ))}
