@@ -4,7 +4,7 @@ import { defaultSettings, ensureDefaultSettings } from "./settings.js";
 import {
   ensureFileExists,
   getBackgroundFilePath,
-  getBackgroundsFilePath,
+  getBackgroundsJsonFilePath,
   getDataFolderPath,
   getDesktopIconsFilePath,
   getDesktopPath,
@@ -32,7 +32,7 @@ export const ensureAppDataFiles = () => {
     const desktopIconsFilePath = getDesktopIconsFilePath();
     const settingsFilePath = getSettingsFilePath();
     const backgroundFilePath = getBackgroundFilePath();
-    const backgroundsFilePath = getBackgroundsFilePath();
+    const backgroundsFilePath = getBackgroundsJsonFilePath();
 
     // Ensure directories exist
     if (!fs.existsSync(logsFolderPath)) {

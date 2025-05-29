@@ -120,6 +120,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   resolveShortcut: (filePath: string) => ipcInvoke("resolveShortcut", filePath),
   openEditBackground: (filePath: string) =>
     ipcInvoke("openEditBackground", filePath),
+  saveBgJson: (summary: BackgroundSummary) => ipcInvoke("saveBgJson", summary),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

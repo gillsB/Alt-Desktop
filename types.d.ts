@@ -46,7 +46,9 @@ type BackgroundSummary = {
   name?: string;
   description?: string;
   iconPath?: string;
+  filename?: string; // Add this if not present
   tags?: string[];
+  localTags?: string[];
 };
 
 type DesktopIcon = {
@@ -143,6 +145,7 @@ interface EventParamMapping {
   idToFilePath: [string];
   resolveShortcut: [string];
   openEditBackground: [string];
+  saveBgJson: [BackgroundSummary];
 }
 
 // The returns from the main process to the renderer
@@ -196,6 +199,7 @@ type EventPayloadMapping = {
   idToFilePath: string | null;
   resolveShortcut: string;
   openEditBackground: boolean;
+  saveBgJson: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -292,5 +296,6 @@ interface Window {
     idToFilePath: (id: string) => Promise<string | null>;
     resolveShortcut: (filePath: string) => Promise<string>;
     openEditBackground: (filePath: string) => Promise<boolean>;
+    saveBgJson: (data: BackgroundSummary) => Promise<boolean>;
   };
 }

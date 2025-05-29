@@ -264,7 +264,7 @@ export function escapeRegExp(str: string) {
  */
 export async function indexBackgrounds() {
   const backgroundsDir = getBackgroundFilePath();
-  const backgroundsJsonPath = getBackgroundsFilePath();
+  const backgroundsJsonPath = getBackgroundsJsonFilePath();
 
   // Read all entries in the backgrounds directory
   const entries = await fs.promises.readdir(backgroundsDir, {
@@ -336,6 +336,49 @@ export async function indexBackgrounds() {
   }
 }
 
+/**
+ * Gets the background folder path for an ID.
+ * @param id The ID of the background.
+ * @returns Base background (id) folder i.e. /backgrounds/id/
+ */
+export const idToBackgroundFolder = async (id: string) => {
+  const baseDir = getBackgroundFilePath();
+  const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
+  return path.join(baseDir, folderPath);
+};
+
+/**
+ * Gets the path of the bg.json file for an ID.
+ * @param id The ID of the background.
+ * @returns bg.json path for background ID.
+ */
+export const idToBgJson = async (id: string) => {
+  const backgroundFolder = await idToBackgroundFolder(id);
+  return path.join(backgroundFolder, "bg.json");
+};
+
+/**
+ * Gets the actual background file for an ID.
+ * @param id The ID of the background.
+ * @returns Direct FilePath of the background ("filename")
+ */
+export const idToBackgroundPath = async (id: string) => {
+  try {
+    const backgroundFolder = await idToBackgroundFolder(id);
+    const bgJsonPath = await idToBgJson(id);
+    if (!fs.existsSync(bgJsonPath)) return null;
+    const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
+    const bg = JSON.parse(rawBg);
+    if (bg.public && bg.public.filename) {
+      return path.join(backgroundFolder, bg.public.filename);
+    }
+    return null;
+  } catch (e) {
+    logger.warn(`Failed to resolve filePath for id ${id}:`, e);
+    return null;
+  }
+};
+
 export const getBasePath = (): string => {
   return getAppDataPath();
 };
@@ -364,6 +407,6 @@ export const getBackgroundFilePath = (): string => {
   return path.join(getBasePath(), "backgrounds");
 };
 
-export const getBackgroundsFilePath = (): string => {
+export const getBackgroundsJsonFilePath = (): string => {
   return path.join(getBasePath(), "backgrounds.json");
 };

@@ -15,10 +15,12 @@ import {
   escapeRegExp,
   getAppDataPath,
   getBackgroundFilePath,
-  getBackgroundsFilePath,
+  getBackgroundsJsonFilePath,
   getDataFolderPath,
   getDesktopIconsFilePath,
   getSettingsFilePath,
+  idToBackgroundPath,
+  idToBgJson,
   ipcMainHandle,
   ipcMainOn,
   resetAllIconsFontColor,
@@ -1204,7 +1206,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
   ipcMainHandle("getBackgroundSummaries", async () => {
-    const backgroundsFile = getBackgroundsFilePath();
+    const backgroundsFile = getBackgroundsJsonFilePath();
     const baseDir = getBackgroundFilePath();
 
     const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
@@ -1248,21 +1250,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     return results;
   });
   ipcMainHandle("idToFilePath", async (id: string) => {
-    try {
-      const baseDir = getBackgroundFilePath();
-      const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
-      const bgJsonPath = path.join(baseDir, folderPath, "bg.json");
-      if (!fs.existsSync(bgJsonPath)) return null;
-      const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
-      const bg = JSON.parse(rawBg);
-      if (bg.public && bg.public.filename) {
-        return path.join(baseDir, folderPath, bg.public.filename);
-      }
-      return null;
-    } catch (e) {
-      logger.warn(`Failed to resolve filePath for id ${id}:`, e);
-      return null;
-    }
+    return idToBackgroundPath(id);
   });
 
   ipcMainHandle(
@@ -1291,6 +1279,47 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return true;
       } catch (error) {
         logger.error(`Error opening EditBackground window: ${error}`);
+        return false;
+      }
+    }
+  );
+  ipcMainHandle(
+    "saveBgJson",
+    async (summary: BackgroundSummary): Promise<boolean> => {
+      try {
+        if (!summary.id) throw new Error("Missing background id");
+        logger.info("here");
+        const bgJsonPath = await idToBgJson(summary.id);
+
+        // Ensure the directory exists
+        await fs.promises.mkdir(path.dirname(bgJsonPath), { recursive: true });
+
+        // Format the bg.json structure
+        const bgJson = {
+          public: {
+            name: summary.name ?? "",
+            filename: summary.filename ?? "",
+            description: summary.description ?? "",
+            tags: summary.tags ?? [],
+            icon: summary.iconPath ? path.basename(summary.iconPath) : "",
+          },
+          local: {
+            tags: summary.localTags ?? [],
+          },
+        };
+
+        // Write to bg.json
+        await fs.promises.writeFile(
+          bgJsonPath,
+          JSON.stringify(bgJson, null, 2),
+          "utf-8"
+        );
+        logger.info(
+          `Saved bg.json for background ${summary.id} at ${bgJsonPath}`
+        );
+        return true;
+      } catch (error) {
+        logger.error("Failed to save bg.json:", error);
         return false;
       }
     }
