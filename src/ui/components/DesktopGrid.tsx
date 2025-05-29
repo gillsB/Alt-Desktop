@@ -115,30 +115,6 @@ const DesktopGrid: React.FC = () => {
   };
 
   /**
-   * Updates a specific field of a `DesktopIcon` at the given position.
-   *
-   * @param { [number, number] } position - A tuple representing the [row, col] position of the icon.
-   * @param { keyof DesktopIcon } field - The field of the `DesktopIcon` to update.
-   * @param { DesktopIcon[keyof DesktopIcon] } value - The new value to set for the specified field.
-   */
-  const updateIconField = <K extends keyof DesktopIcon>(
-    position: [number, number],
-    field: K,
-    value: DesktopIcon[K]
-  ) => {
-    setIconsMap((prevMap) => {
-      const key = `${position[0]},${position[1]}`; // Convert tuple to key
-      const icon = prevMap.get(key);
-      if (!icon) return prevMap; // No update if icon doesn't exist
-
-      const newMap = new Map(prevMap);
-      newMap.set(key, { ...icon, [field]: value });
-
-      return newMap;
-    });
-  };
-
-  /**
    * Handles the "reload-icon" IPC event from the Electron main process.
    * This function updates the `iconsMap` state with the new icon data received via IPC.
    *
@@ -350,9 +326,9 @@ const DesktopGrid: React.FC = () => {
 
   const handleIconClick = (row: number, col: number) => {
     const icon = getIcon(row, col);
-    if (!icon) return iconsMap; // No update if icon doesn't exist
-    const newColor = icon.fontColor === "red" ? "white" : "red";
-    updateIconField([row, col], "fontColor", newColor);
+    if (!icon) {
+      logger.info("Somehow clicked on an icon but also not on an icon...");
+    }
   };
 
   const handleIconDoubleClick = async (row: number, col: number) => {
@@ -901,7 +877,6 @@ const DesktopGrid: React.FC = () => {
           style={{
             left: `${contextMenu.x}px`,
             top: `${contextMenu.y}px`,
-            position: "absolute",
           }}
         >
           {contextMenu.type === "desktop" && (

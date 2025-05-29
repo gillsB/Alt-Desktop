@@ -137,12 +137,11 @@ const SafeImageComponent: React.FC<{
     height: height || defaultIconSize,
   });
   const [imageError, setImageError] = useState(false);
-  const [isEmptyImage] = useState(
-    imagePath === " " || imagePath.toLowerCase() === "none"
-  );
+  const [isEmptyImage, setIsEmptyImage] = useState(false);
 
   useEffect(() => {
     setImageError(false);
+    setIsEmptyImage(imagePath === " " || imagePath.toLowerCase() === "none");
 
     if (isEmptyImage && row && col) {
       logger.info(
