@@ -103,7 +103,19 @@ const BackgroundSelect: React.FC = () => {
   };
 
   const handleOpenFolder = async (backgroundId: string) => {
-    logger.info(`Open Folder for background ${backgroundId}`);
+    if (selectedIds.includes(backgroundId)) {
+      // Open all other selected IDs except the one right-clicked
+      for (const id of selectedIds) {
+        if (id !== backgroundId) {
+          logger.info(
+            `Multiple backgrounds selected, opening folder for ${id}`
+          );
+          await window.electron.openInExplorer("background", id);
+        }
+      }
+    }
+    // Open the one that was right-clicked
+    logger.info(`Opening folder for background ${backgroundId}`);
     await window.electron.openInExplorer("background", backgroundId);
     setContextMenu(null);
   };
