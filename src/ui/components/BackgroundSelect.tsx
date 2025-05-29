@@ -70,9 +70,19 @@ const BackgroundSelect: React.FC = () => {
     // Used for selecting multiple files, not sure if this will be allowed or what to do with this.
     if (e) {
       if (e.ctrlKey || e.metaKey) {
-        setSelectedIds((prev) =>
-          prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-        );
+        setSelectedIds((prev) => {
+          let next;
+          if (prev.includes(id)) {
+            next = prev.filter((x) => x !== id);
+          } else {
+            next = [...prev, id];
+          }
+          // If the next selection is empty, preview fallback.
+          if (next.length === 0) {
+            window.electron.previewBackgroundUpdate({ background: "fallback" });
+          }
+          return next;
+        });
         return;
       }
     }
@@ -169,8 +179,6 @@ const BackgroundSelect: React.FC = () => {
     }
   };
 
-  const selected = summaries.filter((bg) => selectedIds.includes(bg.id));
-
   return (
     <div
       className="background-select-root"
@@ -193,42 +201,48 @@ const BackgroundSelect: React.FC = () => {
               onContextMenu={(e) => handleContextMenu(e, bg.id)}
               tabIndex={0}
             >
-              <SafeImage imagePath={bg.iconPath ?? ""} className="background-icon" />
+              <SafeImage
+                imagePath={bg.iconPath ?? ""}
+                className="background-icon"
+              />
               <h4>{bg.name || bg.id}</h4>
             </div>
           ))}
         </div>
-        {selected.length > 0 && (
-          <div className="background-details-panel">
-            {selected.map((bg) => (
-              <div key={bg.id}>
-                {bg.iconPath && (
+        {selectedIds.length > 0 &&
+          (() => {
+            const bg = summaries.find((bg) => bg.id === selectedIds[0]);
+            if (!bg) return null;
+            return (
+              <div className="background-details-panel" key={bg.id}>
+                <div key={bg.id}>
+                  {bg.iconPath && (
+                    <div className="details-row">
+                      <SafeImage
+                        imagePath={bg.iconPath}
+                        width={128}
+                        height={128}
+                        className="panel-icon"
+                      />
+                    </div>
+                  )}
+                  <h3>{bg.name || bg.id}</h3>
                   <div className="details-row">
-                    <SafeImage
-                      imagePath={bg.iconPath}
-                      width={128}
-                      height={128}
-                      className="panel-icon"
-                    />
+                    <label>Description</label>
+                    <div className="details-value">
+                      {bg.description || <em>No description</em>}
+                    </div>
                   </div>
-                )}
-                <h3>{bg.name || bg.id}</h3>
-                <div className="details-row">
-                  <label>Description</label>
-                  <div className="details-value">
-                    {bg.description || <em>No description</em>}
-                  </div>
-                </div>
-                <div className="details-row">
-                  <label>Tags</label>
-                  <div className="details-value">
-                    {bg.tags?.join(", ") || <em>None</em>}
+                  <div className="details-row">
+                    <label>Tags</label>
+                    <div className="details-value">
+                      {bg.tags?.join(", ") || <em>None</em>}
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })()}
       </div>
       {isDragging && (
         <div className="drag-overlay">

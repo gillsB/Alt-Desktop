@@ -101,6 +101,11 @@ const Background: React.FC<BackgroundProps> = ({
         updates.background !== backgroundPath
       ) {
         logger.info("Updating background to:", updates.background);
+        if (updates.background === "fallback") {
+          logger.info("Background set to fallback, skipping background logic.");
+          setBackgroundPath("");
+          return;
+        }
         let filePath = updates.background;
         if (filePath && !isAbsolutePath(filePath)) {
           filePath = (await convertIDToFilePath(filePath)) || "";
