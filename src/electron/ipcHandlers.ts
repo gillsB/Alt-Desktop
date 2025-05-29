@@ -1241,10 +1241,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         logger.warn(`Failed to read bg.json for ${id}:`, e);
         results.push({
           id,
-          name: "",
-          description: "",
-          iconPath: "",
-          tags: [""],
         });
       }
     }

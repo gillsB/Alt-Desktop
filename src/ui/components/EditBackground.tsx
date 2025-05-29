@@ -60,6 +60,10 @@ const EditBackground: React.FC = () => {
     window.electron.openBackgroundSelect();
   };
 
+  const handleSave = () => {
+    logger.info("Attempting to save...");
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -78,7 +82,7 @@ const EditBackground: React.FC = () => {
           <input
             type="text"
             value={filePath}
-            placeholder="Drop an image or video on this field to set"
+            placeholder="Drop an image or video on this field to set (not implemented yet)"
             onChange={(e) => setFilePath(e.target.value)}
           />
         </div>
@@ -88,7 +92,7 @@ const EditBackground: React.FC = () => {
             <input
               type="text"
               className="icon-path-input"
-              placeholder="Drop an image on this field to set"
+              placeholder="Drop an image on this field to set (not implemented yet)"
             />
           </div>
         </div>
@@ -131,6 +135,11 @@ const EditBackground: React.FC = () => {
             ))}
           </div>
         </div>
+      </div>
+      <div className="subwindow-footer">
+        <button className="save-button" onClick={handleSave}>
+          Save
+        </button>
       </div>
     </div>
   );

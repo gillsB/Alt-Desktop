@@ -43,10 +43,10 @@ type SettingKey = keyof SettingsData;
 
 type BackgroundSummary = {
   id: string;
-  name: string;
-  description: string;
-  iconPath: string;
-  tags: string[];
+  name?: string;
+  description?: string;
+  iconPath?: string;
+  tags?: string[];
 };
 
 type DesktopIcon = {
