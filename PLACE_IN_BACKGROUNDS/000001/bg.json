@@ -1,7 +1,7 @@
 {
   "public": {
     "name": "background",
-    "filename": "background.png",
+    "bgFile": "background.png",
     "description": "A background.",
     "tags": ["image"],
 	"icon": "icon.png"

@@ -23,19 +23,19 @@ const EditBackground: React.FC = () => {
         name: "",
         description: "",
         iconPath: "",
-        filename: "",
+        bgFile: "",
         tags: [],
         localTags: [],
       };
 
   const [summary, setSummary] = useState<BackgroundSummary>(initialSummary);
 
-  // Preview background update when filename changes
+  // Preview background update when bgFile changes
   useEffect(() => {
-    if (summary.filename) {
-      window.electron.previewBackgroundUpdate({ background: summary.filename });
+    if (summary.bgFile) {
+      window.electron.previewBackgroundUpdate({ background: summary.bgFile });
     }
-  }, [summary.filename]);
+  }, [summary.bgFile]);
 
   // Tag toggles
   const handleTagToggle = (tag: string) => {
@@ -71,23 +71,20 @@ const EditBackground: React.FC = () => {
 
     const updatedSummary = { ...summary };
 
-    if (updatedSummary.filename) {
-      const filenameType = await window.electron.getFileType(
-        updatedSummary.filename
+    if (updatedSummary.bgFile) {
+      const bgFileType = await window.electron.getFileType(
+        updatedSummary.bgFile
       );
-      if (
-        filenameType.startsWith("image") ||
-        filenameType.startsWith("video")
-      ) {
-        updatedSummary.filename = await saveFileToBackground(
+      if (bgFileType.startsWith("image") || bgFileType.startsWith("video")) {
+        updatedSummary.bgFile = await saveFileToBackground(
           updatedSummary.id,
-          updatedSummary.filename
+          updatedSummary.bgFile
         );
       } else {
-        logger.error("Invalid file type for filename:", filenameType);
+        logger.error("Invalid file type for bgFile:", bgFileType);
         await showSmallWindow(
           "Invalid File Type",
-          `Selected Background File Path is not an image or video, it is a ${filenameType} type` +
+          `Selected Background File Path is not an image or video, it is a ${bgFileType} type` +
             "\nPlease select a valid image or video file.",
           ["OK"]
         );
@@ -129,15 +126,16 @@ const EditBackground: React.FC = () => {
     pathValue: string | undefined
   ): Promise<string | undefined> => {
     if (!pathValue) return pathValue;
-    const localPath = await window.electron.saveToBackgroundIDFile(id, pathValue);
+    const localPath = await window.electron.saveToBackgroundIDFile(
+      id,
+      pathValue
+    );
     if (localPath) {
       return localPath;
     } else {
       logger.error("Failed to save image:", pathValue);
       return undefined;
     }
-
-    return pathValue;
   };
 
   return (
@@ -159,10 +157,10 @@ const EditBackground: React.FC = () => {
           <label>Background File Path:</label>
           <input
             type="text"
-            value={summary.filename ?? ""}
+            value={summary.bgFile ?? ""}
             placeholder="Drop an image or video on this field to set (not implemented yet)"
             onChange={(e) =>
-              setSummary((prev) => ({ ...prev, filename: e.target.value }))
+              setSummary((prev) => ({ ...prev, bgFile: e.target.value }))
             }
           />
         </div>

@@ -1301,10 +1301,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         const bgJson = {
           public: {
             name: summary.name ?? "",
-            filename: summary.filename ?? "",
+            bgFile: summary.bgFile ?? "",
+            icon: summary.iconPath ? path.basename(summary.iconPath) : "",
             description: summary.description ?? "",
             tags: summary.tags ?? [],
-            icon: summary.iconPath ? path.basename(summary.iconPath) : "",
           },
           local: {
             tags: summary.localTags ?? [],

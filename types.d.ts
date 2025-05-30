@@ -46,7 +46,7 @@ type BackgroundSummary = {
   name?: string;
   description?: string;
   iconPath?: string;
-  filename?: string; // Add this if not present
+  bgFile?: string;
   tags?: string[];
   localTags?: string[];
 };

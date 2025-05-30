@@ -360,7 +360,7 @@ export const idToBgJson = (id: string) => {
 /**
  * Gets the actual background file for an ID.
  * @param id The ID of the background.
- * @returns Direct FilePath of the background ("filename")
+ * @returns Direct FilePath of the background ("bgFile")
  */
 export const idToBackgroundPath = async (id: string) => {
   try {
@@ -369,8 +369,8 @@ export const idToBackgroundPath = async (id: string) => {
     if (!fs.existsSync(bgJsonPath)) return null;
     const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
     const bg = JSON.parse(rawBg);
-    if (bg.public && bg.public.filename) {
-      return path.join(backgroundFolder, bg.public.filename);
+    if (bg.public && bg.public.bgFile) {
+      return path.join(backgroundFolder, bg.public.bgFile);
     }
     return null;
   } catch (e) {

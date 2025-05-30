@@ -171,7 +171,7 @@ const BackgroundSelect: React.FC = () => {
     await window.electron.openEditBackground({
       // TODO make sure this is a unique ID.
       id: fileNameNoExt(filePath),
-      filename: filePath,
+      bgFile: filePath,
     });
   };
 
