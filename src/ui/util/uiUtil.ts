@@ -41,9 +41,9 @@ export function isAbsolutePath(p: string) {
 }
 
 /**
- * 
+ *
  * @param filePath full file path or partial path
- * @returns file name without extensions.
+ * @returns file name (not full file path) without extensions.
  */
 export function fileNameNoExt(filePath: string) {
   const fileName = filePath.split(/[\\/]/).pop() || "";

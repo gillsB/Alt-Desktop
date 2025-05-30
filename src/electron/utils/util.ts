@@ -341,7 +341,7 @@ export async function indexBackgrounds() {
  * @param id The ID of the background.
  * @returns Base background (id) folder i.e. /backgrounds/id/
  */
-export const idToBackgroundFolder = async (id: string) => {
+export const idToBackgroundFolder = (id: string) => {
   const baseDir = getBackgroundFilePath();
   const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
   return path.join(baseDir, folderPath);
@@ -352,8 +352,8 @@ export const idToBackgroundFolder = async (id: string) => {
  * @param id The ID of the background.
  * @returns bg.json path for background ID.
  */
-export const idToBgJson = async (id: string) => {
-  const backgroundFolder = await idToBackgroundFolder(id);
+export const idToBgJson = (id: string) => {
+  const backgroundFolder = idToBackgroundFolder(id);
   return path.join(backgroundFolder, "bg.json");
 };
 

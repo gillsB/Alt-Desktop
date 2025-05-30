@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
+import { showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
@@ -67,13 +68,76 @@ const EditBackground: React.FC = () => {
   // Save handler
   const handleSave = async () => {
     logger.info("Attempting to save...");
-    const success = await window.electron.saveBgJson(summary);
+
+    const updatedSummary = { ...summary };
+
+    if (updatedSummary.filename) {
+      const filenameType = await window.electron.getFileType(
+        updatedSummary.filename
+      );
+      if (
+        filenameType.startsWith("image") ||
+        filenameType.startsWith("video")
+      ) {
+        updatedSummary.filename = await saveFileToBackground(
+          updatedSummary.id,
+          updatedSummary.filename
+        );
+      } else {
+        logger.error("Invalid file type for filename:", filenameType);
+        await showSmallWindow(
+          "Invalid File Type",
+          `Selected Background File Path is not an image or video, it is a ${filenameType} type` +
+            "\nPlease select a valid image or video file.",
+          ["OK"]
+        );
+        return;
+      }
+    }
+
+    if (updatedSummary.iconPath) {
+      const iconPathType = await window.electron.getFileType(
+        updatedSummary.iconPath
+      );
+      if (iconPathType.startsWith("image")) {
+        updatedSummary.iconPath = await saveFileToBackground(
+          updatedSummary.id,
+          updatedSummary.iconPath
+        );
+      } else {
+        await showSmallWindow(
+          "Invalid File Type",
+          `Selected Icon File Path is not an image, it is a ${iconPathType} type` +
+            "\nPlease select a valid image file.",
+          ["OK"]
+        );
+        return;
+      }
+    }
+
+    const success = await window.electron.saveBgJson(updatedSummary);
     if (success) {
       logger.info("Background saved successfully.");
       handleClose();
     } else {
       logger.error("Failed to save background.");
     }
+  };
+
+  const saveFileToBackground = async (
+    id: string,
+    pathValue: string | undefined
+  ): Promise<string | undefined> => {
+    if (!pathValue) return pathValue;
+    const localPath = await window.electron.saveToBackgroundIDFile(id, pathValue);
+    if (localPath) {
+      return localPath;
+    } else {
+      logger.error("Failed to save image:", pathValue);
+      return undefined;
+    }
+
+    return pathValue;
   };
 
   return (
@@ -92,7 +156,7 @@ const EditBackground: React.FC = () => {
           />
         </div>
         <div className="subwindow-field">
-          <label>File Path:</label>
+          <label>Background File Path:</label>
           <input
             type="text"
             value={summary.filename ?? ""}

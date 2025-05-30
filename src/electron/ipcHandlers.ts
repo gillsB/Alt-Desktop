@@ -19,6 +19,7 @@ import {
   getDataFolderPath,
   getDesktopIconsFilePath,
   getSettingsFilePath,
+  idToBackgroundFolder,
   idToBackgroundPath,
   idToBgJson,
   ipcMainHandle,
@@ -475,10 +476,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  // TODO need a way to not save the full video file, just create a shortcut.
+  // TODO also add a flag like saveFile or saveShortcut
   ipcMainHandle(
-    "saveBackgroundImage",
-    async (sourcePath: string): Promise<string> => {
-      const targetDir = getBackgroundFilePath();
+    "saveToBackgroundIDFile",
+    async (id: string, sourcePath: string): Promise<string> => {
+      const targetDir = idToBackgroundFolder(id);
 
       const ext = path.extname(sourcePath);
       const baseName = path.basename(sourcePath, ext);
@@ -538,11 +541,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       try {
         fs.copyFileSync(sourcePath, targetPath);
-        logger.info(`Image saved to: ${targetPath}`);
+        logger.info(`File saved to: ${targetPath}`);
 
         return localFileName;
       } catch (error) {
-        logger.error("Failed to save image:", error);
+        logger.error("Failed to save file:", error);
         throw error;
       }
     }
