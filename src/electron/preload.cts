@@ -118,8 +118,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getBackgroundSummaries: () => ipcInvoke("getBackgroundSummaries"),
   idToFilePath: (id: string) => ipcInvoke("idToFilePath", id),
   resolveShortcut: (filePath: string) => ipcInvoke("resolveShortcut", filePath),
-  openEditBackground: (filePath: string) =>
-    ipcInvoke("openEditBackground", filePath),
+  openEditBackground: (summary: BackgroundSummary) =>
+    ipcInvoke("openEditBackground", summary),
   saveBgJson: (summary: BackgroundSummary) => ipcInvoke("saveBgJson", summary),
 } satisfies Window["electron"]);
 

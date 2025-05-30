@@ -20,7 +20,7 @@ const BackgroundSelect: React.FC = () => {
   const dragCounter = useRef(0);
 
   const handleClose = async () => {
-    logger.info("EditBackground window closed");
+    logger.info("BackgroundSelect window closed");
     await window.electron.saveSettingsData({ background: selectedIds[0] });
     await window.electron.reloadBackground();
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
@@ -167,7 +167,7 @@ const BackgroundSelect: React.FC = () => {
     logger.info("Dropped file path:", filePath);
     logger.info(await window.electron.getFileType(filePath));
 
-    await window.electron.openEditBackground(filePath);
+    await window.electron.openEditBackground({ id: "xyz", filename: filePath });
   };
 
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {

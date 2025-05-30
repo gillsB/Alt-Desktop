@@ -144,7 +144,7 @@ interface EventParamMapping {
   getBackgroundSummaries: [];
   idToFilePath: [string];
   resolveShortcut: [string];
-  openEditBackground: [string];
+  openEditBackground: [BackgroundSummary];
   saveBgJson: [BackgroundSummary];
 }
 
@@ -295,7 +295,7 @@ interface Window {
     getBackgroundSummaries: () => Promise<BackgroundSummary[]>;
     idToFilePath: (id: string) => Promise<string | null>;
     resolveShortcut: (filePath: string) => Promise<string>;
-    openEditBackground: (filePath: string) => Promise<boolean>;
+    openEditBackground: (summary: BackgroundSummary) => Promise<boolean>;
     saveBgJson: (data: BackgroundSummary) => Promise<boolean>;
   };
 }

@@ -1273,9 +1273,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "openEditBackground",
-    async (filePath: string): Promise<boolean> => {
+    async (summary: BackgroundSummary): Promise<boolean> => {
       try {
-        openEditBackground(filePath);
+        openEditBackground(summary);
         return true;
       } catch (error) {
         logger.error(`Error opening EditBackground window: ${error}`);
