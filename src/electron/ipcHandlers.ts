@@ -1,10 +1,10 @@
 import { dialog, screen, shell } from "electron";
-
 import ffprobeStatic from "ffprobe-static";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
+import ws from "windows-shortcuts";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
 import { defaultSettings, ensureDefaultSettings } from "./settings.js";
@@ -476,11 +476,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
-  // TODO need a way to not save the full video file, just create a shortcut.
-  // TODO also add a flag like saveFile or saveShortcut
   ipcMainHandle(
     "saveToBackgroundIDFile",
-    async (id: string, sourcePath: string): Promise<string> => {
+    async (
+      id: string,
+      sourcePath: string,
+      saveFile: boolean
+    ): Promise<string> => {
       const targetDir = idToBackgroundFolder(id);
 
       const ext = path.extname(sourcePath);
@@ -527,7 +529,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         }
       }
 
-      // If no matching file is found, copy the file
+      // If saveFile is false, create a shortcut instead of copying
+      if (!saveFile) {
+        let shortcutName = `${baseName}.lnk`;
+        let shortcutPath = path.join(targetDir, shortcutName);
+        let counter = 1;
+        // Ensure unique shortcut name
+        while (fs.existsSync(shortcutPath)) {
+          shortcutName = `${baseName}(${counter}).lnk`;
+          shortcutPath = path.join(targetDir, shortcutName);
+          counter++;
+        }
+        // Create the shortcut
+        await new Promise<void>((resolve, reject) => {
+          ws.create(shortcutPath, { target: sourcePath }, (err) => {
+            if (err) {
+              openSmallWindow(
+                "Failed to create shortcut",
+                `Failed to create shortcut for: ${sourcePath}\nError: ${err}`
+              );
+              reject(err);
+            } else {
+              logger.info(`Shortcut created at: ${shortcutPath}`);
+              resolve();
+            }
+          });
+        });
+        return shortcutName;
+      }
+
+      // No matching, so copy the file
       let localFileName = `${baseName}${ext}`;
       let targetPath = path.join(targetDir, localFileName);
       let counter = 1;

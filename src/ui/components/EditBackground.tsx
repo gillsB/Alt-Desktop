@@ -78,7 +78,8 @@ const EditBackground: React.FC = () => {
       if (bgFileType.startsWith("image") || bgFileType.startsWith("video")) {
         updatedSummary.bgFile = await saveFileToBackground(
           updatedSummary.id,
-          updatedSummary.bgFile
+          updatedSummary.bgFile,
+          bgFileType.startsWith("image") //TODO replace this with a toggle in gui.
         );
       } else {
         logger.error("Invalid file type for bgFile:", bgFileType);
@@ -99,7 +100,8 @@ const EditBackground: React.FC = () => {
       if (iconPathType.startsWith("image")) {
         updatedSummary.iconPath = await saveFileToBackground(
           updatedSummary.id,
-          updatedSummary.iconPath
+          updatedSummary.iconPath,
+          true // icons always save file to background folder
         );
       } else {
         await showSmallWindow(
@@ -115,6 +117,11 @@ const EditBackground: React.FC = () => {
     const success = await window.electron.saveBgJson(updatedSummary);
     if (success) {
       logger.info("Background saved successfully.");
+      //TODO Add an option to "apply" this background. and if applied then do this.
+      //TODO for now this will just default to saving.
+      await window.electron.saveSettingsData({
+        background: updatedSummary.id,
+      });
       handleClose();
     } else {
       logger.error("Failed to save background.");
@@ -123,12 +130,14 @@ const EditBackground: React.FC = () => {
 
   const saveFileToBackground = async (
     id: string,
-    pathValue: string | undefined
+    pathValue: string | undefined,
+    saveFile: boolean
   ): Promise<string | undefined> => {
     if (!pathValue) return pathValue;
     const localPath = await window.electron.saveToBackgroundIDFile(
       id,
-      pathValue
+      pathValue,
+      saveFile
     );
     if (localPath) {
       return localPath;

@@ -114,7 +114,7 @@ interface EventParamMapping {
   logVideoMessage: [string, string, string];
   openFileDialog: [string, string?];
   saveIconImage: [string, number, number];
-  saveToBackgroundIDFile: [string, string];
+  saveToBackgroundIDFile: [string, string, boolean];
   launchProgram: [number, number];
   launchWebsite: [number, number];
   getFilePath: [File];
@@ -240,7 +240,11 @@ interface Window {
       row: number,
       col: number
     ) => Promise<string>;
-    saveToBackgroundIDFile: (id: string, sourcePath: string) => Promise<string>;
+    saveToBackgroundIDFile: (
+      id: string,
+      sourcePath: string,
+      saveFile: boolean
+    ) => Promise<string>;
     launchProgram: (row: number, col: number) => Promise<boolean>;
     launchWebsite: (row: number, col: number) => Promise<boolean>;
     getFilePath: (file: File) => string;
