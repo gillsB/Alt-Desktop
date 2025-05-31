@@ -66,7 +66,7 @@ const EditBackground: React.FC = () => {
   };
 
   // Save handler
-  const handleSave = async () => {
+  const handleSave = async (applyBg: boolean) => {
     logger.info("Attempting to save...");
 
     const updatedSummary = { ...summary };
@@ -117,11 +117,12 @@ const EditBackground: React.FC = () => {
     const success = await window.electron.saveBgJson(updatedSummary);
     if (success) {
       logger.info("Background saved successfully.");
-      //TODO Add an option to "apply" this background. and if applied then do this.
-      //TODO for now this will just default to saving.
-      await window.electron.saveSettingsData({
-        background: updatedSummary.id,
-      });
+      if (applyBg) {
+        await window.electron.saveSettingsData({
+          background: updatedSummary.id,
+        });
+      }
+
       handleClose();
     } else {
       logger.error("Failed to save background.");
@@ -232,7 +233,10 @@ const EditBackground: React.FC = () => {
         </div>
       </div>
       <div className="subwindow-footer">
-        <button className="save-button" onClick={handleSave}>
+        <button className="save-button" onClick={() => handleSave(true)}>
+          Save & Apply
+        </button>
+        <button className="save-button" onClick={() => handleSave(false)}>
           Save
         </button>
       </div>
