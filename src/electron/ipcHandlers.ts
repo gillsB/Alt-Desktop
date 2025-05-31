@@ -1263,7 +1263,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
     const entries = Object.entries(backgrounds)
       .sort(([, a], [, b]) => Number(b) - Number(a)) // newest first
-      .slice(0, 10); // return first 10 (for now)
+      .slice(0, 40); // return first 40 (for now)
 
     const results = [];
     for (const [id] of entries) {

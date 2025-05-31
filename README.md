@@ -32,9 +32,9 @@ npm run py
 
 ### Current Backgrounds.json testing:
 
-1. Run the program once to build directories
-2. take the folder "000001" from PLACE_IN_BACKGROUNDS and place them at AppData/Roaming/AltDesktop/backgrounds
-3. Re-launch the program (or open Change Background) and it should add the folder "000001": 1748... (unix time) to your "backgrounds" object in backgrounds.json (AppData/Roaming/AltDesktop).
+1. Open the background select via right click desktop -> change background (top right in the header is an icon which looks like a desktop)
+2. Drag and drop a video or image file to open Edit Background.
+3. Fill out the fields you want then save. (Background file path should preview in main window).
+4. This creates a background you can then select via the background select menu.
 
-This is temporary until I include a background as a "default" included or add the ability to make your own backgrounds like this.  
-For now the Settings "Background Path" is still in full command of the actual background displaying but in the future you will essentially choose from saved backgrounds, or create a new background from a video/image.
+Consider these backgrounds slightly volatile. They may break/require editing later on as this whole backgrounds setup is still early in development with a lot of changes needing to be made.
