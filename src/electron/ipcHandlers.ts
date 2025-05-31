@@ -1,11 +1,12 @@
+import { spawn } from "child_process";
 import { dialog, screen, shell } from "electron";
 import ffprobeStatic from "ffprobe-static";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
-import ws from "windows-shortcuts";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
+import { getScriptsPath } from "./pathResolver.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
 import { defaultSettings, ensureDefaultSettings } from "./settings.js";
 import { generateIcon } from "./utils/generateIcon.js";
@@ -540,18 +541,32 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           shortcutPath = path.join(targetDir, shortcutName);
           counter++;
         }
-        // Create the shortcut
+
+        // Build the path to create_shortcut.exe
+        const scriptsPath = getScriptsPath();
+        const exePath = path.join(scriptsPath, "create_shortcut.exe");
+
+        // Run the executable
         await new Promise<void>((resolve, reject) => {
-          ws.create(shortcutPath, { target: sourcePath }, (err) => {
-            if (err) {
-              openSmallWindow(
-                "Failed to create shortcut",
-                `Failed to create shortcut for: ${sourcePath}\nError: ${err}`
-              );
-              reject(err);
-            } else {
+          const proc = spawn(exePath, [sourcePath, shortcutPath], {
+            windowsHide: true,
+          });
+
+          let errorOutput = "";
+          proc.stderr.on("data", (data) => {
+            errorOutput += data.toString();
+          });
+
+          proc.on("close", (code) => {
+            if (code === 0 && fs.existsSync(shortcutPath)) {
               logger.info(`Shortcut created at: ${shortcutPath}`);
               resolve();
+            } else {
+              openSmallWindow(
+                "Failed to create shortcut",
+                `Failed to create shortcut for: ${sourcePath}\nError: ${errorOutput || "Unknown error"}`
+              );
+              reject(new Error(errorOutput || "Failed to create shortcut"));
             }
           });
         });

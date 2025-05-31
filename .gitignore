@@ -41,3 +41,5 @@ back*.mp4
 /build
 /pyenv
 /_file_format_examples
+/src/scripts/create_shortcut/.vs
+/src/scripts/create_shortcut/target
