@@ -29,12 +29,33 @@ const EditBackground: React.FC = () => {
       };
 
   const [summary, setSummary] = useState<BackgroundSummary>(initialSummary);
+  const [bgFileType, setBgFileType] = useState<string | null>(null);
+  const [saveBgFileAsShortcut, setSaveBgFileAsShortcut] =
+    useState<boolean>(true);
 
   // Preview background update when bgFile changes
   useEffect(() => {
     if (summary.bgFile) {
       window.electron.previewBackgroundUpdate({ background: summary.bgFile });
     }
+  }, [summary.bgFile]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (summary.bgFile) {
+      window.electron.getFileType(summary.bgFile).then((type: string) => {
+        if (!cancelled) {
+          setBgFileType(type);
+          // Default to shortcut for videos, file for images
+          setSaveBgFileAsShortcut(type.startsWith("video"));
+        }
+      });
+    } else {
+      setBgFileType(null);
+    }
+    return () => {
+      cancelled = true;
+    };
   }, [summary.bgFile]);
 
   // Tag toggles
@@ -79,7 +100,7 @@ const EditBackground: React.FC = () => {
         updatedSummary.bgFile = await saveFileToBackground(
           updatedSummary.id,
           updatedSummary.bgFile,
-          bgFileType.startsWith("image") //TODO replace this with a toggle in gui.
+          bgFileType.startsWith("image") ? true : !saveBgFileAsShortcut // true for images, user choice for videos
         );
       } else {
         logger.error("Invalid file type for bgFile:", bgFileType);
@@ -174,6 +195,22 @@ const EditBackground: React.FC = () => {
             }
           />
         </div>
+        {bgFileType?.startsWith("video") && (
+          <div className="subwindow-field dropdown-container">
+            <label htmlFor="save-bg-method">Save Background as:&nbsp;</label>
+            <select
+              id="save-bg-method"
+              value={saveBgFileAsShortcut ? "shortcut" : "file"}
+              onChange={(e) =>
+                setSaveBgFileAsShortcut(e.target.value === "shortcut")
+              }
+            >
+              <option value="shortcut">Shortcut (recommended)</option>
+              <option value="file">Copy File</option>
+            </select>
+          </div>
+        )}
+
         <div className="subwindow-field">
           <label>Icon:</label>
           <div className="icon-input-row">
