@@ -501,7 +501,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
       // If path already from background directory just return it.
       if (sourcePath.startsWith(targetDir)) {
-        logger.info("Source already in target directory, skipping copy.");
+        logger.info(
+          `Source ${sourcePath} already in target directory, skipping copy.`
+        );
         return path.basename(sourcePath);
       }
 
@@ -1285,6 +1287,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         const bg = JSON.parse(rawBg);
         // TODO make sure this works for other master paths as well (currently doesn't attempt)
         let iconPath = "";
+        let bgFile = "";
         if (bg.public.icon) {
           iconPath = path.join(
             getBackgroundFilePath(),
@@ -1292,9 +1295,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             bg.public.icon
           );
         }
+        if (bg.public.bgFile) {
+          bgFile = path.join(
+            getBackgroundFilePath(),
+            folderPath,
+            bg.public.bgFile
+          );
+        }
         results.push({
           id,
           name: bg.public?.name,
+          bgFile: bgFile,
           description: bg.public?.description,
           iconPath: iconPath,
           tags: [...(bg.public?.tags ?? []), ...(bg.local?.tags ?? [])],
@@ -1348,7 +1359,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     async (summary: BackgroundSummary): Promise<boolean> => {
       try {
         if (!summary.id) throw new Error("Missing background id");
-        logger.info("here");
         const bgJsonPath = await idToBgJson(summary.id);
 
         // Ensure the directory exists

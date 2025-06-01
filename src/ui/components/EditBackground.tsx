@@ -126,7 +126,11 @@ const EditBackground: React.FC = () => {
       const bgFileType = await window.electron.getFileType(
         updatedSummary.bgFile
       );
-      if (bgFileType.startsWith("image") || bgFileType.startsWith("video")) {
+      if (
+        bgFileType.startsWith("image") ||
+        bgFileType.startsWith("video") ||
+        bgFileType === "application/x-ms-shortcut" // previously saved shortcut
+      ) {
         updatedSummary.bgFile = await saveFileToBackground(
           updatedSummary.id,
           updatedSummary.bgFile,

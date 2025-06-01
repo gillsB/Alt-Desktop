@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
+import { fileNameNoExt } from "../util/uiUtil";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
-import { fileNameNoExt } from "../util/uiUtil";
 
 const logger = createLogger("BackgroundSelect.tsx");
 
@@ -101,6 +101,16 @@ const BackgroundSelect: React.FC = () => {
       await window.electron.previewBackgroundUpdate({
         background: bg.id,
       });
+    }
+  };
+
+  const handleEditBackground = async (backgroundId: string) => {
+    const bg = summaries.find((bg) => bg.id === backgroundId);
+    logger.info("background = ", bg);
+    if (bg) {
+      await window.electron.openEditBackground(bg);
+    } else {
+      logger.warn(`Background with id ${backgroundId} not found in summaries`);
     }
   };
 
@@ -266,6 +276,12 @@ const BackgroundSelect: React.FC = () => {
           }}
           onClick={(e) => e.stopPropagation()}
         >
+          <div
+            className="menu-item"
+            onClick={() => handleEditBackground(contextMenu.backgroundId)}
+          >
+            Edit Background
+          </div>
           <div
             className="menu-item"
             onClick={() => handleOpenFolder(contextMenu.backgroundId)}
