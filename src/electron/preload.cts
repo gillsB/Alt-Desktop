@@ -115,6 +115,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   resetAllIconsFontColor: () => ipcInvoke("resetAllIconsFontColor"),
   desktopSetShowIcons: (showIcons: boolean) =>
     ipcInvoke("desktopSetShowIcons", showIcons),
+  getBackgroundIDs: () => ipcInvoke("getBackgroundIDs"),
   getBackgroundSummaries: () => ipcInvoke("getBackgroundSummaries"),
   idToFilePath: (id: string) => ipcInvoke("idToFilePath", id),
   resolveShortcut: (filePath: string) => ipcInvoke("resolveShortcut", filePath),

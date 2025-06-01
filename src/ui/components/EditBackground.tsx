@@ -77,12 +77,9 @@ const EditBackground: React.FC = () => {
     }));
   };
 
-  //TODO make this re-call BackgroundSelect, and default to newly added (if saved) EditBackground
   const handleClose = () => {
     logger.info("Closing EditBackground");
     window.electron.reloadBackground();
-    // TODO make sure to save settings to new background if user wants to apply it before calling this
-    //re-open BackgroundSelect
     window.electron.openBackgroundSelect();
   };
 
@@ -197,7 +194,7 @@ const EditBackground: React.FC = () => {
         </div>
         {bgFileType?.startsWith("video") && (
           <div className="subwindow-field dropdown-container">
-            <label htmlFor="save-bg-method">Save Background as:&nbsp;</label>
+            <label htmlFor="save-bg-method">Save Background as:</label>
             <select
               id="save-bg-method"
               value={saveBgFileAsShortcut ? "shortcut" : "file"}

@@ -1254,6 +1254,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+  ipcMainHandle("getBackgroundIDs", async () => {
+    try {
+      const backgroundsFile = getBackgroundsJsonFilePath();
+      const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
+      const { backgrounds } = JSON.parse(raw);
+      return Object.keys(backgrounds);
+    } catch (error) {
+      logger.error("Failed to get background IDs:", error);
+      return [];
+    }
+  });
   ipcMainHandle("getBackgroundSummaries", async () => {
     const backgroundsFile = getBackgroundsJsonFilePath();
     const baseDir = getBackgroundFilePath();

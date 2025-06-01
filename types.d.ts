@@ -141,6 +141,7 @@ interface EventParamMapping {
   resetAllIconsFontColor: [];
   desktopSetShowIcons: [boolean];
   openBackgroundSelect: [];
+  getBackgroundIDs: [];
   getBackgroundSummaries: [];
   idToFilePath: [string];
   resolveShortcut: [string];
@@ -195,6 +196,7 @@ type EventPayloadMapping = {
   resetAllIconsFontColor: boolean;
   desktopSetShowIcons: boolean;
   openBackgroundSelect: boolean;
+  getBackgroundIDs: string[];
   getBackgroundSummaries: BackgroundSummary[];
   idToFilePath: string | null;
   resolveShortcut: string;
@@ -296,6 +298,7 @@ interface Window {
     ) => Promise<string>;
     resetAllIconsFontColor: () => Promise<boolean>;
     desktopSetShowIcons: (showIcons: boolean) => Promise<boolean>;
+    getBackgroundIDs: () => Promise<string[]>;
     getBackgroundSummaries: () => Promise<BackgroundSummary[]>;
     idToFilePath: (id: string) => Promise<string | null>;
     resolveShortcut: (filePath: string) => Promise<string>;
