@@ -33,6 +33,20 @@ const EditBackground: React.FC = () => {
   const [saveBgFileAsShortcut, setSaveBgFileAsShortcut] =
     useState<boolean>(true);
 
+  const [ids, setIds] = useState<Set<string>>(new Set<string>());
+
+  useEffect(() => {
+    let cancelled = false;
+    window.electron.getBackgroundIDs().then((idArray: string[]) => {
+      if (!cancelled) {
+        setIds(new Set<string>(idArray));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Preview background update when bgFile changes
   useEffect(() => {
     if (summary.bgFile) {
@@ -88,6 +102,25 @@ const EditBackground: React.FC = () => {
     logger.info("Attempting to save...");
 
     const updatedSummary = { ...summary };
+
+    // If new background, generate a unique id Do not change ID for existing backgrounds
+    if (updatedSummary.id === "") {
+      let base = updatedSummary.name?.trim() || "";
+      if (!base) {
+        // No name -> fallback to a 6-digit numerical id
+        let num = 1;
+        let numId = num.toString().padStart(6, "0");
+        while (ids.has(numId)) {
+          num++;
+          numId = num.toString().padStart(6, "0");
+        }
+        updatedSummary.id = numId;
+      } else {
+        // Use name as the base for the ID
+        base = base.toLowerCase();
+        updatedSummary.id = generateUniqueId(base, ids);
+      }
+    }
 
     if (updatedSummary.bgFile) {
       const bgFileType = await window.electron.getFileType(
@@ -165,6 +198,21 @@ const EditBackground: React.FC = () => {
       return undefined;
     }
   };
+
+  /**
+   * Generate a unique background ID based on a base string and a Set of existing IDs.
+   * If the base exists, appends _1, _2, etc. until unique.
+   */
+  function generateUniqueId(base: string, ids: Set<string>): string {
+    if (!ids.has(base)) return base;
+    let counter = 1;
+    let newId = `${base}_${counter}`;
+    while (ids.has(newId)) {
+      counter++;
+      newId = `${base}_${counter}`;
+    }
+    return newId;
+  }
 
   return (
     <div className="subwindow-container">

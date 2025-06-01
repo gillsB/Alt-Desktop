@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
-import { fileNameNoExt } from "../util/uiUtil";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -170,7 +169,7 @@ const BackgroundSelect: React.FC = () => {
 
     await window.electron.openEditBackground({
       // TODO make sure this is a unique ID.
-      id: fileNameNoExt(filePath),
+      id: "",
       bgFile: filePath,
     });
   };
