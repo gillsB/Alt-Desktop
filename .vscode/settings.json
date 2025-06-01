@@ -20,6 +20,7 @@
     "Keybinds",
     "maxsize",
     "nosniff",
+    "nuitka",
     "onefile",
     "pyinstaller",
     "quicktime",

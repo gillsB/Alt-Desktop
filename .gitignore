@@ -43,3 +43,6 @@ back*.mp4
 /_file_format_examples
 /src/scripts/create_shortcut/.vs
 /src/scripts/create_shortcut/target
+/src/scripts/bin/file_to_image.build
+/src/scripts/bin/file_to_image.dist
+/src/scripts/bin/file_to_image.onefile-build
