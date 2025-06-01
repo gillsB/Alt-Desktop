@@ -4,6 +4,7 @@ import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
+import { fileNameNoExt } from "../util/uiUtil";
 
 const logger = createLogger("BackgroundSelect.tsx");
 
@@ -168,8 +169,8 @@ const BackgroundSelect: React.FC = () => {
     logger.info(await window.electron.getFileType(filePath));
 
     await window.electron.openEditBackground({
-      // TODO make sure this is a unique ID.
       id: "",
+      name: fileNameNoExt(filePath),
       bgFile: filePath,
     });
   };
