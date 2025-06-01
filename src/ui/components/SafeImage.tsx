@@ -201,14 +201,16 @@ const SafeImageComponent: React.FC<{
     };
 
     img.onerror = (e) => {
-      logger.error(`Failed to load image: ${newImageSrc}`, e);
-      setImageError(true);
+      if (newImageSrc !== "") {
+        logger.error(`Failed to load image: [${newImageSrc}]`, e);
+        setImageError(true);
 
-      // Try loading the unknown image
-      const unknownSrc = getUnknownAssetPath(Date.now());
-      if (newImageSrc !== unknownSrc) {
-        logger.info(`Falling back to unknown image: ${unknownSrc}`);
-        setImageSrc(unknownSrc);
+        // Try loading the unknown image
+        const unknownSrc = getUnknownAssetPath(Date.now());
+        if (newImageSrc !== unknownSrc) {
+          logger.info(`Falling back to unknown image: ${unknownSrc}`);
+          setImageSrc(unknownSrc);
+        }
       }
     };
 
