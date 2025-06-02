@@ -253,6 +253,19 @@ const EditBackground: React.FC = () => {
     }
   };
 
+  const handleInputChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "bgFile" | "iconPath"
+  ) => {
+    let value = e.target.value;
+    // If the path ends with .lnk, resolve the shortcut
+    if (value.trim().toLowerCase().endsWith(".lnk")) {
+      const resolved = await window.electron.resolveShortcut(value);
+      if (resolved) value = resolved;
+    }
+    setSummary((prev) => ({ ...prev, [field]: value }));
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -274,9 +287,7 @@ const EditBackground: React.FC = () => {
             type="text"
             value={summary.bgFile ?? ""}
             placeholder="Drop an image or video on this field to set"
-            onChange={(e) =>
-              setSummary((prev) => ({ ...prev, bgFile: e.target.value }))
-            }
+            onChange={(e) => handleInputChange(e, "bgFile")}
             onDragOver={handleDragOver}
             onDrop={(e) => handleFileDrop(e, "bgFile")}
           />
@@ -318,9 +329,7 @@ const EditBackground: React.FC = () => {
             type="text"
             value={summary.iconPath ?? ""}
             placeholder="Drop an image on this field to set"
-            onChange={(e) =>
-              setSummary((prev) => ({ ...prev, iconPath: e.target.value }))
-            }
+            onChange={(e) => handleInputChange(e, "iconPath")}
             onDragOver={handleDragOver}
             onDrop={(e) => handleFileDrop(e, "iconPath")}
           />
