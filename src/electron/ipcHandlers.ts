@@ -1317,7 +1317,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           bgFile: bgFile,
           description: bg.public?.description,
           iconPath: iconPath,
-          tags: [...(bg.public?.tags ?? []), ...(bg.local?.tags ?? [])],
+          tags: bg.public?.tags ?? [],
+          localTags: bg.local?.tags ?? [],
         });
       } catch (e) {
         logger.warn(`Failed to read bg.json for ${id}:`, e);
