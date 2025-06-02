@@ -443,8 +443,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         // Match files with the same base name or base name with a counter
         const escapedBaseName = escapeRegExp(baseName);
-        const baseNameRegex = new RegExp(`^${escapedBaseName}(\\(\\d+\\))?$`);
-        if (baseNameRegex.test(fileBaseName) && fileExt === ext) {
+        const baseNameRegex = new RegExp(
+          `^${escapedBaseName}(\\(\\d+\\))?$`,
+          "i"
+        );
+        if (
+          baseNameRegex.test(fileBaseName) &&
+          fileExt.toLowerCase() === ext.toLowerCase()
+        ) {
           const existingFilePath = path.join(targetDir, file);
           logger.info(`Found matching base name file: ${existingFilePath}`);
           // Compare the two files to see if they are the same
@@ -522,7 +528,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const filesInDir = fs.readdirSync(targetDir);
       // Escape special regex characters in baseName
       const escapedBaseName = escapeRegExp(baseName);
-      const baseNameRegex = new RegExp(`^${escapedBaseName}(\\(\\d+\\))?$`);
+      const baseNameRegex = new RegExp(
+        `^${escapedBaseName}(\\(\\d+\\))?$`,
+        "i"
+      );
       for (const file of filesInDir) {
         const fileExt = path.extname(file);
         const fileBaseName = path.basename(file, fileExt);
