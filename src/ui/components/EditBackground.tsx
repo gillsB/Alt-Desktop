@@ -221,6 +221,26 @@ const EditBackground: React.FC = () => {
     return newId;
   }
 
+  const handleFileDrop = async (
+    event: React.DragEvent<HTMLInputElement>,
+    field: "bgFile" | "iconPath"
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const files = event.dataTransfer.files;
+    if (files && files.length > 0) {
+      const filePath = await window.electron.getFilePath(files[0]);
+      if (filePath) {
+        setSummary((prev) => ({ ...prev, [field]: filePath }));
+      }
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -241,10 +261,12 @@ const EditBackground: React.FC = () => {
           <input
             type="text"
             value={summary.bgFile ?? ""}
-            placeholder="Drop an image or video on this field to set (not implemented yet)"
+            placeholder="Drop an image or video on this field to set"
             onChange={(e) =>
               setSummary((prev) => ({ ...prev, bgFile: e.target.value }))
             }
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleFileDrop(e, "bgFile")}
           />
         </div>
         {bgFileType?.startsWith("video") && (
@@ -264,16 +286,18 @@ const EditBackground: React.FC = () => {
         )}
 
         <div className="subwindow-field">
-          <label>Icon:</label>
+          <label>Icon Preview Image:</label>
           <div className="icon-input-row">
             <input
               type="text"
               className="icon-path-input"
               value={summary.iconPath ?? ""}
-              placeholder="Drop an image on this field to set (not implemented yet)"
+              placeholder="Drop an image on this field to set"
               onChange={(e) =>
                 setSummary((prev) => ({ ...prev, iconPath: e.target.value }))
               }
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleFileDrop(e, "iconPath")}
             />
           </div>
         </div>
