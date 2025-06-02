@@ -232,7 +232,8 @@ const EditBackground: React.FC = () => {
     event.stopPropagation();
     const files = event.dataTransfer.files;
     if (files && files.length > 0) {
-      const filePath = await window.electron.getFilePath(files[0]);
+      let filePath = await window.electron.getFilePath(files[0]);
+      filePath = await window.electron.resolveShortcut(filePath); // Resolve any shortcuts
       if (filePath) {
         setSummary((prev) => ({ ...prev, [field]: filePath }));
       }

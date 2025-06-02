@@ -225,7 +225,8 @@ const Settings: React.FC = () => {
     setIsDragging(false);
 
     const files = event.dataTransfer.files[0];
-    const filePath = window.electron.getFilePath(files);
+    let filePath = window.electron.getFilePath(files);
+    filePath = await window.electron.resolveShortcut(filePath); // Resolve any shortcuts
     const fileType = await window.electron.getFileType(filePath);
 
     logger.info("Dropped file path:", filePath);
