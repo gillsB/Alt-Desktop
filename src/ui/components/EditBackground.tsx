@@ -134,13 +134,16 @@ const EditBackground: React.FC = () => {
         updatedSummary.bgFile = await saveFileToBackground(
           updatedSummary.id,
           updatedSummary.bgFile,
-          bgFileType.startsWith("image") ? true : !saveBgFileAsShortcut // true for images, user choice for videos
+          bgFileType.startsWith("image") ||
+            bgFileType === "application/x-ms-shortcut" // Save images or shortcuts to folder.
+            ? true
+            : !saveBgFileAsShortcut // User choice for videos.
         );
       } else {
         logger.error("Invalid file type for bgFile:", bgFileType);
         await showSmallWindow(
           "Invalid File Type",
-          `Selected Background File Path is not an image or video, it is a ${bgFileType} type` +
+          `Selected Background File Path is not an image or video, it is a [${bgFileType}] type` +
             "\nPlease select a valid image or video file.",
           ["OK"]
         );

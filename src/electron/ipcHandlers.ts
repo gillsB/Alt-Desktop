@@ -484,6 +484,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       sourcePath: string,
       saveFile: boolean
     ): Promise<string> => {
+      logger.info(
+        "SaveToBackgroundIDFile called with:",
+        JSON.stringify({
+          id,
+          sourcePath,
+          saveFile,
+        })
+      );
       const targetDir = idToBackgroundFolder(id);
 
       const ext = path.extname(sourcePath);
@@ -534,6 +542,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       // If saveFile is false, create a shortcut instead of copying
       if (!saveFile) {
+        logger.info("savefile is false, creating a shortcut instead.");
         let shortcutName = `${baseName}.lnk`;
         let shortcutPath = path.join(targetDir, shortcutName);
         let counter = 1;
