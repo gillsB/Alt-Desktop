@@ -1,4 +1,3 @@
-import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
 import { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
@@ -12,10 +11,6 @@ const Settings: React.FC = () => {
   const [initialSettings, setInitialSettings] = useState<SettingsData | null>(
     null
   );
-  const [isHoveringBackground, setHoveringBackground] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const dragCounter = useRef(0);
   const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleClose = async () => {
@@ -28,9 +23,6 @@ const Settings: React.FC = () => {
         );
         if (ret === "Yes") {
           logger.info("User confirmed to close without saving.");
-          if (getSpecificChanges(["background"])) {
-            await window.electron.reloadBackground();
-          }
           if (
             getSpecificChanges([
               "defaultIconSize",
@@ -85,15 +77,13 @@ const Settings: React.FC = () => {
         );
       }
 
+      logger.info("Settings data prepared for saving:", updatedSettings);
+
       // Save the updated settings data
       if (await window.electron.saveSettingsData(updatedSettings)) {
         logger.info("Settings saved successfully.");
         // Update the state once after everything is done
         setSettings(updatedSettings);
-        // Reload the background if background value changes were made
-        if (getSpecificChanges(["background"])) {
-          await window.electron.reloadBackground();
-        }
         closeWindow();
       } else {
         logger.error("Failed to save settings.");
@@ -118,19 +108,6 @@ const Settings: React.FC = () => {
       if (ret === "Yes") {
         closeWindow();
       }
-    }
-  };
-
-  const handleFileSelect = async () => {
-    try {
-      const filePath = await window.electron.openFileDialog("all"); // Accept both image/video
-      if (filePath) {
-        updateSetting("background", filePath);
-        sendPreviewBackgroundUpdate({ background: filePath });
-        logger.info(`Background path set to: ${filePath}`);
-      }
-    } catch (error) {
-      logger.error(`Failed to select or save background:`, error);
     }
   };
 
@@ -192,74 +169,6 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    dragCounter.current++;
-
-    if (dragCounter.current === 1) {
-      setIsDragging(true);
-    }
-  };
-
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    dragCounter.current--;
-
-    if (dragCounter.current === 0) {
-      setIsDragging(false);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    dragCounter.current = 0;
-    setIsDragging(false);
-
-    const files = event.dataTransfer.files[0];
-    let filePath = window.electron.getFilePath(files);
-    filePath = await window.electron.resolveShortcut(filePath); // Resolve any shortcuts
-    const fileType = await window.electron.getFileType(filePath);
-
-    logger.info("Dropped file path:", filePath);
-    logger.info("Dropped file type:", fileType);
-
-    if (fileType.startsWith("image/") || fileType.startsWith("video/")) {
-      logger.info("Dropped file is an image or video. Updating background...");
-      updateSetting("background", filePath);
-      sendPreviewBackgroundUpdate({ background: filePath });
-    } else {
-      logger.warn("Dropped file is neither an image nor a video.");
-      showSmallWindow(
-        "Invalid File Type",
-        "Dropped file is neither image nor video, and will not be used.",
-        ["OK"]
-      );
-    }
-  };
-
-  const sendPreviewBackgroundUpdate = async (
-    updatedFields: Partial<SettingsData>
-  ) => {
-    try {
-      const previewData: Partial<SettingsData> = {
-        background: settings?.background ?? "",
-        ...updatedFields,
-      };
-      await window.electron.previewBackgroundUpdate(previewData);
-    } catch (error) {
-      logger.error("Failed to send preview update:", error);
-    }
-  };
-
   const sendPreviewGridUpdate = async (
     updatedFields: Partial<SettingsData>
   ) => {
@@ -288,41 +197,9 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div
-      className="subwindow-container"
-      onDragOver={handleDragOver}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDrop={handleFileDrop}
-    >
+    <div className="subwindow-container">
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
       <div className="subwindow-content">
-        <div className="subwindow-field">
-          <label htmlFor="background-path">Background Path</label>
-          <input
-            id="background-path"
-            type="text"
-            value={settings?.background || ""}
-            title="Drop an image or video file on this window to auto set the path."
-            onChange={(e) => {
-              const updatedValue = e.target.value;
-              updateSetting("background", updatedValue);
-              sendPreviewBackgroundUpdate({ background: updatedValue });
-            }}
-          />
-          <button
-            className="file-select-button flex items-center gap-2"
-            onClick={handleFileSelect}
-            onMouseEnter={() => setHoveringBackground(true)}
-            onMouseLeave={() => setHoveringBackground(false)}
-          >
-            {isHoveringBackground ? (
-              <FolderOpenIcon className="custom-folder-icon" />
-            ) : (
-              <FolderIcon className="custom-folder-icon" />
-            )}
-          </button>
-        </div>
         <div className="subwindow-field">
           <label htmlFor="icon-size">Default Icon Size</label>
           <input
@@ -459,14 +336,6 @@ const Settings: React.FC = () => {
           </select>
         </div>
       </div>
-      {isDragging && (
-        <div className="drag-overlay">
-          <div className="drag-content">
-            <div className="drag-icon">+</div>
-            <div className="drag-text">Drop image or video file here.</div>
-          </div>
-        </div>
-      )}
       <div className="subwindow-footer">
         <button className="save-button" onClick={handleSave}>
           Save
