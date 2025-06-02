@@ -1,3 +1,4 @@
+import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import "../App.css";
@@ -34,6 +35,8 @@ const EditBackground: React.FC = () => {
     useState<boolean>(true);
 
   const [ids, setIds] = useState<Set<string>>(new Set<string>());
+  const [isHoveringBgFile, setIsHoveringBgFile] = useState(false);
+  const [isHoveringIconPath, setIsHoveringIconPath] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -241,6 +244,14 @@ const EditBackground: React.FC = () => {
     event.stopPropagation();
   };
 
+  const handleFileDialog = async (field: "bgFile" | "iconPath") => {
+    const type = field === "bgFile" ? "image,video" : "image";
+    const filePath = await window.electron.openFileDialog(type);
+    if (filePath) {
+      setSummary((prev) => ({ ...prev, [field]: filePath }));
+    }
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -268,6 +279,21 @@ const EditBackground: React.FC = () => {
             onDragOver={handleDragOver}
             onDrop={(e) => handleFileDrop(e, "bgFile")}
           />
+          <button
+            type="button"
+            className="file-select-button flex items-center gap-2"
+            onClick={() => handleFileDialog("bgFile")}
+            onMouseEnter={() => setIsHoveringBgFile(true)}
+            onMouseLeave={() => setIsHoveringBgFile(false)}
+            tabIndex={-1}
+            title="Browse for background file"
+          >
+            {isHoveringBgFile ? (
+              <FolderOpenIcon className="custom-folder-icon" />
+            ) : (
+              <FolderIcon className="custom-folder-icon" />
+            )}
+          </button>
         </div>
         {bgFileType?.startsWith("video") && (
           <div className="subwindow-field dropdown-container">
@@ -287,19 +313,29 @@ const EditBackground: React.FC = () => {
 
         <div className="subwindow-field">
           <label>Icon Preview Image:</label>
-          <div className="icon-input-row">
-            <input
-              type="text"
-              className="icon-path-input"
-              value={summary.iconPath ?? ""}
-              placeholder="Drop an image on this field to set"
-              onChange={(e) =>
-                setSummary((prev) => ({ ...prev, iconPath: e.target.value }))
-              }
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleFileDrop(e, "iconPath")}
-            />
-          </div>
+          <input
+            type="text"
+            value={summary.iconPath ?? ""}
+            placeholder="Drop an image on this field to set"
+            onChange={(e) =>
+              setSummary((prev) => ({ ...prev, iconPath: e.target.value }))
+            }
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleFileDrop(e, "iconPath")}
+          />
+          <button
+            className="file-select-button flex items-center gap-2"
+            onClick={() => handleFileDialog("iconPath")}
+            onMouseEnter={() => setIsHoveringIconPath(true)}
+            onMouseLeave={() => setIsHoveringIconPath(false)}
+            title="Browse for icon image"
+          >
+            {isHoveringIconPath ? (
+              <FolderOpenIcon className="custom-folder-icon" />
+            ) : (
+              <FolderIcon className="custom-folder-icon" />
+            )}
+          </button>
         </div>
         <div className="subwindow-field">
           <label>Description:</label>
