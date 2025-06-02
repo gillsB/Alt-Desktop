@@ -362,36 +362,39 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           defaultPath: appDataFilePath || undefined, // Use the provided filePath or just default
         };
 
-        if (type === "image") {
-          options.filters = [
-            {
-              name: "Images",
-              extensions: [
-                "png",
-                "jpg",
-                "jpeg",
-                "gif",
-                "bmp",
-                "svg",
-                "webp",
-                "ico",
-              ],
-            },
-          ];
-        } else if (type === "video") {
-          options.filters = [
-            {
-              name: "Videos",
-              extensions: ["mp4", "webm", "ogg", "mov", "mkv"],
-            },
-          ];
+        options.filters = [];
+        const extensions: string[] = [];
+        let filterName = "";
+
+        if (type.includes("image")) {
+          extensions.push(
+            "png",
+            "jpg",
+            "jpeg",
+            "gif",
+            "bmp",
+            "svg",
+            "webp",
+            "ico"
+          );
+          filterName += "Images";
+        }
+        if (type.includes("video")) {
+          extensions.push("mp4", "webm", "ogg", "mov", "mkv");
+          filterName += filterName ? ", Video" : "Video";
+        }
+
+        if (extensions.length > 0) {
+          options.filters.push({
+            name: filterName,
+            extensions,
+          });
         } else {
-          options.filters = [
-            {
-              name: type,
-              extensions: ["*"],
-            },
-          ];
+          // Non supported type, allow all files
+          options.filters.push({
+            name: type,
+            extensions: ["*"],
+          });
         }
 
         result = await dialog.showOpenDialog(options);
