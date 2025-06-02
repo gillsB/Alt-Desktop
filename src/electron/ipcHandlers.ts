@@ -545,6 +545,28 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       // If saveFile is false, create a shortcut instead of copying
       if (!saveFile) {
+        // Prevent creating duplicate shortcuts (search and return shortcut which points to the same file)
+        const shortcutFiles = filesInDir.filter(
+          (f) => path.extname(f).toLowerCase() === ".lnk"
+        );
+        for (const shortcutFile of shortcutFiles) {
+          const shortcutPath = path.join(targetDir, shortcutFile);
+          try {
+            const resolved = resolveShortcut(shortcutPath);
+            if (
+              resolved &&
+              path.resolve(resolved).toLowerCase() ===
+                path.resolve(sourcePath).toLowerCase()
+            ) {
+              logger.info(
+                `Found existing shortcut: ${shortcutFile} -> ${resolved}`
+              );
+              return shortcutFile;
+            }
+          } catch (e) {
+            logger.warn(`Failed to resolve shortcut: ${shortcutPath}`, e);
+          }
+        }
         logger.info("savefile is false, creating a shortcut instead.");
         let shortcutName = `${baseName}.lnk`;
         let shortcutPath = path.join(targetDir, shortcutName);
