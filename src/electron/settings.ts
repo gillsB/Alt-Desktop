@@ -10,6 +10,7 @@ export const defaultSettings: SettingsData = {
   defaultIconSize: 64,
   defaultFontColor: "#FFFFFF",
   windowType: "WINDOWED",
+  newBackgroundID: 1,
 };
 
 const logger = createLoggerForFile("settings.ts");

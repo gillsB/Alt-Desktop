@@ -32,11 +32,12 @@ type DesktopIconData = {
 };
 
 type SettingsData = {
-  background: string;
+  background?: string;
   defaultFontSize?: number;
   defaultIconSize?: number;
   defaultFontColor?: string;
   windowType?: WindowType;
+  newBackgroundID?: number;
 };
 
 type SettingKey = keyof SettingsData;

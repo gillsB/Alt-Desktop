@@ -110,14 +110,22 @@ const EditBackground: React.FC = () => {
     if (updatedSummary.id === "") {
       let base = updatedSummary.name?.trim() || "";
       if (!base) {
-        // No name -> fallback to a 6-digit numerical id
-        let num = 1;
-        let numId = num.toString().padStart(6, "0");
+        // No name -> fallback to a 6+ digit numerical id
+        let num = await window.electron.getSetting("newBackgroundID");
+        if (typeof num !== "number" || num < 0) {
+          num = 1;
+        }
+        let numId =
+          num < 1000000 ? num.toString().padStart(6, "0") : num.toString();
         while (ids.has(numId)) {
           num++;
-          numId = num.toString().padStart(6, "0");
+          numId =
+            num < 1000000 ? num.toString().padStart(6, "0") : num.toString();
         }
         updatedSummary.id = numId;
+        await window.electron.saveSettingsData({
+          newBackgroundID: num + 1,
+        });
       } else {
         // Use name as the base for the ID
         base = base.toLowerCase();
