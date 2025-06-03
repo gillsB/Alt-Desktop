@@ -141,6 +141,28 @@ const BackgroundSelect: React.FC = () => {
     setContextMenu(null);
   };
 
+  const handleDeleteBackground = async (backgroundId: string) => {
+    const bg = summaries.find((bg) => bg.id === backgroundId);
+    const displayName = bg?.name
+      ? `${bg.name} (${backgroundId})`
+      : backgroundId;
+
+    if (
+      await window.electron.showSmallWindow(
+        "Delete Background",
+        `Are you sure you want to delete background:\n${displayName}`,
+        ["Delete", "Cancel"]
+      )
+    ) {
+      logger.info(`Attempting to delete background ${backgroundId}`);
+      // await window.electron.deleteBackground(backgroundId); (not implemented yet)
+
+      // Remove from selectedIds if present
+      setSelectedIds((prev) => prev.filter((id) => id !== backgroundId));
+    }
+    setContextMenu(null);
+  };
+
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -282,11 +304,19 @@ const BackgroundSelect: React.FC = () => {
           >
             Edit Background
           </div>
+          <div className="menu-separator" />
           <div
             className="menu-item"
             onClick={() => handleOpenFolder(contextMenu.backgroundId)}
           >
             Open Folder
+          </div>
+          <div className="menu-separator" />
+          <div
+            className="menu-item"
+            onClick={() => handleDeleteBackground(contextMenu.backgroundId)}
+          >
+            Delete Background
           </div>
         </div>
       )}
