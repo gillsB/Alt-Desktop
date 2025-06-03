@@ -282,6 +282,7 @@ export async function indexBackgrounds() {
       }
     }
   }
+  const validIds = new Set(subfoldersWithBgJson);
 
   // Check if backgrounds.json exists
   if (!fs.existsSync(backgroundsJsonPath)) {
@@ -317,10 +318,19 @@ export async function indexBackgrounds() {
   // Add new backgrounds if not already present
   let updated = false;
   const now = Math.floor(Date.now() / 1000);
-  for (const folderName of subfoldersWithBgJson) {
+  for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
       logger.info(`Adding new background: ${folderName}`);
       backgroundsData.backgrounds[folderName] = now;
+      updated = true;
+    }
+  }
+
+  // Remove non-existent backgrounds
+  for (const id of Object.keys(backgroundsData.backgrounds)) {
+    if (!validIds.has(id)) {
+      logger.info(`Removing non-existent background: ${id}`);
+      delete backgroundsData.backgrounds[id];
       updated = true;
     }
   }
