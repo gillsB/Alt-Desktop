@@ -1310,60 +1310,74 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return [];
     }
   });
-  ipcMainHandle("getBackgroundSummaries", async () => {
-    const backgroundsFile = getBackgroundsJsonFilePath();
-    const baseDir = getBackgroundFilePath();
+  ipcMainHandle(
+    "getBackgroundSummaries",
+    async ({
+      offset = 0,
+      limit = 10,
+      search = "",
+    }: GetBackgroundSummariesRequest = {}) => {
+      const backgroundsFile = getBackgroundsJsonFilePath();
+      const baseDir = getBackgroundFilePath();
 
-    const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
-    const { backgrounds } = JSON.parse(raw);
+      const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
+      const { backgrounds } = JSON.parse(raw);
 
-    const entries = Object.entries(backgrounds)
-      .sort(([, a], [, b]) => Number(b) - Number(a)) // newest first
-      .slice(0, 40); // return first 40 (for now)
+      let entries = Object.entries(backgrounds).sort(
+        ([, a], [, b]) => Number(b) - Number(a)
+      ); // newest first
 
-    const results = [];
-    for (const [id] of entries) {
-      const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
-      const bgJsonPath = path.join(baseDir, folderPath, "bg.json");
-      try {
-        const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
-        const bg = JSON.parse(rawBg);
-        // TODO make sure this works for other master paths as well (currently doesn't attempt)
-        let iconPath = "";
-        let bgFile = "";
-        if (bg.public.icon) {
-          iconPath = path.join(
-            getBackgroundFilePath(),
-            folderPath,
-            bg.public.icon
-          );
-        }
-        if (bg.public.bgFile) {
-          bgFile = path.join(
-            getBackgroundFilePath(),
-            folderPath,
-            bg.public.bgFile
-          );
-        }
-        results.push({
-          id,
-          name: bg.public?.name,
-          bgFile: bgFile,
-          description: bg.public?.description,
-          iconPath: iconPath,
-          tags: bg.public?.tags ?? [],
-          localTags: bg.local?.tags ?? [],
-        });
-      } catch (e) {
-        logger.warn(`Failed to read bg.json for ${id}:`, e);
-        results.push({
-          id,
-        });
+      // Simple search filter (by name or id)
+      if (search) {
+        entries = entries.filter(([id]) =>
+          id.toLowerCase().includes(search.toLowerCase())
+        );
       }
-    }
 
-    return results;
-  });
+      const total = entries.length;
+      entries = entries.slice(offset, offset + limit);
+
+      const results = [];
+      for (const [id] of entries) {
+        const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
+        const bgJsonPath = path.join(baseDir, folderPath, "bg.json");
+        try {
+          const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
+          const bg = JSON.parse(rawBg);
+          let iconPath = "";
+          let bgFile = "";
+          if (bg.public.icon) {
+            iconPath = path.join(
+              getBackgroundFilePath(),
+              folderPath,
+              bg.public.icon
+            );
+          }
+          if (bg.public.bgFile) {
+            bgFile = path.join(
+              getBackgroundFilePath(),
+              folderPath,
+              bg.public.bgFile
+            );
+          }
+          results.push({
+            id,
+            name: bg.public?.name,
+            bgFile: bgFile,
+            description: bg.public?.description,
+            iconPath: iconPath,
+            tags: bg.public?.tags ?? [],
+            localTags: bg.local?.tags ?? [],
+          });
+        } catch (e) {
+          logger.error(`Failed to read bg.json for ${id}:`, e);
+          results.push({ id });
+        }
+      }
+
+      return { results, total };
+    }
+  );
   ipcMainHandle("idToFilePath", async (id: string) => {
     return idToBackgroundPath(id);
   });

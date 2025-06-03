@@ -8,6 +8,8 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("BackgroundSelect.tsx");
 
+const PAGE_SIZE = 10;
+
 const BackgroundSelect: React.FC = () => {
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -18,7 +20,25 @@ const BackgroundSelect: React.FC = () => {
   } | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
   const dragCounter = useRef(0);
+
+  const fetchPage = async (page: number, search: string = "") => {
+    const offset = page * PAGE_SIZE;
+    const { results, total } = await window.electron.getBackgroundSummaries({
+      offset,
+      limit: PAGE_SIZE,
+      search,
+    });
+    setSummaries(results);
+    setTotal(total);
+  };
+
+  useEffect(() => {
+    fetchPage(page, search);
+  }, [page, search]);
 
   const handleClose = async () => {
     logger.info("BackgroundSelect window closed");
@@ -29,12 +49,13 @@ const BackgroundSelect: React.FC = () => {
 
   useEffect(() => {
     window.electron
-      .getBackgroundSummaries()
-      .then((result) => {
-        setSummaries(result);
+      .getBackgroundSummaries({ offset: 0, limit: PAGE_SIZE, search: "" })
+      .then((response) => {
+        setSummaries(response.results);
+        setTotal(response.total);
         logger.info(
           "Loaded background summary IDs",
-          result.map((bg) => bg.id)
+          response.results.map((bg) => bg.id)
         );
       })
       .catch((err) => {
@@ -225,6 +246,18 @@ const BackgroundSelect: React.FC = () => {
       onDrop={handleFileDrop}
     >
       <SubWindowHeader title="Background Select" onClose={handleClose} />
+      <div style={{ padding: "8px" }}>
+        <input
+          type="text"
+          placeholder="Search backgrounds..."
+          value={search}
+          onChange={(e) => {
+            setPage(0);
+            setSearch(e.target.value);
+          }}
+          style={{ width: 200, marginBottom: 8 }}
+        />
+      </div>
       <div className="background-select-content">
         <div className="background-grid">
           {summaries.map((bg) => (
@@ -280,6 +313,32 @@ const BackgroundSelect: React.FC = () => {
               </div>
             );
           })()}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          margin: 8,
+        }}
+      >
+        <button
+          onClick={() => setPage((p) => Math.max(0, p - 1))}
+          disabled={page === 0}
+        >
+          Prev
+        </button>
+        <span style={{ margin: "0 12px" }}>
+          Page {page + 1} of {Math.ceil(total / PAGE_SIZE) || 1}
+        </span>
+        <button
+          onClick={() =>
+            setPage((p) => (p + 1 < Math.ceil(total / PAGE_SIZE) ? p + 1 : p))
+          }
+          disabled={page + 1 >= Math.ceil(total / PAGE_SIZE)}
+        >
+          Next
+        </button>
       </div>
       {isDragging && (
         <div className="drag-overlay">

@@ -42,6 +42,17 @@ type SettingsData = {
 
 type SettingKey = keyof SettingsData;
 
+type GetBackgroundSummariesRequest = {
+  offset?: number;
+  limit?: number;
+  search?: string;
+};
+
+type GetBackgroundSummariesResponse = {
+  results: BackgroundSummary[];
+  total: number;
+};
+
 type BackgroundSummary = {
   id: string;
   name?: string;
@@ -143,7 +154,7 @@ interface EventParamMapping {
   desktopSetShowIcons: [boolean];
   openBackgroundSelect: [];
   getBackgroundIDs: [];
-  getBackgroundSummaries: [];
+  getBackgroundSummaries: [GetBackgroundSummariesRequest?];
   idToFilePath: [string];
   resolveShortcut: [string];
   openEditBackground: [BackgroundSummary];
@@ -198,7 +209,7 @@ type EventPayloadMapping = {
   desktopSetShowIcons: boolean;
   openBackgroundSelect: boolean;
   getBackgroundIDs: string[];
-  getBackgroundSummaries: BackgroundSummary[];
+  getBackgroundSummaries: GetBackgroundSummariesResponse;
   idToFilePath: string | null;
   resolveShortcut: string;
   openEditBackground: boolean;
@@ -300,7 +311,9 @@ interface Window {
     resetAllIconsFontColor: () => Promise<boolean>;
     desktopSetShowIcons: (showIcons: boolean) => Promise<boolean>;
     getBackgroundIDs: () => Promise<string[]>;
-    getBackgroundSummaries: () => Promise<BackgroundSummary[]>;
+    getBackgroundSummaries: (
+      params?: GetBackgroundSummariesRequest
+    ) => Promise<GetBackgroundSummariesResponse>;
     idToFilePath: (id: string) => Promise<string | null>;
     resolveShortcut: (filePath: string) => Promise<string>;
     openEditBackground: (summary: BackgroundSummary) => Promise<boolean>;

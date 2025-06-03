@@ -116,7 +116,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   desktopSetShowIcons: (showIcons: boolean) =>
     ipcInvoke("desktopSetShowIcons", showIcons),
   getBackgroundIDs: () => ipcInvoke("getBackgroundIDs"),
-  getBackgroundSummaries: () => ipcInvoke("getBackgroundSummaries"),
+  getBackgroundSummaries: (params) =>
+    ipcInvoke("getBackgroundSummaries", params),
   idToFilePath: (id: string) => ipcInvoke("idToFilePath", id),
   resolveShortcut: (filePath: string) => ipcInvoke("resolveShortcut", filePath),
   openEditBackground: (summary: BackgroundSummary) =>
