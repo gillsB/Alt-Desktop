@@ -13,6 +13,7 @@ const PAGE_SIZE = 10;
 const BackgroundSelect: React.FC = () => {
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedBg, setSelectedBg] = useState<BackgroundSummary | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -64,18 +65,15 @@ const BackgroundSelect: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Only run when summaries are loaded
-    if (summaries.length > 0) {
-      (async () => {
-        const savedBackground = await window.electron.getSetting("background");
-        if (savedBackground) {
-          handleSelect(savedBackground);
-        } else {
-          logger.info("No saved background found");
-        }
-      })();
-    }
-  }, [summaries]);
+    (async () => {
+      const savedBackground = await window.electron.getSetting("background");
+      if (savedBackground) {
+        handleSelect(savedBackground);
+      } else {
+        logger.info("No saved background found");
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -112,16 +110,21 @@ const BackgroundSelect: React.FC = () => {
     // Find the selected background, select it, and update the preview
     const bg = summaries.find((bg) => bg.id === id);
     logger.info("Selected background:", bg);
+    setSelectedIds([id]);
     if (bg) {
-      setSelectedIds([id]);
+      setSelectedBg(bg);
     } else {
-      logger.warn(`Background with id ${id} not found in summaries`);
-      return;
-    }
-    if (bg?.id) {
-      await window.electron.previewBackgroundUpdate({
-        background: bg.id,
+      // If not in current page, fetch directly
+      const response = await window.electron.getBackgroundSummaries({
+        offset: 0,
+        limit: 1,
+        search: id,
       });
+      if (response.results.length > 0) setSelectedBg(response.results[0]);
+      else setSelectedBg(null);
+    }
+    if (id) {
+      await window.electron.previewBackgroundUpdate({ background: id });
     }
   };
 
@@ -279,40 +282,35 @@ const BackgroundSelect: React.FC = () => {
             </div>
           ))}
         </div>
-        {selectedIds.length > 0 &&
-          (() => {
-            const bg = summaries.find((bg) => bg.id === selectedIds[0]);
-            if (!bg) return null;
-            return (
-              <div className="background-details-panel" key={bg.id}>
-                <div key={bg.id}>
-                  {bg.iconPath && (
-                    <div className="details-row">
-                      <SafeImage
-                        imagePath={bg.iconPath}
-                        width={128}
-                        height={128}
-                        className="panel-icon"
-                      />
-                    </div>
-                  )}
-                  <h3>{bg.name || bg.id}</h3>
-                  <div className="details-row">
-                    <label>Description</label>
-                    <div className="details-value">
-                      {bg.description || <em>No description</em>}
-                    </div>
-                  </div>
-                  <div className="details-row">
-                    <label>Tags</label>
-                    <div className="details-value">
-                      {bg.tags?.join(", ") || <em>None</em>}
-                    </div>
-                  </div>
+        {selectedBg && (
+          <div className="background-details-panel" key={selectedBg.id}>
+            <div key={selectedBg.id}>
+              {selectedBg.iconPath && (
+                <div className="details-row">
+                  <SafeImage
+                    imagePath={selectedBg.iconPath}
+                    width={128}
+                    height={128}
+                    className="panel-icon"
+                  />
+                </div>
+              )}
+              <h3>{selectedBg.name || selectedBg.id}</h3>
+              <div className="details-row">
+                <label>Description</label>
+                <div className="details-value">
+                  {selectedBg.description || <em>No description</em>}
                 </div>
               </div>
-            );
-          })()}
+              <div className="details-row">
+                <label>Tags</label>
+                <div className="details-value">
+                  {selectedBg.tags?.join(", ") || <em>None</em>}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <div
         style={{
