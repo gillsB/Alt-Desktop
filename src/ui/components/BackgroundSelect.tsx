@@ -202,10 +202,11 @@ const BackgroundSelect: React.FC = () => {
       )
     ) {
       logger.info(`Attempting to delete background ${backgroundId}`);
-      // await window.electron.deleteBackground(backgroundId); (not implemented yet)
+      await window.electron.deleteBackground(backgroundId);
 
       // Remove from selectedIds if present
       setSelectedIds((prev) => prev.filter((id) => id !== backgroundId));
+      fetchPage(page, search);
     }
     setContextMenu(null);
   };
