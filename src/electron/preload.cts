@@ -118,6 +118,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getBackgroundIDs: () => ipcInvoke("getBackgroundIDs"),
   getBackgroundSummaries: (params) =>
     ipcInvoke("getBackgroundSummaries", params),
+  getBackgroundPageForId: (params) =>
+    ipcInvoke("getBackgroundPageForId", params),
   idToFilePath: (id: string) => ipcInvoke("idToFilePath", id),
   resolveShortcut: (filePath: string) => ipcInvoke("resolveShortcut", filePath),
   openEditBackground: (summary: BackgroundSummary) =>

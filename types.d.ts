@@ -42,6 +42,16 @@ type SettingsData = {
 
 type SettingKey = keyof SettingsData;
 
+type BackgroundSummary = {
+  id: string;
+  name?: string;
+  description?: string;
+  iconPath?: string;
+  bgFile?: string;
+  tags?: string[];
+  localTags?: string[];
+};
+
 type GetBackgroundSummariesRequest = {
   offset?: number;
   limit?: number;
@@ -53,14 +63,15 @@ type GetBackgroundSummariesResponse = {
   total: number;
 };
 
-type BackgroundSummary = {
+type GetBackgroundPageForIdRequest = {
   id: string;
-  name?: string;
-  description?: string;
-  iconPath?: string;
-  bgFile?: string;
-  tags?: string[];
-  localTags?: string[];
+  search?: string;
+  pageSize?: number;
+};
+
+type GetBackgroundPageForIdResponse = {
+  page: number; // -1 if not found
+  summary?: BackgroundSummary;
 };
 
 type DesktopIcon = {
@@ -155,6 +166,7 @@ interface EventParamMapping {
   openBackgroundSelect: [];
   getBackgroundIDs: [];
   getBackgroundSummaries: [GetBackgroundSummariesRequest?];
+  getBackgroundPageForId: [GetBackgroundPageForIdRequest];
   idToFilePath: [string];
   resolveShortcut: [string];
   openEditBackground: [BackgroundSummary];
@@ -210,6 +222,7 @@ type EventPayloadMapping = {
   openBackgroundSelect: boolean;
   getBackgroundIDs: string[];
   getBackgroundSummaries: GetBackgroundSummariesResponse;
+  getBackgroundPageForId: GetBackgroundPageForIdResponse;
   idToFilePath: string | null;
   resolveShortcut: string;
   openEditBackground: boolean;
@@ -314,6 +327,9 @@ interface Window {
     getBackgroundSummaries: (
       params?: GetBackgroundSummariesRequest
     ) => Promise<GetBackgroundSummariesResponse>;
+    getBackgroundPageForId: (
+      params: GetBackgroundPageForIdRequest
+    ) => Promise<GetBackgroundPageForIdResponse>;
     idToFilePath: (id: string) => Promise<string | null>;
     resolveShortcut: (filePath: string) => Promise<string>;
     openEditBackground: (summary: BackgroundSummary) => Promise<boolean>;

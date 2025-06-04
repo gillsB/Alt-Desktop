@@ -1378,6 +1378,77 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return { results, total };
     }
   );
+  ipcMainHandle(
+    "getBackgroundPageForId",
+    async ({
+      id,
+      search = "",
+      pageSize = 10,
+    }: {
+      id: string;
+      search?: string;
+      pageSize?: number;
+    }) => {
+      const backgroundsFile = getBackgroundsJsonFilePath();
+      const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
+      const { backgrounds } = JSON.parse(raw);
+
+      let entries = Object.entries(backgrounds).sort(
+        ([, a], [, b]) => Number(b) - Number(a)
+      );
+
+      // Apply search filter
+      if (search) {
+        entries = entries.filter(([bgId]) =>
+          bgId.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+
+      const idx = entries.findIndex(([bgId]) => bgId === id);
+      const page = idx !== -1 ? Math.floor(idx / pageSize) : -1;
+
+      // Optionally, return the summary for that ID if found
+      let summary: BackgroundSummary | undefined;
+      if (idx !== -1) {
+        const baseDir = getBackgroundFilePath();
+        const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
+        const bgJsonPath = path.join(baseDir, folderPath, "bg.json");
+        try {
+          const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
+          const bg = JSON.parse(rawBg);
+          let iconPath = "";
+          let bgFile = "";
+          if (bg.public.icon) {
+            iconPath = path.join(
+              getBackgroundFilePath(),
+              folderPath,
+              bg.public.icon
+            );
+          }
+          if (bg.public.bgFile) {
+            bgFile = path.join(
+              getBackgroundFilePath(),
+              folderPath,
+              bg.public.bgFile
+            );
+          }
+          summary = {
+            id,
+            name: bg.public?.name,
+            bgFile: bgFile,
+            description: bg.public?.description,
+            iconPath: iconPath,
+            tags: bg.public?.tags ?? [],
+            localTags: bg.local?.tags ?? [],
+          };
+        } catch {
+          summary = { id };
+        }
+      }
+
+      return { page, summary };
+    }
+  );
   ipcMainHandle("idToFilePath", async (id: string) => {
     return idToBackgroundPath(id);
   });
