@@ -1523,4 +1523,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle("deleteBackground", async (id: string): Promise<boolean> => {
+    try {
+      if (!id) throw new Error("Missing background id");
+      const bgJsonPath = await idToBgJson(id);
+      const bgDir = path.dirname(bgJsonPath);
+
+      // Send the entire background directory to the recycle bin
+      if (fs.existsSync(bgDir)) {
+        await shell.trashItem(bgDir);
+        logger.info(`Moved background directory: ${bgDir} to recycle bin. `);
+      }
+
+      // Remove backgroundID from backgrounds.json
+      const backgroundsFile = getBackgroundsJsonFilePath();
+      const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
+      const data = JSON.parse(raw);
+      if (data.backgrounds && typeof data.backgrounds === "object") {
+        delete data.backgrounds[id];
+      }
+      await fs.promises.writeFile(
+        backgroundsFile,
+        JSON.stringify(data, null, 2),
+        "utf-8"
+      );
+      logger.info(`Removed background ${id} from backgrounds.json`);
+
+      return true;
+    } catch (error) {
+      logger.error(`Failed to delete background ${id}:`, error);
+      return false;
+    }
+  });
 }

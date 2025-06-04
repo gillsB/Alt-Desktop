@@ -171,6 +171,7 @@ interface EventParamMapping {
   resolveShortcut: [string];
   openEditBackground: [BackgroundSummary];
   saveBgJson: [BackgroundSummary];
+  deleteBackground: [string];
 }
 
 // The returns from the main process to the renderer
@@ -227,6 +228,7 @@ type EventPayloadMapping = {
   resolveShortcut: string;
   openEditBackground: boolean;
   saveBgJson: boolean;
+  deleteBackground: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -334,5 +336,6 @@ interface Window {
     resolveShortcut: (filePath: string) => Promise<string>;
     openEditBackground: (summary: BackgroundSummary) => Promise<boolean>;
     saveBgJson: (data: BackgroundSummary) => Promise<boolean>;
+    deleteBackground: (id: string) => Promise<boolean>;
   };
 }
