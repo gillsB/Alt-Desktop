@@ -27,6 +27,26 @@ type SubWindowAction = "EDIT_ICON" | "CLOSE_SUBWINDOW";
 
 type WindowType = "WINDOWED" | "BORDERLESS";
 
+type BackgroundJson = {
+  public?: {
+    name?: string;
+    bgFile?: string;
+    icon?: string;
+    description?: string;
+    tags?: string[];
+  };
+  local?: {
+    tags?: string[];
+  };
+};
+
+interface BackgroundsData {
+  backgrounds: Record<string, number>;
+  tags?: Record<string, string[]>;
+  names?: Record<string, string[]>;
+  masterPaths?: string[];
+}
+
 type DesktopIconData = {
   icons: DesktopIcon[];
 };

@@ -258,6 +258,20 @@ export function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+export async function getTagIndex(): Promise<Record<string, string[]>> {
+  const backgroundsJsonPath = getBackgroundsJsonFilePath();
+  const raw = await fs.promises.readFile(backgroundsJsonPath, "utf-8");
+  const data = JSON.parse(raw);
+  return data.tags || {};
+}
+
+export async function getNameIndex(): Promise<Record<string, string[]>> {
+  const backgroundsJsonPath = getBackgroundsJsonFilePath();
+  const raw = await fs.promises.readFile(backgroundsJsonPath, "utf-8");
+  const data = JSON.parse(raw);
+  return data.names || {};
+}
+
 /**
  * Indexes all background folders in the AppData/Roaming/AltDesktop/backgrounds directory.
  * It reads the directory, checks for subfolders containing a bg.json file, if found adds them to backgrounds.json.
@@ -295,7 +309,7 @@ export async function indexBackgrounds() {
   }
 
   // Read and validate backgrounds.json
-  let backgroundsData: { backgrounds: Record<string, number> };
+  let backgroundsData: BackgroundsData;
   const raw = await fs.promises.readFile(backgroundsJsonPath, "utf-8");
   try {
     backgroundsData = JSON.parse(raw);
@@ -335,14 +349,63 @@ export async function indexBackgrounds() {
     }
   }
 
-  // Write back if updated
-  if (updated) {
+  // Build tag and name indexes
+  const tagsIndex: Record<string, Set<string>> = {};
+  const namesIndex: Record<string, Set<string>> = {};
+
+  for (const id of Object.keys(backgroundsData.backgrounds)) {
+    const bgJsonPath = path.join(backgroundsDir, id, "bg.json");
+    try {
+      if (fs.existsSync(bgJsonPath)) {
+        const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
+        const bg: BackgroundJson = JSON.parse(rawBg);
+
+        // Index tags
+        if (bg.public?.tags && Array.isArray(bg.public.tags)) {
+          for (const tag of bg.public.tags) {
+            if (!tagsIndex[tag]) tagsIndex[tag] = new Set();
+            tagsIndex[tag].add(id);
+          }
+        }
+
+        // Index names
+        if (bg.public?.name) {
+          const name = bg.public.name;
+          if (!namesIndex[name]) namesIndex[name] = new Set();
+          namesIndex[name].add(id);
+        }
+      }
+    } catch (e) {
+      logger.warn(`Failed to index tags/names for ${id}:`, e);
+    }
+  }
+
+  // Convert sets to arrays for JSON serialization
+  backgroundsData.tags = {};
+  for (const tag in tagsIndex) {
+    backgroundsData.tags[tag] = Array.from(tagsIndex[tag]);
+  }
+  backgroundsData.names = {};
+  for (const name in namesIndex) {
+    backgroundsData.names[name] = Array.from(namesIndex[name]);
+  }
+
+  // Write back if updated or if tags/names changed
+  if (
+    updated ||
+    JSON.stringify(backgroundsData.tags) !==
+      JSON.stringify(JSON.parse(raw).tags || {}) ||
+    JSON.stringify(backgroundsData.names) !==
+      JSON.stringify(JSON.parse(raw).names || {})
+  ) {
     await fs.promises.writeFile(
       backgroundsJsonPath,
       JSON.stringify(backgroundsData, null, 2),
       "utf-8"
     );
-    logger.info("updated backgrounds.json with new backgrounds.");
+    logger.info(
+      "updated backgrounds.json with new backgrounds, tags, and names."
+    );
   }
 }
 

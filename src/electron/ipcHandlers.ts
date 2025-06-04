@@ -19,7 +19,9 @@ import {
   getBackgroundsJsonFilePath,
   getDataFolderPath,
   getDesktopIconsFilePath,
+  getNameIndex,
   getSettingsFilePath,
+  getTagIndex,
   idToBackgroundFolder,
   idToBackgroundPath,
   idToBgJson,
@@ -1327,11 +1329,31 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         ([, a], [, b]) => Number(b) - Number(a)
       ); // newest first
 
-      // Simple search filter (by name or id)
+      // Enhanced search filter: match id, name, or tag
       if (search) {
-        entries = entries.filter(([id]) =>
-          id.toLowerCase().includes(search.toLowerCase())
-        );
+        const searchLower = search.toLowerCase();
+
+        // Get tag and name indexes (async)
+        const [tagIndex, nameIndex] = await Promise.all([
+          getTagIndex(),
+          getNameIndex(),
+        ]);
+
+        // Collect all ids matching the search in tags or names
+        const tagMatchedIds = Object.entries(tagIndex)
+          .filter(([tag]) => tag.toLowerCase().includes(searchLower))
+          .flatMap(([, ids]) => ids);
+
+        const nameMatchedIds = Object.entries(nameIndex)
+          .filter(([name]) => name.toLowerCase().includes(searchLower))
+          .flatMap(([, ids]) => ids);
+
+        const extraMatchedIds = new Set([...tagMatchedIds, ...nameMatchedIds]);
+
+        entries = entries.filter(([id]) => {
+          const idMatch = id.toLowerCase().includes(searchLower);
+          return idMatch || extraMatchedIds.has(id);
+        });
       }
 
       const total = entries.length;
@@ -1398,10 +1420,33 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       );
 
       // Apply search filter
+      // As of now there is no way to call getBackgroundPageForId with search.
+      // It only runs on launching BackgroundSelect, which defaults search to "".
+      // Logic is here for future use, if this changes.
       if (search) {
-        entries = entries.filter(([bgId]) =>
-          bgId.toLowerCase().includes(search.toLowerCase())
-        );
+        const searchLower = search.toLowerCase();
+
+        // Get tag and name indexes (async)
+        const [tagIndex, nameIndex] = await Promise.all([
+          getTagIndex(),
+          getNameIndex(),
+        ]);
+
+        // Collect all ids matching the search in tags or names
+        const tagMatchedIds = Object.entries(tagIndex)
+          .filter(([tag]) => tag.toLowerCase().includes(searchLower))
+          .flatMap(([, ids]) => ids);
+
+        const nameMatchedIds = Object.entries(nameIndex)
+          .filter(([name]) => name.toLowerCase().includes(searchLower))
+          .flatMap(([, ids]) => ids);
+
+        const extraMatchedIds = new Set([...tagMatchedIds, ...nameMatchedIds]);
+
+        entries = entries.filter(([bgId]) => {
+          const idMatch = bgId.toLowerCase().includes(searchLower);
+          return idMatch || extraMatchedIds.has(bgId);
+        });
       }
 
       const idx = entries.findIndex(([bgId]) => bgId === id);
