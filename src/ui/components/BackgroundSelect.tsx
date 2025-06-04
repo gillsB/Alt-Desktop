@@ -21,12 +21,13 @@ const BackgroundSelect: React.FC = () => {
   } | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(-1);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const dragCounter = useRef(0);
 
   const fetchPage = async (page: number, search: string = "") => {
+    logger.info(`Fetching page ${page + 1} with search "${search}"`);
     const offset = page * PAGE_SIZE;
     const { results, total } = await window.electron.getBackgroundSummaries({
       offset,
@@ -38,6 +39,35 @@ const BackgroundSelect: React.FC = () => {
   };
 
   useEffect(() => {
+    (async () => {
+      const savedBackground = await window.electron.getSetting("background");
+      if (savedBackground) {
+        const { page: bgPage, summary } =
+          await window.electron.getBackgroundPageForId({
+            id: savedBackground,
+            search,
+            pageSize: PAGE_SIZE,
+          });
+        if (bgPage !== -1) {
+          setPage(bgPage);
+          setSelectedIds([savedBackground]);
+          setSelectedBg(summary ?? null);
+        } else {
+          logger.info("Saved background not found in backgrounds list");
+          setPage(0);
+          setSelectedIds([]);
+          setSelectedBg(null);
+        }
+      } else {
+        logger.info("No saved background found");
+        setPage(0);
+        setSelectedIds([]);
+        setSelectedBg(null);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     fetchPage(page, search);
   }, [page, search]);
 
@@ -47,22 +77,6 @@ const BackgroundSelect: React.FC = () => {
     await window.electron.reloadBackground();
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
-
-  useEffect(() => {
-    window.electron
-      .getBackgroundSummaries({ offset: 0, limit: PAGE_SIZE, search: "" })
-      .then((response) => {
-        setSummaries(response.results);
-        setTotal(response.total);
-        logger.info(
-          "Loaded background summary IDs",
-          response.results.map((bg) => bg.id)
-        );
-      })
-      .catch((err) => {
-        logger.error("Failed to fetch background summaries:", err);
-      });
-  }, []);
 
   useEffect(() => {
     (async () => {
