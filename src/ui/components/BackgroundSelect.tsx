@@ -88,23 +88,32 @@ const BackgroundSelect: React.FC = () => {
 
   const handleSelect = async (id: string, e?: React.MouseEvent) => {
     // Used for selecting multiple files, not sure if this will be allowed or what to do with this.
-    if (e) {
-      if (e.ctrlKey || e.metaKey) {
-        setSelectedIds((prev) => {
-          let next;
-          if (prev.includes(id)) {
-            next = prev.filter((x) => x !== id);
-          } else {
-            next = [...prev, id];
-          }
-          // If the next selection is empty, preview fallback.
-          if (next.length === 0) {
-            window.electron.previewBackgroundUpdate({ background: "fallback" });
-          }
-          return next;
-        });
-        return;
-      }
+    if (e && (e.ctrlKey || e.metaKey)) {
+      setSelectedIds((prev) => {
+        let next;
+        if (prev.includes(id)) {
+          next = prev.filter((x) => x !== id);
+        } else {
+          next = [...prev, id];
+        }
+        // If the next selection is empty, preview fallback.
+        if (next.length === 0) {
+          window.electron.previewBackgroundUpdate({ background: "fallback" });
+          setSelectedBg(null);
+        } else if (
+          // If the selection just went from 0 to 1, or selectedBg is not in next
+          prev.length === 0 ||
+          (selectedBg && !next.includes(selectedBg.id))
+        ) {
+          const newBg = summaries.find((bg) => bg.id === next[0]);
+          window.electron.previewBackgroundUpdate({
+            background: newBg?.id ?? "fallback",
+          });
+          setSelectedBg(newBg ?? null);
+        }
+        return next;
+      });
+      return;
     }
 
     // Find the selected background, select it, and update the preview
