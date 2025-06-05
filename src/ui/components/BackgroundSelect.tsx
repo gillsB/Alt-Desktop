@@ -68,7 +68,14 @@ const BackgroundSelect: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchPage(page, search);
+    const handler = () => {
+      fetchPage(page, search);
+    };
+    handler();
+    window.electron.on("backgrounds-updated", handler);
+    return () => {
+      window.electron.off("backgrounds-updated", handler);
+    };
   }, [page, search]);
 
   const handleClose = async () => {

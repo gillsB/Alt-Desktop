@@ -457,6 +457,12 @@ export async function indexBackgrounds() {
       "updated backgrounds.json with new backgrounds, tags, and names."
     );
   }
+  const allWindows = BrowserWindow.getAllWindows();
+  const mainWindow =
+    allWindows.find(
+      (activeSubWindow) => activeSubWindow.title === "AltDesktop"
+    ) || (allWindows.length > 0 ? allWindows[0] : null);
+  mainWindow?.webContents.send("backgrounds-updated");
 }
 
 /**
