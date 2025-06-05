@@ -1566,4 +1566,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+  ipcMainHandle(
+    "idToBackgroundFolder",
+    async (id: string): Promise<string | null> => {
+      return idToBackgroundFolder(id);
+    }
+  );
 }

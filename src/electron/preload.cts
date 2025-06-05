@@ -126,6 +126,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("openEditBackground", summary),
   saveBgJson: (summary: BackgroundSummary) => ipcInvoke("saveBgJson", summary),
   deleteBackground: (id: string) => ipcInvoke("deleteBackground", id),
+  idToBackgroundFolder: (id: string) => ipcInvoke("idToBackgroundFolder", id),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

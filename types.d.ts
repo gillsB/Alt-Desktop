@@ -194,6 +194,7 @@ interface EventParamMapping {
   openEditBackground: [BackgroundSummary];
   saveBgJson: [BackgroundSummary];
   deleteBackground: [string];
+  idToBackgroundFolder: [string];
 }
 
 // The returns from the main process to the renderer
@@ -251,6 +252,7 @@ type EventPayloadMapping = {
   openEditBackground: boolean;
   saveBgJson: boolean;
   deleteBackground: boolean;
+  idToBackgroundFolder: string | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -359,5 +361,6 @@ interface Window {
     openEditBackground: (summary: BackgroundSummary) => Promise<boolean>;
     saveBgJson: (data: BackgroundSummary) => Promise<boolean>;
     deleteBackground: (id: string) => Promise<boolean>;
+    idToBackgroundFolder: (id: string) => Promise<string | null>;
   };
 }

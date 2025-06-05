@@ -1,4 +1,8 @@
-import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
+import {
+  FolderIcon,
+  FolderOpenIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/solid";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import "../App.css";
@@ -37,6 +41,7 @@ const EditBackground: React.FC = () => {
   const [ids, setIds] = useState<Set<string>>(new Set<string>());
   const [isHoveringBgFile, setIsHoveringBgFile] = useState(false);
   const [isHoveringIconPath, setIsHoveringIconPath] = useState(false);
+  const [hasBackgroundFolder, setHasBackgroundFolder] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +61,20 @@ const EditBackground: React.FC = () => {
       window.electron.previewBackgroundUpdate({ background: summary.bgFile });
     }
   }, [summary.bgFile]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (summary.id) {
+      window.electron.idToBackgroundFolder(summary.id).then((folder) => {
+        if (!cancelled) setHasBackgroundFolder(!!folder);
+      });
+    } else {
+      setHasBackgroundFolder(false);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [summary.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -314,6 +333,27 @@ const EditBackground: React.FC = () => {
               <FolderIcon className="custom-folder-icon" />
             )}
           </button>
+          {hasBackgroundFolder && (
+            <button
+              className="magnifying-glass-button flex items-center gap-2"
+              onClick={async () => {
+                const folder = `/backgrounds/${summary.id}`;
+                logger.info("Opening background folder:", folder);
+                if (folder) {
+                  const filePath = await window.electron.openFileDialog(
+                    "image,video",
+                    folder
+                  );
+                  if (filePath) {
+                    setSummary((prev) => ({ ...prev, bgFile: filePath }));
+                  }
+                }
+              }}
+              title="Select from previously set background files"
+            >
+              <MagnifyingGlassIcon className="custom-magnifying-glass-icon" />
+            </button>
+          )}
         </div>
         {bgFileType?.startsWith("video") && (
           <div className="subwindow-field dropdown-container">
