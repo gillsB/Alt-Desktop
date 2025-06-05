@@ -29,6 +29,7 @@ import {
   ipcMainOn,
   resetAllIconsFontColor,
   resolveShortcut,
+  saveBgJsonFile,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
   updateHeader,
@@ -1389,7 +1390,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             iconPath: iconPath,
             tags: bg.public?.tags ?? [],
             localTags: bg.local?.tags ?? [],
-            indexed: bg.local?.indexed,
+            localIndexed: bg.local?.indexed,
           });
         } catch (e) {
           logger.error(`Failed to read bg.json for ${id}:`, e);
@@ -1530,42 +1531,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "saveBgJson",
     async (summary: BackgroundSummary): Promise<boolean> => {
-      try {
-        if (!summary.id) throw new Error("Missing background id");
-        const bgJsonPath = await idToBgJson(summary.id);
-
-        // Ensure the directory exists
-        await fs.promises.mkdir(path.dirname(bgJsonPath), { recursive: true });
-
-        // Format the bg.json structure
-        const bgJson = {
-          public: {
-            name: summary.name ?? "",
-            bgFile: summary.bgFile ?? "",
-            icon: summary.iconPath ? path.basename(summary.iconPath) : "",
-            description: summary.description ?? "",
-            tags: summary.tags ?? [],
-          },
-          local: {
-            tags: summary.localTags ?? [],
-            indexed: summary.indexed ?? Math.floor(Date.now() / 1000),
-          },
-        };
-
-        // Write to bg.json
-        await fs.promises.writeFile(
-          bgJsonPath,
-          JSON.stringify(bgJson, null, 2),
-          "utf-8"
-        );
-        logger.info(
-          `Saved bg.json for background ${summary.id} at ${bgJsonPath}`
-        );
-        return true;
-      } catch (error) {
-        logger.error("Failed to save bg.json:", error);
-        return false;
-      }
+      return saveBgJsonFile(summary);
     }
   );
   ipcMainHandle("deleteBackground", async (id: string): Promise<boolean> => {

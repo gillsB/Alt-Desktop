@@ -352,28 +352,39 @@ export async function indexBackgrounds() {
 
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
-      let indexedTime = Math.floor(Date.now() / 1000);
+      let indexedTime: number | undefined = Math.floor(Date.now() / 1000);
       const bgJsonPath = path.join(backgroundsDir, folderName, "bg.json");
       if (fs.existsSync(bgJsonPath)) {
         try {
           const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
           const bg: BgJson = JSON.parse(rawBg);
-          // Use local.indexed from bg.json if "Import with Saved Date" is selected and it exists and is valid
+
           if (
             importWithSavedDate &&
             bg.local &&
             bg.local.indexed &&
-            !isNaN(Number(bg.local.indexed))
+            !isNaN(bg.local.indexed)
           ) {
+            // Use saved date from bg.json if user chose "Import with Saved Date"
             indexedTime = Number(bg.local.indexed);
+          } else {
+            // Use current time for "Import as New" or if no valid saved date
+            await saveBgJsonFile({ id: folderName, localIndexed: indexedTime });
           }
         } catch (e) {
           logger.warn(
             `Could not read indexed value from ${bgJsonPath}, using current time. error: ${e}`
           );
+          await saveBgJsonFile({ id: folderName, localIndexed: indexedTime });
         }
       }
-      logger.info(`Adding new background: ${folderName}`);
+      // In case saved time in bg.json is not valid or not found
+      if (indexedTime === undefined) {
+        indexedTime = Math.floor(Date.now() / 1000);
+      }
+      logger.info(
+        `Adding new background: ${folderName}, indexed at ${indexedTime}`
+      );
       backgroundsData.backgrounds[folderName] = indexedTime;
       updated = true;
     }
@@ -445,6 +456,75 @@ export async function indexBackgrounds() {
     logger.info(
       "updated backgrounds.json with new backgrounds, tags, and names."
     );
+  }
+}
+
+/**
+ * Saves a bg.json file for a background summary.
+ * Accepts full or partial summary and only updates the provided fields, leaving others unchanged.
+ * @param summary The full/partial background summary to save.
+ */
+export async function saveBgJsonFile(
+  summary: Partial<BackgroundSummary>
+): Promise<boolean> {
+  try {
+    if (!summary.id) throw new Error("Missing background id");
+    const bgJsonPath = await idToBgJson(summary.id);
+
+    // Ensure the directory exists
+    await fs.promises.mkdir(path.dirname(bgJsonPath), { recursive: true });
+
+    // Read existing bg.json if it exists
+    let oldBg: BgJson = {};
+    if (fs.existsSync(bgJsonPath)) {
+      try {
+        const rawOld = await fs.promises.readFile(bgJsonPath, "utf-8");
+        oldBg = JSON.parse(rawOld);
+      } catch (e) {
+        logger.info(
+          `Failed to read existing bg.json for ${summary.id}, will use defaults. error: ${e}`
+        );
+      }
+    }
+
+    // Merge fields: use provided summary fields, otherwise fall back to oldBg, then default
+    const publicData = {
+      name: summary.name ?? oldBg.public?.name ?? "",
+      bgFile: summary.bgFile ?? oldBg.public?.bgFile ?? "",
+      icon: summary.iconPath
+        ? path.basename(summary.iconPath)
+        : (oldBg.public?.icon ?? ""),
+      description: summary.description ?? oldBg.public?.description ?? "",
+      tags: summary.tags ?? oldBg.public?.tags ?? [],
+    };
+
+    // Handle local.indexed logic
+    const indexed: number | undefined =
+      summary.localIndexed ??
+      oldBg.local?.indexed ??
+      Math.floor(Date.now() / 1000);
+
+    const localData = {
+      tags: summary.localTags ?? oldBg.local?.tags ?? [],
+      indexed,
+    };
+
+    // Write merged bg.json
+    const bgJson = {
+      public: publicData,
+      local: localData,
+    };
+
+    await fs.promises.writeFile(
+      bgJsonPath,
+      JSON.stringify(bgJson, null, 2),
+      "utf-8"
+    );
+    logger.info(`Saved bg.json for background ${summary.id} at ${bgJsonPath}`);
+    return true;
+  } catch (error) {
+    logger.error("Failed to save bg.json:", error);
+    return false;
   }
 }
 
