@@ -1389,6 +1389,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             iconPath: iconPath,
             tags: bg.public?.tags ?? [],
             localTags: bg.local?.tags ?? [],
+            indexed: bg.local?.indexed,
           });
         } catch (e) {
           logger.error(`Failed to read bg.json for ${id}:`, e);
@@ -1547,6 +1548,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           },
           local: {
             tags: summary.localTags ?? [],
+            indexed: summary.indexed ?? Math.floor(Date.now() / 1000),
           },
         };
 

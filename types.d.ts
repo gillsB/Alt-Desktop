@@ -37,6 +37,7 @@ type BackgroundJson = {
   };
   local?: {
     tags?: string[];
+    indexed?: string;
   };
 };
 
@@ -70,6 +71,7 @@ type BackgroundSummary = {
   bgFile?: string;
   tags?: string[];
   localTags?: string[];
+  indexed?: string;
 };
 
 type GetBackgroundSummariesRequest = {
