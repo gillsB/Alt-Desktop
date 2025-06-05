@@ -331,11 +331,41 @@ export async function indexBackgrounds() {
 
   // Add new backgrounds if not already present
   let updated = false;
-  const now = Math.floor(Date.now() / 1000);
+  let foundUnindexedBgJson = false;
+  let importWithModifiedDate = false;
+
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
+      foundUnindexedBgJson = true;
+    }
+  }
+
+  // If any unindexed bg.json are found, prompt the user once
+  if (foundUnindexedBgJson) {
+    const choice = await openSmallWindow(
+      "Import Backgrounds",
+      "Existing bg.json files found that are not indexed. \nHow would you like to import them?",
+      ["Import as New (Appear first)", "Import with Last Modified Date"]
+    );
+    importWithModifiedDate = choice === "Import with Last Modified Date";
+  }
+
+  for (const folderName of validIds) {
+    if (!(folderName in backgroundsData.backgrounds)) {
+      let indexedTime = Math.floor(Date.now() / 1000);
+      if (importWithModifiedDate) {
+        const bgJsonPath = path.join(backgroundsDir, folderName, "bg.json");
+        try {
+          const stat = fs.statSync(bgJsonPath);
+          indexedTime = Math.floor(stat.mtimeMs / 1000);
+        } catch (e) {
+          logger.warn(
+            `Could not get mtime for ${bgJsonPath}, using current time. error: ${e}`
+          );
+        }
+      }
       logger.info(`Adding new background: ${folderName}`);
-      backgroundsData.backgrounds[folderName] = now;
+      backgroundsData.backgrounds[folderName] = indexedTime;
       updated = true;
     }
   }

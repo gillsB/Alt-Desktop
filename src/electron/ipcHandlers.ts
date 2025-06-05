@@ -1333,7 +1333,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       if (search) {
         const searchLower = search.toLowerCase();
 
-        // Get tag and name indexes (async)
         const [tagIndex, nameIndex] = await Promise.all([
           getTagIndex(),
           getNameIndex(),
@@ -1426,7 +1425,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       if (search) {
         const searchLower = search.toLowerCase();
 
-        // Get tag and name indexes (async)
         const [tagIndex, nameIndex] = await Promise.all([
           getTagIndex(),
           getNameIndex(),
