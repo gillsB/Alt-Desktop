@@ -332,7 +332,7 @@ export async function indexBackgrounds() {
   // Add new backgrounds if not already present
   let updated = false;
   let foundUnindexedBgJson = false;
-  let importWithModifiedDate = false;
+  let importWithSavedDate = false;
 
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
@@ -345,22 +345,31 @@ export async function indexBackgrounds() {
     const choice = await openSmallWindow(
       "Import Backgrounds",
       "Existing bg.json files found that are not indexed. \nHow would you like to import them?",
-      ["Import as New (Appear first)", "Import with Last Modified Date"]
+      ["Import as New (Appear first)", "Import with Saved Date"]
     );
-    importWithModifiedDate = choice === "Import with Last Modified Date";
+    importWithSavedDate = choice === "Import with Saved Date";
   }
 
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
       let indexedTime = Math.floor(Date.now() / 1000);
-      if (importWithModifiedDate) {
-        const bgJsonPath = path.join(backgroundsDir, folderName, "bg.json");
+      const bgJsonPath = path.join(backgroundsDir, folderName, "bg.json");
+      if (fs.existsSync(bgJsonPath)) {
         try {
-          const stat = fs.statSync(bgJsonPath);
-          indexedTime = Math.floor(stat.mtimeMs / 1000);
+          const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
+          const bg: BgJson = JSON.parse(rawBg);
+          // Use local.indexed from bg.json if "Import with Saved Date" is selected and it exists and is valid
+          if (
+            importWithSavedDate &&
+            bg.local &&
+            bg.local.indexed &&
+            !isNaN(Number(bg.local.indexed))
+          ) {
+            indexedTime = Number(bg.local.indexed);
+          }
         } catch (e) {
           logger.warn(
-            `Could not get mtime for ${bgJsonPath}, using current time. error: ${e}`
+            `Could not read indexed value from ${bgJsonPath}, using current time. error: ${e}`
           );
         }
       }
@@ -388,7 +397,7 @@ export async function indexBackgrounds() {
     try {
       if (fs.existsSync(bgJsonPath)) {
         const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
-        const bg: BackgroundJson = JSON.parse(rawBg);
+        const bg: BgJson = JSON.parse(rawBg);
 
         // Index tags
         if (bg.public?.tags && Array.isArray(bg.public.tags)) {

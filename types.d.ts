@@ -27,7 +27,7 @@ type SubWindowAction = "EDIT_ICON" | "CLOSE_SUBWINDOW";
 
 type WindowType = "WINDOWED" | "BORDERLESS";
 
-type BackgroundJson = {
+type BgJson = {
   public?: {
     name?: string;
     bgFile?: string;
