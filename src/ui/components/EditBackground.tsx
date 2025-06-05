@@ -42,6 +42,9 @@ const EditBackground: React.FC = () => {
   const [isHoveringBgFile, setIsHoveringBgFile] = useState(false);
   const [isHoveringIconPath, setIsHoveringIconPath] = useState(false);
   const [hasBackgroundFolder, setHasBackgroundFolder] = useState(false);
+  const [isHoveringBackgroundGlass, setHoveringBackgroundGlass] =
+    useState(false);
+  const [isHoveringIconGlass, setHoveringIconGlass] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -293,6 +296,18 @@ const EditBackground: React.FC = () => {
     setSummary((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleGlassClick = async (type: "bgFile" | "iconPath") => {
+    const folder = `/backgrounds/${summary.id}`;
+    logger.info(`Opening background folder for ${type}:`, folder);
+    if (folder) {
+      const fileType = type === "bgFile" ? "image,video" : "image";
+      const filePath = await window.electron.openFileDialog(fileType, folder);
+      if (filePath) {
+        setSummary((prev) => ({ ...prev, [type]: filePath }));
+      }
+    }
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -336,22 +351,16 @@ const EditBackground: React.FC = () => {
           {hasBackgroundFolder && (
             <button
               className="magnifying-glass-button flex items-center gap-2"
-              onClick={async () => {
-                const folder = `/backgrounds/${summary.id}`;
-                logger.info("Opening background folder:", folder);
-                if (folder) {
-                  const filePath = await window.electron.openFileDialog(
-                    "image,video",
-                    folder
-                  );
-                  if (filePath) {
-                    setSummary((prev) => ({ ...prev, bgFile: filePath }));
-                  }
-                }
-              }}
+              onClick={() => handleGlassClick("bgFile")}
+              onMouseEnter={() => setHoveringBackgroundGlass(true)}
+              onMouseLeave={() => setHoveringBackgroundGlass(false)}
               title="Select from previously set background files"
             >
-              <MagnifyingGlassIcon className="custom-magnifying-glass-icon" />
+              <MagnifyingGlassIcon
+                className={`custom-magnifying-glass-icon ${
+                  isHoveringBackgroundGlass ? "hovered" : ""
+                }`}
+              />
             </button>
           )}
         </div>
@@ -394,6 +403,21 @@ const EditBackground: React.FC = () => {
               <FolderIcon className="custom-folder-icon" />
             )}
           </button>
+          {hasBackgroundFolder && (
+            <button
+              className="magnifying-glass-button flex items-center gap-2"
+              onClick={() => handleGlassClick("iconPath")}
+              onMouseEnter={() => setHoveringIconGlass(true)}
+              onMouseLeave={() => setHoveringIconGlass(false)}
+              title="Select from previously set background files"
+            >
+              <MagnifyingGlassIcon
+                className={`custom-magnifying-glass-icon ${
+                  isHoveringIconGlass ? "hovered" : ""
+                }`}
+              />
+            </button>
+          )}
         </div>
         <div className="subwindow-field">
           <label>Description:</label>
