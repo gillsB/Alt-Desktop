@@ -11,6 +11,7 @@ export const defaultSettings: SettingsData = {
   defaultFontColor: "#FFFFFF",
   windowType: "WINDOWED",
   newBackgroundID: 1,
+  externalPaths: [],
 };
 
 const logger = createLoggerForFile("settings.ts");

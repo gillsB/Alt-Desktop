@@ -69,7 +69,10 @@ export const ensureAppDataFiles = () => {
 
     // Ensure desktopIcons.json exists
     ensureFileExists(desktopIconsFilePath, { icons: [] });
-    ensureFileExists(backgroundsFilePath, { masterPaths: [], backgrounds: {} });
+    ensureFileExists(backgroundsFilePath, {
+      externalPaths: [],
+      backgrounds: {},
+    });
     ensureFileExists(settingsFilePath, defaultSettings);
     ensureDefaultSettings();
   } catch (error) {

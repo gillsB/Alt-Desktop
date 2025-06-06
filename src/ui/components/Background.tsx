@@ -68,6 +68,10 @@ const Background: React.FC<BackgroundProps> = ({
   useEffect(() => {
     const fetchFromSettings = async () => {
       const bgPath = await window.electron.getSetting("background");
+      if (bgPath === undefined) {
+        logger.error("Background returned undefined from settings.");
+        return;
+      }
       let filePath = await convertIDToFilePath(bgPath);
       if (filePath) {
         // Always resolve shortcut if the file is a shortcut

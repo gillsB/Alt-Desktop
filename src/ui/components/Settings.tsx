@@ -11,6 +11,11 @@ const Settings: React.FC = () => {
   const [initialSettings, setInitialSettings] = useState<SettingsData | null>(
     null
   );
+  const [externalPathsInput, setExternalPathsInput] = useState(
+    Array.isArray(settings?.externalPaths)
+      ? settings.externalPaths.join(", ")
+      : ""
+  );
   const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleClose = async () => {
@@ -151,6 +156,15 @@ const Settings: React.FC = () => {
     loadSettings();
   }, []);
 
+  // Keep input in sync with settings changes
+  useEffect(() => {
+    setExternalPathsInput(
+      Array.isArray(settings?.externalPaths)
+        ? settings.externalPaths.join(", ")
+        : ""
+    );
+  }, [settings?.externalPaths]);
+
   // Generic function to update a specific field in the settings
   const updateSetting = <K extends keyof SettingsData>(
     key: K,
@@ -200,6 +214,32 @@ const Settings: React.FC = () => {
     <div className="subwindow-container">
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
       <div className="subwindow-content">
+        <div className="subwindow-field">
+          <label htmlFor="external-paths">External Paths</label>
+          <input
+            id="external-paths"
+            type="text"
+            value={externalPathsInput}
+            onChange={(e) => setExternalPathsInput(e.target.value)}
+            onBlur={() => {
+              const paths = externalPathsInput
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean);
+              updateSetting("externalPaths", paths);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const paths = externalPathsInput
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean);
+                updateSetting("externalPaths", paths);
+              }
+            }}
+            placeholder="Enter external paths here"
+          />
+        </div>
         <div className="subwindow-field">
           <label htmlFor="icon-size">Default Icon Size</label>
           <input

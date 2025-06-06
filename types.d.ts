@@ -45,7 +45,7 @@ interface BackgroundsData {
   backgrounds: Record<string, number>;
   tags?: Record<string, string[]>;
   names?: Record<string, string[]>;
-  masterPaths?: string[];
+  externalPaths?: string[];
 }
 
 type DesktopIconData = {
@@ -59,6 +59,7 @@ type SettingsData = {
   defaultFontColor?: string;
   windowType?: WindowType;
   newBackgroundID?: number;
+  externalPaths?: string[];
 };
 
 type SettingKey = keyof SettingsData;
