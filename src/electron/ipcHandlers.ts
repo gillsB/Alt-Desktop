@@ -19,6 +19,7 @@ import {
   getBackgroundsJsonFilePath,
   getDataFolderPath,
   getDesktopIconsFilePath,
+  getExternalPath,
   getNameIndex,
   getSettingsFilePath,
   getTagIndex,
@@ -1325,7 +1326,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       search = "",
     }: GetBackgroundSummariesRequest = {}) => {
       const backgroundsFile = getBackgroundsJsonFilePath();
-      const baseDir = getBackgroundFilePath();
 
       const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
       const { backgrounds } = JSON.parse(raw);
@@ -1365,26 +1365,43 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       const results = [];
       for (const [id] of entries) {
-        const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
-        const bgJsonPath = path.join(baseDir, folderPath, "bg.json");
+        let folderPath: string;
+        let bgJsonPath: string;
+        let iconPath = "";
+        let bgFile = "";
+
+        // Detect and resolve externalPath files
+        const extMatch = id.match(/^ext::(\d+)::(.+)$/);
+        if (extMatch) {
+          const extIndex = Number(extMatch[1]);
+          const folder = extMatch[2];
+          const extBase = await getExternalPath(extIndex);
+          if (extBase) {
+            folderPath = path.join(extBase, folder);
+            bgJsonPath = path.join(folderPath, "bg.json");
+          } else {
+            // fallback to backgrounds dir if external path not found
+            const baseDir = getBackgroundFilePath();
+            folderPath = path.join(baseDir, folder);
+            bgJsonPath = path.join(folderPath, "bg.json");
+          }
+        } else {
+          const baseDir = getBackgroundFilePath();
+          folderPath = id.includes("/")
+            ? path.join(baseDir, ...id.split("/"))
+            : path.join(baseDir, id);
+          bgJsonPath = path.join(folderPath, "bg.json");
+        }
+
         try {
           const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
           const bg = JSON.parse(rawBg);
-          let iconPath = "";
-          let bgFile = "";
-          if (bg.public.icon) {
-            iconPath = path.join(
-              getBackgroundFilePath(),
-              folderPath,
-              bg.public.icon
-            );
+
+          if (bg.public?.icon) {
+            iconPath = path.join(folderPath, bg.public.icon);
           }
-          if (bg.public.bgFile) {
-            bgFile = path.join(
-              getBackgroundFilePath(),
-              folderPath,
-              bg.public.bgFile
-            );
+          if (bg.public?.bgFile) {
+            bgFile = path.join(folderPath, bg.public.bgFile);
           }
           results.push({
             id,
