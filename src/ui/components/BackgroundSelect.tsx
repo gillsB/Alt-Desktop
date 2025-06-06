@@ -280,7 +280,7 @@ const BackgroundSelect: React.FC = () => {
       onDrop={handleFileDrop}
     >
       <SubWindowHeader title="Background Select" onClose={handleClose} />
-      <div style={{ padding: "8px" }}>
+      <div className="search-menu">
         <input
           type="text"
           placeholder="Search backgrounds..."
@@ -289,7 +289,6 @@ const BackgroundSelect: React.FC = () => {
             setPage(0);
             setSearch(e.target.value);
           }}
-          style={{ width: 200, marginBottom: 8 }}
         />
       </div>
       <div className="background-select-content">
