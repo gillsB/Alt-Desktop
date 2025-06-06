@@ -306,12 +306,12 @@ export async function indexBackgrounds() {
   const backgroundsDir = getBackgroundFilePath();
   const backgroundsJsonPath = getBackgroundsJsonFilePath();
 
-  // Read all entries in the backgrounds directory
+  // Read all entries in the main backgrounds directory
   const entries = await fs.promises.readdir(backgroundsDir, {
     withFileTypes: true,
   });
 
-  // Find subfolders with a bg.json file
+  // Find subfolders with a bg.json file in the main backgrounds directory
   const subfoldersWithBgJson: string[] = [];
   for (const entry of entries) {
     if (entry.isDirectory()) {
@@ -322,6 +322,43 @@ export async function indexBackgrounds() {
       }
     }
   }
+
+  // External Paths
+  let externalPaths: string[] = [];
+  if (fs.existsSync(backgroundsJsonPath)) {
+    try {
+      const raw = await fs.promises.readFile(backgroundsJsonPath, "utf-8");
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.externalPaths)) {
+        externalPaths = data.externalPaths.filter(
+          (p: string) => typeof p === "string"
+        );
+      }
+    } catch (e) {
+      logger.warn("Failed to read externalPaths from backgrounds.json:", e);
+    }
+  }
+  for (const extDir of externalPaths) {
+    if (!fs.existsSync(extDir)) continue;
+    try {
+      const extEntries = await fs.promises.readdir(extDir, {
+        withFileTypes: true,
+      });
+      for (const entry of extEntries) {
+        if (entry.isDirectory()) {
+          const subfolderPath = path.join(extDir, entry.name);
+          const bgJsonPath = path.join(subfolderPath, "bg.json");
+          if (fs.existsSync(bgJsonPath)) {
+            // Use a unique identifier for external backgrounds: extDir + "/" + entry.name
+            subfoldersWithBgJson.push(path.join(extDir, entry.name));
+          }
+        }
+      }
+    } catch (e) {
+      logger.warn(`Failed to index external backgrounds in ${extDir}:`, e);
+    }
+  }
+
   const validIds = new Set(subfoldersWithBgJson);
 
   // Check if backgrounds.json exists
@@ -467,6 +504,7 @@ export async function indexBackgrounds() {
   }
 
   // Write back if updated or if tags/names changed
+  backgroundsData.externalPaths = externalPaths;
   if (
     updated ||
     JSON.stringify(backgroundsData.tags) !==
