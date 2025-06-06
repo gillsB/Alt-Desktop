@@ -273,6 +273,32 @@ export async function getNameIndex(): Promise<Record<string, string[]>> {
 }
 
 /**
+ * Saves the provided externalPaths array to backgrounds.json under the "externalPaths" key.
+ * @param paths string[] - The array of external paths to save.
+ */
+export async function saveExternalPaths(paths: string[]) {
+  const backgroundsJsonPath = getBackgroundsJsonFilePath();
+  try {
+    // Read existing backgrounds.json
+    const raw = await fs.promises.readFile(backgroundsJsonPath, "utf-8");
+    const data = JSON.parse(raw);
+
+    // Set or update the externalPaths property
+    data.externalPaths = paths;
+
+    // Write back to backgrounds.json
+    await fs.promises.writeFile(
+      backgroundsJsonPath,
+      JSON.stringify(data, null, 2),
+      "utf-8"
+    );
+    logger.info("Saved externalPaths to backgrounds.json:", paths);
+  } catch (error) {
+    logger.error("Failed to save externalPaths to backgrounds.json:", error);
+  }
+}
+
+/**
  * Indexes all background folders in the AppData/Roaming/AltDesktop/backgrounds directory.
  * It reads the directory, checks for subfolders containing a bg.json file, if found adds them to backgrounds.json.
  */
