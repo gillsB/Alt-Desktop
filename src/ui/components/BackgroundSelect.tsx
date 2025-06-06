@@ -26,6 +26,43 @@ const BackgroundSelect: React.FC = () => {
   const [search, setSearch] = useState("");
   const dragCounter = useRef(0);
 
+  const [showPageInput, setShowPageInput] = useState(false);
+  const [pageInputValue, setPageInputValue] = useState("");
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const pageNumbers: (number | string)[] = [];
+
+  const sidePages = 2;
+
+  if (totalPages <= 9) {
+    for (let i = 0; i < totalPages; i++) pageNumbers.push(i);
+  } else {
+    pageNumbers.push(0);
+
+    if (page > 3) {
+      pageNumbers.push("...");
+    }
+    // Show sidePages before current page
+    for (let i = Math.max(1, page - sidePages); i < page; i++) {
+      if (i !== 0 && i !== totalPages - 1) pageNumbers.push(i);
+    }
+    // Show current page
+    if (page !== 0 && page !== totalPages - 1) pageNumbers.push(page);
+    // Show sidePages after current page
+    for (
+      let i = page + 1;
+      i <= Math.min(totalPages - sidePages, page + sidePages);
+      i++
+    ) {
+      if (i !== 0 && i !== totalPages - 1) pageNumbers.push(i);
+    }
+    if (page < totalPages - 4) {
+      pageNumbers.push("...");
+    }
+
+    pageNumbers.push(totalPages - 1);
+  }
+
   const fetchPage = async (page: number, search: string = "") => {
     logger.info(`Fetching page ${page + 1} with search "${search}"`);
     const offset = page * PAGE_SIZE;
@@ -342,28 +379,67 @@ const BackgroundSelect: React.FC = () => {
           </div>
         )}
       </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          margin: 8,
-        }}
-      >
+      <div className="background-paging-bar">
         <button
-          onClick={() => setPage((p) => Math.max(0, p - 1))}
-          disabled={page === 0}
+          className={`paging-nav${page === 0 ? " inactive" : ""}`}
+          onClick={() => page > 0 && setPage((p) => Math.max(0, p - 1))}
+          tabIndex={0}
         >
           Prev
         </button>
-        <span style={{ margin: "0 12px" }}>
-          Page {page + 1} of {Math.ceil(total / PAGE_SIZE) || 1}
-        </span>
+        {pageNumbers.map((num, idx) =>
+          num === "..." ? (
+            <span
+              key={`ellipsis-${idx}`}
+              className="paging-ellipsis"
+              onClick={() => setShowPageInput(true)}
+              title="Jump to page"
+            >
+              ...
+            </span>
+          ) : (
+            <button
+              key={num}
+              className={num === page ? "paging-current" : ""}
+              onClick={() => setPage(Number(num))}
+              disabled={num === page}
+              style={{
+                fontWeight: num === page ? "bold" : undefined,
+                margin: "0 2px",
+              }}
+            >
+              {Number(num) + 1}
+            </button>
+          )
+        )}
+        {showPageInput && (
+          <input
+            type="number"
+            min={1}
+            max={totalPages}
+            value={pageInputValue}
+            autoFocus
+            onChange={(e) =>
+              setPageInputValue(e.target.value.replace(/\D/, ""))
+            }
+            onBlur={() => setShowPageInput(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const val = Math.max(
+                  1,
+                  Math.min(totalPages, Number(pageInputValue))
+                );
+                setPage(val - 1);
+                setShowPageInput(false);
+              }
+              if (e.key === "Escape") setShowPageInput(false);
+            }}
+          />
+        )}
         <button
-          onClick={() =>
-            setPage((p) => (p + 1 < Math.ceil(total / PAGE_SIZE) ? p + 1 : p))
-          }
-          disabled={page + 1 >= Math.ceil(total / PAGE_SIZE)}
+          className={`paging-nav${page + 1 >= totalPages ? " inactive" : ""}`}
+          onClick={() => page + 1 < totalPages && setPage((p) => p + 1)}
+          tabIndex={0}
         >
           Next
         </button>

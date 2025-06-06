@@ -184,3 +184,52 @@
   background: #121212;
   box-shadow: 0 0 0 2px #007bff88;
 }
+
+.background-paging-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px;
+}
+
+.background-paging-bar button {
+  background: #002853;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin: 0 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.background-paging-bar button.paging-current {
+  background: #007bff;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 0 8px #007bff88;
+}
+
+.background-paging-bar button.paging-nav {
+  background: #003366;
+  color: #fff;
+  opacity: 1;
+}
+.background-paging-bar button.paging-nav.inactive {
+  background: #222c3a;
+  color: #888;
+  cursor: default;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+.background-paging-bar span {
+  margin: 0 12px;
+  color: #bdbdbd;
+  font-size: 1rem;
+  cursor: pointer;
+}
