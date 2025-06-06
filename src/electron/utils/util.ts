@@ -599,11 +599,36 @@ export async function saveBgJsonFile(
 }
 
 /**
- * Gets the background folder path for an ID.
- * @param id The ID of the background.
- * @returns Base background (id) folder i.e. /backgrounds/id/
+ * Helper to get an external path by index from backgrounds.json
  */
-export const idToBackgroundFolder = (id: string) => {
+export async function getExternalPath(index: number) {
+  const backgroundsJsonPath = getBackgroundsJsonFilePath();
+  try {
+    const raw = await fs.promises.readFile(backgroundsJsonPath, "utf-8");
+    const data = JSON.parse(raw);
+    if (Array.isArray(data.externalPaths) && data.externalPaths[index]) {
+      return data.externalPaths[index];
+    }
+  } catch (e) {
+    logger.warn("Failed to get externalPath from backgrounds.json:", e);
+  }
+  return null;
+}
+
+/**
+ * Gets the background folder path for an ID.
+ * Supports external backgrounds with id format ext::<num>::<folder>
+ */
+export const idToBackgroundFolder = async (id: string) => {
+  const extMatch = id.match(/^ext::(\d+)::(.+)$/);
+  if (extMatch) {
+    const extIndex = Number(extMatch[1]);
+    const folder = extMatch[2];
+    const extBase = await getExternalPath(extIndex);
+    if (extBase) {
+      return path.join(extBase, folder);
+    }
+  }
   const baseDir = getBackgroundFilePath();
   const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
   return path.join(baseDir, folderPath);
@@ -611,16 +636,16 @@ export const idToBackgroundFolder = (id: string) => {
 
 /**
  * Gets the path of the bg.json file for an ID.
- * @param id The ID of the background.
- * @returns bg.json path for background ID.
+ * Supports external backgrounds.
  */
-export const idToBgJson = (id: string) => {
-  const backgroundFolder = idToBackgroundFolder(id);
+export const idToBgJson = async (id: string) => {
+  const backgroundFolder = await idToBackgroundFolder(id);
   return path.join(backgroundFolder, "bg.json");
 };
 
 /**
  * Gets the actual background file for an ID.
+ * Supports external backgrounds.
  * @param id The ID of the background.
  * @returns Direct FilePath of the background ("bgFile")
  */

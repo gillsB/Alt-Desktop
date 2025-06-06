@@ -505,7 +505,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           saveFile,
         })
       );
-      const targetDir = idToBackgroundFolder(id);
+      const targetDir = await idToBackgroundFolder(id);
 
       const ext = path.extname(sourcePath);
       const baseName = path.basename(sourcePath, ext);
