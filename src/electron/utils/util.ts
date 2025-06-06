@@ -349,8 +349,8 @@ export async function indexBackgrounds() {
           const subfolderPath = path.join(extDir, entry.name);
           const bgJsonPath = path.join(subfolderPath, "bg.json");
           if (fs.existsSync(bgJsonPath)) {
-            // Use a unique identifier for external backgrounds: extDir + "/" + entry.name
-            subfoldersWithBgJson.push(path.join(extDir, entry.name));
+            const id = `ext::${externalPaths.indexOf(extDir)}::${entry.name}`;
+            subfoldersWithBgJson.push(id);
           }
         }
       }

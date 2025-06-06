@@ -308,6 +308,16 @@ const BackgroundSelect: React.FC = () => {
     }
   };
 
+  function getDisplayName(bg: BackgroundSummary) {
+    if (bg.name) return bg.name;
+    if (bg.id && bg.id.startsWith("ext::")) {
+      // Remove "ext::<num>::" prefix for external paths backgrounds
+      const match = bg.id.match(/^ext::\d+::(.+)$/);
+      if (match) return match[1];
+    }
+    return bg.id;
+  }
+
   return (
     <div
       className="background-select-root"
@@ -345,7 +355,7 @@ const BackgroundSelect: React.FC = () => {
                 imagePath={bg.iconPath ?? ""}
                 className="background-icon"
               />
-              <h4>{bg.name || bg.id}</h4>
+              <h4>{getDisplayName(bg)}</h4>
             </div>
           ))}
         </div>
@@ -362,7 +372,7 @@ const BackgroundSelect: React.FC = () => {
                   />
                 </div>
               )}
-              <h3>{selectedBg.name || selectedBg.id}</h3>
+              <h3>{getDisplayName(selectedBg)}</h3>
               <div className="details-row">
                 <label>Description</label>
                 <div className="details-value">

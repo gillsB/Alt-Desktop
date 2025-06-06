@@ -1084,7 +1084,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         );
         logger.info("Settings data saved successfully.");
         ensureDefaultSettings(); // Add back any missing default settings
-        saveExternalPaths(data.externalPaths || []);
+        if (Array.isArray(data.externalPaths)) {
+          await saveExternalPaths(data.externalPaths);
+        }
         mainWindow.webContents.send("reload-grid");
         updateHeader(mainWindow);
         return true;
