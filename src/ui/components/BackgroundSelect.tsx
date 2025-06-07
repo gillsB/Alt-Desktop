@@ -238,13 +238,12 @@ const BackgroundSelect: React.FC = () => {
       ? `${bg.name} (${backgroundId})`
       : backgroundId;
 
-    if (
-      await window.electron.showSmallWindow(
-        "Delete Background",
-        `Are you sure you want to delete background:\n${displayName}`,
-        ["Delete", "Cancel"]
-      )
-    ) {
+    const result = await window.electron.showSmallWindow(
+      "Delete Background",
+      `Are you sure you want to delete background:\n${displayName}`,
+      ["Delete", "Cancel"]
+    );
+    if (result === "Delete") {
       logger.info(`Attempting to delete background ${backgroundId}`);
       await window.electron.deleteBackground(backgroundId);
 
