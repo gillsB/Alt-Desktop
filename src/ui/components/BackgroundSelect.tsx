@@ -245,12 +245,44 @@ const BackgroundSelect: React.FC = () => {
     );
     if (result === "Delete") {
       logger.info(`Attempting to delete background ${backgroundId}`);
-      await window.electron.deleteBackground(backgroundId);
 
-      // Remove from selectedIds if present
-      setSelectedIds((prev) => prev.filter((id) => id !== backgroundId));
-      fetchPage(page, search);
+      // If the background is selected, unselect and preview fallback background
+      if (selectedIds.includes(backgroundId)) {
+        setSelectedIds((prev) => prev.filter((id) => id !== backgroundId));
+
+        if (selectedBg && selectedBg.id === backgroundId) {
+          setSelectedBg(null);
+          await window.electron.previewBackgroundUpdate({
+            background: "fallback",
+          });
+        }
+      }
+
+      // Attempt deletion
+      try {
+        const success = await window.electron.deleteBackground(backgroundId);
+        if (success) {
+          logger.info(`Successfully deleted background ${backgroundId}`);
+          fetchPage(page, search);
+        } else {
+          logger.error(`Failed to delete background ${backgroundId}`);
+          // Show file in use to user.
+          await window.electron.showSmallWindow(
+            "Delete Failed",
+            `Failed to delete background: \n${displayName}\nThe file may still be in use. Try waiting a few seconds then delete it again.`,
+            ["OK"]
+          );
+        }
+      } catch (error) {
+        logger.error(`Error deleting background ${backgroundId}:`, error);
+        await window.electron.showSmallWindow(
+          "Delete Error",
+          `Error deleting background: ${displayName}\n\n${error}`,
+          ["OK"]
+        );
+      }
     }
+
     setContextMenu(null);
   };
 
