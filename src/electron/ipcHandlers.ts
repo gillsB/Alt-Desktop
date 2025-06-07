@@ -868,9 +868,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       filePath: string
     ): Promise<boolean> => {
       try {
-        // TODO update this for different master paths when added.
         if (type === "background") {
-          filePath = path.join(getBackgroundFilePath(), filePath);
+          filePath = await idToBackgroundFolder(filePath);
           shell.openPath(filePath);
           logger.info(`Opened ${type} in Explorer: ${filePath}`);
           return true;
