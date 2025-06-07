@@ -342,6 +342,10 @@ const BackgroundSelect: React.FC = () => {
     }
   };
 
+  const handleFilterClick = () => {
+    logger.info("filter clicked");
+  };
+
   function getDisplayName(bg: BackgroundSummary) {
     if (bg.name) return bg.name;
     if (bg.id && bg.id.startsWith("ext::")) {
@@ -371,6 +375,9 @@ const BackgroundSelect: React.FC = () => {
             setSearch(e.target.value);
           }}
         />
+        <button className="filter-button" onClick={handleFilterClick}>
+          Filter Search
+        </button>
       </div>
       <div className="background-select-content">
         <div className="background-grid">
