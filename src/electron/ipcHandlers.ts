@@ -25,7 +25,6 @@ import {
   getTagIndex,
   idToBackgroundFolder,
   idToBackgroundPath,
-  idToBgJson,
   ipcMainHandle,
   ipcMainOn,
   resetAllIconsFontColor,
@@ -1557,11 +1556,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("deleteBackground", async (id: string): Promise<boolean> => {
     try {
       if (!id) throw new Error("Missing background id");
-      const bgJsonPath = await idToBgJson(id);
-      const bgDir = path.dirname(bgJsonPath);
+      const bgDir = await idToBackgroundFolder(id);
 
       // Send the entire background directory to the recycle bin
       if (fs.existsSync(bgDir)) {
+        logger.info(bgDir);
         await shell.trashItem(bgDir);
         logger.info(`Moved background directory: ${bgDir} to recycle bin. `);
       }
