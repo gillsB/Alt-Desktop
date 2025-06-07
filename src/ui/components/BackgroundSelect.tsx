@@ -29,6 +29,13 @@ const BackgroundSelect: React.FC = () => {
   const [showPageInput, setShowPageInput] = useState(false);
   const [pageInputValue, setPageInputValue] = useState("");
 
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [filterOptions, setFilterOptions] = useState({
+    images: false,
+    videos: false,
+    favorites: false,
+  });
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageNumbers: (number | string)[] = [];
 
@@ -344,6 +351,15 @@ const BackgroundSelect: React.FC = () => {
 
   const handleFilterClick = () => {
     logger.info("filter clicked");
+    setShowFilterPanel((prev) => !prev);
+  };
+
+  const handleFilterChange = (option: keyof typeof filterOptions) => {
+    setFilterOptions((prev) => {
+      const updated = { ...prev, [option]: !prev[option] };
+      logger.info(`Filter ${option} set to ${updated[option]}`);
+      return updated;
+    });
   };
 
   function getDisplayName(bg: BackgroundSummary) {
@@ -400,7 +416,37 @@ const BackgroundSelect: React.FC = () => {
             </div>
           ))}
         </div>
-        {selectedBg && (
+        {showFilterPanel && (
+          <div className="filter-search-panel">
+            <h3>Filter Backgrounds</h3>
+            <label>
+              <input
+                type="checkbox"
+                checked={filterOptions.images}
+                onChange={() => handleFilterChange("images")}
+              />
+              Images
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={filterOptions.videos}
+                onChange={() => handleFilterChange("videos")}
+              />
+              Videos
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={filterOptions.favorites}
+                onChange={() => handleFilterChange("favorites")}
+              />
+              Favorites
+            </label>
+            <button onClick={() => setShowFilterPanel(false)}>Close</button>
+          </div>
+        )}
+        {!showFilterPanel && selectedBg && (
           <div className="background-details-panel" key={selectedBg.id}>
             <div key={selectedBg.id}>
               {selectedBg.iconPath && (
