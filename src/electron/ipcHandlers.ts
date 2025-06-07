@@ -349,21 +349,22 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
 
-  // optional appDataFilePath parameter to open the dialog in a local appData/Roaming/AltDesktop folder
+  // optional filePath parameter to open the dialog at a path location.
+  // If filePath is non-absolute, it opens in the AppData/Roaming/AltDesktop/{filePath} directory.
   ipcMainHandle(
     "openFileDialog",
-    async (type: string, appDataFilePath?: string): Promise<string | null> => {
+    async (type: string, filePath?: string): Promise<string | null> => {
       let result: Electron.OpenDialogReturnValue;
 
       try {
-        if (appDataFilePath) {
-          appDataFilePath = path.join(getAppDataPath(), appDataFilePath);
-          logger.info("filePath = ", appDataFilePath);
+        if (filePath && !path.isAbsolute(filePath)) {
+          filePath = path.join(getAppDataPath(), filePath);
+          logger.info("filePath = ", filePath);
         }
 
         const options: Electron.OpenDialogOptions = {
           properties: ["openFile"],
-          defaultPath: appDataFilePath || undefined, // Use the provided filePath or just default
+          defaultPath: filePath || undefined, // Use the provided filePath or just default
         };
 
         options.filters = [];

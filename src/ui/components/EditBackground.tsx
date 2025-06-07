@@ -297,7 +297,7 @@ const EditBackground: React.FC = () => {
   };
 
   const handleGlassClick = async (type: "bgFile" | "iconPath") => {
-    const folder = `/backgrounds/${summary.id}`;
+    const folder = await window.electron.idToBackgroundFolder(summary.id);
     logger.info(`Opening background folder for ${type}:`, folder);
     if (folder) {
       const fileType = type === "bgFile" ? "image,video" : "image";

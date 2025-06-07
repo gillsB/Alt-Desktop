@@ -232,6 +232,9 @@ const BackgroundSelect: React.FC = () => {
     setContextMenu(null);
   };
 
+  // TODO fix this for recently in use larger files (video/maybe images).
+  // Problem is that recently in use cannot be moved to trash. and attempting shows 2 admin
+  // permission windows (which does not solve the issue of the folder being locked due to use).
   const handleDeleteBackground = async (backgroundId: string) => {
     const bg = summaries.find((bg) => bg.id === backgroundId);
     const displayName = bg?.name
