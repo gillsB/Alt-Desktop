@@ -31,13 +31,15 @@ const BackgroundSelect: React.FC = () => {
 
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [filterOptions, setFilterOptions] = useState(() =>
-    Object.fromEntries(PUBLIC_TAGS.map((tag) => [tag, true]))
+    Object.fromEntries(PUBLIC_TAGS.map((tag) => [tag, false]))
   );
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageNumbers: (number | string)[] = [];
 
   const sidePages = 2;
+
+  let includeTags: string[] = [];
 
   if (totalPages <= 9) {
     for (let i = 0; i < totalPages; i++) pageNumbers.push(i);
@@ -71,19 +73,13 @@ const BackgroundSelect: React.FC = () => {
   const fetchPage = async (page: number, search: string = "") => {
     logger.info(`Fetching page ${page + 1} with search "${search}"`);
     const offset = page * PAGE_SIZE;
-    const includeTags = Object.entries(filterOptions)
-      .filter(([, checked]) => checked)
-      .map(([tag]) => tag);
 
-    const excludeTags = Object.entries(filterOptions)
-      .filter(([, checked]) => !checked)
-      .map(([tag]) => tag);
     const { results, total } = await window.electron.getBackgroundSummaries({
       offset,
       limit: PAGE_SIZE,
       search,
       includeTags,
-      excludeTags,
+      excludeTags: [],
     });
     setSummaries(results);
     setTotal(total);
@@ -93,20 +89,14 @@ const BackgroundSelect: React.FC = () => {
     (async () => {
       const savedBackground = await window.electron.getSetting("background");
       if (savedBackground) {
-        const includeTags = Object.entries(filterOptions)
-          .filter(([, checked]) => checked)
-          .map(([tag]) => tag);
 
-        const excludeTags = Object.entries(filterOptions)
-          .filter(([, checked]) => !checked)
-          .map(([tag]) => tag);
         const { page: bgPage, summary } =
           await window.electron.getBackgroundPageForId({
             id: savedBackground,
             pageSize: PAGE_SIZE,
             search,
             includeTags,
-            excludeTags,
+            excludeTags: [],
           });
         if (bgPage !== -1) {
           setPage(bgPage);
@@ -137,6 +127,12 @@ const BackgroundSelect: React.FC = () => {
       window.electron.off("backgrounds-updated", handler);
     };
   }, [page, search, filterOptions]);
+  
+  useEffect(() => {
+    includeTags = Object.entries(filterOptions)
+      .filter(([, checked]) => checked)
+      .map(([tag]) => tag);
+  }, [filterOptions]);
 
   const handleClose = async () => {
     logger.info("BackgroundSelect window closed");
