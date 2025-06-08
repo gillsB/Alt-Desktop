@@ -666,6 +666,38 @@ export const idToBackgroundPath = async (id: string) => {
   }
 };
 
+export async function filterBackgroundEntries(
+  entries: [string, number][],
+  search: string
+): Promise<[string, number][]> {
+  if (!search) {
+    return entries;
+  }
+
+  const searchLower = search.toLowerCase();
+
+  const [tagIndex, nameIndex] = await Promise.all([
+    getTagIndex(),
+    getNameIndex(),
+  ]);
+
+  // Collect all ids matching the search in tags or names
+  const tagMatchedIds = Object.entries(tagIndex)
+    .filter(([tag]) => tag.toLowerCase().includes(searchLower))
+    .flatMap(([, ids]) => ids);
+
+  const nameMatchedIds = Object.entries(nameIndex)
+    .filter(([name]) => name.toLowerCase().includes(searchLower))
+    .flatMap(([, ids]) => ids);
+
+  const extraMatchedIds = new Set([...tagMatchedIds, ...nameMatchedIds]);
+
+  return entries.filter(([id]) => {
+    const idMatch = id.toLowerCase().includes(searchLower);
+    return idMatch || extraMatchedIds.has(id);
+  });
+}
+
 export const getBasePath = (): string => {
   return getAppDataPath();
 };

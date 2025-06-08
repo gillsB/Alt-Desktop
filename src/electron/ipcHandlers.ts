@@ -14,15 +14,14 @@ import { safeSpawn } from "./utils/safeSpawn.js";
 import {
   ensureFileExists,
   escapeRegExp,
+  filterBackgroundEntries,
   getAppDataPath,
   getBackgroundFilePath,
   getBackgroundsJsonFilePath,
   getDataFolderPath,
   getDesktopIconsFilePath,
   getExternalPath,
-  getNameIndex,
   getSettingsFilePath,
-  getTagIndex,
   idToBackgroundFolder,
   idToBackgroundPath,
   ipcMainHandle,
@@ -1329,35 +1328,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
       const { backgrounds } = JSON.parse(raw);
 
-      let entries = Object.entries(backgrounds).sort(
-        ([, a], [, b]) => Number(b) - Number(a)
-      ); // newest first
+      let entries: [string, number][] = Object.entries(backgrounds)
+        .sort(([, a], [, b]) => Number(b) - Number(a))
+        .map(([id, value]) => [id, Number(value)]);
 
-      // Enhanced search filter: match id, name, or tag
-      if (search) {
-        const searchLower = search.toLowerCase();
-
-        const [tagIndex, nameIndex] = await Promise.all([
-          getTagIndex(),
-          getNameIndex(),
-        ]);
-
-        // Collect all ids matching the search in tags or names
-        const tagMatchedIds = Object.entries(tagIndex)
-          .filter(([tag]) => tag.toLowerCase().includes(searchLower))
-          .flatMap(([, ids]) => ids);
-
-        const nameMatchedIds = Object.entries(nameIndex)
-          .filter(([name]) => name.toLowerCase().includes(searchLower))
-          .flatMap(([, ids]) => ids);
-
-        const extraMatchedIds = new Set([...tagMatchedIds, ...nameMatchedIds]);
-
-        entries = entries.filter(([id]) => {
-          const idMatch = id.toLowerCase().includes(searchLower);
-          return idMatch || extraMatchedIds.has(id);
-        });
-      }
+      // Apply search filter
+      entries = await filterBackgroundEntries(entries, search);
 
       const total = entries.length;
       entries = entries.slice(offset, offset + limit);
@@ -1436,38 +1412,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
       const { backgrounds } = JSON.parse(raw);
 
-      let entries = Object.entries(backgrounds).sort(
-        ([, a], [, b]) => Number(b) - Number(a)
-      );
+      let entries: [string, number][] = Object.entries(backgrounds)
+        .sort(([, a], [, b]) => Number(b) - Number(a))
+        .map(([id, value]) => [id, Number(value)]);
 
       // Apply search filter
-      // As of now there is no way to call getBackgroundPageForId with search.
-      // It only runs on launching BackgroundSelect, which defaults search to "".
-      // Logic is here for future use, if this changes.
-      if (search) {
-        const searchLower = search.toLowerCase();
-
-        const [tagIndex, nameIndex] = await Promise.all([
-          getTagIndex(),
-          getNameIndex(),
-        ]);
-
-        // Collect all ids matching the search in tags or names
-        const tagMatchedIds = Object.entries(tagIndex)
-          .filter(([tag]) => tag.toLowerCase().includes(searchLower))
-          .flatMap(([, ids]) => ids);
-
-        const nameMatchedIds = Object.entries(nameIndex)
-          .filter(([name]) => name.toLowerCase().includes(searchLower))
-          .flatMap(([, ids]) => ids);
-
-        const extraMatchedIds = new Set([...tagMatchedIds, ...nameMatchedIds]);
-
-        entries = entries.filter(([bgId]) => {
-          const idMatch = bgId.toLowerCase().includes(searchLower);
-          return idMatch || extraMatchedIds.has(bgId);
-        });
-      }
+      entries = await filterBackgroundEntries(entries, search);
 
       const idx = entries.findIndex(([bgId]) => bgId === id);
       const page = idx !== -1 ? Math.floor(idx / pageSize) : -1;
