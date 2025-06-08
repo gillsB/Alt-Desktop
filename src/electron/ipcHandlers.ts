@@ -1322,6 +1322,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       offset = 0,
       limit = 10,
       search = "",
+      includeTags = [],
+      excludeTags = [],
     }: GetBackgroundSummariesRequest = {}) => {
       const backgroundsFile = getBackgroundsJsonFilePath();
 
@@ -1333,7 +1335,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         .map(([id, value]) => [id, Number(value)]);
 
       // Apply search filter
-      entries = await filterBackgroundEntries(entries, search);
+      entries = await filterBackgroundEntries(
+        entries,
+        search,
+        includeTags,
+        excludeTags
+      );
 
       const total = entries.length;
       entries = entries.slice(offset, offset + limit);
@@ -1401,13 +1408,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "getBackgroundPageForId",
     async ({
       id,
-      search = "",
       pageSize = 10,
-    }: {
-      id: string;
-      search?: string;
-      pageSize?: number;
-    }) => {
+      search = "",
+      includeTags = [],
+      excludeTags = [],
+    }: GetBackgroundPageForIdRequest) => {
       const backgroundsFile = getBackgroundsJsonFilePath();
       const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
       const { backgrounds } = JSON.parse(raw);
@@ -1417,7 +1422,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         .map(([id, value]) => [id, Number(value)]);
 
       // Apply search filter
-      entries = await filterBackgroundEntries(entries, search);
+      entries = await filterBackgroundEntries(
+        entries,
+        search,
+        includeTags,
+        excludeTags
+      );
 
       const idx = entries.findIndex(([bgId]) => bgId === id);
       const page = idx !== -1 ? Math.floor(idx / pageSize) : -1;

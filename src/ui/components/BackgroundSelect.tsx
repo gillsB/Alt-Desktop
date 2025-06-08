@@ -77,6 +77,8 @@ const BackgroundSelect: React.FC = () => {
       offset,
       limit: PAGE_SIZE,
       search,
+      includeTags: [],
+      excludeTags: [],
     });
     setSummaries(results);
     setTotal(total);
@@ -89,8 +91,10 @@ const BackgroundSelect: React.FC = () => {
         const { page: bgPage, summary } =
           await window.electron.getBackgroundPageForId({
             id: savedBackground,
-            search,
             pageSize: PAGE_SIZE,
+            search,
+            includeTags: [],
+            excludeTags: [],
           });
         if (bgPage !== -1) {
           setPage(bgPage);
@@ -193,6 +197,8 @@ const BackgroundSelect: React.FC = () => {
         offset: 0,
         limit: 1,
         search: id,
+        includeTags: [],
+        excludeTags: [],
       });
       if (response.results.length > 0) setSelectedBg(response.results[0]);
       else setSelectedBg(null);

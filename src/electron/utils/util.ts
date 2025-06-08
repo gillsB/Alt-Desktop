@@ -668,33 +668,76 @@ export const idToBackgroundPath = async (id: string) => {
 
 export async function filterBackgroundEntries(
   entries: [string, number][],
-  search: string
+  search: string,
+  includeTags: string[] = [],
+  excludeTags: string[] = []
 ): Promise<[string, number][]> {
-  if (!search) {
-    return entries;
-  }
-
-  const searchLower = search.toLowerCase();
-
   const [tagIndex, nameIndex] = await Promise.all([
     getTagIndex(),
     getNameIndex(),
   ]);
 
-  // Collect all ids matching the search in tags or names
-  const tagMatchedIds = Object.entries(tagIndex)
-    .filter(([tag]) => tag.toLowerCase().includes(searchLower))
-    .flatMap(([, ids]) => ids);
+  // Handle exclude tags first - get all ids that should be excluded
+  const excludedIds = new Set<string>();
+  if (excludeTags.length > 0) {
+    const excludeTagsLower = excludeTags.map((tag) => tag.toLowerCase());
+    Object.entries(tagIndex).forEach(([tag, ids]) => {
+      if (excludeTagsLower.includes(tag.toLowerCase())) {
+        ids.forEach((id) => excludedIds.add(id));
+      }
+    });
+  }
 
-  const nameMatchedIds = Object.entries(nameIndex)
-    .filter(([name]) => name.toLowerCase().includes(searchLower))
-    .flatMap(([, ids]) => ids);
+  // Handle include tags - get all ids that can be included
+  let includeFilteredIds: Set<string> | null = null;
+  if (includeTags.length > 0) {
+    includeFilteredIds = new Set<string>();
+    const includeTagsLower = includeTags.map((tag) => tag.toLowerCase());
+    Object.entries(tagIndex).forEach(([tag, ids]) => {
+      if (includeTagsLower.includes(tag.toLowerCase())) {
+        ids.forEach((id) => includeFilteredIds!.add(id));
+      }
+    });
+  }
 
-  const extraMatchedIds = new Set([...tagMatchedIds, ...nameMatchedIds]);
+  // Handle search filtering
+  let searchMatchedIds: Set<string> | null = null;
+  if (search) {
+    const searchLower = search.toLowerCase();
+
+    // Collect all ids matching the search in tags or names
+    const tagMatchedIds = Object.entries(tagIndex)
+      .filter(([tag]) => tag.toLowerCase().includes(searchLower))
+      .flatMap(([, ids]) => ids);
+
+    const nameMatchedIds = Object.entries(nameIndex)
+      .filter(([name]) => name.toLowerCase().includes(searchLower))
+      .flatMap(([, ids]) => ids);
+
+    searchMatchedIds = new Set([...tagMatchedIds, ...nameMatchedIds]);
+  }
 
   return entries.filter(([id]) => {
-    const idMatch = id.toLowerCase().includes(searchLower);
-    return idMatch || extraMatchedIds.has(id);
+    // First check if excluded
+    if (excludedIds.has(id)) {
+      return false;
+    }
+
+    // If include tags are specified, id must be in the include set
+    if (includeFilteredIds !== null && !includeFilteredIds.has(id)) {
+      return false;
+    }
+
+    // If no search term, return true (already passed include/exclude filters)
+    if (!search) {
+      return true;
+    }
+
+    // Check if id matches search directly or through tag/name indices
+    const idMatch = id.toLowerCase().includes(search.toLowerCase());
+    const searchMatch = searchMatchedIds ? searchMatchedIds.has(id) : false;
+
+    return idMatch || searchMatch;
   });
 }
 

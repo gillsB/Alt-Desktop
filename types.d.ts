@@ -79,6 +79,8 @@ type GetBackgroundSummariesRequest = {
   offset?: number;
   limit?: number;
   search?: string;
+  includeTags?: string[];
+  excludeTags?: string[];
 };
 
 type GetBackgroundSummariesResponse = {
@@ -88,8 +90,10 @@ type GetBackgroundSummariesResponse = {
 
 type GetBackgroundPageForIdRequest = {
   id: string;
-  search?: string;
   pageSize?: number;
+  search?: string;
+  includeTags?: string[];
+  excludeTags?: string[];
 };
 
 type GetBackgroundPageForIdResponse = {
