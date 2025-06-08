@@ -2,6 +2,8 @@ import { createLogger } from "./uiLogger";
 
 const logger = createLogger("rendererUtil.ts");
 
+export const PUBLIC_TAGS = ["These", "Are", "Official", "Tags", "Only"];
+
 /**
  * Displays a small window with a title, message, and buttons.
  *

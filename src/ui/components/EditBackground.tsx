@@ -8,12 +8,11 @@ import { useLocation } from "react-router-dom";
 import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
-import { showSmallWindow } from "../util/uiUtil";
+import { PUBLIC_TAGS, showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
 
-const PUBLIC_TAGS = ["These", "Are", "Official", "Tags", "Only"];
 //These are local tags and would not be shared with bg.json (made by user).
 const PERSONAL_TAGS = ["These", "Are", "local", "Tags"];
 
