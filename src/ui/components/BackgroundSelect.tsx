@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
-import { fileNameNoExt } from "../util/uiUtil";
+import { fileNameNoExt, PUBLIC_TAGS } from "../util/uiUtil";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -30,11 +30,9 @@ const BackgroundSelect: React.FC = () => {
   const [pageInputValue, setPageInputValue] = useState("");
 
   const [showFilterPanel, setShowFilterPanel] = useState(false);
-  const [filterOptions, setFilterOptions] = useState({
-    images: false,
-    videos: false,
-    favorites: false,
-  });
+  const [filterOptions, setFilterOptions] = useState(() =>
+    Object.fromEntries(PUBLIC_TAGS.map((tag) => [tag, true]))
+  );
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageNumbers: (number | string)[] = [];
@@ -360,14 +358,6 @@ const BackgroundSelect: React.FC = () => {
     setShowFilterPanel((prev) => !prev);
   };
 
-  const handleFilterChange = (option: keyof typeof filterOptions) => {
-    setFilterOptions((prev) => {
-      const updated = { ...prev, [option]: !prev[option] };
-      logger.info(`Filter ${option} set to ${updated[option]}`);
-      return updated;
-    });
-  };
-
   function getDisplayName(bg: BackgroundSummary) {
     if (bg.name) return bg.name;
     if (bg.id && bg.id.startsWith("ext::")) {
@@ -425,30 +415,22 @@ const BackgroundSelect: React.FC = () => {
         {showFilterPanel && (
           <div className="filter-search-panel">
             <h3>Filter Backgrounds</h3>
-            <label>
-              <input
-                type="checkbox"
-                checked={filterOptions.images}
-                onChange={() => handleFilterChange("images")}
-              />
-              Images
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={filterOptions.videos}
-                onChange={() => handleFilterChange("videos")}
-              />
-              Videos
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={filterOptions.favorites}
-                onChange={() => handleFilterChange("favorites")}
-              />
-              Favorites
-            </label>
+            {PUBLIC_TAGS.map((tag) => (
+              <label key={tag}>
+                <input
+                  type="checkbox"
+                  checked={!!filterOptions[tag]}
+                  onChange={() => {
+                    setFilterOptions((prev) => {
+                      const updated = { ...prev, [tag]: !prev[tag] };
+                      logger.info(`Filter ${tag} set to ${updated[tag]}`);
+                      return updated;
+                    });
+                  }}
+                />
+                {tag}
+              </label>
+            ))}
             <button onClick={() => setShowFilterPanel(false)}>Close</button>
           </div>
         )}
