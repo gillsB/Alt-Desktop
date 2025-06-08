@@ -467,7 +467,7 @@ export async function indexBackgrounds() {
   const namesIndex: Record<string, Set<string>> = {};
 
   for (const id of Object.keys(backgroundsData.backgrounds)) {
-    const bgJsonPath = path.join(backgroundsDir, id, "bg.json");
+    const bgJsonPath = await idToBgJson(id);
     try {
       if (fs.existsSync(bgJsonPath)) {
         const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
