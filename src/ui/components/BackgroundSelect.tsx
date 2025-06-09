@@ -89,7 +89,6 @@ const BackgroundSelect: React.FC = () => {
     (async () => {
       const savedBackground = await window.electron.getSetting("background");
       if (savedBackground) {
-
         const { page: bgPage, summary } =
           await window.electron.getBackgroundPageForId({
             id: savedBackground,
@@ -102,6 +101,17 @@ const BackgroundSelect: React.FC = () => {
           setPage(bgPage);
           setSelectedIds([savedBackground]);
           setSelectedBg(summary ?? null);
+
+          // Wait for grid to render, then scroll to the item
+          setTimeout(() => {
+            const selectedElement = gridItemRefs.current[savedBackground];
+            if (selectedElement) {
+              selectedElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }, 100);
         } else {
           logger.info("Saved background not found in backgrounds list");
           setPage(0);
@@ -127,7 +137,7 @@ const BackgroundSelect: React.FC = () => {
       window.electron.off("backgrounds-updated", handler);
     };
   }, [page, search, filterOptions]);
-  
+
   useEffect(() => {
     includeTags = Object.entries(filterOptions)
       .filter(([, checked]) => checked)
@@ -379,6 +389,8 @@ const BackgroundSelect: React.FC = () => {
     return bg.id;
   }
 
+  const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
+
   return (
     <div
       className="background-select-root"
@@ -407,6 +419,9 @@ const BackgroundSelect: React.FC = () => {
           {summaries.map((bg) => (
             <div
               key={bg.id}
+              ref={(selectedElement) => {
+                gridItemRefs.current[bg.id] = selectedElement;
+              }}
               className={
                 "background-grid-item" +
                 (selectedIds.includes(bg.id) ? " selected" : "")
