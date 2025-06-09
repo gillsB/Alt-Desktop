@@ -265,3 +265,10 @@
 .filter-button:hover {
   background-color: #0056b3;
 }
+
+.background-details-panel .button-center {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 12px 0;
+}

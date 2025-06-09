@@ -375,8 +375,11 @@ const BackgroundSelect: React.FC = () => {
   };
 
   const handleFilterClick = () => {
-    logger.info("filter clicked");
     setShowFilterPanel((prev) => !prev);
+  };
+
+  const handleJumpToClick = () => {
+    logger.info("Jump to clicked.");
   };
 
   function getDisplayName(bg: BackgroundSummary) {
@@ -473,6 +476,11 @@ const BackgroundSelect: React.FC = () => {
                   />
                 </div>
               )}
+              <div className="button-center">
+                <button className="button" onClick={handleJumpToClick}>
+                  Jump to
+                </button>
+              </div>
               <h3>{getDisplayName(selectedBg)}</h3>
               <div className="details-row">
                 <label>Description</label>
