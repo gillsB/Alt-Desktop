@@ -487,6 +487,10 @@ export async function indexBackgrounds() {
           if (!namesIndex[name]) namesIndex[name] = new Set();
           namesIndex[name].add(id);
         }
+      } else {
+        logger.error(
+          `bg.json does not exist at ${bgJsonPath} Cannot load ${id} into backgrounds.json`
+        );
       }
     } catch (e) {
       logger.warn(`Failed to index tags/names for ${id}:`, e);
@@ -653,7 +657,10 @@ export const idToBackgroundPath = async (id: string) => {
   try {
     const backgroundFolder = await idToBackgroundFolder(id);
     const bgJsonPath = await idToBgJson(id);
-    if (!fs.existsSync(bgJsonPath)) return null;
+    if (!fs.existsSync(bgJsonPath)) {
+      logger.error(`bg.json not found at ${bgJsonPath}`);
+      return null;
+    }
     const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
     const bg = JSON.parse(rawBg);
     if (bg.public && bg.public.bgFile) {
