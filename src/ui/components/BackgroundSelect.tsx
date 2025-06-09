@@ -378,8 +378,32 @@ const BackgroundSelect: React.FC = () => {
     setShowFilterPanel((prev) => !prev);
   };
 
-  const handleJumpToClick = () => {
-    logger.info("Jump to clicked.");
+  const handleJumpToClick = async () => {
+    if (!selectedBg) return;
+    // Get the page and position for the currently selected background
+    const { page: bgPage } = await window.electron.getBackgroundPageForId({
+      id: selectedBg.id,
+      pageSize: PAGE_SIZE,
+      search,
+      includeTags,
+      excludeTags: [],
+    });
+
+    if (bgPage !== -1) {
+      setPage(bgPage);
+      setSelectedIds([selectedBg.id]);
+      // Wait for grid to render, then scroll to the item
+      setTimeout(() => {
+        const el = gridItemRefs.current[selectedBg.id];
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    } else {
+      // TODO fix this when excluding is eventually added. No set in stone idea for what it does when
+      // it is not in the current filter yet. Either discard filter, show regardless, or show a message.
+      logger.info("Selected background not found in backgrounds list");
+    }
   };
 
   function getDisplayName(bg: BackgroundSummary) {
