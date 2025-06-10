@@ -695,6 +695,43 @@ export async function filterBackgroundEntries(
     });
   }
 
+  // Operator-based search
+  const op = parseSearchQuery(search);
+  if (op) {
+    let matchedIds: string[] = [];
+    if (op.type === "id") {
+      matchedIds = entries.filter(([id]) => id === op.value).map(([id]) => id);
+    } else if (op.type === "name") {
+      matchedIds = Object.entries(nameIndex)
+        .filter(([name]) => name.toLowerCase() === op.value.toLowerCase())
+        .flatMap(([, ids]) => ids)
+        .filter((id) => entries.some(([eid]) => eid === id));
+    } else if (op.type === "tag") {
+      matchedIds = (tagIndex[op.value] || []).filter((id) =>
+        entries.some(([eid]) => eid === id)
+      );
+    }
+    const matchedSet = new Set(matchedIds);
+    entries = entries.filter(([id]) => matchedSet.has(id));
+    // Still apply include/exclude tags
+    return entries.filter(([id]) => {
+      if (excludedIds.has(id)) return false;
+      if (includeTags.length > 0) {
+        // Only include if in includeTags
+        let includeFilteredIds: Set<string> | null = null;
+        includeFilteredIds = new Set<string>();
+        const includeTagsLower = includeTags.map((tag) => tag.toLowerCase());
+        Object.entries(tagIndex).forEach(([tag, ids]) => {
+          if (includeTagsLower.includes(tag.toLowerCase())) {
+            ids.forEach((iid) => includeFilteredIds!.add(iid));
+          }
+        });
+        if (!includeFilteredIds.has(id)) return false;
+      }
+      return true;
+    });
+  }
+
   // Handle include tags - get all ids that can be included
   let includeFilteredIds: Set<string> | null = null;
   if (includeTags.length > 0) {
@@ -747,6 +784,14 @@ export async function filterBackgroundEntries(
     return idMatch || searchMatch;
   });
 }
+
+export const parseSearchQuery = (search: string) => {
+  const match = search.match(/^(id|name|tag):(.+)$/i);
+  if (match) {
+    return { type: match[1].toLowerCase(), value: match[2] };
+  }
+  return null;
+};
 
 export const getBasePath = (): string => {
   return getAppDataPath();
