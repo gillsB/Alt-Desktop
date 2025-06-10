@@ -9,6 +9,7 @@ import { SubWindowHeader } from "./SubWindowHeader";
 const logger = createLogger("BackgroundSelect.tsx");
 
 const PAGE_SIZE = 10;
+let includeTags: string[] = [];
 
 const BackgroundSelect: React.FC = () => {
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
@@ -38,8 +39,6 @@ const BackgroundSelect: React.FC = () => {
   const pageNumbers: (number | string)[] = [];
 
   const sidePages = 2;
-
-  let includeTags: string[] = [];
 
   if (totalPages <= 9) {
     for (let i = 0; i < totalPages; i++) pageNumbers.push(i);
@@ -73,9 +72,6 @@ const BackgroundSelect: React.FC = () => {
   const fetchPage = async (page: number, search: string = "") => {
     logger.info(`Fetching page ${page + 1} with search "${search}"`);
     const offset = page * PAGE_SIZE;
-    includeTags = Object.entries(filterOptions)
-      .filter(([, checked]) => checked)
-      .map(([tag]) => tag);
 
     logger.info("Include Tags in fetchPage = ", JSON.stringify(includeTags));
 
@@ -141,7 +137,18 @@ const BackgroundSelect: React.FC = () => {
     return () => {
       window.electron.off("backgrounds-updated", handler);
     };
-  }, [page, search, filterOptions]);
+  }, [page, search]);
+
+  useEffect(() => {
+    includeTags = Object.entries(filterOptions)
+      .filter(([, checked]) => checked)
+      .map(([tag]) => tag);
+    if (page !== 0) {
+      setPage(0); // useEffect above calls fetchPage
+    } else {
+      fetchPage(page, search);
+    }
+  }, [filterOptions]);
 
   const handleClose = async () => {
     logger.info("BackgroundSelect window closed");
