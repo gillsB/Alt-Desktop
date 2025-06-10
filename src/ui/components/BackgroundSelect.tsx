@@ -214,15 +214,12 @@ const BackgroundSelect: React.FC = () => {
       // If not in current page, fetch directly
       const response = await window.electron.getBackgroundSummaries({
         offset: 0,
-        limit: 10, // Allow more than 1 as two backgrounds in different folders can share an ID and both return.
-        search: id,
+        limit: 1,
+        search: "id:" + id,
         includeTags: [],
         excludeTags: [],
       });
-      // Try to find an exact match in the results
-      const exact = response.results.find((bg) => bg.id === id);
-      if (exact) setSelectedBg(exact);
-      else if (response.results.length > 0) setSelectedBg(response.results[0]);
+      if (response.results.length > 0) setSelectedBg(response.results[0]);
       else setSelectedBg(null);
     }
     if (id) {
