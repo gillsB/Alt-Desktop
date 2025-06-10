@@ -17,15 +17,15 @@
     -1px 1px 0 #000,
     1px 1px 0 #000;
   line-height: 1.2;
-  max-height: 4em;
+  max-height: 4rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: var(--line-clamp, 3);
+  line-clamp: var(--line-clamp, 3);
   -webkit-box-orient: vertical;
-  overflow-wrap: break-word;
+  overflow: hidden;
   word-break: break-word;
   padding-top: 4px;
   padding-bottom: 1px;
@@ -34,8 +34,6 @@
   cursor: pointer;
   user-select: none;
 }
-
-
 
 .submenu {
   position: absolute;

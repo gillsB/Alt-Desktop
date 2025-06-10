@@ -857,10 +857,16 @@ const DesktopGrid: React.FC = () => {
                     <div
                       className="desktop-icon-name"
                       title={icon.name}
-                      style={{
-                        color: icon.fontColor || defaultFontColor,
-                        fontSize: icon.fontSize || defaultFontSize,
-                      }}
+                      style={
+                        {
+                          color: icon.fontColor || defaultFontColor,
+                          fontSize: icon.fontSize || defaultFontSize,
+                          "--line-clamp": Math.max(
+                            1,
+                            Math.floor(48 / (icon.fontSize || defaultFontSize))
+                          ),
+                        } as React.CSSProperties
+                      }
                     >
                       {icon.name}
                     </div>

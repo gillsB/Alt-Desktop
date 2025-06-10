@@ -381,7 +381,6 @@ const BackgroundSelect: React.FC = () => {
   const handleJumpToClick = async () => {
     if (!selectedBg) return;
     // Get the page and position for the currently selected background
-    logger.info(`Jump to click called with ${JSON.stringify(selectedBg)}`);
     const { page: bgPage } = await window.electron.getBackgroundPageForId({
       id: selectedBg.id,
       pageSize: PAGE_SIZE,
