@@ -73,6 +73,11 @@ const BackgroundSelect: React.FC = () => {
   const fetchPage = async (page: number, search: string = "") => {
     logger.info(`Fetching page ${page + 1} with search "${search}"`);
     const offset = page * PAGE_SIZE;
+    includeTags = Object.entries(filterOptions)
+      .filter(([, checked]) => checked)
+      .map(([tag]) => tag);
+
+    logger.info("Include Tags in fetchPage = ", JSON.stringify(includeTags));
 
     const { results, total } = await window.electron.getBackgroundSummaries({
       offset,
@@ -137,12 +142,6 @@ const BackgroundSelect: React.FC = () => {
       window.electron.off("backgrounds-updated", handler);
     };
   }, [page, search, filterOptions]);
-
-  useEffect(() => {
-    includeTags = Object.entries(filterOptions)
-      .filter(([, checked]) => checked)
-      .map(([tag]) => tag);
-  }, [filterOptions]);
 
   const handleClose = async () => {
     logger.info("BackgroundSelect window closed");
