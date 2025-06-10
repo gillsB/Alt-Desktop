@@ -687,7 +687,7 @@ export async function filterBackgroundEntries(
   logger.info("IncludeTags called with: " + includeTags);
   logger.info("ExcludeTags called with: " + excludeTags);
 
-  // Handle exclude tags first - get all ids that should be excluded
+  // Build a set of all ids to exclude
   const excludedIds = new Set<string>();
   if (excludeTags.length > 0) {
     const excludeTagsLower = excludeTags.map((tag) => tag.toLowerCase());
@@ -720,71 +720,48 @@ export async function filterBackgroundEntries(
     return entries.filter(([id]) => {
       if (excludedIds.has(id)) return false;
       if (includeTags.length > 0) {
-        // Only include if in includeTags
-        let includeFilteredIds: Set<string> | null = null;
-        includeFilteredIds = new Set<string>();
-        const includeTagsLower = includeTags.map((tag) => tag.toLowerCase());
-        Object.entries(tagIndex).forEach(([tag, ids]) => {
-          if (includeTagsLower.includes(tag.toLowerCase())) {
-            ids.forEach((iid) => includeFilteredIds!.add(iid));
-          }
-        });
-        if (!includeFilteredIds.has(id)) return false;
+        // AND logic: id must be present in every tag's id list
+        const hasAllTags = includeTags.every((tag) =>
+          (tagIndex[tag] || []).includes(id)
+        );
+        if (!hasAllTags) return false;
       }
       return true;
     });
   }
 
-  // Handle include tags - get all ids that can be included
-  let includeFilteredIds: Set<string> | null = null;
-  if (includeTags.length > 0) {
-    includeFilteredIds = new Set<string>();
-    const includeTagsLower = includeTags.map((tag) => tag.toLowerCase());
-    Object.entries(tagIndex).forEach(([tag, ids]) => {
-      if (includeTagsLower.includes(tag.toLowerCase())) {
-        ids.forEach((id) => includeFilteredIds!.add(id));
-      }
-    });
-  }
-
-  // Handle search filtering
-  let searchMatchedIds: Set<string> | null = null;
-  if (search) {
-    const searchLower = search.toLowerCase();
-
-    // Collect all ids matching the search in tags or names
-    const tagMatchedIds = Object.entries(tagIndex)
-      .filter(([tag]) => tag.toLowerCase().includes(searchLower))
-      .flatMap(([, ids]) => ids);
-
-    const nameMatchedIds = Object.entries(nameIndex)
-      .filter(([name]) => name.toLowerCase().includes(searchLower))
-      .flatMap(([, ids]) => ids);
-
-    searchMatchedIds = new Set([...tagMatchedIds, ...nameMatchedIds]);
-  }
-
+  // Handle includeTags with AND logic (must have ALL tags)
   return entries.filter(([id]) => {
-    // First check if excluded
-    if (excludedIds.has(id)) {
-      return false;
-    }
+    // Exclude: remove if in excludedIds
+    if (excludedIds.has(id)) return false;
 
-    // If include tags are specified, id must be in the include set
-    if (includeFilteredIds !== null && !includeFilteredIds.has(id)) {
-      return false;
+    // Include: must have ALL includeTags
+    if (includeTags.length > 0) {
+      const hasAllTags = includeTags.every((tag) =>
+        (tagIndex[tag] || []).includes(id)
+      );
+      if (!hasAllTags) return false;
     }
 
     // If no search term, return true (already passed include/exclude filters)
-    if (!search) {
-      return true;
-    }
+    if (!search) return true;
 
-    // Check if id matches search directly or through tag/name indices
-    const idMatch = id.toLowerCase().includes(search.toLowerCase());
-    const searchMatch = searchMatchedIds ? searchMatchedIds.has(id) : false;
+    const searchLower = search.toLowerCase();
+    const idMatch = id.toLowerCase().includes(searchLower);
 
-    return idMatch || searchMatch;
+    // Tag and name partial match
+    const tagMatch = Object.keys(tagIndex).some(
+      (tag) =>
+        tag.toLowerCase().includes(searchLower) &&
+        (tagIndex[tag] || []).includes(id)
+    );
+    const nameMatch = Object.keys(nameIndex).some(
+      (name) =>
+        name.toLowerCase().includes(searchLower) &&
+        (nameIndex[name] || []).includes(id)
+    );
+
+    return idMatch || tagMatch || nameMatch;
   });
 }
 
