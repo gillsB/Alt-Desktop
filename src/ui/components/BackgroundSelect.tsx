@@ -40,6 +40,10 @@ const BackgroundSelect: React.FC = () => {
     Object.fromEntries(PUBLIC_TAGS.map((tag) => [tag, false]))
   );
 
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
+  const [suggestionIndex, setSuggestionIndex] = useState(0);
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageNumbers: (number | string)[] = [];
 
@@ -455,13 +459,77 @@ const BackgroundSelect: React.FC = () => {
           placeholder="Search backgrounds..."
           value={search}
           onChange={(e) => {
+            const value = e.target.value;
             setPage(0);
-            setSearch(e.target.value);
+            setSearch(value);
+
+            // This only works for adding tag: at the current end of a message.
+            const tagMatch = value.match(/(?:^|\s)tag:([^\s]*)$/i);
+            if (tagMatch) {
+              const partial = tagMatch[1].toLowerCase();
+              const matches = PUBLIC_TAGS.filter((tag) =>
+                tag.toLowerCase().startsWith(partial)
+              ).slice(0, 5);
+              setTagSuggestions(matches);
+              setShowTagSuggestions(matches.length > 0);
+              setSuggestionIndex(0);
+            } else {
+              setShowTagSuggestions(false);
+              setTagSuggestions([]);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (showTagSuggestions && tagSuggestions.length > 0) {
+              if (e.key === "ArrowDown") {
+                setSuggestionIndex((i) => (i + 1) % tagSuggestions.length);
+                e.preventDefault();
+              } else if (e.key === "ArrowUp") {
+                setSuggestionIndex(
+                  (i) => (i - 1 + tagSuggestions.length) % tagSuggestions.length
+                );
+                e.preventDefault();
+              } else if (e.key === "Tab" || e.key === "Enter") {
+                const value = search.replace(/(?:^|\s)tag:[^\s]*$/i, (m) => {
+                  const prefix = m.match(/^\s/) ? " " : "";
+                  return prefix + "tag:" + tagSuggestions[suggestionIndex];
+                });
+                setSearch(value + " ");
+                setShowTagSuggestions(false);
+                setTagSuggestions([]);
+                e.preventDefault();
+              } else if (e.key === "Escape") {
+                setShowTagSuggestions(false);
+              }
+            }
           }}
         />
         <button className="filter-button" onClick={handleFilterClick}>
           Filter Search
         </button>
+        {showTagSuggestions && (
+          <div className="tag-suggestion-dropdown">
+            {tagSuggestions.map((tag, idx) => (
+              <div
+                key={tag}
+                className={
+                  "tag-suggestion-item" +
+                  (idx === suggestionIndex ? " selected" : "")
+                }
+                onMouseDown={() => {
+                  const value = search.replace(/(?:^|\s)tag:[^\s]*$/i, (m) => {
+                    const prefix = m.match(/^\s/) ? " " : "";
+                    return prefix + "tag:" + tag;
+                  });
+                  setSearch(value + " ");
+                  setShowTagSuggestions(false);
+                  setTagSuggestions([]);
+                }}
+              >
+                {"tag:" + tag}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <div className="background-select-content">
         <div className="background-grid">
