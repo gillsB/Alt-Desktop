@@ -602,7 +602,21 @@ const BackgroundSelect: React.FC = () => {
               <div className="details-row">
                 <label>Tags</label>
                 <div className="details-value">
-                  {selectedBg.tags?.join(", ") || <em>None</em>}
+                  {selectedBg.tags && selectedBg.tags.length > 0 ? (
+                    selectedBg.tags.join(", ")
+                  ) : (
+                    <em>None</em>
+                  )}
+                </div>
+              </div>
+              <div className="details-row">
+                <label>Local Tags</label>
+                <div className="details-value">
+                  {selectedBg.localTags && selectedBg.localTags.length > 0 ? (
+                    selectedBg.localTags.join(", ")
+                  ) : (
+                    <em>None</em>
+                  )}
                 </div>
               </div>
             </div>
