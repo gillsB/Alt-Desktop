@@ -5,10 +5,11 @@ import {
 } from "@heroicons/react/24/solid";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { PUBLIC_TAGS } from "../../shared/publicTags";
 import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
-import { PUBLIC_TAGS, showSmallWindow } from "../util/uiUtil";
+import { showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");

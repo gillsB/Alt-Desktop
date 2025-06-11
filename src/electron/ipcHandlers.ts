@@ -5,6 +5,7 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
+import { PUBLIC_TAGS } from "../shared/publicTags.js";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getScriptsPath } from "./pathResolver.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
@@ -1391,7 +1392,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             bgFile: bgFile,
             description: bg.public?.description,
             iconPath: iconPath,
-            tags: bg.public?.tags ?? [],
+            tags: (bg.public?.tags ?? []).filter((t: string) =>
+              PUBLIC_TAGS.includes(t)
+            ),
             localTags: bg.local?.tags ?? [],
             localIndexed: bg.local?.indexed,
           });
@@ -1463,7 +1466,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             bgFile: bgFile,
             description: bg.public?.description,
             iconPath: iconPath,
-            tags: bg.public?.tags ?? [],
+            tags: (bg.public?.tags ?? []).filter(
+              (
+                t: string // Only return public tags.
+              ) => PUBLIC_TAGS.includes(t)
+            ),
             localTags: bg.local?.tags ?? [],
           };
         } catch {

@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
+import { PUBLIC_TAGS } from "../../shared/publicTags";
 import "../App.css";
 import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
-import {
-  fileNameNoExt,
-  parseAdvancedSearch,
-  PUBLIC_TAGS,
-} from "../util/uiUtil";
+import { fileNameNoExt, parseAdvancedSearch } from "../util/uiUtil";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
