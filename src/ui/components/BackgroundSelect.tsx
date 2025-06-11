@@ -129,6 +129,7 @@ const BackgroundSelect: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (page === -1) return; // prevent OnMount call.
     const handler = () => {
       fetchPage(page, search);
     };
@@ -140,6 +141,7 @@ const BackgroundSelect: React.FC = () => {
   }, [page, search]);
 
   useEffect(() => {
+    if (page === -1) return; // prevent OnMount call.
     includeTags = Object.entries(filterOptions)
       .filter(([, checked]) => checked)
       .map(([tag]) => tag);

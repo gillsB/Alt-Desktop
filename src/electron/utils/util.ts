@@ -684,9 +684,6 @@ export async function filterBackgroundEntries(
     getNameIndex(),
   ]);
 
-  logger.info("IncludeTags called with: " + includeTags);
-  logger.info("ExcludeTags called with: " + excludeTags);
-
   // Build a set of all ids to exclude
   const excludedIds = new Set<string>();
   if (excludeTags.length > 0) {
