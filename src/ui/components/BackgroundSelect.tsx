@@ -2,7 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
-import { fileNameNoExt, PUBLIC_TAGS } from "../util/uiUtil";
+import {
+  fileNameNoExt,
+  parseAdvancedSearch,
+  PUBLIC_TAGS,
+} from "../util/uiUtil";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -10,6 +14,7 @@ const logger = createLogger("BackgroundSelect.tsx");
 
 const PAGE_SIZE = 10;
 let includeTags: string[] = [];
+const excludeTags: string[] = [];
 
 const BackgroundSelect: React.FC = () => {
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
@@ -69,21 +74,42 @@ const BackgroundSelect: React.FC = () => {
     pageNumbers.push(totalPages - 1);
   }
 
-  const fetchPage = async (page: number, search: string = "") => {
+  const fetchPage = async (page: number) => {
     logger.info(`Fetching page ${page + 1} with search "${search}"`);
     const offset = page * PAGE_SIZE;
 
-    logger.info("Include Tags in fetchPage = ", JSON.stringify(includeTags));
+    // Parse search string for tags and terms
+    const { addTags, removeTags, searchTerms } = parseAdvancedSearch(search);
+
+    const newTags = Array.from(new Set([...includeTags, ...addTags]));
+    const newExcludeTags = Array.from(new Set([...excludeTags, ...removeTags]));
 
     const { results, total } = await window.electron.getBackgroundSummaries({
       offset,
       limit: PAGE_SIZE,
-      search,
-      includeTags,
-      excludeTags: [],
+      search: searchTerms.join(" "), // Only the free text terms
+      includeTags: newTags,
+      excludeTags: newExcludeTags,
     });
     setSummaries(results);
     setTotal(total);
+  };
+
+  const getBackgroundPage = async (id: string) => {
+    const { addTags, removeTags, searchTerms } = parseAdvancedSearch(search);
+
+    const newTags = Array.from(new Set([...includeTags, ...addTags]));
+    const newExcludeTags = Array.from(new Set([...excludeTags, ...removeTags]));
+    const { page: bgPage, summary } =
+      await window.electron.getBackgroundPageForId({
+        id: id,
+        pageSize: PAGE_SIZE,
+        search: searchTerms.join(" "),
+        includeTags: newTags,
+        excludeTags: newExcludeTags,
+      });
+
+    return { page: bgPage, summary };
   };
 
   useEffect(() => {
@@ -91,13 +117,7 @@ const BackgroundSelect: React.FC = () => {
       const savedBackground = await window.electron.getSetting("background");
       if (savedBackground) {
         const { page: bgPage, summary } =
-          await window.electron.getBackgroundPageForId({
-            id: savedBackground,
-            pageSize: PAGE_SIZE,
-            search,
-            includeTags,
-            excludeTags: [],
-          });
+          await getBackgroundPage(savedBackground);
         if (bgPage !== -1) {
           setPage(bgPage);
           setSelectedIds([savedBackground]);
@@ -131,7 +151,7 @@ const BackgroundSelect: React.FC = () => {
   useEffect(() => {
     if (page === -1) return; // prevent OnMount call.
     const handler = () => {
-      fetchPage(page, search);
+      fetchPage(page);
     };
     handler();
     window.electron.on("backgrounds-updated", handler);
@@ -148,7 +168,7 @@ const BackgroundSelect: React.FC = () => {
     if (page !== 0) {
       setPage(0); // useEffect above calls fetchPage
     } else {
-      fetchPage(page, search);
+      fetchPage(page);
     }
   }, [filterOptions]);
 
@@ -306,7 +326,7 @@ const BackgroundSelect: React.FC = () => {
         const success = await window.electron.deleteBackground(backgroundId);
         if (success) {
           logger.info(`Successfully deleted background ${backgroundId}`);
-          fetchPage(page, search);
+          fetchPage(page);
         } else {
           logger.error(`Failed to delete background ${backgroundId}`);
           // Show file in use to user.
@@ -389,14 +409,8 @@ const BackgroundSelect: React.FC = () => {
   const handleJumpToClick = async () => {
     if (!selectedBg) return;
     // Get the page and position for the currently selected background
-    const { page: bgPage } = await window.electron.getBackgroundPageForId({
-      id: selectedBg.id,
-      pageSize: PAGE_SIZE,
-      search,
-      includeTags,
-      excludeTags: [],
-    });
 
+    const { page: bgPage } = await getBackgroundPage(selectedBg.id);
     if (bgPage !== -1) {
       setPage(bgPage);
       setSelectedIds([selectedBg.id]);

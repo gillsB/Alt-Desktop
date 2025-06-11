@@ -51,3 +51,28 @@ export function fileNameNoExt(filePath: string) {
   const fileName = filePath.split(/[\\/]/).pop() || "";
   return fileName.replace(/\.[^/.]+$/, "");
 }
+
+export function parseAdvancedSearch(search: string) {
+  const addTags: string[] = [];
+  const removeTags: string[] = [];
+  const searchTerms: string[] = [];
+
+  // Split by spaces
+  const parts = search.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+
+  for (const part of parts) {
+    if (part.startsWith("-tag:")) {
+      removeTags.push(part.slice(5));
+    } else if (part.startsWith("tag:")) {
+      addTags.push(part.slice(4));
+    } else {
+      searchTerms.push(part);
+    }
+  }
+
+  return {
+    addTags,
+    removeTags,
+    searchTerms,
+  };
+}
