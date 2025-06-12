@@ -60,6 +60,7 @@ type SettingsData = {
   windowType?: WindowType;
   newBackgroundID?: number;
   externalPaths?: string[];
+  localTags?: string[];
 };
 
 type SettingKey = keyof SettingsData;
