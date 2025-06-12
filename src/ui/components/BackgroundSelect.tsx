@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { PUBLIC_TAGS } from "../../shared/publicTags";
+import { PUBLIC_TAGS } from "../../electron/publicTags";
 import "../App.css";
 import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";

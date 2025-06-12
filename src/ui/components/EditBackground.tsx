@@ -5,7 +5,7 @@ import {
 } from "@heroicons/react/24/solid";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { PUBLIC_TAGS } from "../../shared/publicTags";
+import { PUBLIC_TAGS } from "../../electron/publicTags";
 import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
