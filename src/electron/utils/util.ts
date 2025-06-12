@@ -154,8 +154,8 @@ export const ensureFileExists = (
        *  So display an error when filepath does not exist to identify how/when this is called
        *  before a file is created.
        */
-      logger.error(
-        "Error: file does not exist, When it should, fallback creating:",
+      logger.warn(
+        "Warning: file does not exist, When it should, fallback creating:",
         filePath
       );
       fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2), "utf-8");
@@ -658,7 +658,7 @@ export const idToBackgroundPath = async (id: string) => {
     const backgroundFolder = await idToBackgroundFolder(id);
     const bgJsonPath = await idToBgJson(id);
     if (!fs.existsSync(bgJsonPath)) {
-      logger.error(`bg.json not found at ${bgJsonPath}`);
+      logger.warn(`bg.json not found at ${bgJsonPath}`);
       return null;
     }
     const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
@@ -774,10 +774,6 @@ export const getBasePath = (): string => {
   return getAppDataPath();
 };
 
-export const getDesktopPath = (): string => {
-  return path.join(getBasePath(), "desktop");
-};
-
 export const getDataFolderPath = (): string => {
   return path.join(getBasePath(), "data");
 };
@@ -787,11 +783,11 @@ export const getLogsFolderPath = (): string => {
 };
 
 export const getDesktopIconsFilePath = (): string => {
-  return path.join(getDesktopPath(), "desktopIcons.json");
+  return path.join(getBasePath(), "desktopIcons.json");
 };
 
 export const getSettingsFilePath = (): string => {
-  return path.join(getDesktopPath(), "settings.json");
+  return path.join(getBasePath(), "settings.json");
 };
 
 export const getBackgroundFilePath = (): string => {
