@@ -9,7 +9,11 @@ import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getScriptsPath } from "./pathResolver.js";
 import { PUBLIC_TAGS } from "./publicTags.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
-import { defaultSettings, ensureDefaultSettings } from "./settings.js";
+import {
+  defaultSettings,
+  ensureDefaultSettings,
+  getSetting,
+} from "./settings.js";
 import { generateIcon } from "./utils/generateIcon.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import {
@@ -1395,7 +1399,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             tags: (bg.public?.tags ?? []).filter((t: string) =>
               PUBLIC_TAGS.includes(t)
             ),
-            localTags: bg.local?.tags ?? [],
+            localTags: (bg.local?.tags ?? []).filter((t: string) =>
+              (getSetting("localTags") as string[]).includes(t)
+            ),
             localIndexed: bg.local?.indexed,
           });
         } catch (e) {
