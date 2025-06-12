@@ -320,8 +320,7 @@ const EditIcon: React.FC = () => {
     if (!icon) return;
 
     const files = event.dataTransfer.files[0];
-    let filePath = window.electron.getFilePath(files);
-    filePath = await window.electron.resolveShortcut(filePath); // Resolve any shortcuts
+    const filePath = window.electron.getFilePath(files);
     const fileType = await window.electron.getFileType(filePath);
     logger.info("Returned filePath from dropped file: ", filePath);
     if (fileType.startsWith("image/")) {
