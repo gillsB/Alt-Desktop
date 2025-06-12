@@ -14,8 +14,7 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
 
-//These are local tags and would not be shared with bg.json (made by user).
-const PERSONAL_TAGS = ["These", "Are", "local", "Tags"];
+let LOCAL_TAGS: string[] | undefined = [];
 
 const EditBackground: React.FC = () => {
   const location = useLocation();
@@ -57,6 +56,13 @@ const EditBackground: React.FC = () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    const fetchLocalTags = async () => {
+      LOCAL_TAGS = await window.electron.getSetting("localTags");
+    };
+    fetchLocalTags();
+  });
 
   // Preview background update when bgFile changes
   useEffect(() => {
@@ -446,9 +452,9 @@ const EditBackground: React.FC = () => {
           </div>
         </div>
         <div className="subwindow-field">
-          <label>Personal Tags:</label>
+          <label>Local Tags:</label>
           <div className="tag-row">
-            {PERSONAL_TAGS.map((tag) => (
+            {(LOCAL_TAGS ?? []).map((tag) => (
               <button
                 key={tag}
                 type="button"
