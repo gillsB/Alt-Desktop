@@ -485,9 +485,10 @@ export async function indexBackgrounds() {
         // Index tags
         if (bg.public?.tags && Array.isArray(bg.public.tags)) {
           for (const tag of bg.public.tags) {
-            if (allowedTags.includes(tag.toLowerCase())) {
-              if (!tagsIndex[tag]) tagsIndex[tag] = new Set();
-              tagsIndex[tag].add(id);
+            const tagLower = tag.toLowerCase();
+            if (allowedTags.includes(tagLower)) {
+              if (!tagsIndex[tagLower]) tagsIndex[tagLower] = new Set();
+              tagsIndex[tagLower].add(id);
             }
           }
         }
@@ -511,7 +512,7 @@ export async function indexBackgrounds() {
   // Convert sets to arrays for JSON serialization
   backgroundsData.tags = {};
   for (const tag in tagsIndex) {
-    if (allowedTags.includes(tag.toLowerCase())) {
+    if (allowedTags.includes(tag)) {
       backgroundsData.tags[tag] = Array.from(tagsIndex[tag]);
     }
   }
