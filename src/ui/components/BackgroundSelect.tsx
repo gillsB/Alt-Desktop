@@ -450,243 +450,259 @@ const BackgroundSelect: React.FC = () => {
       onDrop={handleFileDrop}
     >
       <SubWindowHeader title="Background Select" onClose={handleClose} />
-      <div className="search-menu">
-        <input
-          type="text"
-          placeholder="Search backgrounds..."
-          value={search}
-          onChange={(e) => {
-            const value = e.target.value;
-            setPage(0);
-            setSearch(value);
+      <div className="background-main-content">
+        {/* Left side: search, grid, paging */}
+        <div className="background-left-panel">
+          <div className="search-menu">
+            <input
+              type="text"
+              placeholder="Search backgrounds..."
+              value={search}
+              onChange={(e) => {
+                const value = e.target.value;
+                setPage(0);
+                setSearch(value);
 
-            // This only works for adding tag: at the current end of a message.
-            const tagMatch = value.match(/(?:^|\s)tag:([^\s]*)$/i);
-            if (tagMatch) {
-              const partial = tagMatch[1].toLowerCase();
-              const matches = PUBLIC_TAGS.filter((tag) =>
-                tag.toLowerCase().startsWith(partial)
-              ).slice(0, 5);
-              setTagSuggestions(matches);
-              setShowTagSuggestions(matches.length > 0);
-              setSuggestionIndex(0);
-            } else {
-              setShowTagSuggestions(false);
-              setTagSuggestions([]);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (showTagSuggestions && tagSuggestions.length > 0) {
-              if (e.key === "ArrowDown") {
-                setSuggestionIndex((i) => (i + 1) % tagSuggestions.length);
-                e.preventDefault();
-              } else if (e.key === "ArrowUp") {
-                setSuggestionIndex(
-                  (i) => (i - 1 + tagSuggestions.length) % tagSuggestions.length
-                );
-                e.preventDefault();
-              } else if (e.key === "Tab" || e.key === "Enter") {
-                const value = search.replace(/(?:^|\s)tag:[^\s]*$/i, (m) => {
-                  const prefix = m.match(/^\s/) ? " " : "";
-                  return prefix + "tag:" + tagSuggestions[suggestionIndex];
-                });
-                setSearch(value + " ");
-                setShowTagSuggestions(false);
-                setTagSuggestions([]);
-                e.preventDefault();
-              } else if (e.key === "Escape") {
-                setShowTagSuggestions(false);
-              }
-            }
-          }}
-        />
-        <button className="filter-button" onClick={handleFilterClick}>
-          Filter Search
-        </button>
-        {showTagSuggestions && (
-          <div className="tag-suggestion-dropdown">
-            {tagSuggestions.map((tag, idx) => (
-              <div
-                key={tag}
-                className={
-                  "tag-suggestion-item" +
-                  (idx === suggestionIndex ? " selected" : "")
-                }
-                onMouseDown={() => {
-                  const value = search.replace(/(?:^|\s)tag:[^\s]*$/i, (m) => {
-                    const prefix = m.match(/^\s/) ? " " : "";
-                    return prefix + "tag:" + tag;
-                  });
-                  setSearch(value + " ");
+                // This only works for adding tag: at the current end of a message.
+                const tagMatch = value.match(/(?:^|\s)tag:([^\s]*)$/i);
+                if (tagMatch) {
+                  const partial = tagMatch[1].toLowerCase();
+                  const matches = PUBLIC_TAGS.filter((tag) =>
+                    tag.toLowerCase().startsWith(partial)
+                  ).slice(0, 5);
+                  setTagSuggestions(matches);
+                  setShowTagSuggestions(matches.length > 0);
+                  setSuggestionIndex(0);
+                } else {
                   setShowTagSuggestions(false);
                   setTagSuggestions([]);
-                }}
-              >
-                {"tag:" + tag}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <div className="background-select-content">
-        <div className="background-grid">
-          {summaries.map((bg) => (
-            <div
-              key={bg.id}
-              ref={(selectedElement) => {
-                gridItemRefs.current[bg.id] = selectedElement;
+                }
               }}
-              className={
-                "background-grid-item" +
-                (selectedIds.includes(bg.id) ? " selected" : "")
-              }
-              onClick={(e) => handleSelect(bg.id, e)}
-              onContextMenu={(e) => handleContextMenu(e, bg.id)}
+              onKeyDown={(e) => {
+                if (showTagSuggestions && tagSuggestions.length > 0) {
+                  if (e.key === "ArrowDown") {
+                    setSuggestionIndex((i) => (i + 1) % tagSuggestions.length);
+                    e.preventDefault();
+                  } else if (e.key === "ArrowUp") {
+                    setSuggestionIndex(
+                      (i) =>
+                        (i - 1 + tagSuggestions.length) % tagSuggestions.length
+                    );
+                    e.preventDefault();
+                  } else if (e.key === "Tab" || e.key === "Enter") {
+                    const value = search.replace(
+                      /(?:^|\s)tag:[^\s]*$/i,
+                      (m) => {
+                        const prefix = m.match(/^\s/) ? " " : "";
+                        return (
+                          prefix + "tag:" + tagSuggestions[suggestionIndex]
+                        );
+                      }
+                    );
+                    setSearch(value + " ");
+                    setShowTagSuggestions(false);
+                    setTagSuggestions([]);
+                    e.preventDefault();
+                  } else if (e.key === "Escape") {
+                    setShowTagSuggestions(false);
+                  }
+                }
+              }}
+            />
+            <button className="filter-button" onClick={handleFilterClick}>
+              Filter Search
+            </button>
+            {showTagSuggestions && (
+              <div className="tag-suggestion-dropdown">
+                {tagSuggestions.map((tag, idx) => (
+                  <div
+                    key={tag}
+                    className={
+                      "tag-suggestion-item" +
+                      (idx === suggestionIndex ? " selected" : "")
+                    }
+                    onMouseDown={() => {
+                      const value = search.replace(
+                        /(?:^|\s)tag:[^\s]*$/i,
+                        (m) => {
+                          const prefix = m.match(/^\s/) ? " " : "";
+                          return prefix + "tag:" + tag;
+                        }
+                      );
+                      setSearch(value + " ");
+                      setShowTagSuggestions(false);
+                      setTagSuggestions([]);
+                    }}
+                  >
+                    {"tag:" + tag}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="background-select-content">
+            <div className="background-grid">
+              {summaries.map((bg) => (
+                <div
+                  key={bg.id}
+                  ref={(selectedElement) => {
+                    gridItemRefs.current[bg.id] = selectedElement;
+                  }}
+                  className={
+                    "background-grid-item" +
+                    (selectedIds.includes(bg.id) ? " selected" : "")
+                  }
+                  onClick={(e) => handleSelect(bg.id, e)}
+                  onContextMenu={(e) => handleContextMenu(e, bg.id)}
+                  tabIndex={0}
+                >
+                  <SafeImage
+                    imagePath={bg.iconPath ?? ""}
+                    className="background-icon"
+                  />
+                  <h4>{getDisplayName(bg)}</h4>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="background-paging-bar">
+            <button
+              className={`paging-nav${page === 0 ? " inactive" : ""}`}
+              onClick={() => page > 0 && setPage((p) => Math.max(0, p - 1))}
               tabIndex={0}
             >
-              <SafeImage
-                imagePath={bg.iconPath ?? ""}
-                className="background-icon"
-              />
-              <h4>{getDisplayName(bg)}</h4>
-            </div>
-          ))}
-        </div>
-        {showFilterPanel && (
-          <div className="filter-search-panel">
-            <h3>Filter Backgrounds</h3>
-            {PUBLIC_TAGS.map((tag) => (
-              <label key={tag}>
-                <input
-                  type="checkbox"
-                  checked={!!filterOptions[tag]}
-                  onChange={() => {
-                    setFilterOptions((prev) => {
-                      const updated = { ...prev, [tag]: !prev[tag] };
-                      logger.info(`Filter ${tag} set to ${updated[tag]}`);
-                      return updated;
-                    });
-                  }}
-                />
-                {tag}
-              </label>
-            ))}
-            <button onClick={() => setShowFilterPanel(false)}>Close</button>
-          </div>
-        )}
-        {!showFilterPanel && selectedBg && (
-          <div className="background-details-panel" key={selectedBg.id}>
-            <div key={selectedBg.id}>
-              {selectedBg.iconPath && (
-                <div className="details-row">
-                  <SafeImage
-                    imagePath={selectedBg.iconPath}
-                    width={128}
-                    height={128}
-                    className="panel-icon"
-                  />
-                </div>
-              )}
-              <div className="button-center">
-                <button className="button" onClick={handleJumpToClick}>
-                  Jump to
-                </button>
-              </div>
-              <h3>{getDisplayName(selectedBg)}</h3>
-              <div className="details-row">
-                <label>Description</label>
-                <div className="details-value">
-                  {selectedBg.description || <em>No description</em>}
-                </div>
-              </div>
-              <div className="details-row">
-                <label>Tags</label>
-                <div className="details-value">
-                  {selectedBg.tags && selectedBg.tags.length > 0 ? (
-                    selectedBg.tags.join(", ")
-                  ) : (
-                    <em>None</em>
-                  )}
-                </div>
-              </div>
-              <div className="details-row">
-                <label>Local Tags</label>
-                <div className="details-value">
-                  {selectedBg.localTags && selectedBg.localTags.length > 0 ? (
-                    selectedBg.localTags.join(", ")
-                  ) : (
-                    <em>None</em>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="background-paging-bar">
-        <button
-          className={`paging-nav${page === 0 ? " inactive" : ""}`}
-          onClick={() => page > 0 && setPage((p) => Math.max(0, p - 1))}
-          tabIndex={0}
-        >
-          Prev
-        </button>
-        {pageNumbers.map((num, idx) =>
-          num === "..." ? (
-            <span
-              key={`ellipsis-${idx}`}
-              className="paging-ellipsis"
-              onClick={() => setShowPageInput(true)}
-              title="Jump to page"
-            >
-              ...
-            </span>
-          ) : (
-            <button
-              key={num}
-              className={num === page ? "paging-current" : ""}
-              onClick={() => setPage(Number(num))}
-              disabled={num === page}
-              style={{
-                fontWeight: num === page ? "bold" : undefined,
-                margin: "0 2px",
-              }}
-            >
-              {Number(num) + 1}
+              Prev
             </button>
-          )
-        )}
-        {showPageInput && (
-          <input
-            type="number"
-            min={1}
-            max={totalPages}
-            value={pageInputValue}
-            autoFocus
-            onChange={(e) =>
-              setPageInputValue(e.target.value.replace(/\D/, ""))
-            }
-            onBlur={() => setShowPageInput(false)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                const val = Math.max(
-                  1,
-                  Math.min(totalPages, Number(pageInputValue))
-                );
-                setPage(val - 1);
-                setShowPageInput(false);
-              }
-              if (e.key === "Escape") setShowPageInput(false);
-            }}
-          />
-        )}
-        <button
-          className={`paging-nav${page + 1 >= totalPages ? " inactive" : ""}`}
-          onClick={() => page + 1 < totalPages && setPage((p) => p + 1)}
-          tabIndex={0}
-        >
-          Next
-        </button>
+            {pageNumbers.map((num, idx) =>
+              num === "..." ? (
+                <span
+                  key={`ellipsis-${idx}`}
+                  className="paging-ellipsis"
+                  onClick={() => setShowPageInput(true)}
+                  title="Jump to page"
+                >
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={num}
+                  className={num === page ? "paging-current" : ""}
+                  onClick={() => setPage(Number(num))}
+                  disabled={num === page}
+                  style={{
+                    fontWeight: num === page ? "bold" : undefined,
+                    margin: "0 2px",
+                  }}
+                >
+                  {Number(num) + 1}
+                </button>
+              )
+            )}
+            {showPageInput && (
+              <input
+                type="number"
+                min={1}
+                max={totalPages}
+                value={pageInputValue}
+                autoFocus
+                onChange={(e) =>
+                  setPageInputValue(e.target.value.replace(/\D/, ""))
+                }
+                onBlur={() => setShowPageInput(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const val = Math.max(
+                      1,
+                      Math.min(totalPages, Number(pageInputValue))
+                    );
+                    setPage(val - 1);
+                    setShowPageInput(false);
+                  }
+                  if (e.key === "Escape") setShowPageInput(false);
+                }}
+              />
+            )}
+            <button
+              className={`paging-nav${page + 1 >= totalPages ? " inactive" : ""}`}
+              onClick={() => page + 1 < totalPages && setPage((p) => p + 1)}
+              tabIndex={0}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+        {/* Right side: details or filter */}
+        <div className="background-right-panel">
+          {showFilterPanel ? (
+            <div className="filter-search-panel">
+              <h3>Filter Backgrounds</h3>
+              {PUBLIC_TAGS.map((tag) => (
+                <label key={tag}>
+                  <input
+                    type="checkbox"
+                    checked={!!filterOptions[tag]}
+                    onChange={() => {
+                      setFilterOptions((prev) => {
+                        const updated = { ...prev, [tag]: !prev[tag] };
+                        logger.info(`Filter ${tag} set to ${updated[tag]}`);
+                        return updated;
+                      });
+                    }}
+                  />
+                  {tag}
+                </label>
+              ))}
+              <button onClick={() => setShowFilterPanel(false)}>Close</button>
+            </div>
+          ) : selectedBg ? (
+            <div className="background-details-panel" key={selectedBg.id}>
+              <div key={selectedBg.id}>
+                {selectedBg.iconPath && (
+                  <div className="details-row">
+                    <SafeImage
+                      imagePath={selectedBg.iconPath}
+                      width={128}
+                      height={128}
+                      className="panel-icon"
+                    />
+                  </div>
+                )}
+                <div className="button-center">
+                  <button className="button" onClick={handleJumpToClick}>
+                    Jump to
+                  </button>
+                </div>
+                <h3>{getDisplayName(selectedBg)}</h3>
+                <div className="details-row">
+                  <label>Description</label>
+                  <div className="details-value">
+                    {selectedBg.description || <em>No description</em>}
+                  </div>
+                </div>
+                <div className="details-row">
+                  <label>Tags</label>
+                  <div className="details-value">
+                    {selectedBg.tags && selectedBg.tags.length > 0 ? (
+                      selectedBg.tags.join(", ")
+                    ) : (
+                      <em>None</em>
+                    )}
+                  </div>
+                </div>
+                <div className="details-row">
+                  <label>Local Tags</label>
+                  <div className="details-value">
+                    {selectedBg.localTags && selectedBg.localTags.length > 0 ? (
+                      selectedBg.localTags.join(", ")
+                    ) : (
+                      <em>None</em>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
       {isDragging && (
         <div className="drag-overlay">
