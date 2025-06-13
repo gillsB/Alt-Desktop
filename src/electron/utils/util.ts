@@ -466,7 +466,8 @@ export async function indexBackgrounds() {
   const tagsIndex: Record<string, Set<string>> = {};
   const namesIndex: Record<string, Set<string>> = {};
 
-  for (const id of Object.keys(backgroundsData.backgrounds)) {
+  const ids = Object.keys(backgroundsData.backgrounds);
+  await promisePool(ids, 50, async (id) => {
     const bgJsonPath = await idToBgJson(id);
     try {
       if (fs.existsSync(bgJsonPath)) {
@@ -495,7 +496,7 @@ export async function indexBackgrounds() {
     } catch (e) {
       logger.warn(`Failed to index tags/names for ${id}:`, e);
     }
-  }
+  });
 
   // Convert sets to arrays for JSON serialization
   backgroundsData.tags = {};
@@ -531,6 +532,7 @@ export async function indexBackgrounds() {
       (activeSubWindow) => activeSubWindow.title === "AltDesktop"
     ) || (allWindows.length > 0 ? allWindows[0] : null);
   mainWindow?.webContents.send("backgrounds-updated");
+  logger.info("Finished indexing");
 }
 
 /**
@@ -797,3 +799,31 @@ export const getBackgroundFilePath = (): string => {
 export const getBackgroundsJsonFilePath = (): string => {
   return path.join(getBasePath(), "backgrounds.json");
 };
+
+// Helper: concurrency-limited promise pool
+export async function promisePool<T>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<void>
+) {
+  const executing: Promise<void>[] = [];
+  let i = 0;
+
+  async function enqueue() {
+    if (i >= items.length) return;
+    const item = items[i++];
+    const p = fn(item).then(() => {
+      // Remove this promise from executing when done
+      executing.splice(executing.indexOf(p), 1);
+    });
+    executing.push(p);
+    if (executing.length < limit) {
+      await enqueue();
+    }
+  }
+
+  // Start initial batch
+  await Promise.all(Array(Math.min(limit, items.length)).fill(0).map(enqueue));
+  // Wait for all to finish
+  await Promise.all(executing);
+}

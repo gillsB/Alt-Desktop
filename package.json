@@ -28,6 +28,7 @@
     "follow-redirects": "^1.15.9",
     "mime-types": "^2.1.35",
     "os-utils": "^0.0.14",
+    "p-limit": "^6.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
