@@ -699,14 +699,15 @@ export async function filterBackgroundEntries(
     getNameIndex(),
   ]);
 
+  // TagIndex uses lowercase, so convert to lowercase.
+  const excludeTagsLower = excludeTags.map((tag) => tag.toLowerCase());
+  const includeTagsLower = includeTags.map((tag) => tag.toLowerCase());
+
   // Build a set of all ids to exclude
   const excludedIds = new Set<string>();
-  if (excludeTags.length > 0) {
-    const excludeTagsLower = excludeTags.map((tag) => tag.toLowerCase());
-    Object.entries(tagIndex).forEach(([tag, ids]) => {
-      if (excludeTagsLower.includes(tag.toLowerCase())) {
-        ids.forEach((id) => excludedIds.add(id));
-      }
+  if (excludeTagsLower.length > 0) {
+    excludeTagsLower.forEach((tag) => {
+      (tagIndex[tag] || []).forEach((id) => excludedIds.add(id));
     });
   }
 
@@ -722,7 +723,8 @@ export async function filterBackgroundEntries(
         .flatMap(([, ids]) => ids)
         .filter((id) => entries.some(([eid]) => eid === id));
     } else if (op.type === "tag") {
-      matchedIds = (tagIndex[op.value] || []).filter((id) =>
+      const tag = op.value.toLowerCase();
+      matchedIds = (tagIndex[tag] || []).filter((id) =>
         entries.some(([eid]) => eid === id)
       );
     }
@@ -731,9 +733,9 @@ export async function filterBackgroundEntries(
     // Still apply include/exclude tags
     return entries.filter(([id]) => {
       if (excludedIds.has(id)) return false;
-      if (includeTags.length > 0) {
+      if (includeTagsLower.length > 0) {
         // AND logic: id must be present in every tag's id list
-        const hasAllTags = includeTags.every((tag) =>
+        const hasAllTags = includeTagsLower.every((tag) =>
           (tagIndex[tag] || []).includes(id)
         );
         if (!hasAllTags) return false;
@@ -748,13 +750,12 @@ export async function filterBackgroundEntries(
     if (excludedIds.has(id)) return false;
 
     // Include: must have ALL includeTags
-    if (includeTags.length > 0) {
-      const hasAllTags = includeTags.every((tag) =>
+    if (includeTagsLower.length > 0) {
+      const hasAllTags = includeTagsLower.every((tag) =>
         (tagIndex[tag] || []).includes(id)
       );
       if (!hasAllTags) return false;
     }
-
     // If no search term, return true (already passed include/exclude filters)
     if (!search) return true;
 
