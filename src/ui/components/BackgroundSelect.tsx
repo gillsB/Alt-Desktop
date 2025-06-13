@@ -701,7 +701,17 @@ const BackgroundSelect: React.FC = () => {
                 </div>
               </div>
             </div>
-          ) : null}
+          ) : (
+            <div className="background-empty-panel">
+              <div>
+                Drag and drop an image or video onto this window to create a new
+                background.
+                <br />
+                <br />
+                Then select a background by clicking on it.
+              </div>
+            </div>
+          )}
         </div>
       </div>
       {isDragging && (
