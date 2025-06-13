@@ -8,6 +8,7 @@ import {
 import fs from "fs";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
+import { PUBLIC_TAGS } from "../publicTags.js";
 import { getSetting } from "../settings.js";
 import {
   getAllowedUrls,
@@ -466,6 +467,13 @@ export async function indexBackgrounds() {
   const tagsIndex: Record<string, Set<string>> = {};
   const namesIndex: Record<string, Set<string>> = {};
 
+  const localTags = await getSetting("localTags");
+
+  const allowedTags = [
+    ...PUBLIC_TAGS,
+    ...(Array.isArray(localTags) ? localTags : []),
+  ].map((tag) => tag.toLowerCase());
+
   const ids = Object.keys(backgroundsData.backgrounds);
   await promisePool(ids, 50, async (id) => {
     const bgJsonPath = await idToBgJson(id);
@@ -477,8 +485,10 @@ export async function indexBackgrounds() {
         // Index tags
         if (bg.public?.tags && Array.isArray(bg.public.tags)) {
           for (const tag of bg.public.tags) {
-            if (!tagsIndex[tag]) tagsIndex[tag] = new Set();
-            tagsIndex[tag].add(id);
+            if (allowedTags.includes(tag.toLowerCase())) {
+              if (!tagsIndex[tag]) tagsIndex[tag] = new Set();
+              tagsIndex[tag].add(id);
+            }
           }
         }
 
@@ -501,7 +511,9 @@ export async function indexBackgrounds() {
   // Convert sets to arrays for JSON serialization
   backgroundsData.tags = {};
   for (const tag in tagsIndex) {
-    backgroundsData.tags[tag] = Array.from(tagsIndex[tag]);
+    if (allowedTags.includes(tag.toLowerCase())) {
+      backgroundsData.tags[tag] = Array.from(tagsIndex[tag]);
+    }
   }
   backgroundsData.names = {};
   for (const name in namesIndex) {
