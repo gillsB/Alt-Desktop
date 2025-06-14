@@ -470,9 +470,11 @@ export async function indexBackgrounds() {
   const localTags = await getSetting("localTags");
 
   const allowedTags = [
-    ...PUBLIC_TAGS,
-    ...(Array.isArray(localTags) ? localTags : []),
-  ].map((tag) => tag.toLowerCase());
+    ...PUBLIC_TAGS.map((tag) => tag.toLowerCase()),
+    ...(Array.isArray(localTags) ? localTags.map((tag) => tag.name) : []),
+  ];
+
+  logger.info("Allowed tags for indexing:", allowedTags);
 
   const ids = Object.keys(backgroundsData.backgrounds);
   await promisePool(ids, 50, async (id) => {
