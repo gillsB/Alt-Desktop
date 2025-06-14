@@ -135,7 +135,7 @@ const EditBackground: React.FC = () => {
     const updatedSummary = { ...summary };
 
     // If new background, generate a unique id Do not change ID for existing backgrounds
-    if (updatedSummary.id === "") {
+    if (!updatedSummary.id || updatedSummary.id === "") {
       let base = updatedSummary.name?.trim() || "";
       if (!base) {
         // No name -> fallback to a 6+ digit numerical id
