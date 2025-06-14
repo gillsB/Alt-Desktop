@@ -494,6 +494,16 @@ export async function indexBackgrounds() {
             }
           }
         }
+        // Index local tags
+        if (bg.local?.tags && Array.isArray(bg.local.tags)) {
+          for (const tag of bg.local.tags) {
+            const tagLower = tag.toLowerCase();
+            if (allowedTags.includes(tagLower)) {
+              if (!tagsIndex[tagLower]) tagsIndex[tagLower] = new Set();
+              tagsIndex[tagLower].add(id);
+            }
+          }
+        }
 
         // Index names
         if (bg.public?.name) {
