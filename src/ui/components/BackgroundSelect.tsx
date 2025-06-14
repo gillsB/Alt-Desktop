@@ -256,7 +256,11 @@ const BackgroundSelect: React.FC = () => {
     }
   };
 
-  const handleEditBackground = async (backgroundId: string) => {
+  const handleEditBackground = async (backgroundId?: string) => {
+    if (!backgroundId) {
+      await window.electron.openEditBackground({} as BackgroundSummary);
+      return;
+    }
     const bg = summaries.find((bg) => bg.id === backgroundId);
     logger.info("background = ", bg);
     if (bg) {
@@ -705,7 +709,15 @@ const BackgroundSelect: React.FC = () => {
             <div className="background-empty-panel">
               <div>
                 Drag and drop an image or video onto this window to create a new
-                background.
+                background. Or click the button below.
+                <br />
+                <br />
+                <button
+                  className="button"
+                  onClick={() => handleEditBackground()}
+                >
+                  Create Background
+                </button>
                 <br />
                 <br />
                 Then select a background by clicking on it.
