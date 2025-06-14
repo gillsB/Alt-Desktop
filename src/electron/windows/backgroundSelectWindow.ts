@@ -6,6 +6,8 @@ export function openBackgroundSelectWindow() {
     width: 850,
     height: 660,
     frame: false,
+    minWidth: 645,
+    minHeight: 450,
   };
 
   const subWindowHash = `background-select`;
