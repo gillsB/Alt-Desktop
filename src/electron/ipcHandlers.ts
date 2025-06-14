@@ -9,11 +9,7 @@ import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getScriptsPath } from "./pathResolver.js";
 import { PUBLIC_TAGS } from "./publicTags.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
-import {
-  defaultSettings,
-  ensureDefaultSettings,
-  getSetting,
-} from "./settings.js";
+import { defaultSettings, getSetting, saveSettingsData } from "./settings.js";
 import { generateIcon } from "./utils/generateIcon.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import {
@@ -34,7 +30,6 @@ import {
   resetAllIconsFontColor,
   resolveShortcut,
   saveBgJsonFile,
-  saveExternalPaths,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
   updateHeader,
@@ -1069,35 +1064,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "saveSettingsData",
     async (data: Partial<SettingsData>): Promise<boolean> => {
-      try {
-        logger.info("SaveSettingsData called with data:", JSON.stringify(data));
-        const settingsFilePath = getSettingsFilePath();
-        // Read current settings
-        let currentSettings: SettingsData = defaultSettings;
-        if (fs.existsSync(settingsFilePath)) {
-          currentSettings = JSON.parse(
-            fs.readFileSync(settingsFilePath, "utf-8")
-          );
-        }
-        // Merge only the provided keys/values
-        const newSettings = { ...currentSettings, ...data };
-        fs.writeFileSync(
-          settingsFilePath,
-          JSON.stringify(newSettings, null, 2),
-          "utf-8"
-        );
-        logger.info("Settings data saved successfully.");
-        ensureDefaultSettings(); // Add back any missing default settings
-        if (Array.isArray(data.externalPaths)) {
-          await saveExternalPaths(data.externalPaths);
-        }
-        mainWindow.webContents.send("reload-grid");
-        updateHeader(mainWindow);
-        return true;
-      } catch (error) {
-        logger.error("Error saving settings data:", error);
-        return false;
-      }
+      logger.info("SaveSettingsData called with data:", JSON.stringify(data));
+      const result = await saveSettingsData(data);
+      mainWindow.webContents.send("reload-grid");
+      updateHeader(mainWindow);
+      return result;
     }
   );
   ipcMainHandle(
@@ -1565,4 +1536,41 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return idToBackgroundFolder(id);
     }
   );
+  // TODO add reasons for why it fails to add tag to user (smallWindow).
+  // For example if tag already exists, name invalid etc.
+  ipcMainHandle("addLocalTag", async (tag: LocalTag): Promise<boolean> => {
+    try {
+      // Validate name: no spaces, must be lowercase, not in PUBLIC_TAGS or localTags
+      if (!tag.name || typeof tag.name !== "string") return false;
+      if (/\s/.test(tag.name)) return false;
+      const name = tag.name.toLowerCase();
+
+      // Check against PUBLIC_TAGS
+      if (PUBLIC_TAGS.map((t) => t.toLowerCase()).includes(name)) return false;
+
+      // Get current localTags (support both string[] and LocalTag[])
+      let localTagsRaw = getSetting("localTags") as (string | LocalTag)[];
+      if (!Array.isArray(localTagsRaw)) localTagsRaw = [];
+
+      // Filter to only LocalTag objects
+      const localTags: LocalTag[] = localTagsRaw
+        .filter(
+          (t): t is LocalTag =>
+            typeof t === "object" && t !== null && "name" in t
+        )
+        .map((t) => ({ ...t, name: t.name.toLowerCase() }));
+
+      // Check for duplicates in localTags
+      const exists = localTags.some((t) => t.name === name);
+      if (exists) return false;
+
+      localTags.push({ ...tag, name });
+
+      await saveSettingsData({ localTags });
+      return true;
+    } catch (e) {
+      baseLogger.error("Failed to add local tag:", e);
+      return false;
+    }
+  });
 }

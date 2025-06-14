@@ -14,7 +14,7 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
 
-let LOCAL_TAGS: string[] | undefined = [];
+let LOCAL_TAGS: LocalTag[] | undefined = [];
 
 const EditBackground: React.FC = () => {
   const location = useLocation();
@@ -454,18 +454,23 @@ const EditBackground: React.FC = () => {
         <div className="subwindow-field">
           <label>Local Tags:</label>
           <div className="tag-row">
-            {(LOCAL_TAGS ?? []).map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                className={
-                  summary.localTags?.includes(tag) ? "tag-selected" : "tag"
-                }
-                onClick={() => handlePersonalTagToggle(tag)}
-              >
-                {tag}
-              </button>
-            ))}
+            {(LOCAL_TAGS ?? []).map((tagObj) => {
+              const tagName = typeof tagObj === "string" ? tagObj : tagObj.name;
+              return (
+                <button
+                  key={tagName}
+                  type="button"
+                  className={
+                    summary.localTags?.includes(tagName)
+                      ? "tag-selected"
+                      : "tag"
+                  }
+                  onClick={() => handlePersonalTagToggle(tagName)}
+                >
+                  {tagName}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

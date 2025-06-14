@@ -52,6 +52,12 @@ type DesktopIconData = {
   icons: DesktopIcon[];
 };
 
+type LocalTag = {
+  name: string;
+  category: string;
+  favorite: boolean;
+};
+
 type SettingsData = {
   background?: string;
   defaultFontSize?: number;
@@ -60,7 +66,7 @@ type SettingsData = {
   windowType?: WindowType;
   newBackgroundID?: number;
   externalPaths?: string[];
-  localTags?: string[];
+  localTags?: LocalTag[];
 };
 
 type SettingKey = keyof SettingsData;
@@ -201,6 +207,7 @@ interface EventParamMapping {
   saveBgJson: [BackgroundSummary];
   deleteBackground: [string];
   idToBackgroundFolder: [string];
+  addLocalTag: [LocalTag];
 }
 
 // The returns from the main process to the renderer
@@ -259,6 +266,7 @@ type EventPayloadMapping = {
   saveBgJson: boolean;
   deleteBackground: boolean;
   idToBackgroundFolder: string | null;
+  addLocalTag: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -368,5 +376,6 @@ interface Window {
     saveBgJson: (data: BackgroundSummary) => Promise<boolean>;
     deleteBackground: (id: string) => Promise<boolean>;
     idToBackgroundFolder: (id: string) => Promise<string | null>;
+    addLocalTag: (tag: localTag) => Promise<boolean>;
   };
 }
