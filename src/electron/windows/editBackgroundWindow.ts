@@ -7,7 +7,7 @@ import { openSubWindow } from "./subWindowManager.js";
  */
 export function openEditBackground(summary: BackgroundSummary) {
   const options = {
-    width: 700,
+    width: 750,
     height: 800,
     frame: false,
     resizable: true,

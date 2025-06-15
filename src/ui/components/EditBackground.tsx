@@ -42,6 +42,7 @@ const EditBackground: React.FC = () => {
   const [isHoveringBackgroundGlass, setHoveringBackgroundGlass] =
     useState(false);
   const [isHoveringIconGlass, setHoveringIconGlass] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [localTags, setLocalTags] = useState<LocalTag[]>([]);
   const [groupedLocalTags, setGroupedLocalTags] = useState<
     Record<string, LocalTag[]>
@@ -331,8 +332,8 @@ const EditBackground: React.FC = () => {
     <div className="subwindow-container">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
       <div className="subwindow-content">
-        <div className="subwindow-field">
-          <label>Name:</label>
+        <div className="edit-bg-field">
+          <label className="edit-bg-label">Name:</label>
           <input
             type="text"
             value={summary.name ?? ""}
@@ -342,8 +343,8 @@ const EditBackground: React.FC = () => {
             }
           />
         </div>
-        <div className="subwindow-field">
-          <label>Background File Path:</label>
+        <div className="edit-bg-field">
+          <label className="edit-bg-label">Background File Path:</label>
           <input
             type="text"
             value={summary.bgFile ?? ""}
@@ -384,7 +385,7 @@ const EditBackground: React.FC = () => {
           )}
         </div>
         {bgFileType?.startsWith("video") && (
-          <div className="subwindow-field dropdown-container">
+          <div className="edit-bg-field dropdown-container">
             <label htmlFor="save-bg-method">Save Background as:</label>
             <select
               id="save-bg-method"
@@ -399,8 +400,8 @@ const EditBackground: React.FC = () => {
           </div>
         )}
 
-        <div className="subwindow-field">
-          <label>Icon Preview Image:</label>
+        <div className="edit-bg-field">
+          <label className="edit-bg-label">Icon Preview Image:</label>
           <input
             type="text"
             value={summary.iconPath ?? ""}
@@ -438,8 +439,8 @@ const EditBackground: React.FC = () => {
             </button>
           )}
         </div>
-        <div className="subwindow-field">
-          <label>Description:</label>
+        <div className="edit-bg-field">
+          <label className="edit-bg-label">Description:</label>
           <textarea
             value={summary.description ?? ""}
             placeholder="Short description"
@@ -449,8 +450,8 @@ const EditBackground: React.FC = () => {
             rows={2}
           />
         </div>
-        <div className="subwindow-field">
-          <label>Public Tags:</label>
+        <div className="edit-bg-field">
+          <label className="edit-bg-label">Public Tags:</label>
           <div className="tag-row">
             {PUBLIC_TAGS.map((tag) => (
               <button
@@ -464,26 +465,48 @@ const EditBackground: React.FC = () => {
             ))}
           </div>
         </div>
-        <div className="subwindow-field">
+        <div className="local-tags">
           <label>Local Tags:</label>
           <div className="tag-grouped-list">
             {Object.entries(groupedLocalTags).map(([category, tags]) => (
-              <div key={category} className="tag-category-group">
+              <div key={category} className="tag-category-group" draggable>
                 <div className="tag-category-header">{category}</div>
-                <div className="tag-row">
+                <div className="tag-checkbox-list">
                   {tags.map((tagObj) => (
-                    <button
+                    <div
                       key={tagObj.name}
-                      type="button"
                       className={
-                        summary.localTags?.includes(tagObj.name)
-                          ? "tag-selected"
-                          : "tag"
+                        "tag-checkbox-row" +
+                        (summary.localTags?.includes(tagObj.name)
+                          ? " selected"
+                          : "")
                       }
-                      onClick={() => handlePersonalTagToggle(tagObj.name)}
+                      draggable
                     >
-                      {tagObj.name}
-                    </button>
+                      <input
+                        type="checkbox"
+                        className="tag-checkbox"
+                        checked={summary.localTags?.includes(tagObj.name)}
+                        onChange={() => handlePersonalTagToggle(tagObj.name)}
+                        id={`tag-checkbox-${category}-${tagObj.name}`}
+                      />
+                      <label
+                        className="tag-name"
+                        htmlFor={`tag-checkbox-${category}-${tagObj.name}`}
+                        title={tagObj.name}
+                      >
+                        {tagObj.name}
+                      </label>
+                      <span
+                        className={
+                          "tag-fav-star" + (tagObj.favorite ? "" : " not-fav")
+                        }
+                        title={tagObj.favorite ? "Favorite" : "Not favorite"}
+                        // TODO add onClick handler
+                      >
+                        ★
+                      </span>
+                    </div>
                   ))}
                 </div>
               </div>
