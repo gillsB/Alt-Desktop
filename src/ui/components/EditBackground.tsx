@@ -3,7 +3,7 @@ import {
   FolderOpenIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
-import React, { useEffect, useState } from "react";
+import React, { JSX, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { PUBLIC_TAGS } from "../../electron/publicTags";
 import "../App.css";
@@ -48,6 +48,12 @@ const EditBackground: React.FC = () => {
     Record<string, LocalTag[]>
   >({});
 
+  const [columns, setColumns] = useState<JSX.Element[][]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [categoryToColumnMap, setCategoryToColumnMap] = useState<
+    Record<string, number>
+  >({});
+
   useEffect(() => {
     let cancelled = false;
     window.electron.getBackgroundIDs().then((idArray: string[]) => {
@@ -77,6 +83,91 @@ const EditBackground: React.FC = () => {
     };
     fetchLocalTags();
   }, []);
+
+  useEffect(() => {
+    const calculateColumns = () => {
+      const containerWidth =
+        containerRef.current?.offsetWidth ?? window.innerWidth;
+      const colWidth = 160 + 14;
+      const maxCols = Math.max(1, Math.floor(containerWidth / colWidth));
+
+      const blocks = Object.entries(groupedLocalTags).map(
+        ([category, tags]) => ({ header: category, items: tags })
+      );
+
+      let map = { ...categoryToColumnMap };
+      const needsRemap =
+        Object.keys(map).length !== blocks.length ||
+        Math.max(...Object.values(map)) >= maxCols;
+
+      if (needsRemap) {
+        map = {};
+        let col = 0;
+        for (const block of blocks) {
+          map[block.header] = col;
+          col = (col + 1) % maxCols;
+        }
+        setCategoryToColumnMap(map);
+      }
+
+      const newCols: JSX.Element[][] = Array.from(
+        { length: maxCols },
+        () => []
+      );
+
+      for (const block of blocks) {
+        const colIndex = map[block.header] ?? 0;
+        newCols[colIndex].push(
+          <div key={block.header} className="tag-category-group" draggable>
+            <div className="tag-category-header">{block.header}</div>
+            <div className="tag-checkbox-list">
+              {block.items.map((tagObj) => (
+                <div
+                  key={tagObj.name}
+                  className={
+                    "tag-checkbox-row" +
+                    (summary.localTags?.includes(tagObj.name)
+                      ? " selected"
+                      : "")
+                  }
+                  draggable
+                >
+                  <input
+                    type="checkbox"
+                    className="tag-checkbox"
+                    checked={summary.localTags?.includes(tagObj.name)}
+                    onChange={() => handlePersonalTagToggle(tagObj.name)}
+                    id={`tag-checkbox-${block.header}-${tagObj.name}`}
+                  />
+                  <label
+                    className="tag-name"
+                    htmlFor={`tag-checkbox-${block.header}-${tagObj.name}`}
+                    title={tagObj.name}
+                  >
+                    {tagObj.name}
+                  </label>
+                  <span
+                    className={
+                      "tag-fav-star" + (tagObj.favorite ? "" : " not-fav")
+                    }
+                    title={tagObj.favorite ? "Favorite" : "Not favorite"}
+                  >
+                    ★
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      setColumns(newCols);
+    };
+
+    calculateColumns();
+    window.addEventListener("resize", calculateColumns);
+    return () => window.removeEventListener("resize", calculateColumns);
+  }, [groupedLocalTags, summary.localTags, categoryToColumnMap]);
 
   // Preview background update when bgFile changes
   useEffect(() => {
@@ -467,48 +558,10 @@ const EditBackground: React.FC = () => {
         </div>
         <div className="local-tags">
           <label>Local Tags:</label>
-          <div className="tag-grouped-list">
-            {Object.entries(groupedLocalTags).map(([category, tags]) => (
-              <div key={category} className="tag-category-group" draggable>
-                <div className="tag-category-header">{category}</div>
-                <div className="tag-checkbox-list">
-                  {tags.map((tagObj) => (
-                    <div
-                      key={tagObj.name}
-                      className={
-                        "tag-checkbox-row" +
-                        (summary.localTags?.includes(tagObj.name)
-                          ? " selected"
-                          : "")
-                      }
-                      draggable
-                    >
-                      <input
-                        type="checkbox"
-                        className="tag-checkbox"
-                        checked={summary.localTags?.includes(tagObj.name)}
-                        onChange={() => handlePersonalTagToggle(tagObj.name)}
-                        id={`tag-checkbox-${category}-${tagObj.name}`}
-                      />
-                      <label
-                        className="tag-name"
-                        htmlFor={`tag-checkbox-${category}-${tagObj.name}`}
-                        title={tagObj.name}
-                      >
-                        {tagObj.name}
-                      </label>
-                      <span
-                        className={
-                          "tag-fav-star" + (tagObj.favorite ? "" : " not-fav")
-                        }
-                        title={tagObj.favorite ? "Favorite" : "Not favorite"}
-                        // TODO add onClick handler
-                      >
-                        ★
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          <div className="tag-column-wrapper" ref={containerRef}>
+            {columns.map((col, idx) => (
+              <div key={idx} className="tag-column">
+                {col}
               </div>
             ))}
           </div>

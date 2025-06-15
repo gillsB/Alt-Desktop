@@ -166,3 +166,19 @@
   flex: 0 0 150px;
   user-select: none;
 }
+
+.tag-column-wrapper {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
+.tag-column {
+  flex: 1 1 160px;
+  max-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
