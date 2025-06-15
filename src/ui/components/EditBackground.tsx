@@ -3,13 +3,14 @@ import {
   FolderOpenIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
-import React, { JSX, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { PUBLIC_TAGS } from "../../electron/publicTags";
 import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
+import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
@@ -48,12 +49,6 @@ const EditBackground: React.FC = () => {
     Record<string, LocalTag[]>
   >({});
 
-  const [columns, setColumns] = useState<JSX.Element[][]>([]);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [categoryToColumnMap, setCategoryToColumnMap] = useState<
-    Record<string, number>
-  >({});
-
   useEffect(() => {
     let cancelled = false;
     window.electron.getBackgroundIDs().then((idArray: string[]) => {
@@ -65,6 +60,19 @@ const EditBackground: React.FC = () => {
       cancelled = true;
     };
   }, []);
+
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
+    new Set()
+  );
+
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) newSet.delete(category);
+      else newSet.add(category);
+      return newSet;
+    });
+  };
 
   // Fetch local tags and group by category
   useEffect(() => {
@@ -83,91 +91,6 @@ const EditBackground: React.FC = () => {
     };
     fetchLocalTags();
   }, []);
-
-  useEffect(() => {
-    const calculateColumns = () => {
-      const containerWidth =
-        containerRef.current?.offsetWidth ?? window.innerWidth;
-      const colWidth = 160 + 14;
-      const maxCols = Math.max(1, Math.floor(containerWidth / colWidth));
-
-      const blocks = Object.entries(groupedLocalTags).map(
-        ([category, tags]) => ({ header: category, items: tags })
-      );
-
-      let map = { ...categoryToColumnMap };
-      const needsRemap =
-        Object.keys(map).length !== blocks.length ||
-        Math.max(...Object.values(map)) >= maxCols;
-
-      if (needsRemap) {
-        map = {};
-        let col = 0;
-        for (const block of blocks) {
-          map[block.header] = col;
-          col = (col + 1) % maxCols;
-        }
-        setCategoryToColumnMap(map);
-      }
-
-      const newCols: JSX.Element[][] = Array.from(
-        { length: maxCols },
-        () => []
-      );
-
-      for (const block of blocks) {
-        const colIndex = map[block.header] ?? 0;
-        newCols[colIndex].push(
-          <div key={block.header} className="tag-category-group" draggable>
-            <div className="tag-category-header">{block.header}</div>
-            <div className="tag-checkbox-list">
-              {block.items.map((tagObj) => (
-                <div
-                  key={tagObj.name}
-                  className={
-                    "tag-checkbox-row" +
-                    (summary.localTags?.includes(tagObj.name)
-                      ? " selected"
-                      : "")
-                  }
-                  draggable
-                >
-                  <input
-                    type="checkbox"
-                    className="tag-checkbox"
-                    checked={summary.localTags?.includes(tagObj.name)}
-                    onChange={() => handlePersonalTagToggle(tagObj.name)}
-                    id={`tag-checkbox-${block.header}-${tagObj.name}`}
-                  />
-                  <label
-                    className="tag-name"
-                    htmlFor={`tag-checkbox-${block.header}-${tagObj.name}`}
-                    title={tagObj.name}
-                  >
-                    {tagObj.name}
-                  </label>
-                  <span
-                    className={
-                      "tag-fav-star" + (tagObj.favorite ? "" : " not-fav")
-                    }
-                    title={tagObj.favorite ? "Favorite" : "Not favorite"}
-                  >
-                    ★
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      }
-
-      setColumns(newCols);
-    };
-
-    calculateColumns();
-    window.addEventListener("resize", calculateColumns);
-    return () => window.removeEventListener("resize", calculateColumns);
-  }, [groupedLocalTags, summary.localTags, categoryToColumnMap]);
 
   // Preview background update when bgFile changes
   useEffect(() => {
@@ -420,150 +343,232 @@ const EditBackground: React.FC = () => {
   };
 
   return (
-    <div className="subwindow-container">
+    <div className="edit-background-root">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
-      <div className="subwindow-content">
-        <div className="edit-bg-field">
-          <label className="edit-bg-label">Name:</label>
-          <input
-            type="text"
-            value={summary.name ?? ""}
-            placeholder="Background name"
-            onChange={(e) =>
-              setSummary((prev) => ({ ...prev, name: e.target.value }))
-            }
-          />
-        </div>
-        <div className="edit-bg-field">
-          <label className="edit-bg-label">Background File Path:</label>
-          <input
-            type="text"
-            value={summary.bgFile ?? ""}
-            placeholder="Drop an image or video on this field to set"
-            onChange={(e) => handleInputChange(e, "bgFile")}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleFileDrop(e, "bgFile")}
-          />
-          <button
-            type="button"
-            className="file-select-button flex items-center gap-2"
-            onClick={() => handleFileDialog("bgFile")}
-            onMouseEnter={() => setIsHoveringBgFile(true)}
-            onMouseLeave={() => setIsHoveringBgFile(false)}
-            tabIndex={-1}
-            title="Browse for background file"
-          >
-            {isHoveringBgFile ? (
-              <FolderOpenIcon className="custom-folder-icon" />
-            ) : (
-              <FolderIcon className="custom-folder-icon" />
-            )}
-          </button>
-          {hasBackgroundFolder && (
-            <button
-              className="magnifying-glass-button flex items-center gap-2"
-              onClick={() => handleGlassClick("bgFile")}
-              onMouseEnter={() => setHoveringBackgroundGlass(true)}
-              onMouseLeave={() => setHoveringBackgroundGlass(false)}
-              title="Select from previously set background files"
-            >
-              <MagnifyingGlassIcon
-                className={`custom-magnifying-glass-icon ${
-                  isHoveringBackgroundGlass ? "hovered" : ""
-                }`}
-              />
-            </button>
-          )}
-        </div>
-        {bgFileType?.startsWith("video") && (
-          <div className="edit-bg-field dropdown-container">
-            <label htmlFor="save-bg-method">Save Background as:</label>
-            <select
-              id="save-bg-method"
-              value={saveBgFileAsShortcut ? "shortcut" : "file"}
+      <div className="edit-background-main-content">
+        {/* Left: Editable details panel */}
+        <div className="edit-background-panel">
+          <div className="details-row">
+            <SafeImage
+              imagePath={summary.iconPath ?? ""}
+              width={128}
+              height={128}
+              className="panel-icon"
+            />
+          </div>
+          <div className="details-row">
+            <label>Name</label>
+            <input
+              type="text"
+              value={summary.name ?? ""}
               onChange={(e) =>
-                setSaveBgFileAsShortcut(e.target.value === "shortcut")
+                setSummary((prev) => ({ ...prev, name: e.target.value }))
               }
-            >
-              <option value="shortcut">Shortcut (recommended)</option>
-              <option value="file">Copy File</option>
-            </select>
+            />
           </div>
-        )}
-
-        <div className="edit-bg-field">
-          <label className="edit-bg-label">Icon Preview Image:</label>
-          <input
-            type="text"
-            value={summary.iconPath ?? ""}
-            placeholder="Drop an image on this field to set"
-            onChange={(e) => handleInputChange(e, "iconPath")}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleFileDrop(e, "iconPath")}
-          />
-          <button
-            className="file-select-button flex items-center gap-2"
-            onClick={() => handleFileDialog("iconPath")}
-            onMouseEnter={() => setIsHoveringIconPath(true)}
-            onMouseLeave={() => setIsHoveringIconPath(false)}
-            title="Browse for icon image"
-          >
-            {isHoveringIconPath ? (
-              <FolderOpenIcon className="custom-folder-icon" />
-            ) : (
-              <FolderIcon className="custom-folder-icon" />
-            )}
-          </button>
-          {hasBackgroundFolder && (
-            <button
-              className="magnifying-glass-button flex items-center gap-2"
-              onClick={() => handleGlassClick("iconPath")}
-              onMouseEnter={() => setHoveringIconGlass(true)}
-              onMouseLeave={() => setHoveringIconGlass(false)}
-              title="Select from previously set background files"
-            >
-              <MagnifyingGlassIcon
-                className={`custom-magnifying-glass-icon ${
-                  isHoveringIconGlass ? "hovered" : ""
-                }`}
-              />
-            </button>
-          )}
-        </div>
-        <div className="edit-bg-field">
-          <label className="edit-bg-label">Description:</label>
-          <textarea
-            value={summary.description ?? ""}
-            placeholder="Short description"
-            onChange={(e) =>
-              setSummary((prev) => ({ ...prev, description: e.target.value }))
-            }
-            rows={2}
-          />
-        </div>
-        <div className="edit-bg-field">
-          <label className="edit-bg-label">Public Tags:</label>
-          <div className="tag-row">
-            {PUBLIC_TAGS.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                className={summary.tags?.includes(tag) ? "tag-selected" : "tag"}
-                onClick={() => handleTagToggle(tag)}
+          <div className="details-row">
+            <label>Description</label>
+            <textarea
+              value={summary.description ?? ""}
+              onChange={(e) =>
+                setSummary((prev) => ({ ...prev, description: e.target.value }))
+              }
+            />
+          </div>
+          {bgFileType?.startsWith("video") && (
+            <div className="edit-bg-field dropdown-container">
+              <label htmlFor="save-bg-method">Save Background as:</label>
+              <select
+                id="save-bg-method"
+                value={saveBgFileAsShortcut ? "shortcut" : "file"}
+                onChange={(e) =>
+                  setSaveBgFileAsShortcut(e.target.value === "shortcut")
+                }
               >
-                {tag}
+                <option value="shortcut">Shortcut (recommended)</option>
+                <option value="file">Copy File</option>
+              </select>
+            </div>
+          )}
+          <div className="edit-bg-field">
+            <label>Background File Path</label>
+            <div className="input-row">
+              <input
+                type="text"
+                value={summary.bgFile ?? ""}
+                placeholder="Drop an image or video on this field to set"
+                onChange={(e) => handleInputChange(e, "bgFile")}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleFileDrop(e, "bgFile")}
+              />
+              <button
+                type="button"
+                className="file-select-button flex items-center gap-2"
+                onClick={() => handleFileDialog("bgFile")}
+                onMouseEnter={() => setIsHoveringBgFile(true)}
+                onMouseLeave={() => setIsHoveringBgFile(false)}
+                tabIndex={-1}
+                title="Browse for background file"
+              >
+                {isHoveringBgFile ? (
+                  <FolderOpenIcon className="custom-folder-icon" />
+                ) : (
+                  <FolderIcon className="custom-folder-icon" />
+                )}
               </button>
-            ))}
+              {hasBackgroundFolder && (
+                <button
+                  className="magnifying-glass-button flex items-center gap-2"
+                  onClick={() => handleGlassClick("bgFile")}
+                  onMouseEnter={() => setHoveringBackgroundGlass(true)}
+                  onMouseLeave={() => setHoveringBackgroundGlass(false)}
+                  title="Select from previously set background files"
+                >
+                  <MagnifyingGlassIcon
+                    className={`custom-magnifying-glass-icon ${
+                      isHoveringBackgroundGlass ? "hovered" : ""
+                    }`}
+                  />
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="details-row">
+            <div className="edit-bg-field">
+              <label>Icon Preview Image</label>
+              <div className="input-row">
+                <input
+                  type="text"
+                  value={summary.iconPath ?? ""}
+                  placeholder="Drop an image on this field to set"
+                  onChange={(e) => handleInputChange(e, "iconPath")}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleFileDrop(e, "iconPath")}
+                />
+                <button
+                  type="button"
+                  className="file-select-button flex items-center gap-2"
+                  onClick={() => handleFileDialog("iconPath")}
+                  onMouseEnter={() => setIsHoveringIconPath(true)}
+                  onMouseLeave={() => setIsHoveringIconPath(false)}
+                  tabIndex={-1}
+                  title="Browse for icon image"
+                >
+                  {isHoveringIconPath ? (
+                    <FolderOpenIcon className="custom-folder-icon" />
+                  ) : (
+                    <FolderIcon className="custom-folder-icon" />
+                  )}
+                </button>
+                {hasBackgroundFolder && (
+                  <button
+                    className="magnifying-glass-button flex items-center gap-2"
+                    onClick={() => handleGlassClick("iconPath")}
+                    onMouseEnter={() => setHoveringIconGlass(true)}
+                    onMouseLeave={() => setHoveringIconGlass(false)}
+                    title="Select from previously set background files"
+                  >
+                    <MagnifyingGlassIcon
+                      className={`custom-magnifying-glass-icon ${
+                        isHoveringIconGlass ? "hovered" : ""
+                      }`}
+                    />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-        <div className="local-tags">
-          <label>Local Tags:</label>
-          <div className="tag-column-wrapper" ref={containerRef}>
-            {columns.map((col, idx) => (
-              <div key={idx} className="tag-column">
-                {col}
-              </div>
-            ))}
+        {/* Right: Tag management */}
+        <div className="edit-background-tags-panel">
+          <div className="edit-bg-field">
+            <label className="edit-bg-label">Public Tags:</label>
+            <div className="tag-row">
+              {PUBLIC_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  className={
+                    summary.tags?.includes(tag) ? "tag-selected" : "tag"
+                  }
+                  onClick={() => handleTagToggle(tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="local-tags">
+            <label>Local Tags:</label>
+            <div>
+              {Object.entries(groupedLocalTags)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([category, tags]) => {
+                  const isCollapsed = collapsedCategories.has(category);
+                  return (
+                    <div key={category} className="tag-category-block">
+                      <div
+                        className="tag-category-header"
+                        onClick={() => toggleCategory(category)}
+                      >
+                        <span>{category}</span>
+                        <button
+                          className="tag-toggle-button"
+                          onClick={() => toggleCategory(category)}
+                        >
+                          {isCollapsed ? "▸" : "▾"}
+                        </button>
+                      </div>
+                      {!isCollapsed && (
+                        <div className="tag-grid">
+                          {tags.map((tagObj) => (
+                            <div
+                              key={tagObj.name}
+                              className={
+                                "tag-checkbox-row" +
+                                (summary.localTags?.includes(tagObj.name)
+                                  ? " selected"
+                                  : "")
+                              }
+                              draggable
+                            >
+                              <input
+                                type="checkbox"
+                                className="tag-checkbox"
+                                checked={summary.localTags?.includes(
+                                  tagObj.name
+                                )}
+                                onChange={() =>
+                                  handlePersonalTagToggle(tagObj.name)
+                                }
+                                id={`tag-checkbox-${category}-${tagObj.name}`}
+                              />
+                              <label
+                                className="tag-name"
+                                htmlFor={`tag-checkbox-${category}-${tagObj.name}`}
+                                title={tagObj.name}
+                              >
+                                {tagObj.name}
+                              </label>
+                              <span
+                                className={
+                                  "tag-fav-star" +
+                                  (tagObj.favorite ? "" : " not-fav")
+                                }
+                                title={
+                                  tagObj.favorite ? "Favorite" : "Not favorite"
+                                }
+                              >
+                                ★
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
           </div>
         </div>
       </div>

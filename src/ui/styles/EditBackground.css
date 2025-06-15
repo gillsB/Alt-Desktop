@@ -25,19 +25,6 @@
   color: #fff;
 }
 
-.icon-path-input {
-  flex: 1;
-}
-
-.icon-preview {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid #444;
-  background: #181828;
-}
-
 .tag-row {
   display: flex;
   flex-wrap: wrap;
@@ -47,6 +34,7 @@
 .local-tags {
   width: 100%;
 }
+
 .tag-checkbox-row {
   display: flex;
   align-items: center;
@@ -58,7 +46,6 @@
   border-radius: 7px;
   border: 1px solid #232345;
   transition: background 0.15s;
-  position: relative;
   user-select: none;
   height: 18px;
   flex: 0 0 150px;
@@ -74,7 +61,7 @@
 }
 
 .tag-checkbox {
-  display: none; /* Hide the checkbox input */
+  display: none;
 }
 
 .tag-name {
@@ -107,10 +94,10 @@
   font-size: 1.08rem;
   margin: 0 0 4px 0;
   color: #fff;
-  cursor: move;
   display: flex;
   align-items: center;
   gap: 6px;
+  justify-content: space-between;
 }
 
 .tag-category-group {
@@ -120,31 +107,81 @@
   display: block;
 }
 
-.tag-checkbox-list {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  gap: 2px 10px;
-  width: 150px;
-  align-items: flex-start;
+.tag-toggle-button {
+  background: none;
+  border: none;
+  color: #bdbdbd;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  transition: color 0.2s;
 }
 
-.tag-grouped-list {
-  column-width: 160px;
-  column-gap: 14px;
+.tag-toggle-button:hover {
+  color: #fff;
+}
+
+.tag-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  gap: 4px 12px;
+}
+
+.edit-background-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background: #232323;
+  color: #fff;
+  overflow: hidden;
+}
+
+.edit-background-main-content {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
   width: 100%;
-  max-height: 220px;
+  overflow: hidden;
+}
+
+.edit-background-panel {
+  width: 320px;
+  background: #33333d;
+  border-right: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 24px;
+  box-sizing: border-box;
+  gap: 18px;
   overflow-y: auto;
-  padding-bottom: 8px;
+}
+
+.edit-background-tags-panel {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  padding: 24px;
+  overflow-y: auto;
 }
 
 .edit-bg-field {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
+  flex-direction: column;
+  gap: 4px;
   width: 100%;
 }
+
+.edit-bg-field .input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
 .edit-bg-field input,
 .edit-bg-field select,
 .edit-bg-field textarea {
@@ -160,25 +197,56 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
-.edit-bg-label {
-  font-weight: bold;
-  color: white;
-  flex: 0 0 150px;
-  user-select: none;
-}
 
-.tag-column-wrapper {
-  display: flex;
-  gap: 14px;
-  width: 100%;
-  overflow-y: auto;
-  padding-bottom: 8px;
-}
-
-.tag-column {
-  flex: 1 1 160px;
-  max-width: 160px;
+.details-row {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.panel-icon {
+  width: 128px;
+  height: 128px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #181828;
+  margin-bottom: 8px;
+}
+
+.file-select-button,
+.magnifying-glass-button {
+  background: none;
+  border: none;
+  color: #bdbdbd;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.file-select-button:hover,
+.magnifying-glass-button:hover {
+  background: #232345;
+  color: #fff;
+}
+
+.custom-folder-icon,
+.custom-magnifying-glass-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Dropdown below label */
+.edit-bg-field label {
+  margin-bottom: 2px;
+}
+
+.edit-bg-field select {
+  margin-top: 0;
+  margin-bottom: 0;
 }
