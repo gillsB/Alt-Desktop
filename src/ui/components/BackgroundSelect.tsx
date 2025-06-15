@@ -41,6 +41,23 @@ const BackgroundSelect: React.FC = () => {
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
 
+  const [localTags, setLocalTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
+
+  // Sets up allTags reference for all tags, public and local.
+  useEffect(() => {
+    (async () => {
+      const tags = await window.electron.getSetting("localTags");
+      if (Array.isArray(tags)) {
+        const local = tags.map((t: LocalTag) => t.name);
+        setLocalTags(local);
+        setAllTags(Array.from(new Set([...PUBLIC_TAGS, ...local])));
+      } else {
+        setAllTags([...PUBLIC_TAGS]);
+      }
+    })();
+  }, [localTags]);
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageNumbers: (number | string)[] = [];
 
@@ -466,14 +483,13 @@ const BackgroundSelect: React.FC = () => {
                 const value = e.target.value;
                 setPage(0);
                 setSearch(value);
-
                 // This only works for adding tag: at the current end of a message.
                 const tagMatch = value.match(/(?:^|\s)tag:([^\s]*)$/i);
                 if (tagMatch) {
                   const partial = tagMatch[1].toLowerCase();
-                  const matches = PUBLIC_TAGS.filter((tag) =>
-                    tag.toLowerCase().startsWith(partial)
-                  ).slice(0, 5);
+                  const matches = allTags
+                    .filter((tag) => tag.toLowerCase().startsWith(partial))
+                    .slice(0, 5);
                   setTagSuggestions(matches);
                   setShowTagSuggestions(matches.length > 0);
                   setSuggestionIndex(0);
