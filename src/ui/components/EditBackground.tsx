@@ -14,8 +14,6 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
 
-let LOCAL_TAGS: LocalTag[] | undefined = [];
-
 const EditBackground: React.FC = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -44,6 +42,10 @@ const EditBackground: React.FC = () => {
   const [isHoveringBackgroundGlass, setHoveringBackgroundGlass] =
     useState(false);
   const [isHoveringIconGlass, setHoveringIconGlass] = useState(false);
+  const [localTags, setLocalTags] = useState<LocalTag[]>([]);
+  const [groupedLocalTags, setGroupedLocalTags] = useState<
+    Record<string, LocalTag[]>
+  >({});
 
   useEffect(() => {
     let cancelled = false;
@@ -57,12 +59,23 @@ const EditBackground: React.FC = () => {
     };
   }, []);
 
+  // Fetch local tags and group by category
   useEffect(() => {
     const fetchLocalTags = async () => {
-      LOCAL_TAGS = await window.electron.getSetting("localTags");
+      const tags = await window.electron.getSetting("localTags");
+      if (Array.isArray(tags)) {
+        setLocalTags(tags);
+        // Group tags by category
+        const grouped: Record<string, LocalTag[]> = {};
+        for (const tag of tags) {
+          if (!grouped[tag.category]) grouped[tag.category] = [];
+          grouped[tag.category].push(tag);
+        }
+        setGroupedLocalTags(grouped);
+      }
     };
     fetchLocalTags();
-  });
+  }, []);
 
   // Preview background update when bgFile changes
   useEffect(() => {
@@ -453,24 +466,28 @@ const EditBackground: React.FC = () => {
         </div>
         <div className="subwindow-field">
           <label>Local Tags:</label>
-          <div className="tag-row">
-            {(LOCAL_TAGS ?? []).map((tagObj) => {
-              const tagName = typeof tagObj === "string" ? tagObj : tagObj.name;
-              return (
-                <button
-                  key={tagName}
-                  type="button"
-                  className={
-                    summary.localTags?.includes(tagName)
-                      ? "tag-selected"
-                      : "tag"
-                  }
-                  onClick={() => handlePersonalTagToggle(tagName)}
-                >
-                  {tagName}
-                </button>
-              );
-            })}
+          <div className="tag-grouped-list">
+            {Object.entries(groupedLocalTags).map(([category, tags]) => (
+              <div key={category} className="tag-category-group">
+                <div className="tag-category-header">{category}</div>
+                <div className="tag-row">
+                  {tags.map((tagObj) => (
+                    <button
+                      key={tagObj.name}
+                      type="button"
+                      className={
+                        summary.localTags?.includes(tagObj.name)
+                          ? "tag-selected"
+                          : "tag"
+                      }
+                      onClick={() => handlePersonalTagToggle(tagObj.name)}
+                    >
+                      {tagObj.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
