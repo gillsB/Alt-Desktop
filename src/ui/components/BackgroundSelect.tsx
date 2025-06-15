@@ -671,6 +671,22 @@ const BackgroundSelect: React.FC = () => {
                   />
                   {tag}
                 </label>
+              ))}{" "}
+              {localTags.map((tag) => (
+                <label key={tag}>
+                  <input
+                    type="checkbox"
+                    checked={!!filterOptions[tag]}
+                    onChange={() => {
+                      setFilterOptions((prev) => {
+                        const updated = { ...prev, [tag]: !prev[tag] };
+                        logger.info(`Filter ${tag} set to ${updated[tag]}`);
+                        return updated;
+                      });
+                    }}
+                  />
+                  {tag}
+                </label>
               ))}
               <button onClick={() => setShowFilterPanel(false)}>Close</button>
             </div>
