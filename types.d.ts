@@ -208,6 +208,7 @@ interface EventParamMapping {
   deleteBackground: [string];
   idToBackgroundFolder: [string];
   addLocalTag: [LocalTag];
+  closeEditTagsWindow: [];
 }
 
 // The returns from the main process to the renderer
@@ -267,6 +268,7 @@ type EventPayloadMapping = {
   deleteBackground: boolean;
   idToBackgroundFolder: string | null;
   addLocalTag: boolean;
+  closeEditTagsWindow: void;
 };
 
 type UnsubscribeFunction = () => void;
@@ -377,5 +379,6 @@ interface Window {
     deleteBackground: (id: string) => Promise<boolean>;
     idToBackgroundFolder: (id: string) => Promise<string | null>;
     addLocalTag: (tag: localTag) => Promise<boolean>;
+    closeEditTagsWindow: () => void;
   };
 }

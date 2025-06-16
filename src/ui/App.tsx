@@ -6,6 +6,7 @@ import BackgroundSelect from "./components/BackgroundSelect";
 import DesktopGrid from "./components/DesktopGrid";
 import EditBackground from "./components/EditBackground";
 import EditIcon from "./components/EditIcon";
+import EditTagsWindow from "./components/EditTags";
 import { Header } from "./components/Header";
 import HoverOpacityItem from "./components/HoverOpacityItem";
 import SelectIconWindow from "./components/SelectIconWindow";
@@ -39,6 +40,7 @@ const App: React.FC = () => {
         <Route path="/select-icon" element={<SelectIconWindow />} />
         <Route path="/background-select" element={<BackgroundSelect />} />
         <Route path="/edit-background" element={<EditBackground />} />
+        <Route path="/edit-tags" element={<EditTagsWindow />} />
       </Routes>
     </Router>
   );

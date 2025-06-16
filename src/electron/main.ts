@@ -8,6 +8,7 @@ import { getSetting } from "./settings.js";
 import { createTray } from "./tray.js";
 import { indexBackgrounds, isDev } from "./utils/util.js";
 import { registerVideoFileProtocol } from "./videoFileProtocol.js";
+import { openEditTagsWindow } from "./windows/editTagsWindow.js";
 import { getActiveSubWindow } from "./windows/subWindowManager.js";
 import { handleWindowState, registerWindowKeybinds } from "./windowState.js";
 
@@ -96,6 +97,7 @@ app.on("ready", () => {
     mainWindow.webContents.send("window-unmaximized");
   });
 
+  openEditTagsWindow();
   //mainWindow.webContents.openDevTools();
 });
 
