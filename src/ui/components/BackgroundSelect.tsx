@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PUBLIC_TAGS } from "../../electron/publicTags";
 import "../App.css";
 import "../styles/BackgroundSelect.css";
@@ -43,6 +43,8 @@ const BackgroundSelect: React.FC = () => {
 
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
+
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Sets up allTags reference for all tags, public and local.
   useEffect(() => {
@@ -462,6 +464,44 @@ const BackgroundSelect: React.FC = () => {
 
   const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
+  useLayoutEffect(() => {
+    if (contextMenu) {
+      // Use requestAnimationFrame to ensure the menu is rendered
+      requestAnimationFrame(adjustContextMenuPosition);
+    }
+  }, [contextMenu]);
+
+  const adjustContextMenuPosition = () => {
+    // Only run if context menu exists
+    if (!contextMenuRef.current) return;
+
+    const menuElement = contextMenuRef.current;
+    const menuRect = menuElement.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    // Get current position from style
+    const currentX = parseFloat(menuElement.style.left);
+    const currentY = parseFloat(menuElement.style.top);
+
+    // Adjust if needed to prevent overflow
+    if (currentX + menuRect.width > viewportWidth) {
+      menuElement.style.left = `${currentX - menuRect.width}px`;
+    }
+
+    if (currentY + menuRect.height > viewportHeight) {
+      menuElement.style.top = `${currentY - menuRect.height}px`;
+    }
+
+    const submenuWidth = 120; // Approximate width submenu
+    const shouldShowSubmenuLeft =
+      currentX + menuRect.width + submenuWidth > viewportWidth;
+    menuElement.setAttribute(
+      "data-submenu-direction",
+      shouldShowSubmenuLeft ? "left" : "right"
+    );
+  };
+
   return (
     <div
       className="background-select-root"
@@ -769,6 +809,7 @@ const BackgroundSelect: React.FC = () => {
       {contextMenu && (
         <div
           className="context-menu"
+          ref={contextMenuRef}
           style={{
             left: contextMenu.x,
             top: contextMenu.y,
