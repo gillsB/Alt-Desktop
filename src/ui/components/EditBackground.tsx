@@ -344,6 +344,13 @@ const EditBackground: React.FC = () => {
     }
   };
 
+  const handleAddTagClick = () => {
+    logger.info("Add tag clicked");
+  };
+  const handleCategoriesClick = () => {
+    logger.info("Categories clicked");
+  };
+
   return (
     <div className="edit-background-root">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -501,7 +508,7 @@ const EditBackground: React.FC = () => {
             </div>
           </div>
           <div className="local-tags">
-            <div className="local-tags-header">
+            <div className="local-tags-header input-row">
               <label style={{ marginRight: 8 }}>Local Tags:</label>
               <input
                 type="text"
@@ -510,6 +517,22 @@ const EditBackground: React.FC = () => {
                 onChange={(e) => setLocalTagSearch(e.target.value)}
                 style={{ flex: 1, minWidth: 0, maxWidth: 200 }}
               />
+              <button
+                type="button"
+                className="button"
+                style={{ marginLeft: 8 }}
+                onClick={handleAddTagClick}
+              >
+                Add Tag
+              </button>
+              <button
+                type="button"
+                className="button"
+                style={{ marginLeft: 8 }}
+                onClick={handleCategoriesClick}
+              >
+                Categories
+              </button>
             </div>
             <div>
               {Object.entries(groupedLocalTags)
