@@ -49,6 +49,8 @@ const EditBackground: React.FC = () => {
     Record<string, LocalTag[]>
   >({});
 
+  const [localTagSearch, setLocalTagSearch] = useState("");
+
   useEffect(() => {
     let cancelled = false;
     window.electron.getBackgroundIDs().then((idArray: string[]) => {
@@ -376,18 +378,20 @@ const EditBackground: React.FC = () => {
             />
           </div>
           {bgFileType?.startsWith("video") && (
-            <div className="edit-bg-field dropdown-container">
-              <label htmlFor="save-bg-method">Save Background as:</label>
-              <select
-                id="save-bg-method"
-                value={saveBgFileAsShortcut ? "shortcut" : "file"}
-                onChange={(e) =>
-                  setSaveBgFileAsShortcut(e.target.value === "shortcut")
-                }
-              >
-                <option value="shortcut">Shortcut (recommended)</option>
-                <option value="file">Copy File</option>
-              </select>
+            <div className="edit-bg-field">
+              <label>Save Background as:</label>
+              <div className="edit-bg-field dropdown-container">
+                <select
+                  id="save-bg-method"
+                  value={saveBgFileAsShortcut ? "shortcut" : "file"}
+                  onChange={(e) =>
+                    setSaveBgFileAsShortcut(e.target.value === "shortcut")
+                  }
+                >
+                  <option value="shortcut">Shortcut (recommended)</option>
+                  <option value="file">Copy File</option>
+                </select>
+              </div>
             </div>
           )}
           <div className="edit-bg-field">
@@ -497,11 +501,33 @@ const EditBackground: React.FC = () => {
             </div>
           </div>
           <div className="local-tags">
-            <label>Local Tags:</label>
+            <div className="local-tags-header">
+              <label style={{ marginRight: 8 }}>Local Tags:</label>
+              <input
+                type="text"
+                placeholder="Search tags..."
+                value={localTagSearch}
+                onChange={(e) => setLocalTagSearch(e.target.value)}
+                style={{ flex: 1, minWidth: 0, maxWidth: 200 }}
+              />
+            </div>
             <div>
               {Object.entries(groupedLocalTags)
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([category, tags]) => {
+                  const search = localTagSearch.toLowerCase();
+                  const categoryMatches = category
+                    .toLowerCase()
+                    .includes(search);
+
+                  // If category matches, show all tags; otherwise, show matched tags.
+                  const filteredTags = categoryMatches
+                    ? tags
+                    : tags.filter((tagObj) =>
+                        tagObj.name.toLowerCase().includes(search)
+                      );
+
+                  if (filteredTags.length === 0) return null;
                   const isCollapsed = collapsedCategories.has(category);
                   return (
                     <div key={category} className="tag-category-block">
@@ -519,7 +545,7 @@ const EditBackground: React.FC = () => {
                       </div>
                       {!isCollapsed && (
                         <div className="tag-grid">
-                          {tags.map((tagObj) => (
+                          {filteredTags.map((tagObj) => (
                             <div
                               key={tagObj.name}
                               className={
