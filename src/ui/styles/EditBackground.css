@@ -145,6 +145,8 @@
   height: 100%;
   width: 100%;
   overflow: hidden;
+  height: calc(100vh - 60px - 35px);
+  max-height: calc(100vh - 60px - 35px);
 }
 
 .edit-background-panel {
@@ -189,7 +191,6 @@
   font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  flex: 1;
   box-sizing: border-box;
   color: #fff;
 }

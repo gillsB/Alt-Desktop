@@ -356,7 +356,7 @@ const EditBackground: React.FC = () => {
               className="panel-icon"
             />
           </div>
-          <div className="details-row">
+          <div className="edit-bg-field">
             <label>Name</label>
             <input
               type="text"
@@ -366,7 +366,7 @@ const EditBackground: React.FC = () => {
               }
             />
           </div>
-          <div className="details-row">
+          <div className="edit-bg-field">
             <label>Description</label>
             <textarea
               value={summary.description ?? ""}
@@ -433,49 +433,47 @@ const EditBackground: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="details-row">
-            <div className="edit-bg-field">
-              <label>Icon Preview Image</label>
-              <div className="input-row">
-                <input
-                  type="text"
-                  value={summary.iconPath ?? ""}
-                  placeholder="Drop an image on this field to set"
-                  onChange={(e) => handleInputChange(e, "iconPath")}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleFileDrop(e, "iconPath")}
-                />
-                <button
-                  type="button"
-                  className="file-select-button flex items-center gap-2"
-                  onClick={() => handleFileDialog("iconPath")}
-                  onMouseEnter={() => setIsHoveringIconPath(true)}
-                  onMouseLeave={() => setIsHoveringIconPath(false)}
-                  tabIndex={-1}
-                  title="Browse for icon image"
-                >
-                  {isHoveringIconPath ? (
-                    <FolderOpenIcon className="custom-folder-icon" />
-                  ) : (
-                    <FolderIcon className="custom-folder-icon" />
-                  )}
-                </button>
-                {hasBackgroundFolder && (
-                  <button
-                    className="magnifying-glass-button flex items-center gap-2"
-                    onClick={() => handleGlassClick("iconPath")}
-                    onMouseEnter={() => setHoveringIconGlass(true)}
-                    onMouseLeave={() => setHoveringIconGlass(false)}
-                    title="Select from previously set background files"
-                  >
-                    <MagnifyingGlassIcon
-                      className={`custom-magnifying-glass-icon ${
-                        isHoveringIconGlass ? "hovered" : ""
-                      }`}
-                    />
-                  </button>
+          <div className="edit-bg-field">
+            <label>Icon Preview Image</label>
+            <div className="input-row">
+              <input
+                type="text"
+                value={summary.iconPath ?? ""}
+                placeholder="Drop an image on this field to set"
+                onChange={(e) => handleInputChange(e, "iconPath")}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleFileDrop(e, "iconPath")}
+              />
+              <button
+                type="button"
+                className="file-select-button flex items-center gap-2"
+                onClick={() => handleFileDialog("iconPath")}
+                onMouseEnter={() => setIsHoveringIconPath(true)}
+                onMouseLeave={() => setIsHoveringIconPath(false)}
+                tabIndex={-1}
+                title="Browse for icon image"
+              >
+                {isHoveringIconPath ? (
+                  <FolderOpenIcon className="custom-folder-icon" />
+                ) : (
+                  <FolderIcon className="custom-folder-icon" />
                 )}
-              </div>
+              </button>
+              {hasBackgroundFolder && (
+                <button
+                  className="magnifying-glass-button flex items-center gap-2"
+                  onClick={() => handleGlassClick("iconPath")}
+                  onMouseEnter={() => setHoveringIconGlass(true)}
+                  onMouseLeave={() => setHoveringIconGlass(false)}
+                  title="Select from previously set background files"
+                >
+                  <MagnifyingGlassIcon
+                    className={`custom-magnifying-glass-icon ${
+                      isHoveringIconGlass ? "hovered" : ""
+                    }`}
+                  />
+                </button>
+              )}
             </div>
           </div>
         </div>
