@@ -205,16 +205,6 @@
   margin-bottom: 16px;
 }
 
-.panel-icon {
-  width: 128px;
-  height: 128px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #444;
-  background: #181828;
-  margin-bottom: 8px;
-}
-
 .file-select-button,
 .magnifying-glass-button {
   background: none;

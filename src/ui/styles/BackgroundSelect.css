@@ -90,6 +90,20 @@
   height: 100% !important;
   object-fit: cover !important;
 }
+.panel-icon {
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  max-width: 260px;
+  min-width: 64px;
+  height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.panel-icon .safe-image-img {
+  object-fit: cover !important;
+}
 
 .background-grid-item.selected {
   border: 3px solid #007bff;
@@ -196,12 +210,6 @@
 
 .background-details-panel .details-row:last-child {
   margin-bottom: 0;
-}
-
-.background-details-panel .details-row .panel-icon {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .filter-search-panel {
