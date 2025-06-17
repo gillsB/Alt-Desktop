@@ -38,10 +38,6 @@ import { getVideoFileUrl } from "./videoFileProtocol.js";
 import { openBackgroundSelectWindow } from "./windows/backgroundSelectWindow.js";
 import { openEditBackground } from "./windows/editBackgroundWindow.js";
 import { openEditIconWindow } from "./windows/editIconWindow.js";
-import {
-  getEditTagsWindow,
-  openEditTagsWindow,
-} from "./windows/editTagsWindow.js";
 import { openSettingsWindow } from "./windows/settingsWindow.js";
 import {
   closeActiveSubWindow,
@@ -1576,22 +1572,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return true;
     } catch (e) {
       baseLogger.error("Failed to add local tag:", e);
-      return false;
-    }
-  });
-
-  ipcMainHandle("closeEditTagsWindow", () => {
-    const win = getEditTagsWindow();
-    if (win) {
-      win.close();
-    }
-  });
-  ipcMainHandle("openEditTagsWindow", async (): Promise<boolean> => {
-    try {
-      openEditTagsWindow();
-      return true;
-    } catch (error) {
-      logger.error("Failed to open Edit Tags window:", error);
       return false;
     }
   });

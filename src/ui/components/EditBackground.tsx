@@ -10,6 +10,7 @@ import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
+import EditTagsWindow from "./EditTags";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -35,6 +36,8 @@ const EditBackground: React.FC = () => {
   const [bgFileType, setBgFileType] = useState<string | null>(null);
   const [saveBgFileAsShortcut, setSaveBgFileAsShortcut] =
     useState<boolean>(true);
+
+  const [showEditTags, setShowEditTags] = useState(false);
 
   const [ids, setIds] = useState<Set<string>>(new Set<string>());
   const [isHoveringBgFile, setIsHoveringBgFile] = useState(false);
@@ -345,7 +348,7 @@ const EditBackground: React.FC = () => {
   };
 
   const handleAddTagClick = () => {
-    window.electron.openEditTagsWindow();
+    setShowEditTags(true);
     logger.info("Add tag clicked");
   };
   const handleCategoriesClick = () => {
@@ -628,6 +631,19 @@ const EditBackground: React.FC = () => {
           Save
         </button>
       </div>
+      {showEditTags && (
+        <div
+          className="edit-tags-modal-overlay"
+          onClick={() => setShowEditTags(false)}
+        >
+          <div
+            className="edit-tags-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <EditTagsWindow />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
