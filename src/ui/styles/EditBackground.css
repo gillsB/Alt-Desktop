@@ -257,7 +257,7 @@
 
 .edit-tags-modal-content {
   background: #232323;
-  border-radius: 12px;
+  border-radius: 0px;
   min-width: 340px;
   min-height: 220px;
   max-width: 420px;

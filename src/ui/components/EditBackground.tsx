@@ -640,7 +640,7 @@ const EditBackground: React.FC = () => {
             className="edit-tags-modal-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <EditTagsWindow />
+            <EditTagsWindow onClose={() => setShowEditTags(false)} />
           </div>
         </div>
       )}
