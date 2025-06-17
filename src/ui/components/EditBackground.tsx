@@ -54,6 +54,12 @@ const EditBackground: React.FC = () => {
 
   const [localTagSearch, setLocalTagSearch] = useState("");
 
+  const [draggedTag, setDraggedTag] = useState<{
+    tag: LocalTag;
+    fromCategory: string;
+  } | null>(null);
+  const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     window.electron.getBackgroundIDs().then((idArray: string[]) => {
@@ -355,6 +361,27 @@ const EditBackground: React.FC = () => {
     logger.info("Categories clicked");
   };
 
+  const handleDragStart = (tag: LocalTag, fromCategory: string) => {
+    setDraggedTag({ tag, fromCategory });
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTag(null);
+    setDragOverCategory(null);
+  };
+
+  const handleDragOverCategory = (category: string) => {
+    setDragOverCategory(category);
+  };
+
+  const handleDropOnCategory = (category: string) => {
+    if (draggedTag && draggedTag.fromCategory !== category) {
+      logger.info(`${draggedTag.tag.name} dropped into ${category}`);
+    }
+    setDraggedTag(null);
+    setDragOverCategory(null);
+  };
+
   return (
     <div className="edit-background-root">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -556,8 +583,17 @@ const EditBackground: React.FC = () => {
 
                   if (filteredTags.length === 0) return null;
                   const isCollapsed = collapsedCategories.has(category);
+                  const isDragOver = dragOverCategory === category;
                   return (
-                    <div key={category} className="tag-category-block">
+                    <div
+                      key={category}
+                      className={`tag-category-block${
+                        isDragOver ? " drag-over-category" : ""
+                      }`}
+                      onDragOver={() => handleDragOverCategory(category)}
+                      onDrop={() => handleDropOnCategory(category)}
+                      onDragLeave={() => setDragOverCategory(null)}
+                    >
                       <div
                         className="tag-category-header"
                         onClick={() => toggleCategory(category)}
@@ -565,7 +601,10 @@ const EditBackground: React.FC = () => {
                         <span>{category}</span>
                         <button
                           className="tag-toggle-button"
-                          onClick={() => toggleCategory(category)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleCategory(category);
+                          }}
                         >
                           {isCollapsed ? "▸" : "▾"}
                         </button>
@@ -576,12 +615,19 @@ const EditBackground: React.FC = () => {
                             <div
                               key={tagObj.name}
                               className={
-                                "tag-checkbox-row" +
+                                "tag-checkbox-row draggable-tag" +
                                 (summary.localTags?.includes(tagObj.name)
                                   ? " selected"
+                                  : "") +
+                                (draggedTag?.tag.name === tagObj.name
+                                  ? " dragging"
                                   : "")
                               }
                               draggable
+                              onDragStart={() =>
+                                handleDragStart(tagObj, category)
+                              }
+                              onDragEnd={handleDragEnd}
                             >
                               <input
                                 type="checkbox"

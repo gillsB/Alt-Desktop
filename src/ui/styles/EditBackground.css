@@ -31,6 +31,10 @@
   gap: 8px;
 }
 
+.edit-background-tags-panel,
+.local-tags {
+  overscroll-behavior: contain;
+}
 .local-tags {
   margin-top: 15px;
   width: 100%;
@@ -98,7 +102,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  justify-content: space-between;
+  background-color: #2e2e35;
+  justify-content: right;
 }
 
 .tag-category-group {
@@ -269,4 +274,20 @@
   display: flex;
   flex-direction: column;
   overflow: auto;
+}
+.draggable-tag {
+  cursor: grab;
+  opacity: 1;
+  transition:
+    box-shadow 0.15s,
+    opacity 0.15s;
+}
+.draggable-tag.dragging {
+  opacity: 0.5;
+  box-shadow: 0 0 8px #007bff;
+}
+.drag-over-category {
+  background: #232345;
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px #007bff;
 }
