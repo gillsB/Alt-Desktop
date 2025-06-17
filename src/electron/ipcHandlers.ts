@@ -1575,4 +1575,28 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+  ipcMainHandle(
+    "updateLocalTag",
+    async (name: string, tag: LocalTag): Promise<boolean> => {
+      try {
+        let localTagsRaw = getSetting("localTags") as LocalTag[];
+        if (!Array.isArray(localTagsRaw)) localTagsRaw = [];
+
+        // Find the tag to update by the original name (case-insensitive)
+        const idx = localTagsRaw.findIndex(
+          (t) => t.name.toLowerCase() === name.toLowerCase()
+        );
+        if (idx === -1) return false; // Tag not found
+
+        // Update the tag (allowing the name to change)
+        localTagsRaw[idx] = { ...tag, name: tag.name.toLowerCase() };
+
+        await saveSettingsData({ localTags: localTagsRaw });
+        return true;
+      } catch (e) {
+        baseLogger.error("Failed to update local tag:", e);
+        return false;
+      }
+    }
+  );
 }

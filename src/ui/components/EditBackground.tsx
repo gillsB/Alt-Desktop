@@ -85,21 +85,24 @@ const EditBackground: React.FC = () => {
     });
   };
 
-  // Fetch local tags and group by category
-  useEffect(() => {
-    const fetchLocalTags = async () => {
-      const tags = await window.electron.getSetting("localTags");
-      if (Array.isArray(tags)) {
-        setLocalTags(tags);
-        // Group tags by category
-        const grouped: Record<string, LocalTag[]> = {};
-        for (const tag of tags) {
-          if (!grouped[tag.category]) grouped[tag.category] = [];
-          grouped[tag.category].push(tag);
-        }
-        setGroupedLocalTags(grouped);
+  // Fetch and group by category
+  const fetchLocalTags = async () => {
+    const tags = await window.electron.getSetting("localTags");
+    if (Array.isArray(tags)) {
+      setLocalTags(tags);
+      // Group tags by category
+      const grouped: Record<string, LocalTag[]> = {};
+      for (const tag of tags) {
+        if (!grouped[tag.category]) grouped[tag.category] = [];
+        grouped[tag.category].push(tag);
       }
-    };
+      setGroupedLocalTags(grouped);
+    }
+  };
+  fetchLocalTags();
+
+  // Fetch local tags on mount
+  useEffect(() => {
     fetchLocalTags();
   }, []);
 
@@ -374,9 +377,11 @@ const EditBackground: React.FC = () => {
     setDragOverCategory(category);
   };
 
-  const handleDropOnCategory = (category: string) => {
+  const handleDropOnCategory = async (category: string) => {
     if (draggedTag && draggedTag.fromCategory !== category) {
       logger.info(`${draggedTag.tag.name} dropped into ${category}`);
+      await window.electron.updateLocalTag(draggedTag.tag.name, { ...draggedTag.tag, category });
+      await fetchLocalTags(); // Refresh tags/categories
     }
     setDraggedTag(null);
     setDragOverCategory(null);
@@ -587,10 +592,11 @@ const EditBackground: React.FC = () => {
                   return (
                     <div
                       key={category}
-                      className={`tag-category-block${
-                        isDragOver ? " drag-over-category" : ""
-                      }`}
-                      onDragOver={() => handleDragOverCategory(category)}
+                      className={`tag-category-block${isDragOver ? " drag-over-category" : ""}`}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        handleDragOverCategory(category);
+                      }}
                       onDrop={() => handleDropOnCategory(category)}
                       onDragLeave={() => setDragOverCategory(null)}
                     >
