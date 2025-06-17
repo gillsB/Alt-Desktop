@@ -2,20 +2,22 @@ import { BrowserWindow } from "electron";
 import { pathToFileURL } from "url";
 import { createLoggerForFile } from "../logging.js";
 import { getPreloadPath, getUIPath } from "../pathResolver.js";
-import {
-  getMainWindow,
-  isDev,
-  subWindowDevtoolsEnabled,
-} from "../utils/util.js";
-import { getActiveSubWindow } from "../windows/subWindowManager.js";
+import { isDev, subWindowDevtoolsEnabled, getMainWindow } from "../utils/util.js";
+import { getActiveSubWindow } from "./subWindowManager.js";
 
 const logger = createLoggerForFile("editTagsWindow.ts");
 
-export let editTagsWindows: CustomBrowserWindow[] = [];
+let editTagsWindow: CustomBrowserWindow | null = null;
 
 export function openEditTagsWindow() {
+  if (editTagsWindow && !editTagsWindow.isDestroyed()) {
+    editTagsWindow.show();
+    editTagsWindow.focus();
+    return editTagsWindow;
+  }
   const activeSubWindow = getActiveSubWindow();
   const mainWindow = getMainWindow();
+
   const options = {
     width: 600,
     height: 500,
@@ -35,9 +37,8 @@ export function openEditTagsWindow() {
   };
 
   // Create a new window (not singleton)
-  const editTagsWindow = new BrowserWindow(options) as CustomBrowserWindow;
+  editTagsWindow = new BrowserWindow(options) as CustomBrowserWindow;
   editTagsWindow.customTitle = "Edit Tags";
-  editTagsWindows.push(editTagsWindow);
 
   let editTagsUrl: string;
   if (isDev()) {
@@ -49,14 +50,14 @@ export function openEditTagsWindow() {
   }
 
   editTagsWindow.once("ready-to-show", () => {
-    editTagsWindow.show();
+    editTagsWindow!.show();
     if (isDev() && subWindowDevtoolsEnabled()) {
-      editTagsWindow.webContents.openDevTools({ mode: "detach" });
+      editTagsWindow!.webContents.openDevTools({ mode: "detach" });
     }
   });
 
   editTagsWindow.on("closed", () => {
-    editTagsWindows = editTagsWindows.filter((w) => w !== editTagsWindow);
+    editTagsWindow = null;
   });
 
   logger.info(`Created Edit Tags window with URL: ${editTagsUrl}`);
@@ -64,6 +65,6 @@ export function openEditTagsWindow() {
   return editTagsWindow;
 }
 
-export function getEditTagsWindows(): BrowserWindow[] {
-  return editTagsWindows;
+export function getEditTagsWindow(): BrowserWindow | null {
+  return editTagsWindow;
 }

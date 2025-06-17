@@ -39,7 +39,7 @@ import { openBackgroundSelectWindow } from "./windows/backgroundSelectWindow.js"
 import { openEditBackground } from "./windows/editBackgroundWindow.js";
 import { openEditIconWindow } from "./windows/editIconWindow.js";
 import {
-  editTagsWindows,
+  getEditTagsWindow,
   openEditTagsWindow,
 } from "./windows/editTagsWindow.js";
 import { openSettingsWindow } from "./windows/settingsWindow.js";
@@ -1581,8 +1581,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
 
   ipcMainHandle("closeEditTagsWindow", () => {
-    if (editTagsWindows.length > 0) {
-      const win = editTagsWindows[editTagsWindows.length - 1];
+    const win = getEditTagsWindow();
+    if (win) {
       win.close();
     }
   });

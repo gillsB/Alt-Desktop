@@ -1,6 +1,6 @@
 import { BrowserWindow, globalShortcut } from "electron";
 import { createLoggerForFile } from "./logging.js";
-import { getEditTagsWindows } from "./windows/editTagsWindow.js";
+import { getEditTagsWindow } from "./windows/editTagsWindow.js";
 import {
   getActiveSubWindow,
   getSmallWindows,
@@ -21,9 +21,8 @@ export function handleWindowState(mainWindow: BrowserWindow) {
     });
 
     // Hide all edit tags windows
-    getEditTagsWindows().forEach((win) => {
-      if (!win.isDestroyed()) win.hide();
-    });
+    const editTagsWindow = getEditTagsWindow();
+    if (editTagsWindow) editTagsWindow.hide();
   });
 
   mainWindow.on("restore", () => {
@@ -36,9 +35,8 @@ export function handleWindowState(mainWindow: BrowserWindow) {
     });
 
     // Show all edit tags windows
-    getEditTagsWindows().forEach((win) => {
-      if (!win.isDestroyed()) win.show();
-    });
+    const editTagsWindow = getEditTagsWindow();
+    if (editTagsWindow) editTagsWindow.show();
   });
 
   mainWindow.on("hide", () => {
