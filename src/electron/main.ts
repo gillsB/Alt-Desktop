@@ -6,9 +6,8 @@ import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { getSetting } from "./settings.js";
 import { createTray } from "./tray.js";
-import { indexBackgrounds, isDev } from "./utils/util.js";
+import { indexBackgrounds, isDev, setMainWindow } from "./utils/util.js";
 import { registerVideoFileProtocol } from "./videoFileProtocol.js";
-import { openEditTagsWindow } from "./windows/editTagsWindow.js";
 import { getActiveSubWindow } from "./windows/subWindowManager.js";
 import { handleWindowState, registerWindowKeybinds } from "./windowState.js";
 
@@ -68,6 +67,8 @@ app.on("ready", () => {
     mainWindow.maximize();
   });
 
+  setMainWindow(mainWindow);
+
   // Handle window state events
   handleWindowState(mainWindow);
 
@@ -97,7 +98,6 @@ app.on("ready", () => {
     mainWindow.webContents.send("window-unmaximized");
   });
 
-  openEditTagsWindow();
   //mainWindow.webContents.openDevTools();
 });
 

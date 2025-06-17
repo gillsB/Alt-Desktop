@@ -38,7 +38,10 @@ import { getVideoFileUrl } from "./videoFileProtocol.js";
 import { openBackgroundSelectWindow } from "./windows/backgroundSelectWindow.js";
 import { openEditBackground } from "./windows/editBackgroundWindow.js";
 import { openEditIconWindow } from "./windows/editIconWindow.js";
-import { editTagsWindows } from "./windows/editTagsWindow.js";
+import {
+  editTagsWindows,
+  openEditTagsWindow,
+} from "./windows/editTagsWindow.js";
 import { openSettingsWindow } from "./windows/settingsWindow.js";
 import {
   closeActiveSubWindow,
@@ -1581,6 +1584,15 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     if (editTagsWindows.length > 0) {
       const win = editTagsWindows[editTagsWindows.length - 1];
       win.close();
+    }
+  });
+  ipcMainHandle("openEditTagsWindow", async (): Promise<boolean> => {
+    try {
+      openEditTagsWindow();
+      return true;
+    } catch (error) {
+      logger.error("Failed to open Edit Tags window:", error);
+      return false;
     }
   });
 }

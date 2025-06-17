@@ -2,13 +2,20 @@ import { BrowserWindow } from "electron";
 import { pathToFileURL } from "url";
 import { createLoggerForFile } from "../logging.js";
 import { getPreloadPath, getUIPath } from "../pathResolver.js";
-import { isDev, subWindowDevtoolsEnabled } from "../utils/util.js";
+import {
+  getMainWindow,
+  isDev,
+  subWindowDevtoolsEnabled,
+} from "../utils/util.js";
+import { getActiveSubWindow } from "../windows/subWindowManager.js";
 
 const logger = createLoggerForFile("editTagsWindow.ts");
 
 export let editTagsWindows: CustomBrowserWindow[] = [];
 
 export function openEditTagsWindow() {
+  const activeSubWindow = getActiveSubWindow();
+  const mainWindow = getMainWindow();
   const options = {
     width: 600,
     height: 500,
@@ -16,6 +23,7 @@ export function openEditTagsWindow() {
     minHeight: 300,
     frame: false,
     backgroundColor: "#00000000",
+    parent: activeSubWindow ?? mainWindow ?? undefined, // Prefer parent to be sub window if possible.
     show: false,
     skipTaskbar: true,
     modal: false,

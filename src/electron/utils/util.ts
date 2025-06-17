@@ -20,6 +20,8 @@ const logger = createLoggerForFile("util.ts");
 let isSubWindowDevtoolsEnabled = false;
 let isSmallWindowDevtoolsEnabled = false;
 
+let mainWindow: BrowserWindow | null = null;
+
 export function isDev(): boolean {
   return process.env.NODE_ENV === "development";
 }
@@ -36,6 +38,14 @@ export function setSmallWindowDevtoolsEnabled(enabled: boolean): void {
 }
 export function smallWindowDevtoolsEnabled(): boolean {
   return isSmallWindowDevtoolsEnabled;
+}
+
+export function setMainWindow(win: BrowserWindow) {
+  mainWindow = win;
+}
+
+export function getMainWindow(): BrowserWindow | null {
+  return mainWindow;
 }
 
 /**

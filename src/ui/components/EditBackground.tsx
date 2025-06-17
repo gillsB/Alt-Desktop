@@ -345,6 +345,7 @@ const EditBackground: React.FC = () => {
   };
 
   const handleAddTagClick = () => {
+    window.electron.openEditTagsWindow();
     logger.info("Add tag clicked");
   };
   const handleCategoriesClick = () => {
