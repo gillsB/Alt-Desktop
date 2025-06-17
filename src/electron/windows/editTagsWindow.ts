@@ -63,3 +63,7 @@ export function openEditTagsWindow() {
 
   return editTagsWindow;
 }
+
+export function getEditTagsWindows(): BrowserWindow[] {
+  return editTagsWindows;
+}

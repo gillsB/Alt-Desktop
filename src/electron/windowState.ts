@@ -1,6 +1,10 @@
 import { BrowserWindow, globalShortcut } from "electron";
 import { createLoggerForFile } from "./logging.js";
-import { getActiveSubWindow } from "./windows/subWindowManager.js";
+import { getEditTagsWindows } from "./windows/editTagsWindow.js";
+import {
+  getActiveSubWindow,
+  getSmallWindows,
+} from "./windows/subWindowManager.js";
 
 const logger = createLoggerForFile("windowState.ts");
 
@@ -9,16 +13,32 @@ let lastBounds: Electron.Rectangle | null = null; // Store the last window bound
 export function handleWindowState(mainWindow: BrowserWindow) {
   mainWindow.on("minimize", () => {
     const activeSubWindow = getActiveSubWindow();
-    if (activeSubWindow) {
-      activeSubWindow.hide(); // Minimizing the subWindow adds a goofy animation. so .hide()
-    }
+    if (activeSubWindow) activeSubWindow.hide();
+
+    // Hide all small windows
+    getSmallWindows().forEach((win) => {
+      if (!win.isDestroyed()) win.hide();
+    });
+
+    // Hide all edit tags windows
+    getEditTagsWindows().forEach((win) => {
+      if (!win.isDestroyed()) win.hide();
+    });
   });
 
   mainWindow.on("restore", () => {
     const activeSubWindow = getActiveSubWindow();
-    if (activeSubWindow) {
-      activeSubWindow.show(); // Restoring the subWindow adds a goofy animation. so .show()
-    }
+    if (activeSubWindow) activeSubWindow.show();
+
+    // Show all small windows
+    getSmallWindows().forEach((win) => {
+      if (!win.isDestroyed()) win.show();
+    });
+
+    // Show all edit tags windows
+    getEditTagsWindows().forEach((win) => {
+      if (!win.isDestroyed()) win.show();
+    });
   });
 
   mainWindow.on("hide", () => {
