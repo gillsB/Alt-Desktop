@@ -14,7 +14,7 @@
 .modal-content {
   flex-grow: 1;
   padding: 10px;
-  padding-top: 40px;
+  padding-top: 20px;
   padding-bottom: 10px;
   overflow-y: auto;
   display: flex;
