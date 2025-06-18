@@ -1543,12 +1543,34 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("addLocalTag", async (tag: LocalTag): Promise<boolean> => {
     try {
       // Validate name: no spaces, must be lowercase, not in PUBLIC_TAGS or localTags
-      if (!tag.name || typeof tag.name !== "string") return false;
-      if (/\s/.test(tag.name)) return false;
+      if (!tag.name || typeof tag.name !== "string") {
+        logger.warn("Invalid tag name:", tag.name);
+        openSmallWindow(
+          "Invalid Tag",
+          "Tag name must be a non-empty string without spaces.",
+          ["Okay"]
+        );
+        return false;
+      }
+      if (/\s/.test(tag.name)) {
+        logger.warn("Tag name contains spaces:", tag.name);
+        openSmallWindow("Invalid Tag", "Tag name cannot contain spaces.", [
+          "Okay",
+        ]);
+        return false;
+      }
       const name = tag.name.toLowerCase();
 
       // Check against PUBLIC_TAGS
-      if (PUBLIC_TAGS.map((t) => t.toLowerCase()).includes(name)) return false;
+      if (PUBLIC_TAGS.map((t) => t.toLowerCase()).includes(name)) {
+        logger.warn(`Attempted to add a public tag as a local tag: ${name}`);
+        openSmallWindow(
+          "Invalid Tag",
+          "You cannot add a public tag as a local tag.",
+          ["Okay"]
+        );
+        return false;
+      }
 
       // Get current localTags (support both string[] and LocalTag[])
       let localTagsRaw = getSetting("localTags") as (string | LocalTag)[];
@@ -1564,14 +1586,27 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       // Check for duplicates in localTags
       const exists = localTags.some((t) => t.name === name);
-      if (exists) return false;
+      if (exists) {
+        logger.warn(`Tag already exists: ${name}`);
+        openSmallWindow(
+          "Tag Already Exists",
+          `The tag "${name}" already exists. Please choose a different name.`,
+          ["Okay"]
+        );
+        return false;
+      }
 
       localTags.push({ ...tag, name });
 
       await saveSettingsData({ localTags });
       return true;
     } catch (e) {
-      baseLogger.error("Failed to add local tag:", e);
+      logger.error("Failed to add local tag:", e);
+      openSmallWindow(
+        "Error Adding Tag",
+        `An error occurred while adding the tag:\n ${e}`,
+        ["Okay"]
+      );
       return false;
     }
   });
@@ -1600,7 +1635,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         await saveSettingsData({ localTags: localTagsRaw });
         return true;
       } catch (e) {
-        baseLogger.error("Failed to update local tag:", e);
+        logger.error("Failed to update local tag:", e);
         return false;
       }
     }
@@ -1625,7 +1660,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       await saveSettingsData({ localTags: localTagsRaw });
       return true;
     } catch (e) {
-      baseLogger.error("Failed to delete local tag:", e);
+      logger.error("Failed to delete local tag:", e);
       return false;
     }
   });
@@ -1647,7 +1682,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       return categories;
     } catch (e) {
-      baseLogger.error("Failed to get tag categories:", e);
+      logger.error("Failed to get tag categories:", e);
       return [];
     }
   });

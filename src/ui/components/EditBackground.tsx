@@ -720,10 +720,18 @@ const EditBackground: React.FC = () => {
         </div>
       </div>
       <div className="subwindow-footer">
-        <button className="save-button" onClick={() => handleSave(true)}>
+        <button
+          title="Save and set the background to this background"
+          className="save-button"
+          onClick={() => handleSave(true)}
+        >
           Save & Apply
         </button>
-        <button className="save-button" onClick={() => handleSave(false)}>
+        <button
+          title="Save and do not set the background"
+          className="save-button"
+          onClick={() => handleSave(false)}
+        >
           Save
         </button>
       </div>
