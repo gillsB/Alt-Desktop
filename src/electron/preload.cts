@@ -128,7 +128,9 @@ electron.contextBridge.exposeInMainWorld("electron", {
   deleteBackground: (id: string) => ipcInvoke("deleteBackground", id),
   idToBackgroundFolder: (id: string) => ipcInvoke("idToBackgroundFolder", id),
   addLocalTag: (tag: LocalTag) => ipcInvoke("addLocalTag", tag),
-  updateLocalTag: (name: string, tag: LocalTag) => ipcInvoke("updateLocalTag", name, tag),
+  updateLocalTag: (name: string, tag: LocalTag) =>
+    ipcInvoke("updateLocalTag", name, tag),
+  deleteLocalTag: (name: string) => ipcInvoke("deleteLocalTag", name),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

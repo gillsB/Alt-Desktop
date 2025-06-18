@@ -402,11 +402,19 @@ const EditBackground: React.FC = () => {
     setTagContextMenu(null);
   };
 
-  const handleDeleteTag = (tag: LocalTag, category: string) => {
-    logger.info(`Delete tag: ${tag.name} in category: ${category}`);
-    setTagContextMenu(null);
+  const handleDeleteTag = async (tag: LocalTag, category: string) => {
+    const response = await showSmallWindow(
+      "Delete Tag",
+      `Are you sure you want to delete  ${tag.name} in category: ${category}?`,
+      ["Delete", "Cancel"]
+    );
+    if (response === "Delete") {
+      logger.info(`Delete tag: ${tag.name} in category: ${category}`);
+      await window.electron.deleteLocalTag(tag.name);
+      setTagContextMenu(null);
+    }
   };
-  
+
   useEffect(() => {
     if (!tagContextMenu) return;
     const closeMenu = () => setTagContextMenu(null);

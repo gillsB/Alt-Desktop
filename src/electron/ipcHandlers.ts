@@ -1605,4 +1605,28 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle("deleteLocalTag", async (name: string): Promise<boolean> => {
+    try {
+      let localTagsRaw = getSetting("localTags") as LocalTag[];
+      if (!Array.isArray(localTagsRaw)) localTagsRaw = [];
+
+      // Find the tag to delete by the original name (case-insensitive)
+      const idx = localTagsRaw.findIndex(
+        (t) => t.name.toLowerCase() === name.toLowerCase()
+      );
+      if (idx === -1) {
+        logger.error("Tag not found for deletion:", name);
+        return false; // Tag not found
+      }
+
+      // Remove the tag
+      localTagsRaw.splice(idx, 1);
+
+      await saveSettingsData({ localTags: localTagsRaw });
+      return true;
+    } catch (e) {
+      baseLogger.error("Failed to delete local tag:", e);
+      return false;
+    }
+  });
 }
