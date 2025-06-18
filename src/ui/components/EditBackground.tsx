@@ -60,6 +60,13 @@ const EditBackground: React.FC = () => {
   } | null>(null);
   const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
 
+  const [tagContextMenu, setTagContextMenu] = useState<{
+    x: number;
+    y: number;
+    tag: LocalTag;
+    category: string;
+  } | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     window.electron.getBackgroundIDs().then((idArray: string[]) => {
@@ -380,12 +387,32 @@ const EditBackground: React.FC = () => {
   const handleDropOnCategory = async (category: string) => {
     if (draggedTag && draggedTag.fromCategory !== category) {
       logger.info(`${draggedTag.tag.name} dropped into ${category}`);
-      await window.electron.updateLocalTag(draggedTag.tag.name, { ...draggedTag.tag, category });
+      await window.electron.updateLocalTag(draggedTag.tag.name, {
+        ...draggedTag.tag,
+        category,
+      });
       await fetchLocalTags(); // Refresh tags/categories
     }
     setDraggedTag(null);
     setDragOverCategory(null);
   };
+
+  const handleRenameTag = (tag: LocalTag, category: string) => {
+    logger.info(`Rename tag: ${tag.name} in category: ${category}`);
+    setTagContextMenu(null);
+  };
+
+  const handleDeleteTag = (tag: LocalTag, category: string) => {
+    logger.info(`Delete tag: ${tag.name} in category: ${category}`);
+    setTagContextMenu(null);
+  };
+  
+  useEffect(() => {
+    if (!tagContextMenu) return;
+    const closeMenu = () => setTagContextMenu(null);
+    window.addEventListener("click", closeMenu);
+    return () => window.removeEventListener("click", closeMenu);
+  }, [tagContextMenu]);
 
   return (
     <div className="edit-background-root">
@@ -634,6 +661,15 @@ const EditBackground: React.FC = () => {
                                 handleDragStart(tagObj, category)
                               }
                               onDragEnd={handleDragEnd}
+                              onContextMenu={(e) => {
+                                e.preventDefault();
+                                setTagContextMenu({
+                                  x: e.clientX,
+                                  y: e.clientY,
+                                  tag: tagObj,
+                                  category,
+                                });
+                              }}
                             >
                               <input
                                 type="checkbox"
@@ -693,6 +729,36 @@ const EditBackground: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <EditTagsWindow onClose={() => setShowEditTags(false)} />
+          </div>
+        </div>
+      )}
+      {tagContextMenu && (
+        <div
+          className="context-menu"
+          style={{
+            position: "fixed",
+            left: tagContextMenu.x,
+            top: tagContextMenu.y,
+            zIndex: 3000,
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <div
+            className="menu-item"
+            onClick={() =>
+              handleRenameTag(tagContextMenu.tag, tagContextMenu.category)
+            }
+          >
+            Rename
+          </div>
+          <div
+            className="menu-item"
+            onClick={() =>
+              handleDeleteTag(tagContextMenu.tag, tagContextMenu.category)
+            }
+          >
+            Delete
           </div>
         </div>
       )}

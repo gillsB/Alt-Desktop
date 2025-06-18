@@ -1586,7 +1586,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         const idx = localTagsRaw.findIndex(
           (t) => t.name.toLowerCase() === name.toLowerCase()
         );
-        if (idx === -1) return false; // Tag not found
+        if (idx === -1) {
+          logger.error(
+            "Tag not found for update:",
+            name + " attempted to save tag: " + tag
+          );
+          return false; // Tag not found
+        }
 
         // Update the tag (allowing the name to change)
         localTagsRaw[idx] = { ...tag, name: tag.name.toLowerCase() };
