@@ -1629,4 +1629,26 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+  ipcMainHandle("getTagCategories", async (): Promise<string[]> => {
+    try {
+      let localTagsRaw = getSetting("localTags") as LocalTag[];
+      if (!Array.isArray(localTagsRaw)) localTagsRaw = [];
+
+      const localTags: LocalTag[] = localTagsRaw as LocalTag[];
+
+      // Get unique, non-empty categories
+      const categories = Array.from(
+        new Set(
+          localTags
+            .map((tag) => tag.category)
+            .filter((cat): cat is string => !!cat && typeof cat === "string")
+        )
+      );
+
+      return categories;
+    } catch (e) {
+      baseLogger.error("Failed to get tag categories:", e);
+      return [];
+    }
+  });
 }

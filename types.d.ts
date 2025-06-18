@@ -210,6 +210,7 @@ interface EventParamMapping {
   addLocalTag: [LocalTag];
   updateLocalTag: [string, LocalTag];
   deleteLocalTag: [string];
+  getTagCategories: [];
 }
 
 // The returns from the main process to the renderer
@@ -271,6 +272,7 @@ type EventPayloadMapping = {
   addLocalTag: boolean;
   updateLocalTag: boolean;
   deleteLocalTag: boolean;
+  getTagCategories: string[];
 };
 
 type UnsubscribeFunction = () => void;
@@ -383,5 +385,6 @@ interface Window {
     addLocalTag: (tag: localTag) => Promise<boolean>;
     updateLocalTag: (name: string, tag: LocalTag) => Promise<boolean>;
     deleteLocalTag: (name: string) => Promise<boolean>;
+    getTagCategories: () => Promise<string[]>;
   };
 }

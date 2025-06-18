@@ -1,21 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/EditTags.css";
 import { createLogger } from "../util/uiLogger";
+import { showSmallWindow } from "../util/uiUtil";
 
 const logger = createLogger("EditTags.tsx");
 
-const CATEGORY_OPTIONS = [
-  { value: "none", label: "No category" },
+const STATIC_OPTIONS = [
+  { value: "", label: "No category" },
   { value: "new", label: "New category  ➕" },
-  { value: "cat1", label: "Cat1" },
-  { value: "cat2", label: "Cat2" },
-  { value: "cat3", label: "Cat3" },
 ];
 
 const EditTagsWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const [tagInput, setTagInput] = useState("");
-  const [category, setCategory] = useState("none");
+  const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
+  const [categoryOptions, setCategoryOptions] = useState(STATIC_OPTIONS);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const categories: string[] = await window.electron.getTagCategories();
+        const dynamicOptions = categories
+          .filter((cat) => cat && cat !== "" && cat !== "new")
+          .map((cat) => ({ value: cat, label: cat }));
+        setCategoryOptions([...STATIC_OPTIONS, ...dynamicOptions]);
+      } catch (e) {
+        logger.error("Failed to fetch tag categories", e);
+      }
+    })();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Only allow lowercase, replace spaces with "-"
@@ -28,13 +41,40 @@ const EditTagsWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   };
 
   const handleNewCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setNewCategory(value);
+    setNewCategory(e.target.value);
   };
 
-  const handleCreateTag = () => {
+  const handleCreateTag = async () => {
+    if (
+      category === "new" &&
+      (!newCategory ||
+        categoryOptions.some((opt) => opt.value === newCategory.toLowerCase()))
+    ) {
+      await showSmallWindow(
+        "Invalid Category",
+        !newCategory
+          ? "Please enter a new category name."
+          : "A category with that name already exists. Please select it from the dropdown.",
+        ["Okay"]
+      );
+      return;
+    } else {
+      try {
+        const saved = await window.electron.addLocalTag({
+          name: tagInput,
+          category: category === "new" ? newCategory : category,
+          favorite: false,
+        });
+        if (saved) {
+          logger.info(`Tag created: ${tagInput} in category ${category}`);
+          onClose?.();
+        }
+      } catch (error) {
+        logger.error("Failed to save tag", error);
+      }
+    }
     logger.info(
-      `Create Tag clicked with value: ${tagInput}, category: ${category}` +
+      `Create Tag clicked, but failed to save with value: ${tagInput}, category: ${category}` +
         (category === "new" ? `, new category: ${newCategory}` : "")
     );
   };
@@ -61,7 +101,7 @@ const EditTagsWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
               className="create-tag-input"
               style={{ width: "100%" }}
             >
-              {CATEGORY_OPTIONS.map((opt) => (
+              {categoryOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
