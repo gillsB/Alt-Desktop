@@ -109,7 +109,7 @@ const EditBackground: React.FC = () => {
   };
   useEffect(() => {
     fetchLocalTags();
-  });
+  }, []);
 
   // Fetch categories and tags on mount
   useEffect(() => {
