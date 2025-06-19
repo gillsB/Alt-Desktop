@@ -120,3 +120,39 @@ export const saveSettingsData = async (
     return false;
   }
 };
+
+/**
+ * Ensures all categories from localTags are present in the categories setting.
+ * Adds any missing categories to the beginning of the categories array, saves, and returns the updated array.
+ */
+export async function getCategories(): Promise<string[]> {
+  try {
+    // Get current categories and localTags from settings
+    const categories = (getSetting("categories") as string[]) ?? [];
+    const localTags = (getSetting("localTags") as LocalTag[]) ?? [];
+
+    // Get all unique, non-empty categories from localTags
+    const tagCategories = Array.from(
+      new Set(
+        localTags
+          .map((tag) => tag.category)
+          .filter((cat): cat is string => !!cat && typeof cat === "string")
+      )
+    );
+
+    // Find categories in localTags not already in categories setting
+    const missing = tagCategories.filter((cat) => !categories.includes(cat));
+
+    // Add missing categories to the beginning of the categories array
+    logger.info(`Adding missing categories: ${missing}`);
+    if (missing.length > 0) {
+      categories.unshift(...missing);
+      await saveSettingsData({ categories });
+    }
+
+    return categories;
+  } catch (error) {
+    logger.error("Error syncing and getting categories:", error);
+    return [];
+  }
+}

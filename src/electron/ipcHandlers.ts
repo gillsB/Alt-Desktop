@@ -9,7 +9,12 @@ import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getScriptsPath } from "./pathResolver.js";
 import { PUBLIC_TAGS } from "./publicTags.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
-import { defaultSettings, getSetting, saveSettingsData } from "./settings.js";
+import {
+  defaultSettings,
+  getCategories,
+  getSetting,
+  saveSettingsData,
+} from "./settings.js";
 import { generateIcon } from "./utils/generateIcon.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import {
@@ -1663,25 +1668,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
   ipcMainHandle("getTagCategories", async (): Promise<string[]> => {
-    try {
-      let localTagsRaw = getSetting("localTags") as LocalTag[];
-      if (!Array.isArray(localTagsRaw)) localTagsRaw = [];
-
-      const localTags: LocalTag[] = localTagsRaw as LocalTag[];
-
-      // Get unique, non-empty categories
-      const categories = Array.from(
-        new Set(
-          localTags
-            .map((tag) => tag.category)
-            .filter((cat): cat is string => !!cat && typeof cat === "string")
-        )
-      );
-
-      return categories;
-    } catch (e) {
-      logger.error("Failed to get tag categories:", e);
-      return [];
-    }
+    return getCategories();
   });
 }
