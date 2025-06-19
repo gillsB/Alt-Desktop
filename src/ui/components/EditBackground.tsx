@@ -107,7 +107,9 @@ const EditBackground: React.FC = () => {
       setGroupedLocalTags(grouped);
     }
   };
-  fetchLocalTags();
+  useEffect(() => {
+    fetchLocalTags();
+  });
 
   // Fetch categories and tags on mount
   useEffect(() => {

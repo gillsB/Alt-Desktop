@@ -58,7 +58,7 @@ const BackgroundSelect: React.FC = () => {
         setAllTags([...PUBLIC_TAGS]);
       }
     })();
-  }, [localTags]);
+  }, []);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageNumbers: (number | string)[] = [];
