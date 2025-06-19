@@ -144,8 +144,8 @@ export async function getCategories(): Promise<string[]> {
     const missing = tagCategories.filter((cat) => !categories.includes(cat));
 
     // Add missing categories to the beginning of the categories array
-    logger.info(`Adding missing categories: ${missing}`);
     if (missing.length > 0) {
+      logger.info(`Adding missing categories: ${missing}`);
       categories.unshift(...missing);
       await saveSettingsData({ categories });
     }

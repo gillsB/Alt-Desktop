@@ -20,6 +20,7 @@ const EditTagsWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     (async () => {
       try {
         const categories: string[] = await window.electron.getTagCategories();
+        logger.info(`Categories: ${categories}`);
         const dynamicOptions = categories
           .filter((cat) => cat && cat !== "" && cat !== "new")
           .map((cat) => ({ value: cat, label: cat }));
