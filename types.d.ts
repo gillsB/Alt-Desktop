@@ -66,6 +66,7 @@ type SettingsData = {
   windowType?: WindowType;
   newBackgroundID?: number;
   externalPaths?: string[];
+  categories?: string[];
   localTags?: LocalTag[];
 };
 

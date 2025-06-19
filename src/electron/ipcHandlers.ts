@@ -1538,8 +1538,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return idToBackgroundFolder(id);
     }
   );
-  // TODO add reasons for why it fails to add tag to user (smallWindow).
-  // For example if tag already exists, name invalid etc.
   ipcMainHandle("addLocalTag", async (tag: LocalTag): Promise<boolean> => {
     try {
       // Validate name: no spaces, must be lowercase, not in PUBLIC_TAGS or localTags

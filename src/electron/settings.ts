@@ -12,6 +12,7 @@ export const defaultSettings: SettingsData = {
   windowType: "WINDOWED",
   newBackgroundID: 1,
   externalPaths: [],
+  categories: [],
   localTags: [],
 };
 
