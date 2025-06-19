@@ -156,3 +156,18 @@ export async function getCategories(): Promise<string[]> {
     return [];
   }
 }
+
+export async function addCategory(name: string) {
+  try {
+    const categories = (getSetting("categories") as string[]) ?? [];
+    if (!categories.includes(name)) {
+      categories.unshift(name);
+      await saveSettingsData({ categories });
+      logger.info("Added category", name);
+    } else {
+      logger.info("Category already exists", name);
+    }
+  } catch (e) {
+    logger.error(`Error adding category ${name}, ${e}`);
+  }
+}

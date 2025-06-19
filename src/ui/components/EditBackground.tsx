@@ -93,8 +93,10 @@ const EditBackground: React.FC = () => {
     });
   };
 
-  // Fetch and group by category
-  const fetchLocalTags = async () => {
+  const loadLocalTags = async () => {
+    const categories: string[] = await window.electron.getTagCategories();
+    setCategoryOrder(categories);
+
     const tags = await window.electron.getSetting("localTags");
     if (Array.isArray(tags)) {
       setLocalTags(tags);
@@ -107,30 +109,13 @@ const EditBackground: React.FC = () => {
       setGroupedLocalTags(grouped);
     }
   };
-  useEffect(() => {
-    fetchLocalTags();
-  }, []);
 
-  // Fetch categories and tags on mount
+  // Load the local tags on mount
   useEffect(() => {
     let cancelled = false;
-    const fetchCategoriesAndTags = async () => {
-      const categories: string[] = await window.electron.getTagCategories();
-      if (!cancelled) setCategoryOrder(categories);
-
-      const tags = await window.electron.getSetting("localTags");
-      if (Array.isArray(tags)) {
-        setLocalTags(tags);
-        // Group tags by category
-        const grouped: Record<string, LocalTag[]> = {};
-        for (const tag of tags) {
-          if (!grouped[tag.category]) grouped[tag.category] = [];
-          grouped[tag.category].push(tag);
-        }
-        setGroupedLocalTags(grouped);
-      }
-    };
-    fetchCategoriesAndTags();
+    (async () => {
+      if (!cancelled) await loadLocalTags();
+    })();
     return () => {
       cancelled = true;
     };
@@ -390,6 +375,10 @@ const EditBackground: React.FC = () => {
     setShowEditTags(true);
     logger.info("Add tag clicked");
   };
+  const handleCloseEditTags = () => {
+    setShowEditTags(false);
+    loadLocalTags(); // Refresh tags after closing modal
+  };
   const handleCategoriesClick = () => {
     logger.info("Categories clicked");
   };
@@ -414,7 +403,7 @@ const EditBackground: React.FC = () => {
         ...draggedTag.tag,
         category,
       });
-      await fetchLocalTags(); // Refresh tags/categories
+      await loadLocalTags();
     }
     setDraggedTag(null);
     setDragOverCategory(null);
@@ -434,6 +423,7 @@ const EditBackground: React.FC = () => {
     if (response === "Delete") {
       logger.info(`Delete tag: ${tag.name} in category: ${category}`);
       await window.electron.deleteLocalTag(tag.name);
+      loadLocalTags();
       setTagContextMenu(null);
     }
   };
@@ -840,7 +830,7 @@ const EditBackground: React.FC = () => {
             className="edit-tags-modal-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <EditTagsWindow onClose={() => setShowEditTags(false)} />
+            <EditTagsWindow onClose={handleCloseEditTags} />
           </div>
         </div>
       )}

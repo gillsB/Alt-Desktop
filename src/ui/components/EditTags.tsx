@@ -69,6 +69,7 @@ const EditTagsWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         if (saved) {
           logger.info(`Tag created: ${tagInput} in category ${category}`);
           onClose?.();
+          return;
         }
       } catch (error) {
         logger.error("Failed to save tag", error);

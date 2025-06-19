@@ -10,6 +10,7 @@ import { getScriptsPath } from "./pathResolver.js";
 import { PUBLIC_TAGS } from "./publicTags.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
 import {
+  addCategory,
   defaultSettings,
   getCategories,
   getSetting,
@@ -1600,6 +1601,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
 
       localTags.push({ ...tag, name });
+      addCategory(tag.category);
 
       await saveSettingsData({ localTags });
       return true;
@@ -1634,7 +1636,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         // Update the tag (allowing the name to change)
         localTagsRaw[idx] = { ...tag, name: tag.name.toLowerCase() };
-
+        addCategory(tag.category);
         await saveSettingsData({ localTags: localTagsRaw });
         return true;
       } catch (e) {
