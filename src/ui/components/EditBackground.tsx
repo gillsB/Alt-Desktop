@@ -385,6 +385,10 @@ const EditBackground: React.FC = () => {
     logger.info("Categories clicked");
     setShowEditCategories(true);
   };
+  const handleCloseEditCategories = () => {
+    setShowEditCategories(false);
+    loadLocalTags(); // Refresh tags after closing modal
+  };
 
   const handleDragStart = (tag: LocalTag, fromCategory: string) => {
     setDraggedTag({ tag, fromCategory });
@@ -825,10 +829,7 @@ const EditBackground: React.FC = () => {
         </button>
       </div>
       {showAddTag && (
-        <div
-          className="add-tag-modal-overlay"
-          onClick={() => setShowAddTag(false)}
-        >
+        <div className="add-tag-modal-overlay" onClick={handleCloseAddTag}>
           <div
             className="add-tag-modal-content"
             onClick={(e) => e.stopPropagation()}
@@ -840,13 +841,13 @@ const EditBackground: React.FC = () => {
       {showEditCategories && (
         <div
           className="edit-categories-modal-overlay"
-          onClick={() => setShowEditCategories(false)}
+          onClick={handleCloseEditCategories}
         >
           <div
             className="edit-categories-modal-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <EditCategories onClose={() => setShowEditCategories(false)} />
+            <EditCategories onClose={handleCloseEditCategories} />
           </div>
         </div>
       )}
