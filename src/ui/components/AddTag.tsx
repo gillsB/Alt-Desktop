@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import "../styles/EditTags.css";
+import "../styles/AddTag.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
 
-const logger = createLogger("EditTags.tsx");
+const logger = createLogger("AddTag.tsx");
 
 const STATIC_OPTIONS = [
   { value: "", label: "No category" },
   { value: "new", label: "New category  ➕" },
 ];
 
-const EditTagsWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
+const AddTagWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const [tagInput, setTagInput] = useState("");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -136,4 +136,4 @@ const EditTagsWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   );
 };
 
-export default EditTagsWindow;
+export default AddTagWindow;

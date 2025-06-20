@@ -10,7 +10,7 @@ import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
-import EditTagsWindow from "./EditTags";
+import AddTagWindow from "./AddTag";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -37,7 +37,7 @@ const EditBackground: React.FC = () => {
   const [saveBgFileAsShortcut, setSaveBgFileAsShortcut] =
     useState<boolean>(true);
 
-  const [showEditTags, setShowEditTags] = useState(false);
+  const [showAddTag, setShowAddTag] = useState(false);
 
   const [ids, setIds] = useState<Set<string>>(new Set<string>());
   const [isHoveringBgFile, setIsHoveringBgFile] = useState(false);
@@ -372,11 +372,11 @@ const EditBackground: React.FC = () => {
   };
 
   const handleAddTagClick = () => {
-    setShowEditTags(true);
+    setShowAddTag(true);
     logger.info("Add tag clicked");
   };
-  const handleCloseEditTags = () => {
-    setShowEditTags(false);
+  const handleCloseAddTag = () => {
+    setShowAddTag(false);
     loadLocalTags(); // Refresh tags after closing modal
   };
   const handleCategoriesClick = () => {
@@ -821,16 +821,16 @@ const EditBackground: React.FC = () => {
           Save
         </button>
       </div>
-      {showEditTags && (
+      {showAddTag && (
         <div
-          className="edit-tags-modal-overlay"
-          onClick={() => setShowEditTags(false)}
+          className="add-tag-modal-overlay"
+          onClick={() => setShowAddTag(false)}
         >
           <div
-            className="edit-tags-modal-content"
+            className="add-tag-modal-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <EditTagsWindow onClose={handleCloseEditTags} />
+            <AddTagWindow onClose={handleCloseAddTag} />
           </div>
         </div>
       )}

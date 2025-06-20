@@ -247,7 +247,7 @@
   margin-top: 0;
   margin-bottom: 0;
 }
-.edit-tags-modal-overlay {
+.add-tag-modal-overlay {
   position: fixed;
   z-index: 2000;
   top: 0;
@@ -260,7 +260,7 @@
   justify-content: center;
 }
 
-.edit-tags-modal-content {
+.add-tag    -modal-content {
   background: #232323;
   border-radius: 0px;
   min-width: 340px;
