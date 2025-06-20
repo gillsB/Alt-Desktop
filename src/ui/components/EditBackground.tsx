@@ -11,6 +11,7 @@ import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
 import AddTagWindow from "./AddTag";
+import EditCategories from "./EditCategories";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -38,6 +39,7 @@ const EditBackground: React.FC = () => {
     useState<boolean>(true);
 
   const [showAddTag, setShowAddTag] = useState(false);
+  const [showEditCategories, setShowEditCategories] = useState(false);
 
   const [ids, setIds] = useState<Set<string>>(new Set<string>());
   const [isHoveringBgFile, setIsHoveringBgFile] = useState(false);
@@ -60,12 +62,6 @@ const EditBackground: React.FC = () => {
   } | null>(null);
   const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
   const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
-
-  const [draggedCategory, setDraggedCategory] = useState<string | null>(null);
-  const [dragOverCategoryTarget, setDragOverCategoryTarget] = useState<
-    string | null
-  >(null);
-  const [placeholderIndex, setPlaceholderIndex] = useState<number | null>(null);
 
   const [tagContextMenu, setTagContextMenu] = useState<{
     x: number;
@@ -387,6 +383,7 @@ const EditBackground: React.FC = () => {
   };
   const handleCategoriesClick = () => {
     logger.info("Categories clicked");
+    setShowEditCategories(true);
   };
 
   const handleDragStart = (tag: LocalTag, fromCategory: string) => {
@@ -440,55 +437,6 @@ const EditBackground: React.FC = () => {
     window.addEventListener("click", closeMenu);
     return () => window.removeEventListener("click", closeMenu);
   }, [tagContextMenu]);
-
-  const handleCategoryDragStart = (category: string) => {
-    setDraggedCategory(category);
-  };
-
-  const handleCategoryDragOver = (category: string, e: React.DragEvent) => {
-    e.preventDefault();
-    const idx = categoryOrder.indexOf(category);
-    setPlaceholderIndex(idx + 1);
-    setDragOverCategoryTarget(category);
-  };
-
-  const handleCategoryDrop = (category: string) => {
-    if (draggedCategory && draggedCategory !== category) {
-      const fromIndex = categoryOrder.indexOf(draggedCategory);
-      const toIndex = categoryOrder.indexOf(category);
-      if (fromIndex !== -1 && toIndex !== -1) {
-        const newOrder = [...categoryOrder];
-        let insertAt = toIndex;
-        if (fromIndex < toIndex) {
-          insertAt = toIndex - 1;
-        }
-        newOrder.splice(fromIndex, 1);
-        newOrder.splice(insertAt, 0, draggedCategory);
-        setCategoryOrder(newOrder);
-        logger.info(
-          `Category "${draggedCategory}" moved from ${fromIndex} to ${toIndex}`
-        );
-      }
-    }
-    setDraggedCategory(null);
-    setDragOverCategoryTarget(null);
-  };
-
-  const handleCategoryDragEnd = () => {
-    setDraggedCategory(null);
-    setDragOverCategoryTarget(null);
-  };
-
-  const previewOrder = [...categoryOrder];
-  if (
-    draggedCategory &&
-    placeholderIndex !== null &&
-    previewOrder.includes(draggedCategory)
-  ) {
-    const fromIndex = previewOrder.indexOf(draggedCategory);
-    previewOrder.splice(fromIndex, 1);
-    previewOrder.splice(placeholderIndex, 0, "__PLACEHOLDER__");
-  }
 
   return (
     <div className="edit-background-root">
@@ -759,185 +707,100 @@ const EditBackground: React.FC = () => {
                 {categoryOrder
                   .filter((category) => category !== "")
                   .map((category) => {
-                    if (category === "__PLACEHOLDER__") {
-                      return (
-                        <div
-                          key="category-placeholder"
-                          className="category-drop-placeholder"
-                          onDragOver={(e) => e.preventDefault()}
-                          onDrop={() => {
-                            if (draggedCategory && placeholderIndex !== null) {
-                              const fromIndex =
-                                categoryOrder.indexOf(draggedCategory);
-                              let insertAt = placeholderIndex;
-                              if (fromIndex < insertAt) insertAt--;
-                              if (fromIndex !== -1 && insertAt !== -1) {
-                                const newOrder = [...categoryOrder];
-                                newOrder.splice(fromIndex, 1);
-                                newOrder.splice(insertAt, 0, draggedCategory);
-                                setCategoryOrder(newOrder);
-                                logger.info(
-                                  `Category "${draggedCategory}" moved from ${fromIndex} to ${insertAt}`
-                                );
-                              }
-                            }
-                            setDraggedCategory(null);
-                            setDragOverCategoryTarget(null);
-                            setPlaceholderIndex(null);
-                          }}
-                          onDragLeave={() => setPlaceholderIndex(null)}
-                        >
-                          <div className="placeholder-text">Drop here</div>
-                        </div>
-                      );
-                    }
                     const isCollapsed = collapsedCategories.has(category);
-                    const isDraggedCategory = draggedCategory === category;
-                    const showDropPlaceholder =
-                      dragOverCategoryTarget === category &&
-                      draggedCategory &&
-                      draggedCategory !== category &&
-                      categoryOrder.indexOf(draggedCategory) !==
-                        categoryOrder.indexOf(category);
+                    const isDragOver = dragOverCategory === category;
                     const tags = groupedLocalTags[category] || [];
-
                     return (
-                      <React.Fragment key={category}>
-                        {showDropPlaceholder && (
-                          <div
-                            className="category-drop-placeholder"
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={() => {
-                              if (
-                                draggedCategory &&
-                                draggedCategory !== category &&
-                                categoryOrder.indexOf(draggedCategory) !==
-                                  categoryOrder.indexOf(category)
-                              ) {
-                                const fromIndex =
-                                  categoryOrder.indexOf(draggedCategory);
-                                const toIndex = categoryOrder.indexOf(category);
-                                if (fromIndex !== -1 && toIndex !== -1) {
-                                  const newOrder = [...categoryOrder];
-                                  let insertAt = toIndex;
-                                  if (fromIndex < toIndex) {
-                                    insertAt = toIndex - 1;
-                                  }
-                                  newOrder.splice(fromIndex, 1);
-                                  newOrder.splice(insertAt, 0, draggedCategory);
-                                  setCategoryOrder(newOrder);
-                                  logger.info(
-                                    `Category "${draggedCategory}" moved from ${fromIndex} to ${insertAt}`
-                                  );
-                                }
-                              }
-                              setDraggedCategory(null);
-                              setDragOverCategoryTarget(null);
+                      <div
+                        key={category}
+                        className={`tag-category-block${isDragOver ? " drag-over-category" : ""}`}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          handleDragOverCategory(category);
+                        }}
+                        onDrop={() => handleDropOnCategory(category)}
+                        onDragLeave={() => setDragOverCategory(null)}
+                      >
+                        <div
+                          className="tag-category-header"
+                          onClick={() => toggleCategory(category)}
+                        >
+                          <span>{category}</span>
+                          <button
+                            className="tag-toggle-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleCategory(category);
                             }}
-                            onDragLeave={() => setDragOverCategoryTarget(null)}
                           >
-                            <div className="placeholder-text">
-                              Category will appear here
-                            </div>
+                            {isCollapsed ? "▸" : "▾"}
+                          </button>
+                        </div>
+                        {!isCollapsed && (
+                          <div className="tag-grid">
+                            {tags.map((tagObj) => (
+                              <div
+                                key={tagObj.name}
+                                className={
+                                  "tag-checkbox-row draggable-tag" +
+                                  (summary.localTags?.includes(tagObj.name)
+                                    ? " selected"
+                                    : "") +
+                                  (draggedTag?.tag.name === tagObj.name
+                                    ? " dragging"
+                                    : "")
+                                }
+                                draggable
+                                onDragStart={() =>
+                                  handleDragStart(tagObj, category)
+                                }
+                                onDragEnd={handleDragEnd}
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  setTagContextMenu({
+                                    x: e.clientX,
+                                    y: e.clientY,
+                                    tag: tagObj,
+                                    category,
+                                  });
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="tag-checkbox"
+                                  checked={summary.localTags?.includes(
+                                    tagObj.name
+                                  )}
+                                  onChange={() =>
+                                    handlePersonalTagToggle(tagObj.name)
+                                  }
+                                  id={`tag-checkbox-${category}-${tagObj.name}`}
+                                />
+                                <label
+                                  className="tag-name"
+                                  htmlFor={`tag-checkbox-${category}-${tagObj.name}`}
+                                  title={tagObj.name}
+                                >
+                                  {tagObj.name}
+                                </label>
+                                <span
+                                  className={
+                                    "tag-fav-star" +
+                                    (tagObj.favorite ? "" : " not-fav")
+                                  }
+                                  title={
+                                    tagObj.favorite
+                                      ? "Favorite"
+                                      : "Not favorite"
+                                  }
+                                >
+                                  ★
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         )}
-                        <div
-                          className={
-                            `tag-category-block${dragOverCategory === category ? " drag-over-category" : ""}` +
-                            (isDraggedCategory ? " dragging-category" : "")
-                          }
-                          draggable
-                          onDragStart={() => handleCategoryDragStart(category)}
-                          onDragOver={(e) =>
-                            handleCategoryDragOver(category, e)
-                          }
-                          onDrop={() => handleCategoryDrop(category)}
-                          onDragEnd={handleCategoryDragEnd}
-                          style={{
-                            opacity: isDraggedCategory ? 0.5 : 1,
-                          }}
-                        >
-                          <div
-                            className="tag-category-header"
-                            onClick={() => toggleCategory(category)}
-                          >
-                            <span>{category}</span>
-                            <button
-                              className="tag-toggle-button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleCategory(category);
-                              }}
-                            >
-                              {isCollapsed ? "▸" : "▾"}
-                            </button>
-                          </div>
-                          {!isCollapsed && (
-                            <div className="tag-grid">
-                              {tags.map((tagObj) => (
-                                <div
-                                  key={tagObj.name}
-                                  className={
-                                    "tag-checkbox-row draggable-tag" +
-                                    (summary.localTags?.includes(tagObj.name)
-                                      ? " selected"
-                                      : "") +
-                                    (draggedTag?.tag.name === tagObj.name
-                                      ? " dragging"
-                                      : "")
-                                  }
-                                  draggable
-                                  onDragStart={() =>
-                                    handleDragStart(tagObj, category)
-                                  }
-                                  onDragEnd={handleDragEnd}
-                                  onContextMenu={(e) => {
-                                    e.preventDefault();
-                                    setTagContextMenu({
-                                      x: e.clientX,
-                                      y: e.clientY,
-                                      tag: tagObj,
-                                      category,
-                                    });
-                                  }}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    className="tag-checkbox"
-                                    checked={summary.localTags?.includes(
-                                      tagObj.name
-                                    )}
-                                    onChange={() =>
-                                      handlePersonalTagToggle(tagObj.name)
-                                    }
-                                    id={`tag-checkbox-${category}-${tagObj.name}`}
-                                  />
-                                  <label
-                                    className="tag-name"
-                                    htmlFor={`tag-checkbox-${category}-${tagObj.name}`}
-                                    title={tagObj.name}
-                                  >
-                                    {tagObj.name}
-                                  </label>
-                                  <span
-                                    className={
-                                      "tag-fav-star" +
-                                      (tagObj.favorite ? "" : " not-fav")
-                                    }
-                                    title={
-                                      tagObj.favorite
-                                        ? "Favorite"
-                                        : "Not favorite"
-                                    }
-                                  >
-                                    ★
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </React.Fragment>
+                      </div>
                     );
                   })}
               </div>
@@ -971,6 +834,19 @@ const EditBackground: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <AddTagWindow onClose={handleCloseAddTag} />
+          </div>
+        </div>
+      )}
+      {showEditCategories && (
+        <div
+          className="edit-categories-modal-overlay"
+          onClick={() => setShowEditCategories(false)}
+        >
+          <div
+            className="edit-categories-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <EditCategories onClose={() => setShowEditCategories(false)} />
           </div>
         </div>
       )}
