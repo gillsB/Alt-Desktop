@@ -1,0 +1,91 @@
+.draggable-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px auto;
+  width: 90%;
+}
+
+.edit-categories-list {
+  width: 100%;
+}
+
+.category-item {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 12px 16px;
+  margin: 4px 0;
+  background-color: #f5f5f5;
+  border: 3px solid transparent;
+  border-radius: 6px;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.category-item:hover {
+  background-color: #e8e8e8;
+  border-color: #d0d0d0;
+}
+
+.category-item.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+  transform: rotate(2deg);
+  z-index: 1000;
+}
+
+.category-item.drag-over-above {
+  border-top: 3px solid #007acc;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.category-item.drag-over-below {
+  border-bottom: 3px solid #007acc;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.drag-handle {
+  color: #999;
+  font-size: 16px;
+  margin-right: 12px;
+  cursor: grab;
+  line-height: 1;
+  font-weight: bold;
+}
+
+.category-item.dragging .drag-handle {
+  cursor: grabbing;
+}
+
+.category-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .category-item {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+  }
+
+  .category-item:hover {
+    background-color: #3d3d3d;
+    border-color: #555;
+  }
+
+  .category-item.drag-over-above {
+    border-top-color: #4a9eff;
+  }
+
+  .category-item.drag-over-below {
+    border-bottom-color: #4a9eff;
+  }
+
+  .drag-handle {
+    color: #888;
+  }
+}
