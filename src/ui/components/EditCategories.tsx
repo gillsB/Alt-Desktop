@@ -45,8 +45,13 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         ["Okay"]
       );
       return;
-    } // todo make this case insensitive
-    if (categories.includes(categoryInput)) {
+    }
+    const lowercasedCategoryInput = categoryInput.toLowerCase();
+    if (
+      categories.some(
+        (category) => category.toLowerCase() === lowercasedCategoryInput
+      )
+    ) {
       await showSmallWindow(
         "Duplicate Category",
         "A category with that name already exists.",
@@ -54,6 +59,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       );
       return;
     }
+
     try {
       // todo ipc handler to add category.
       setCategories([categoryInput, ...categories]);
