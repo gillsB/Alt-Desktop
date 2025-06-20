@@ -61,7 +61,9 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     }
 
     try {
-      // todo ipc handler to add category.
+      await window.electron.saveSettingsData({
+        categories: [categoryInput, ...categories],
+      });
       setCategories([categoryInput, ...categories]);
       setCategoryInput("");
       logger.info(`Category added: ${categoryInput}`);
@@ -128,7 +130,10 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     }
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLLIElement>, dropIndex: number) => {
+  const handleDrop = async (
+    e: React.DragEvent<HTMLLIElement>,
+    dropIndex: number
+  ) => {
     e.preventDefault();
 
     if (dragState.draggedIndex === null || dragState.insertPosition === null) {
@@ -168,7 +173,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       insertPosition: null,
     });
 
-    // TODO: Add IPC handler to save the new category order
+    await window.electron.saveSettingsData({ categories: newCategories });
   };
 
   const getCategoryItemClass = (index: number) => {
