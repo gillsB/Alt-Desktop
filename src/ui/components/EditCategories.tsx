@@ -242,18 +242,18 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     <div className="modal-window-content">
       <div className="modal-content">
         <div className="subwindow-field">
-          <label>Category Name:</label>
           <input
             type="text"
             value={categoryInput}
             onChange={handleInputChange}
-            placeholder="Enter new category"
+            placeholder="Enter new category name"
             className="create-tag-input"
           />
+          <button className="button" onClick={handleAddCategory}>
+            Add Category
+          </button>
         </div>
-        <button className="button" onClick={handleAddCategory}>
-          Add Category
-        </button>
+
         <div className="edit-categories-list">
           <h3>Existing Categories</h3>
           <ul className="draggable-list">
