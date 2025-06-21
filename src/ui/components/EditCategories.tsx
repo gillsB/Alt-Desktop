@@ -23,6 +23,9 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState<string>("");
+  const [duplicateErrorIndex, setDuplicateErrorIndex] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
     (async () => {
@@ -214,11 +217,16 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     if (
       newName &&
       newName !== oldName &&
-      !categories.some(
+      categories.some(
         (cat, i) =>
           i !== editingIndex && cat.toLowerCase() === newName.toLowerCase()
       )
     ) {
+      setDuplicateErrorIndex(index);
+      setTimeout(() => setDuplicateErrorIndex(null), 1800);
+      return;
+    }
+    if (newName && newName !== oldName) {
       logger.info(`Category renamed from "${oldName}" to "${newName}"`);
       const added = await window.electron.renameCategory(oldName, newName);
       logger.info("result for renameCategory:", added);
@@ -287,6 +295,11 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                   >
                     {cat}
                   </span>
+                )}
+                {duplicateErrorIndex === index && (
+                  <div className="category-inline-error">
+                    That name already exists
+                  </div>
                 )}
               </li>
             ))}
