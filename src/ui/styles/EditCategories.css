@@ -32,7 +32,7 @@
 .category-item.dragging {
   opacity: 0.5;
   cursor: grabbing;
-  transform: rotate(2deg);
+  transform: rotate(1deg);
   z-index: 1000;
 }
 
@@ -66,6 +66,18 @@
   font-weight: 500;
 }
 
+.category-edit-input {
+  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1.5px solid #007acc;
+  background: #fff;
+  color: #222;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 @media (prefers-color-scheme: dark) {
   .category-item {
     background-color: #2d2d2d;
@@ -87,5 +99,11 @@
 
   .drag-handle {
     color: #888;
+  }
+
+  .category-edit-input {
+    background: #232323;
+    color: #e0e0e0;
+    border-color: #4a9eff;
   }
 }

@@ -21,6 +21,9 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     insertPosition: null,
   });
 
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingValue, setEditingValue] = useState<string>("");
+
   useEffect(() => {
     (async () => {
       try {
@@ -197,6 +200,36 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     return className;
   };
 
+  const handleCategoryDoubleClick = (index: number) => {
+    setEditingIndex(index);
+    setEditingValue(categories[index]);
+  };
+
+  const finishEditing = async (index: number) => {
+    if (editingIndex === null) return;
+    const oldName = categories[editingIndex];
+    const newName = editingValue.trim();
+    setEditingIndex(null);
+    setEditingValue("");
+    if (
+      newName &&
+      newName !== oldName &&
+      !categories.some(
+        (cat, i) =>
+          i !== editingIndex && cat.toLowerCase() === newName.toLowerCase()
+      )
+    ) {
+      logger.info(`Category renamed from "${oldName}" to "${newName}"`);
+      const added = await window.electron.renameCategory(oldName, newName);
+      logger.info("result for renameCategory:", added);
+      if (added) {
+        const updated = [...categories];
+        updated[index] = newName;
+        setCategories(updated);
+      }
+    }
+  };
+
   return (
     <div className="modal-window-content">
       <div className="modal-content">
@@ -229,7 +262,32 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                 onDrop={(e) => handleDrop(e, index)}
               >
                 <span className="drag-handle">⋮⋮</span>
-                <span className="category-text">{cat}</span>
+                {editingIndex === index ? (
+                  <input
+                    className="category-edit-input"
+                    value={editingValue}
+                    autoFocus
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    onBlur={() => finishEditing(index)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") finishEditing(index);
+                      if (e.key === "Escape") {
+                        setEditingIndex(null);
+                        setEditingValue("");
+                      }
+                    }}
+                    style={{ flex: 1, fontWeight: 500 }}
+                  />
+                ) : (
+                  <span
+                    className="category-text"
+                    onDoubleClick={() => handleCategoryDoubleClick(index)}
+                    title="Double-click to rename"
+                    style={{ cursor: "pointer" }}
+                  >
+                    {cat}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
