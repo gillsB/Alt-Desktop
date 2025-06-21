@@ -174,3 +174,49 @@ export async function addCategory(name: string) {
     logger.error(`Error adding category ${name}, ${e}`);
   }
 }
+
+export async function renameCategory(
+  oldName: string,
+  newName: string
+): Promise<boolean> {
+  try {
+    if (!oldName || !newName || oldName === newName) {
+      return false;
+    }
+    const categories = (getSetting("categories") as string[]) ?? [];
+    const index = categories.indexOf(oldName);
+    let updated = false;
+
+    if (index !== -1) {
+      categories[index] = newName;
+      updated = true;
+    } else {
+      logger.warn(`Category ${oldName} not found for renaming`);
+    }
+
+    // Update localTags with the new category name
+    let localTags = (getSetting("localTags") as LocalTag[]) ?? [];
+    let tagsUpdated = false;
+    localTags = localTags.map((tag) => {
+      if (tag.category === oldName) {
+        tagsUpdated = true;
+        return { ...tag, category: newName };
+      }
+      return tag;
+    });
+
+    if (updated || tagsUpdated) {
+      await saveSettingsData({
+        categories,
+        localTags,
+      });
+      logger.info(
+        `Renamed category from ${oldName} to ${newName} and updated tags`
+      );
+      return true;
+    }
+  } catch (e) {
+    logger.error(`Error renaming category from ${oldName} to ${newName}, ${e}`);
+  }
+  return false;
+}

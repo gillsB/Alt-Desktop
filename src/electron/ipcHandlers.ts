@@ -14,6 +14,7 @@ import {
   defaultSettings,
   getCategories,
   getSetting,
+  renameCategory,
   saveSettingsData,
 } from "./settings.js";
 import { generateIcon } from "./utils/generateIcon.js";
@@ -1671,5 +1672,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle("getTagCategories", async (): Promise<string[]> => {
     return getCategories();
+  });
+  ipcMainHandle("renameCategory", async (oldName: string, newName: string): Promise<boolean> => {
+    return renameCategory(oldName, newName);
   });
 }
