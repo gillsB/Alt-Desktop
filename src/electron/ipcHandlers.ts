@@ -12,6 +12,7 @@ import { getSafeFileUrl } from "./safeFileProtocol.js";
 import {
   addCategory,
   defaultSettings,
+  deleteCategory,
   getCategories,
   getSetting,
   renameCategory,
@@ -1673,7 +1674,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getTagCategories", async (): Promise<string[]> => {
     return getCategories();
   });
-  ipcMainHandle("renameCategory", async (oldName: string, newName: string): Promise<boolean> => {
-    return renameCategory(oldName, newName);
+  ipcMainHandle(
+    "renameCategory",
+    async (oldName: string, newName: string): Promise<boolean> => {
+      return renameCategory(oldName, newName);
+    }
+  );
+  ipcMainHandle("deleteCategory", async (name: string): Promise<boolean> => {
+    return deleteCategory(name);
   });
 }

@@ -134,6 +134,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getTagCategories: () => ipcInvoke("getTagCategories"),
   renameCategory: (oldName: string, newName: string) =>
     ipcInvoke("renameCategory", oldName, newName),
+  deleteCategory: (name: string) => ipcInvoke("deleteCategory", name),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

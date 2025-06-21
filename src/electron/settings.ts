@@ -220,3 +220,38 @@ export async function renameCategory(
   }
   return false;
 }
+
+export async function deleteCategory(name: string): Promise<boolean> {
+  try {
+    if (!name) {
+      return false;
+    }
+    // Remove from categories
+    const categories = (getSetting("categories") as string[]) ?? [];
+    const index = categories.indexOf(name);
+    if (index === -1) {
+      logger.warn(`Category ${name} not found for deletion`);
+      return false;
+    }
+    categories.splice(index, 1);
+
+    // Update localTags: set category to "" for tags with this category
+    let localTags = (getSetting("localTags") as LocalTag[]) ?? [];
+    localTags = localTags.map((tag) => {
+      if (tag.category === name) {
+        return { ...tag, category: "" };
+      }
+      return tag;
+    });
+
+    await saveSettingsData({
+      categories,
+      localTags,
+    });
+    logger.info(`Deleted category "${name}" and reverted affected tags to ""`);
+    return true;
+  } catch (e) {
+    logger.error(`Error deleting category ${name}: ${e}`);
+    return false;
+  }
+}
