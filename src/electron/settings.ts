@@ -159,6 +159,9 @@ export async function getCategories(): Promise<string[]> {
 
 export async function addCategory(name: string) {
   try {
+    if (!name) {
+      return;
+    }
     const categories = (getSetting("categories") as string[]) ?? [];
     if (!categories.includes(name)) {
       categories.unshift(name);
