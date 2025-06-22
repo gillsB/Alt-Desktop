@@ -94,7 +94,7 @@ const BackgroundSelect: React.FC = () => {
     pageNumbers.push(totalPages - 1);
   }
 
-  const fetchPage = async (page: number) => {
+  const fetchPage = async () => {
     logger.info(`Fetching page ${page + 1} with search "${search}"`);
     const offset = page * PAGE_SIZE;
 
@@ -170,15 +170,15 @@ const BackgroundSelect: React.FC = () => {
 
   useEffect(() => {
     if (page === -1) return; // prevent OnMount call.
-    const handler = () => {
-      fetchPage(page);
-    };
-    handler();
-    window.electron.on("backgrounds-updated", handler);
-    return () => {
-      window.electron.off("backgrounds-updated", handler);
-    };
+    fetchPage();
   }, [page, search]);
+
+  useEffect(() => {
+    window.electron.on("backgrounds-updated", fetchPage);
+    return () => {
+      window.electron.off("backgrounds-updated", fetchPage);
+    };
+  }, []);
 
   useEffect(() => {
     if (page === -1) return; // prevent OnMount call.
@@ -188,7 +188,7 @@ const BackgroundSelect: React.FC = () => {
     if (page !== 0) {
       setPage(0); // useEffect above calls fetchPage
     } else {
-      fetchPage(page);
+      fetchPage();
     }
   }, [filterOptions]);
 
@@ -350,7 +350,7 @@ const BackgroundSelect: React.FC = () => {
         const success = await window.electron.deleteBackground(backgroundId);
         if (success) {
           logger.info(`Successfully deleted background ${backgroundId}`);
-          fetchPage(page);
+          fetchPage();
         } else {
           logger.error(`Failed to delete background ${backgroundId}`);
           // Show file in use to user.
