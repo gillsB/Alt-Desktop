@@ -30,16 +30,17 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     null
   );
 
+  const fetchCategories = async () => {
+    try {
+      const cats: string[] = await window.electron.getTagCategories();
+      logger.info(`Categories: ${cats}`);
+      setCategories(cats);
+    } catch (e) {
+      logger.error("Failed to fetch categories", e);
+    }
+  };
   useEffect(() => {
-    (async () => {
-      try {
-        const cats: string[] = await window.electron.getTagCategories();
-        logger.info(`Categories: ${cats}`);
-        setCategories(cats);
-      } catch (e) {
-        logger.error("Failed to fetch categories", e);
-      }
-    })();
+    fetchCategories();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,7 +173,6 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     // Insert it at the new position
     newCategories.splice(insertIndex, 0, draggedItem);
 
-    setCategories(newCategories);
     logger.info(`Category moved from ${draggedIndex} to ${insertIndex}`);
 
     // Clear drag state immediately
@@ -183,6 +183,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     });
 
     await window.electron.saveSettingsData({ categories: newCategories });
+    fetchCategories();
   };
 
   const getCategoryItemClass = (index: number) => {
@@ -236,7 +237,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       if (added) {
         const updated = [...categories];
         updated[index] = newName;
-        setCategories(updated);
+        fetchCategories();
       }
     }
   };
@@ -251,6 +252,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     const ret = await window.electron.deleteCategory(name);
     if (ret) logger.info(`Category deleted: ${name}`);
     setPendingDeleteIndex(null);
+    fetchCategories();
   };
 
   const handleCancelDelete = () => {
