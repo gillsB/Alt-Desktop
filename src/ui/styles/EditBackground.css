@@ -47,8 +47,7 @@
 .tag-checkbox-row {
   display: flex;
   align-items: center;
-  min-width: 70px;
-  max-width: 140px;
+  min-width: 140px;
   padding: 2px 4px;
   margin: 1px 0;
   background: #181828;
@@ -75,7 +74,7 @@
 
 .tag-name {
   width: 140px;
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: #bdbdbd;
   white-space: nowrap;
   overflow: hidden;
@@ -134,7 +133,7 @@
 
 .tag-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 4px 12px;
 }
 
