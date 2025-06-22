@@ -26,6 +26,9 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const [duplicateErrorIndex, setDuplicateErrorIndex] = useState<number | null>(
     null
   );
+  const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
     (async () => {
@@ -238,6 +241,22 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     }
   };
 
+  const handleDeleteClick = (index: number) => {
+    setPendingDeleteIndex(index);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (pendingDeleteIndex === null) return;
+    const name = categories[pendingDeleteIndex];
+    const ret = await window.electron.deleteCategory(name);
+    if (ret) logger.info(`Category deleted: ${name}`);
+    setPendingDeleteIndex(null);
+  };
+
+  const handleCancelDelete = () => {
+    setPendingDeleteIndex(null);
+  };
+
   return (
     <div className="modal-window-content">
       <div className="modal-content">
@@ -256,6 +275,12 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 
         <div className="edit-categories-list">
           <h3>Existing Categories</h3>
+          {pendingDeleteIndex !== null && (
+            <div
+              className="category-delete-overlay"
+              onClick={handleCancelDelete}
+            />
+          )}
           <ul className="draggable-list">
             {categories.map((cat, index) => (
               <li
@@ -268,6 +293,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, index)}
+                style={{ position: "relative" }}
               >
                 <span className="drag-handle">⋮⋮</span>
                 {editingIndex === index ? (
@@ -284,7 +310,6 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                         setEditingValue("");
                       }
                     }}
-                    style={{ flex: 1, fontWeight: 500 }}
                   />
                 ) : (
                   <span
@@ -296,9 +321,30 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                     {cat}
                   </span>
                 )}
+                {/* Delete button */}
+                <button
+                  className="category-delete-btn"
+                  title="Delete category"
+                  onClick={() => handleDeleteClick(index)}
+                >
+                  ×
+                </button>
+                {/* Inline error */}
                 {duplicateErrorIndex === index && (
                   <div className="category-inline-error">
                     That name already exists
+                  </div>
+                )}
+                {/* Confirm dialog */}
+                {pendingDeleteIndex === index && (
+                  <div className="category-delete-confirm">
+                    <span>Delete &quot;{cat || <em>(empty)</em>}&quot;?</span>
+                    <button className="button" onClick={handleConfirmDelete}>
+                      Delete
+                    </button>
+                    <button className="button" onClick={handleCancelDelete}>
+                      Cancel
+                    </button>
                   </div>
                 )}
               </li>
