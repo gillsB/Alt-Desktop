@@ -434,6 +434,14 @@ const EditBackground: React.FC = () => {
       setTagContextMenu(null);
     }
   };
+  const handleToggleFavorite = async (tag: LocalTag) => {
+    const updatedTag = { ...tag, favorite: !tag.favorite };
+    logger.info(
+      `${updatedTag.favorite ? "Favorite" : "Unfavorite"} tag: ${tag.name}`
+    );
+    await window.electron.updateLocalTag(tag.name, updatedTag);
+    await loadLocalTags();
+  };  
 
   useEffect(() => {
     if (!tagContextMenu) return;
@@ -695,6 +703,8 @@ const EditBackground: React.FC = () => {
                             "tag-fav-star" + (tagObj.favorite ? "" : " not-fav")
                           }
                           title={tagObj.favorite ? "Favorite" : "Not favorite"}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => handleToggleFavorite(tagObj)}
                         >
                           ★
                         </span>
@@ -791,6 +801,8 @@ const EditBackground: React.FC = () => {
                                 title={
                                   tagObj.favorite ? "Favorite" : "Not favorite"
                                 }
+                                style={{ cursor: "pointer" }}
+                                onClick={() => handleToggleFavorite(tagObj)}
                               >
                                 ★
                               </span>
