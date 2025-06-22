@@ -76,6 +76,7 @@
   color: #222;
   outline: none;
   width: 100%;
+  max-width: calc(100% - 32px);
   box-sizing: border-box;
 }
 

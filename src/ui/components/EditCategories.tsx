@@ -151,21 +151,24 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     }
 
     const draggedIndex = dragState.draggedIndex;
-    const newCategories = [...categories];
-    const draggedItem = newCategories[draggedIndex];
 
-    // Calculate the final insert position
-    let insertIndex;
-    if (dragState.insertPosition === "above") {
-      insertIndex = dropIndex;
-    } else {
-      insertIndex = dropIndex + 1;
-    }
-
-    // Adjust for the removal of the dragged item
+    let insertIndex =
+      dragState.insertPosition === "above" ? dropIndex : dropIndex + 1;
     if (draggedIndex < insertIndex) {
       insertIndex--;
     }
+    if (draggedIndex === insertIndex) {
+      logger.info(`Category dropped at the same position: ${draggedIndex}`);
+      setDragState({
+        draggedIndex: null,
+        draggedOverIndex: null,
+        insertPosition: null,
+      });
+      return;
+    }
+
+    const newCategories = [...categories];
+    const draggedItem = newCategories[draggedIndex];
 
     // Remove the dragged item
     newCategories.splice(draggedIndex, 1);
