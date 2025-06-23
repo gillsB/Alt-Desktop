@@ -368,3 +368,16 @@
 .tag-suggestion-item:hover {
   background: #444;
 }
+
+.filter-category-block {
+  margin-bottom: 12px;
+}
+.filter-category-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.filter-tag-label {
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 2px;
+}
