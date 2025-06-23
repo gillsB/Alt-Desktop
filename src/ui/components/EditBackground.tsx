@@ -90,7 +90,20 @@ const EditBackground: React.FC = () => {
   >(new Set());
   const [collapsedPublicTags, setCollapsedPublicTags] = useState(false);
 
-  const toggleCategory = (category: string) => {
+  // Load categories collapsed/expanded state from settings
+  useEffect(() => {
+    (async () => {
+      const categoriesObj: Record<string, boolean> =
+        (await window.electron.getSetting("categories")) ?? {};
+      // Categories with value === false should be collapsed
+      const collapsed = Object.entries(categoriesObj)
+        .filter(([, expanded]) => !expanded)
+        .map(([cat]) => cat);
+      setCollapsedCategories(new Set(collapsed));
+    })();
+  }, []);
+
+  const toggleCategory = async (category: string) => {
     setCollapsedCategories((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(category)) newSet.delete(category);
