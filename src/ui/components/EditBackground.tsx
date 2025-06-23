@@ -88,6 +88,7 @@ const EditBackground: React.FC = () => {
   const [collapsedPublicCategories, setCollapsedPublicCategories] = useState<
     Set<string>
   >(new Set());
+  const [collapsedPublicTags, setCollapsedPublicTags] = useState(false);
 
   const toggleCategory = (category: string) => {
     setCollapsedCategories((prev) => {
@@ -105,6 +106,10 @@ const EditBackground: React.FC = () => {
       else newSet.add(category);
       return newSet;
     });
+  };
+
+  const togglePublicTags = () => {
+    setCollapsedPublicTags((prev) => !prev);
   };
 
   const loadLocalTags = async () => {
@@ -602,45 +607,69 @@ const EditBackground: React.FC = () => {
         {/* Right: Tag management */}
         <div className="edit-background-tags-panel">
           <div className="edit-bg-field">
-            <label className="edit-bg-label">Public Tags:</label>
-            <div>
-              {PUBLIC_TAG_CATEGORIES.map((catObj) => (
-                <div key={catObj.name} className="public-tag-category-block">
-                  <div
-                    className="tag-category-header"
-                    onClick={() => togglePublicCategory(catObj.name)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <span>{catObj.name}</span>
-                    <button
-                      className="tag-toggle-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        togglePublicCategory(catObj.name);
-                      }}
-                    >
-                      {collapsedPublicCategories.has(catObj.name) ? "▸" : "▾"}
-                    </button>
-                  </div>
-                  {!collapsedPublicCategories.has(catObj.name) && (
-                    <div className="tag-row">
-                      {catObj.tags.map((tag) => (
-                        <button
-                          key={tag}
-                          type="button"
-                          className={
-                            summary.tags?.includes(tag) ? "tag-selected" : "tag"
-                          }
-                          onClick={() => handleTagToggle(tag)}
-                        >
-                          {tag}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div
+              className={
+                "public-tags-header tag-category-header" +
+                (collapsedPublicTags ? "" : " expanded")
+              }
+              style={{ cursor: "pointer", marginBottom: 4 }}
+              onClick={togglePublicTags}
+            >
+              <label className="edit-bg-label" style={{ marginBottom: 0 }}>
+                Public Tags:
+              </label>
+              <button
+                className="tag-toggle-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  togglePublicTags();
+                }}
+              >
+                {collapsedPublicTags ? "▸" : "▾"}
+              </button>
             </div>
+            {!collapsedPublicTags && (
+              <div>
+                {PUBLIC_TAG_CATEGORIES.map((catObj) => (
+                  <div key={catObj.name} className="public-tag-category-block">
+                    <div
+                      className="tag-category-header"
+                      onClick={() => togglePublicCategory(catObj.name)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <span>{catObj.name}</span>
+                      <button
+                        className="tag-toggle-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePublicCategory(catObj.name);
+                        }}
+                      >
+                        {collapsedPublicCategories.has(catObj.name) ? "▸" : "▾"}
+                      </button>
+                    </div>
+                    {!collapsedPublicCategories.has(catObj.name) && (
+                      <div className="tag-row">
+                        {catObj.tags.map((tag) => (
+                          <button
+                            key={tag}
+                            type="button"
+                            className={
+                              summary.tags?.includes(tag)
+                                ? "tag-selected"
+                                : "tag"
+                            }
+                            onClick={() => handleTagToggle(tag)}
+                          >
+                            {tag}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="local-tags">
             <div className="local-tags-header input-row">
