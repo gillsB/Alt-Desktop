@@ -39,6 +39,27 @@ export const ensureDefaultSettings = (): void => {
       }
     }
 
+    // Migrate categories if needed
+    if (migrateCategoriesSetting(settings)) {
+      updated = true;
+    }
+
+    // Type check for all other settings (replace if type does not match default)
+    for (const [key, defaultValue] of Object.entries(defaultSettings)) {
+      if (key === "categories") continue; // already handled above
+      const currentValue = settings[key];
+      if (
+        typeof currentValue !== typeof defaultValue ||
+        (Array.isArray(defaultValue) && !Array.isArray(currentValue))
+      ) {
+        logger.info(
+          `Setting "${key}" has invalid type. Replacing with default value.`
+        );
+        settings[key] = defaultValue;
+        updated = true;
+      }
+    }
+
     // Write updated settings back to the file if changes were made
     if (updated) {
       fs.writeFileSync(
@@ -46,9 +67,13 @@ export const ensureDefaultSettings = (): void => {
         JSON.stringify(settings, null, 2),
         "utf-8"
       );
-      logger.info("Settings file updated with missing default settings.");
+      logger.info(
+        "Settings file updated with missing or fixed default settings."
+      );
     } else {
-      logger.info("No missing settings detected. Settings file is up-to-date.");
+      logger.info(
+        "No missing or invalid settings detected. Settings file is up-to-date."
+      );
     }
   } catch (error) {
     logger.error("Error ensuring default settings:", error);
@@ -264,4 +289,35 @@ export async function deleteCategory(name: string): Promise<boolean> {
     logger.error(`Error deleting category ${name}: ${e}`);
     return false;
   }
+}
+
+/**
+ * Migrates the categories setting to the correct object format if needed.
+ * Returns true if migration occurred, false otherwise.
+ */
+function migrateCategoriesSetting(settings: Record<string, unknown>): boolean {
+  let updated = false;
+  // If categories is an array, convert to object
+  if (Array.isArray(settings.categories)) {
+    logger.info("Migrating categories from array to object format.");
+    const migrated: Record<string, boolean> = {};
+    for (const cat of settings.categories) {
+      if (typeof cat === "string") {
+        migrated[cat] = true;
+      }
+    }
+    settings.categories = migrated;
+    updated = true;
+  }
+  // Otherwise replace with default if its not an array.
+  else if (
+    typeof settings.categories !== "object" ||
+    settings.categories === null ||
+    Array.isArray(settings.categories)
+  ) {
+    logger.info("Replacing invalid categories setting with default.");
+    settings.categories = { ...defaultSettings.categories };
+    updated = true;
+  }
+  return updated;
 }
