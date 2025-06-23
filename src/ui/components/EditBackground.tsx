@@ -5,7 +5,7 @@ import {
 } from "@heroicons/react/24/solid";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { PUBLIC_TAGS } from "../../electron/publicTags";
+import { PUBLIC_TAG_CATEGORIES } from "../../electron/publicTags";
 import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
@@ -85,9 +85,21 @@ const EditBackground: React.FC = () => {
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
     new Set()
   );
+  const [collapsedPublicCategories, setCollapsedPublicCategories] = useState<
+    Set<string>
+  >(new Set());
 
   const toggleCategory = (category: string) => {
     setCollapsedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) newSet.delete(category);
+      else newSet.add(category);
+      return newSet;
+    });
+  };
+
+  const togglePublicCategory = (category: string) => {
+    setCollapsedPublicCategories((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(category)) newSet.delete(category);
       else newSet.add(category);
@@ -441,7 +453,7 @@ const EditBackground: React.FC = () => {
     );
     await window.electron.updateLocalTag(tag.name, updatedTag);
     await loadLocalTags();
-  };  
+  };
 
   useEffect(() => {
     if (!tagContextMenu) return;
@@ -591,18 +603,42 @@ const EditBackground: React.FC = () => {
         <div className="edit-background-tags-panel">
           <div className="edit-bg-field">
             <label className="edit-bg-label">Public Tags:</label>
-            <div className="tag-row">
-              {PUBLIC_TAGS.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  className={
-                    summary.tags?.includes(tag) ? "tag-selected" : "tag"
-                  }
-                  onClick={() => handleTagToggle(tag)}
-                >
-                  {tag}
-                </button>
+            <div>
+              {PUBLIC_TAG_CATEGORIES.map((catObj) => (
+                <div key={catObj.name} className="public-tag-category-block">
+                  <div
+                    className="tag-category-header"
+                    onClick={() => togglePublicCategory(catObj.name)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <span>{catObj.name}</span>
+                    <button
+                      className="tag-toggle-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePublicCategory(catObj.name);
+                      }}
+                    >
+                      {collapsedPublicCategories.has(catObj.name) ? "▸" : "▾"}
+                    </button>
+                  </div>
+                  {!collapsedPublicCategories.has(catObj.name) && (
+                    <div className="tag-row">
+                      {catObj.tags.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          className={
+                            summary.tags?.includes(tag) ? "tag-selected" : "tag"
+                          }
+                          onClick={() => handleTagToggle(tag)}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>

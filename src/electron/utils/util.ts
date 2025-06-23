@@ -8,7 +8,7 @@ import {
 import fs from "fs";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
-import { PUBLIC_TAGS } from "../publicTags.js";
+import { PUBLIC_TAG_CATEGORIES } from "../publicTags.js";
 import { getSetting } from "../settings.js";
 import {
   getAllowedUrls,
@@ -16,6 +16,8 @@ import {
 } from "../windows/subWindowManager.js";
 
 const logger = createLoggerForFile("util.ts");
+
+const PUBLIC_TAGS_FLAT = PUBLIC_TAG_CATEGORIES.flatMap((cat) => cat.tags);
 
 let isSubWindowDevtoolsEnabled = false;
 let isSmallWindowDevtoolsEnabled = false;
@@ -480,7 +482,7 @@ export async function indexBackgrounds() {
   const localTags = await getSetting("localTags");
 
   const allowedTags = [
-    ...PUBLIC_TAGS.map((tag) => tag.toLowerCase()),
+    ...PUBLIC_TAGS_FLAT.map((tag) => tag.toLowerCase()),
     ...(Array.isArray(localTags) ? localTags.map((tag) => tag.name) : []),
   ];
 

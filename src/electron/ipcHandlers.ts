@@ -7,7 +7,7 @@ import mime from "mime-types";
 import path from "path";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getScriptsPath } from "./pathResolver.js";
-import { PUBLIC_TAGS } from "./publicTags.js";
+import { PUBLIC_TAG_CATEGORIES } from "./publicTags.js";
 import { getSafeFileUrl } from "./safeFileProtocol.js";
 import {
   addCategory,
@@ -58,6 +58,7 @@ import {
 ffmpeg.setFfprobePath(ffprobeStatic.path);
 
 const logger = createLoggerForFile("ipcHandlers.ts");
+const PUBLIC_TAGS_FLAT = PUBLIC_TAG_CATEGORIES.flatMap((cat) => cat.tags);
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {
@@ -1376,7 +1377,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             description: bg.public?.description,
             iconPath: iconPath,
             tags: (bg.public?.tags ?? []).filter((t: string) =>
-              PUBLIC_TAGS.includes(t)
+              PUBLIC_TAGS_FLAT.includes(t)
             ),
             localTags: (bg.local?.tags ?? []).filter((t: string) =>
               (getSetting("localTags") as LocalTag[]).some(
@@ -1456,7 +1457,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             tags: (bg.public?.tags ?? []).filter(
               (
                 t: string // Only return public tags.
-              ) => PUBLIC_TAGS.includes(t)
+              ) => PUBLIC_TAGS_FLAT.includes(t)
             ),
             localTags: bg.local?.tags ?? [],
           };
@@ -1568,7 +1569,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const name = tag.name.toLowerCase();
 
       // Check against PUBLIC_TAGS
-      if (PUBLIC_TAGS.map((t) => t.toLowerCase()).includes(name)) {
+      if (PUBLIC_TAGS_FLAT.map((t) => t.toLowerCase()).includes(name)) {
         logger.warn(`Attempted to add a public tag as a local tag: ${name}`);
         openSmallWindow(
           "Invalid Tag",
