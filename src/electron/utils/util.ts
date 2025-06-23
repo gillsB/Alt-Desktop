@@ -865,3 +865,22 @@ export async function promisePool<T>(
   // Wait for all to finish
   await Promise.all(executing);
 }
+
+/**
+ * Backs up the given file to file_old.json in the same directory, if not already present.
+ * Returns true if backup was made, false if already exists or failed.
+ */
+export function backupSettingsFile(settingsPath: string): boolean {
+  try {
+    const dir = path.dirname(settingsPath);
+    const backupPath = path.join(dir, "settings_old.json");
+    if (!fs.existsSync(backupPath) && fs.existsSync(settingsPath)) {
+      fs.copyFileSync(settingsPath, backupPath);
+      return true;
+    }
+  } catch (e) {
+    logger.error("Failed to backup settings file:", e);
+    return false;
+  }
+  return false;
+}

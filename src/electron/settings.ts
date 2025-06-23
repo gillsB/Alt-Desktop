@@ -1,7 +1,11 @@
 import { app } from "electron";
 import fs from "fs";
 import { createLoggerForFile } from "./logging.js";
-import { getSettingsFilePath, saveExternalPaths } from "./utils/util.js";
+import {
+  backupSettingsFile,
+  getSettingsFilePath,
+  saveExternalPaths,
+} from "./utils/util.js";
 import { openSmallWindow } from "./windows/subWindowManager.js";
 
 export const defaultSettings: SettingsData = {
@@ -19,6 +23,7 @@ export const defaultSettings: SettingsData = {
 const logger = createLoggerForFile("settings.ts");
 
 let pendingSettingsError: string | null = null;
+let pendingSettingsNotice: string | null = null;
 
 /**
  * Ensures that all default settings exist in the settings file.
@@ -62,6 +67,9 @@ export const ensureDefaultSettings = (): void => {
 
     // Write updated settings back to the file if changes were made
     if (updated) {
+      // Backup before overwriting
+      backupSettingsFile(settingsFilePath);
+
       fs.writeFileSync(
         settingsFilePath,
         JSON.stringify(settings, null, 2),
@@ -70,6 +78,8 @@ export const ensureDefaultSettings = (): void => {
       logger.info(
         "Settings file updated with missing or fixed default settings."
       );
+      pendingSettingsNotice =
+        "Default settings have been restored or migrated to a new format.\nIf you notice any issues, a backup of your previous settings is saved as settings_old.json in User/AppData/Roaming/AltDesktop.";
     } else {
       logger.info(
         "No missing or invalid settings detected. Settings file is up-to-date."
@@ -83,11 +93,16 @@ export const ensureDefaultSettings = (): void => {
 };
 
 app.on("ready", () => {
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
     if (pendingSettingsError) {
       logger.info("Attempting to show settings error window.");
-      openSmallWindow("Settings Error", pendingSettingsError, ["OK"]);
+      await openSmallWindow("Settings Error", pendingSettingsError, ["OK"]);
       pendingSettingsError = null; // Clear the error after showing the window
+    }
+    if (pendingSettingsNotice) {
+      logger.info("Attempting to show settings notice window.");
+      await openSmallWindow("Settings Notice", pendingSettingsNotice, ["OK"]);
+      pendingSettingsNotice = null; // Clear the notice after showing the window
     }
   });
 });
