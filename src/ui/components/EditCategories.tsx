@@ -14,6 +14,9 @@ interface DragState {
 
 const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const [categoryInput, setCategoryInput] = useState("");
+  const [categoriesObj, setCategoriesObj] = useState<Record<string, boolean>>(
+    {}
+  );
   const [categories, setCategories] = useState<string[]>([]);
   const [dragState, setDragState] = useState<DragState>({
     draggedIndex: null,
@@ -32,9 +35,12 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 
   const fetchCategories = async () => {
     try {
-      const cats: string[] = await window.electron.getTagCategories();
-      logger.info(`Categories: ${cats}`);
-      setCategories(cats);
+      const catsObj: Record<string, boolean> =
+        (await window.electron.getSetting("categories")) ?? // fallback
+        {};
+      setCategoriesObj(catsObj);
+      setCategories(Object.keys(catsObj));
+      logger.info(`Categories: ${Object.keys(catsObj)}`);
     } catch (e) {
       logger.error("Failed to fetch categories", e);
     }
@@ -71,10 +77,10 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     }
 
     try {
-      await window.electron.saveSettingsData({
-        categories: [categoryInput, ...categories],
-      });
-      setCategories([categoryInput, ...categories]);
+      const newObj = { [categoryInput]: true, ...categoriesObj };
+      await window.electron.saveSettingsData({ categories: newObj });
+      setCategoriesObj(newObj);
+      setCategories(Object.keys(newObj));
       setCategoryInput("");
       logger.info(`Category added: ${categoryInput}`);
     } catch (error) {
@@ -167,14 +173,16 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       return;
     }
 
-    const newCategories = [...categories];
-    const draggedItem = newCategories[draggedIndex];
+    // Reorder the keys, but keep the expanded/collapsed state
+    const newOrder = [...categories];
+    const [removed] = newOrder.splice(draggedIndex, 1);
+    newOrder.splice(insertIndex, 0, removed);
 
-    // Remove the dragged item
-    newCategories.splice(draggedIndex, 1);
-
-    // Insert it at the new position
-    newCategories.splice(insertIndex, 0, draggedItem);
+    // Rebuild the object in the new order
+    const newObj: Record<string, boolean> = {};
+    for (const key of newOrder) {
+      newObj[key] = categoriesObj[key];
+    }
 
     logger.info(`Category moved from ${draggedIndex} to ${insertIndex}`);
 
@@ -185,8 +193,9 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       insertPosition: null,
     });
 
-    await window.electron.saveSettingsData({ categories: newCategories });
-    fetchCategories();
+    await window.electron.saveSettingsData({ categories: newObj });
+    setCategoriesObj(newObj);
+    setCategories(newOrder);
   };
 
   const getCategoryItemClass = (index: number) => {
@@ -215,6 +224,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     setEditingValue(categories[index]);
   };
 
+  // Rename category
   const finishEditing = async (index: number) => {
     if (editingIndex === null) return;
     const oldName = categories[editingIndex];
@@ -238,8 +248,17 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       const added = await window.electron.renameCategory(oldName, newName);
       logger.info("result for renameCategory:", added);
       if (added) {
-        const updated = [...categories];
-        updated[index] = newName;
+        // Update local state
+        const newObj: Record<string, boolean> = {};
+        for (const key of categories) {
+          if (key === oldName) {
+            newObj[newName] = categoriesObj[oldName];
+          } else {
+            newObj[key] = categoriesObj[key];
+          }
+        }
+        setCategoriesObj(newObj);
+        setCategories(Object.keys(newObj));
         fetchCategories();
       }
     }

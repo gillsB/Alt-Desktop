@@ -12,7 +12,7 @@ export const defaultSettings: SettingsData = {
   windowType: "WINDOWED",
   newBackgroundID: 1,
   externalPaths: [],
-  categories: [],
+  categories: {} as Record<string, boolean>,
   localTags: [],
 };
 
@@ -128,7 +128,8 @@ export const saveSettingsData = async (
 export async function getCategories(): Promise<string[]> {
   try {
     // Get current categories and localTags from settings
-    const categories = (getSetting("categories") as string[]) ?? [];
+    const categoriesObj =
+      (getSetting("categories") as Record<string, boolean>) ?? {};
     const localTags = (getSetting("localTags") as LocalTag[]) ?? [];
 
     // Get all unique, non-empty categories from localTags
@@ -140,32 +141,39 @@ export async function getCategories(): Promise<string[]> {
       )
     );
 
-    // Find categories in localTags not already in categories setting
-    const missing = tagCategories.filter((cat) => !categories.includes(cat));
-
-    // Add missing categories to the beginning of the categories array
-    if (missing.length > 0) {
-      logger.info(`Adding missing categories: ${missing}`);
-      categories.unshift(...missing);
-      await saveSettingsData({ categories });
+    // Add missing categories to the categories object (default to true/expanded)
+    let updated = false;
+    for (const cat of tagCategories) {
+      if (!(cat in categoriesObj)) {
+        categoriesObj[cat] = true;
+        updated = true;
+      }
     }
 
-    return categories;
+    if (updated) {
+      logger.info(
+        `Adding missing categories: ${tagCategories.filter((cat) => !(cat in categoriesObj))}`
+      );
+      await saveSettingsData({ categories: categoriesObj });
+    }
+
+    return Object.keys(categoriesObj);
   } catch (error) {
     logger.error("Error syncing and getting categories:", error);
     return [];
   }
 }
 
-export async function addCategory(name: string) {
+export async function addCategory(name: string, expanded = true) {
   try {
     if (!name) {
       return;
     }
-    const categories = (getSetting("categories") as string[]) ?? [];
-    if (!categories.includes(name)) {
-      categories.unshift(name);
-      await saveSettingsData({ categories });
+    const categoriesObj =
+      (getSetting("categories") as Record<string, boolean>) ?? {};
+    if (!(name in categoriesObj)) {
+      categoriesObj[name] = expanded;
+      await saveSettingsData({ categories: categoriesObj });
       logger.info("Added category", name);
     } else {
       logger.info("Category already exists", name);
@@ -183,12 +191,14 @@ export async function renameCategory(
     if (!oldName || !newName || oldName === newName) {
       return false;
     }
-    const categories = (getSetting("categories") as string[]) ?? [];
-    const index = categories.indexOf(oldName);
+    const categoriesObj =
+      (getSetting("categories") as Record<string, boolean>) ?? {};
     let updated = false;
 
-    if (index !== -1) {
-      categories[index] = newName;
+    if (oldName in categoriesObj) {
+      const expanded = categoriesObj[oldName];
+      delete categoriesObj[oldName];
+      categoriesObj[newName] = expanded;
       updated = true;
     } else {
       logger.warn(`Category ${oldName} not found for renaming`);
@@ -207,7 +217,7 @@ export async function renameCategory(
 
     if (updated || tagsUpdated) {
       await saveSettingsData({
-        categories,
+        categories: categoriesObj,
         localTags,
       });
       logger.info(
@@ -227,13 +237,13 @@ export async function deleteCategory(name: string): Promise<boolean> {
       return false;
     }
     // Remove from categories
-    const categories = (getSetting("categories") as string[]) ?? [];
-    const index = categories.indexOf(name);
-    if (index === -1) {
+    const categoriesObj =
+      (getSetting("categories") as Record<string, boolean>) ?? {};
+    if (!(name in categoriesObj)) {
       logger.warn(`Category ${name} not found for deletion`);
       return false;
     }
-    categories.splice(index, 1);
+    delete categoriesObj[name];
 
     // Update localTags: set category to "" for tags with this category
     let localTags = (getSetting("localTags") as LocalTag[]) ?? [];
@@ -245,7 +255,7 @@ export async function deleteCategory(name: string): Promise<boolean> {
     });
 
     await saveSettingsData({
-      categories,
+      categories: categoriesObj,
       localTags,
     });
     logger.info(`Deleted category "${name}" and reverted affected tags to ""`);
