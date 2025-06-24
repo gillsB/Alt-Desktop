@@ -180,6 +180,7 @@ const EditBackground: React.FC = () => {
 
   const togglePublicTags = () => {
     setCollapsedPublicTags((prev) => !prev);
+    togglePublicCategory("show");
   };
 
   const loadLocalTags = async () => {
