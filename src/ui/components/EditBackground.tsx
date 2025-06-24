@@ -106,8 +106,23 @@ const EditBackground: React.FC = () => {
   const toggleCategory = async (category: string) => {
     setCollapsedCategories((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(category)) newSet.delete(category);
-      else newSet.add(category);
+      let expanded = true;
+      if (newSet.has(category)) {
+        newSet.delete(category);
+        expanded = true;
+      } else {
+        newSet.add(category);
+        expanded = false;
+      }
+      // Update settings.json
+      window.electron
+        .getSetting("categories")
+        .then((categoriesObj: Record<string, boolean> | undefined) => {
+          if (categoriesObj && typeof categoriesObj === "object") {
+            categoriesObj[category] = expanded;
+            window.electron.saveSettingsData({ categories: categoriesObj });
+          }
+        });
       return newSet;
     });
   };
