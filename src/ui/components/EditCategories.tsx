@@ -32,12 +32,15 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(
     null
   );
+  const [emptyCategory, setEmptyCategory] = useState<boolean>(false);
 
   const fetchCategories = async () => {
     try {
       const catsObj: Record<string, boolean> =
-        (await window.electron.getSetting("categories")) ?? {}; // fallback
+        (await window.electron.getSetting("categories")) ?? {};
       setCategoriesObj(catsObj);
+      // Separate out "" category for appending on save
+      setEmptyCategory(Object.prototype.hasOwnProperty.call(catsObj, ""));
       setCategories(Object.keys(catsObj).filter((name) => name !== ""));
       logger.info(`Categories: ${Object.keys(catsObj)}`);
     } catch (e) {
@@ -77,9 +80,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 
     try {
       const newObj = { [categoryInput]: true, ...categoriesObj };
-      await window.electron.saveSettingsData({ categories: newObj });
-      setCategoriesObj(newObj);
-      setCategories(Object.keys(newObj));
+      await saveCategories(newObj);
       setCategoryInput("");
       logger.info(`Category added: ${categoryInput}`);
     } catch (error) {
@@ -145,6 +146,16 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     }
   };
 
+  // Re-attach the empty ("") category and save
+  const saveCategories = async (newObj: Record<string, boolean>) => {
+    if (emptyCategory) {
+      newObj[""] = categoriesObj[""];
+    }
+    await window.electron.saveSettingsData({ categories: newObj });
+    setCategoriesObj(newObj);
+    setCategories(Object.keys(newObj).filter((name) => name !== ""));
+  };
+
   const handleDrop = async (
     e: React.DragEvent<HTMLLIElement>,
     dropIndex: number
@@ -192,9 +203,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       insertPosition: null,
     });
 
-    await window.electron.saveSettingsData({ categories: newObj });
-    setCategoriesObj(newObj);
-    setCategories(newOrder);
+    await saveCategories(newObj);
   };
 
   const getCategoryItemClass = (index: number) => {
