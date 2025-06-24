@@ -130,11 +130,53 @@ const EditBackground: React.FC = () => {
   const togglePublicCategory = (category: string) => {
     setCollapsedPublicCategories((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(category)) newSet.delete(category);
-      else newSet.add(category);
+      let expanded = true;
+      if (newSet.has(category)) {
+        newSet.delete(category);
+        expanded = true;
+      } else {
+        newSet.add(category);
+        expanded = false;
+      }
+      // Update settings.json
+      window.electron
+        .getSetting("publicCategories")
+        .then(
+          (
+            publicCategoriesObj:
+              | (Record<string, boolean> & { show?: boolean })
+              | undefined
+          ) => {
+            if (
+              publicCategoriesObj &&
+              typeof publicCategoriesObj === "object"
+            ) {
+              publicCategoriesObj[category] = expanded;
+              window.electron.saveSettingsData({
+                publicCategories: publicCategoriesObj,
+              });
+            }
+          }
+        );
       return newSet;
     });
   };
+
+  useEffect(() => {
+    (async () => {
+      const publicCategoriesObj: Record<string, boolean> & { show?: boolean } =
+        (await window.electron.getSetting("publicCategories")) ?? {};
+      // Categories with value === false should be collapsed (ignore "show" key)
+      const collapsed = Object.entries(publicCategoriesObj)
+        .filter(([cat, expanded]) => cat !== "show" && !expanded)
+        .map(([cat]) => cat);
+      setCollapsedPublicCategories(new Set(collapsed));
+      // Set collapsedPublicTags from "show" property (if present)
+      if (typeof publicCategoriesObj.show === "boolean") {
+        setCollapsedPublicTags(!publicCategoriesObj.show);
+      }
+    })();
+  }, []);
 
   const togglePublicTags = () => {
     setCollapsedPublicTags((prev) => !prev);
