@@ -1,12 +1,20 @@
 import { app } from "electron";
 import fs from "fs";
 import { createLoggerForFile } from "./logging.js";
+import { PUBLIC_TAG_CATEGORIES } from "./publicTags.js";
 import {
   backupSettingsFile,
   getSettingsFilePath,
   saveExternalPaths,
 } from "./utils/util.js";
 import { openSmallWindow } from "./windows/subWindowManager.js";
+
+export const defaultPublicCategories: Record<string, boolean> & {
+  show: boolean;
+} = {
+  ...Object.fromEntries(PUBLIC_TAG_CATEGORIES.map((cat) => [cat.name, true])),
+  show: true,
+};
 
 export const defaultSettings: SettingsData = {
   background: "",
@@ -16,6 +24,7 @@ export const defaultSettings: SettingsData = {
   windowType: "WINDOWED",
   newBackgroundID: 1,
   externalPaths: [],
+  publicCategories: defaultPublicCategories,
   categories: {} as Record<string, boolean>,
   localTags: [],
 };
