@@ -36,10 +36,9 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const fetchCategories = async () => {
     try {
       const catsObj: Record<string, boolean> =
-        (await window.electron.getSetting("categories")) ?? // fallback
-        {};
+        (await window.electron.getSetting("categories")) ?? {}; // fallback
       setCategoriesObj(catsObj);
-      setCategories(Object.keys(catsObj));
+      setCategories(Object.keys(catsObj).filter((name) => name !== ""));
       logger.info(`Categories: ${Object.keys(catsObj)}`);
     } catch (e) {
       logger.error("Failed to fetch categories", e);
