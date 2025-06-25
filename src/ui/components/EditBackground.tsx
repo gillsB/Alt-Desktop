@@ -887,6 +887,12 @@ const EditBackground: React.FC = () => {
               </div>
               {/* Render all other categories in order, even if empty */}
               {categoryOrder
+                .filter((category) =>
+                  localTagSearch.trim()
+                    ? filteredGroupedLocalTags[category] &&
+                      filteredGroupedLocalTags[category].length > 0
+                    : true
+                )
                 .filter((category) => category !== "")
                 .map((category) => {
                   const isCollapsed = collapsedCategories.has(category);
