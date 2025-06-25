@@ -559,6 +559,21 @@ const EditBackground: React.FC = () => {
     return () => window.removeEventListener("click", closeMenu);
   }, [tagContextMenu]);
 
+  const filteredGroupedLocalTags = React.useMemo(() => {
+    if (!localTagSearch.trim()) return groupedLocalTags;
+    const search = localTagSearch.trim().toLowerCase();
+    const filtered: Record<string, LocalTag[]> = {};
+    for (const [category, tags] of Object.entries(groupedLocalTags)) {
+      const filteredTags = tags.filter((tag) =>
+        tag.name.toLowerCase().includes(search)
+      );
+      if (filteredTags.length > 0) {
+        filtered[category] = filteredTags;
+      }
+    }
+    return filtered;
+  }, [groupedLocalTags, localTagSearch]);
+
   return (
     <div className="edit-background-root">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -816,7 +831,7 @@ const EditBackground: React.FC = () => {
                 </div>
                 {!collapsedCategories.has("") && (
                   <div className="tag-grid">
-                    {(groupedLocalTags[""] || []).map((tagObj) => (
+                    {(filteredGroupedLocalTags[""] || []).map((tagObj) => (
                       <div
                         key={tagObj.name}
                         className={
@@ -876,7 +891,7 @@ const EditBackground: React.FC = () => {
                 .map((category) => {
                   const isCollapsed = collapsedCategories.has(category);
                   const isDragOver = dragOverCategory === category;
-                  const tags = groupedLocalTags[category] || [];
+                  const tags = filteredGroupedLocalTags[category] || [];
                   return (
                     <div
                       key={category}
