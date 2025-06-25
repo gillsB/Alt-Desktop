@@ -564,11 +564,17 @@ const EditBackground: React.FC = () => {
     const search = localTagSearch.trim().toLowerCase();
     const filtered: Record<string, LocalTag[]> = {};
     for (const [category, tags] of Object.entries(groupedLocalTags)) {
-      const filteredTags = tags.filter((tag) =>
-        tag.name.toLowerCase().includes(search)
-      );
-      if (filteredTags.length > 0) {
-        filtered[category] = filteredTags;
+      if (category.toLowerCase().includes(search)) {
+        // If category matches, show all tags in it
+        filtered[category] = tags;
+      } else {
+        // Otherwise, only show tags that match
+        const filteredTags = tags.filter((tag) =>
+          tag.name.toLowerCase().includes(search)
+        );
+        if (filteredTags.length > 0) {
+          filtered[category] = filteredTags;
+        }
       }
     }
     return filtered;
