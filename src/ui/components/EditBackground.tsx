@@ -166,21 +166,42 @@ const EditBackground: React.FC = () => {
     (async () => {
       const publicCategoriesObj: Record<string, boolean> & { show?: boolean } =
         (await window.electron.getSetting("publicCategories")) ?? {};
+      if (typeof publicCategoriesObj.show === "boolean") {
+        setCollapsedPublicTags(!publicCategoriesObj.show);
+      }
       // Categories with value === false should be collapsed (ignore "show" key)
       const collapsed = Object.entries(publicCategoriesObj)
         .filter(([cat, expanded]) => cat !== "show" && !expanded)
         .map(([cat]) => cat);
       setCollapsedPublicCategories(new Set(collapsed));
-      // Set collapsedPublicTags from "show" property (if present)
-      if (typeof publicCategoriesObj.show === "boolean") {
-        setCollapsedPublicTags(!publicCategoriesObj.show);
-      }
     })();
   }, []);
 
   const togglePublicTags = () => {
-    setCollapsedPublicTags((prev) => !prev);
-    togglePublicCategory("show");
+    setCollapsedPublicTags((prev) => {
+      const newVal = !prev;
+      // Save the correct value to settings: show = !collapsed
+      window.electron
+        .getSetting("publicCategories")
+        .then(
+          (
+            publicCategoriesObj:
+              | (Record<string, boolean> & { show?: boolean })
+              | undefined
+          ) => {
+            if (
+              publicCategoriesObj &&
+              typeof publicCategoriesObj === "object"
+            ) {
+              publicCategoriesObj.show = !newVal;
+              window.electron.saveSettingsData({
+                publicCategories: publicCategoriesObj,
+              });
+            }
+          }
+        );
+      return newVal;
+    });
   };
 
   const loadLocalTags = async () => {
