@@ -7,7 +7,7 @@
   font-size: 0.95rem;
   margin: 2px 0;
   background: #111111;
-  color: #bdbdbd;
+  color: #fff;
   cursor: pointer;
   transition:
     background 0.15s,
@@ -82,6 +82,9 @@
   height: unset;
   flex: unset;
   box-shadow: none;
+  cursor: pointer;
+  gap: 8px;
+  position: relative;
 }
 
 .tag-checkbox-row.selected {
@@ -105,29 +108,29 @@
 }
 
 .tag-name {
+  color: #fff;
   width: unset;
   font-size: 0.95rem;
-  color: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0 8px 0 12px;
-  padding: 4px 0;
+  padding: 4px 0 4px 12px;
   font-weight: 600;
-  cursor: pointer;
+  pointer-events: none;
+  flex-shrink: 1;
 }
 
 .tag-fav-star {
-  margin-left: auto; /* Pushes the star to the far right */
-  margin-right: 8px;
+  margin: 0;
   color: #ffd700;
   font-size: 1em;
   cursor: pointer;
   transition: color 0.15s;
   user-select: none;
   align-self: center;
+  margin-left: auto;
+  padding-right: 4px;
 }
-
 .tag-fav-star.not-fav {
   color: #444;
 }

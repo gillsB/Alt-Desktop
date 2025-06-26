@@ -861,13 +861,17 @@ const EditBackground: React.FC = () => {
                             category: "",
                           });
                         }}
+                        onClick={() => handlePersonalTagToggle(tagObj.name)}
+                        style={{ cursor: "pointer" }}
                       >
                         <input
                           type="checkbox"
                           className="tag-checkbox"
                           checked={summary.localTags?.includes(tagObj.name)}
-                          onChange={() => handlePersonalTagToggle(tagObj.name)}
+                          readOnly
+                          tabIndex={-1}
                           id={`tag-checkbox--${tagObj.name}`}
+                          style={{ pointerEvents: "none" }}
                         />
                         <label
                           className="tag-name"
@@ -881,8 +885,11 @@ const EditBackground: React.FC = () => {
                             "tag-fav-star" + (tagObj.favorite ? "" : " not-fav")
                           }
                           title={tagObj.favorite ? "Favorite" : "Not favorite"}
-                          style={{ cursor: "pointer" }}
-                          onClick={() => handleToggleFavorite(tagObj)}
+                          style={{ cursor: "pointer", marginLeft: "auto" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleFavorite(tagObj);
+                          }}
                         >
                           ★
                         </span>
@@ -958,6 +965,10 @@ const EditBackground: React.FC = () => {
                                   category,
                                 });
                               }}
+                              onClick={() =>
+                                handlePersonalTagToggle(tagObj.name)
+                              }
+                              style={{ cursor: "pointer" }}
                             >
                               <input
                                 type="checkbox"
@@ -965,10 +976,10 @@ const EditBackground: React.FC = () => {
                                 checked={summary.localTags?.includes(
                                   tagObj.name
                                 )}
-                                onChange={() =>
-                                  handlePersonalTagToggle(tagObj.name)
-                                }
+                                readOnly
+                                tabIndex={-1}
                                 id={`tag-checkbox-${category}-${tagObj.name}`}
+                                style={{ pointerEvents: "none" }} // Prevent input from blocking row click
                               />
                               <label
                                 className="tag-name"
@@ -985,8 +996,14 @@ const EditBackground: React.FC = () => {
                                 title={
                                   tagObj.favorite ? "Favorite" : "Not favorite"
                                 }
-                                style={{ cursor: "pointer" }}
-                                onClick={() => handleToggleFavorite(tagObj)}
+                                style={{
+                                  cursor: "pointer",
+                                  marginLeft: "auto",
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent row click
+                                  handleToggleFavorite(tagObj);
+                                }}
                               >
                                 ★
                               </span>
