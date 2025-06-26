@@ -570,6 +570,13 @@ const EditBackground: React.FC = () => {
     logger.info(
       `Renamed tag: ${renameModal?.tag.name} -> ${newName} in category: ${renameModal?.category}`
     );
+    // Update summary.localTags (unselects old tag name, selects new name)
+    setSummary((prev) => ({
+      ...prev,
+      localTags: prev.localTags?.map((t) =>
+        t === renameModal?.tag.name ? newName : t
+      ),
+    }));
     await loadLocalTags();
     setRenameModal(null);
   };
