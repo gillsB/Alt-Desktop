@@ -70,25 +70,34 @@
 .tag-checkbox-row {
   display: flex;
   align-items: center;
-  min-width: 140px;
-  padding: 2px 4px;
-  margin: 1px 0;
-  background: #181828;
-  border-radius: 7px;
-  border: 1px solid #232345;
-  transition: background 0.15s;
-  user-select: none;
-  height: 18px;
-  flex: 0 0 150px;
+  min-width: unset;
+  padding: 0;
+  margin: 2px 4px 2px 0;
+  background: none;
+  border: none;
+  border-radius: 16px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  height: unset;
+  flex: unset;
+  box-shadow: none;
 }
 
 .tag-checkbox-row.selected {
-  background: #007bff22;
-  border-color: #007bff;
+  background: #007bff;
+  color: #fff;
+  border: none;
 }
 
-.tag-checkbox-row:hover {
-  background: #232345;
+.tag-checkbox-row:not(.selected) {
+  background: #111111;
+  color: #bdbdbd;
+}
+
+.tag-checkbox-row:hover:not(.selected) {
+  background: #404063;
+  color: #fff;
 }
 
 .tag-checkbox {
@@ -96,23 +105,26 @@
 }
 
 .tag-name {
-  width: 140px;
-  font-size: 1rem;
-  color: #bdbdbd;
+  width: unset;
+  font-size: 0.95rem;
+  color: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-right: 2px;
+  margin: 0 8px 0 12px;
+  padding: 4px 0;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .tag-fav-star {
-  margin-left: auto;
+  margin-left: auto; /* Pushes the star to the far right */
+  margin-right: 8px;
   color: #ffd700;
   font-size: 1em;
   cursor: pointer;
   transition: color 0.15s;
   user-select: none;
-  margin-right: 0;
   align-self: center;
 }
 
@@ -156,8 +168,8 @@
 
 .tag-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 4px 12px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 4px 6px;
 }
 
 .edit-background-root {
