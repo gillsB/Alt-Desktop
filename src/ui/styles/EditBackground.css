@@ -32,7 +32,30 @@
 }
 
 .local-tags-header {
+  padding: 5px 14px;
+}
+
+.local-tags-header label {
   margin-bottom: 12px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  min-width: 80px;
+}
+
+.local-tags-header input[type="text"] {
+  padding: 4px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: #fff;
+  background: #000000;
+  margin-bottom: 0;
+  margin-right: 0;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .edit-background-tags-panel,
@@ -40,7 +63,7 @@
   overscroll-behavior: contain;
 }
 .local-tags {
-  margin-top: 15px;
+  margin-top: 10px;
   width: 100%;
 }
 
