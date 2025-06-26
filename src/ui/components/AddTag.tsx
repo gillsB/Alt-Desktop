@@ -136,4 +136,65 @@ const AddTagWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   );
 };
 
+export const RenameTagModal: React.FC<{
+  initialName: string;
+  existingNames: string[];
+  onRename: (newName: string) => void;
+  onCancel: () => void;
+}> = ({ initialName, existingNames, onRename, onCancel }) => {
+  const [value, setValue] = useState(initialName);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow lowercase, replace spaces with "-"
+    const val = e.target.value.toLowerCase().replace(/\s+/g, "-");
+    setValue(val);
+  };
+
+  const handleSubmit = async () => {
+    if (!value) {
+      await showSmallWindow("Invalid Tag Name", "Tag name cannot be empty.", [
+        "Okay",
+      ]);
+      return;
+    }
+    if (value !== initialName && existingNames.includes(value)) {
+      await showSmallWindow(
+        "Duplicate Tag",
+        "A tag with that name already exists.",
+        ["Okay"]
+      );
+      return;
+    }
+    onRename(value);
+  };
+
+  return (
+    <div className="modal-window-content">
+      <div className="modal-content">
+        <div className="subwindow-field">
+          <label>Rename Tag:</label>
+          <input
+            type="text"
+            value={value}
+            onChange={handleInputChange}
+            autoFocus
+            className="create-tag-input"
+            onKeyDown={async (e) => {
+              if (e.key === "Escape") onCancel();
+            }}
+          />
+        </div>
+      </div>
+      <div className="modal-window-footer">
+        <button className="button" onClick={handleSubmit}>
+          Rename
+        </button>
+        <button className="button" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default AddTagWindow;

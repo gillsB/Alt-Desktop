@@ -10,7 +10,7 @@ import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
-import AddTagWindow from "./AddTag";
+import AddTagWindow, { RenameTagModal } from "./AddTag";
 import EditCategories from "./EditCategories";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
@@ -48,7 +48,7 @@ const EditBackground: React.FC = () => {
   const [isHoveringBackgroundGlass, setHoveringBackgroundGlass] =
     useState(false);
   const [isHoveringIconGlass, setHoveringIconGlass] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [localTags, setLocalTags] = useState<LocalTag[]>([]);
   const [groupedLocalTags, setGroupedLocalTags] = useState<
     Record<string, LocalTag[]>
@@ -525,11 +525,6 @@ const EditBackground: React.FC = () => {
     setDragOverCategory(null);
   };
 
-  const handleRenameTag = (tag: LocalTag, category: string) => {
-    logger.info(`Rename tag: ${tag.name} in category: ${category}`);
-    setTagContextMenu(null);
-  };
-
   const handleDeleteTag = async (tag: LocalTag, category: string) => {
     const response = await showSmallWindow(
       "Delete Tag",
@@ -543,6 +538,7 @@ const EditBackground: React.FC = () => {
       setTagContextMenu(null);
     }
   };
+
   const handleToggleFavorite = async (tag: LocalTag) => {
     const updatedTag = { ...tag, favorite: !tag.favorite };
     logger.info(
@@ -550,6 +546,36 @@ const EditBackground: React.FC = () => {
     );
     await window.electron.updateLocalTag(tag.name, updatedTag);
     await loadLocalTags();
+  };
+
+  const [renameModal, setRenameModal] = useState<{
+    tag: LocalTag;
+    category: string;
+  } | null>(null);
+
+  // Handler for starting edit
+  const handleRenameTag = (tag: LocalTag, category: string) => {
+    setRenameModal({ tag, category });
+    setTagContextMenu(null);
+  };
+
+  // Handler for finishing edit
+  const handleFinishRenameTag = async (newName: string) => {
+    if (renameModal?.tag.name === newName) {
+      logger.info("No change in tag name, skipping rename.");
+      setRenameModal(null);
+      return;
+    }
+    await window.electron.renameLocalTag(renameModal?.tag.name ?? "", newName);
+    logger.info(
+      `Renamed tag: ${renameModal?.tag.name} -> ${newName} in category: ${renameModal?.category}`
+    );
+    await loadLocalTags();
+    setRenameModal(null);
+  };
+
+  const handleCancelRenameTag = () => {
+    setRenameModal(null);
   };
 
   useEffect(() => {
@@ -1084,6 +1110,21 @@ const EditBackground: React.FC = () => {
             }
           >
             Delete
+          </div>
+        </div>
+      )}
+      {renameModal && (
+        <div className="add-tag-modal-overlay" onClick={handleCancelRenameTag}>
+          <div
+            className="add-tag-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <RenameTagModal
+              initialName={renameModal.tag.name}
+              onRename={handleFinishRenameTag}
+              onCancel={handleCancelRenameTag}
+              existingNames={localTags.map((t) => t.name)}
+            />
           </div>
         </div>
       )}
