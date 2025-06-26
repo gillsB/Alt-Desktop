@@ -215,6 +215,7 @@ interface EventParamMapping {
   getTagCategories: [];
   renameCategory: [string, string];
   deleteCategory: [string];
+  renameLocalTag: [string, string];
 }
 
 // The returns from the main process to the renderer
@@ -279,6 +280,7 @@ type EventPayloadMapping = {
   getTagCategories: string[];
   renameCategory: boolean;
   deleteCategory: boolean;
+  renameLocalTag: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -394,5 +396,6 @@ interface Window {
     getTagCategories: () => Promise<string[]>;
     renameCategory: (oldName: string, newName: string) => Promise<boolean>;
     deleteCategory: (name: string) => Promise<boolean>;
+    renameLocalTag: (oldName: string, newName: string) => Promise<boolean>;
   };
 }

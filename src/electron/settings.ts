@@ -4,7 +4,9 @@ import { createLoggerForFile } from "./logging.js";
 import { PUBLIC_TAG_CATEGORIES } from "./publicTags.js";
 import {
   backupSettingsFile,
+  getBackgroundsJsonFilePath,
   getSettingsFilePath,
+  idToBgJson,
   saveExternalPaths,
 } from "./utils/util.js";
 import { openSmallWindow } from "./windows/subWindowManager.js";
@@ -169,6 +171,93 @@ export const saveSettingsData = async (
     return false;
   }
 };
+
+export async function renameLocalTag(
+  oldName: string,
+  newName: string
+): Promise<boolean> {
+  try {
+    if (!oldName || !newName || oldName === newName) {
+      logger.warn("Invalid tag names for renaming.");
+      return false;
+    }
+
+    // 1. Update localTags in settings.json
+    let localTags = (getSetting("localTags") as LocalTag[]) ?? [];
+    let tagsUpdated = false;
+    localTags = localTags.map((tag) => {
+      if (tag.name === oldName) {
+        tagsUpdated = true;
+        return { ...tag, name: newName };
+      }
+      return tag;
+    });
+
+    // 2. Update all bg.json files for backgrounds that reference the old tag name
+    const backgroundsFilePath = getBackgroundsJsonFilePath();
+    let backgroundsData: { backgrounds: Record<string, number> } = {
+      backgrounds: {},
+    };
+    if (fs.existsSync(backgroundsFilePath)) {
+      backgroundsData = JSON.parse(
+        fs.readFileSync(backgroundsFilePath, "utf-8")
+      );
+    }
+    const bgIds = Object.keys(backgroundsData.backgrounds);
+
+    for (const id of bgIds) {
+      const bgJsonPath = await idToBgJson(id);
+      if (fs.existsSync(bgJsonPath)) {
+        const bgData = JSON.parse(fs.readFileSync(bgJsonPath, "utf-8"));
+        // Update local tags if present
+        if (
+          bgData.local &&
+          Array.isArray(bgData.local.tags) &&
+          bgData.local.tags.includes(oldName)
+        ) {
+          bgData.local.tags = bgData.local.tags.map((tag: string) =>
+            tag === oldName ? newName : tag
+          );
+          fs.writeFileSync(
+            bgJsonPath,
+            JSON.stringify(bgData, null, 2),
+            "utf-8"
+          );
+          logger.info(
+            `Renamed local tag in ${bgJsonPath}: ${oldName} -> ${newName}`
+          );
+        }
+      }
+    }
+
+    // 3. Save updated localTags to settings
+    if (tagsUpdated) {
+      await saveSettingsData({ localTags });
+      logger.info(
+        `Renamed local tag "${oldName}" to "${newName}" in settings and backgrounds.`
+      );
+      return true;
+    } else {
+      await openSmallWindow(
+        "Error Renaming Local Tag",
+        `Failed to rename local tag from "${oldName}" to "${newName}".\nError: Tag not found.`,
+        ["OK"]
+      );
+      logger.warn(`Tag "${oldName}" not found in localTags for renaming.`);
+      return false;
+    }
+  } catch (e) {
+    await openSmallWindow(
+      "Error Renaming Local Tag",
+      `Failed to rename local tag from "${oldName}" to "${newName}".\nError: ${e}`,
+      ["OK"]
+    );
+    logger.error(
+      `Error renaming local tag from "${oldName}" to "${newName}": ${e}`
+    );
+    return false;
+  }
+}
 
 /**
  * Ensures all categories from localTags are present in the categories setting.
