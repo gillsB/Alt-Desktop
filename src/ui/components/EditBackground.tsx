@@ -255,17 +255,20 @@ const EditBackground: React.FC = () => {
 
   useEffect(() => {
     let cancelled = false;
-    if (summary.bgFile) {
-      window.electron.getFileType(summary.bgFile).then((type: string) => {
-        if (!cancelled) {
-          setBgFileType(type);
-          // Default to shortcut for videos, file for images
-          setSaveBgFileAsShortcut(type.startsWith("video"));
-        }
-      });
-    } else {
-      setBgFileType(null);
-    }
+    (async () => {
+      if (summary.bgFile) {
+        const path = await window.electron.resolveShortcut(summary.bgFile);
+        window.electron.getFileType(path).then((type: string) => {
+          if (!cancelled) {
+            setBgFileType(type);
+            // Default to shortcut for videos, file for images
+            setSaveBgFileAsShortcut(type.startsWith("video"));
+          }
+        });
+      } else {
+        setBgFileType(null);
+      }
+    })();
     return () => {
       cancelled = true;
     };
