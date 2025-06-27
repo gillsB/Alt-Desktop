@@ -315,7 +315,9 @@ export async function saveExternalPaths(paths: string[]) {
  * Indexes all background folders in the AppData/Roaming/AltDesktop/backgrounds directory.
  * It reads the directory, checks for subfolders containing a bg.json file, if found adds them to backgrounds.json.
  */
-export async function indexBackgrounds() {
+export async function indexBackgrounds(options?: {
+  newExternalPathAdded?: boolean;
+}) {
   const backgroundsDir = getBackgroundFilePath();
   const backgroundsJsonPath = getBackgroundsJsonFilePath();
 
@@ -408,7 +410,7 @@ export async function indexBackgrounds() {
   // Add new backgrounds if not already present
   let updated = false;
   let foundUnindexedBgJson = false;
-  let importWithSavedDate = false;
+  let importWithSavedDate = false; // Default to "Import as New"
 
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
@@ -416,8 +418,8 @@ export async function indexBackgrounds() {
     }
   }
 
-  // If any unindexed bg.json are found, prompt the user once
-  if (foundUnindexedBgJson) {
+  // Only prompt if unindexed bg.jsons found and newExternalPathAdded is true
+  if (foundUnindexedBgJson && options?.newExternalPathAdded) {
     const choice = await openSmallWindow(
       "Import Backgrounds",
       "Existing bg.json files found that are not indexed. \nHow would you like to import them?",
@@ -429,7 +431,7 @@ export async function indexBackgrounds() {
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
       let indexedTime: number | undefined = Math.floor(Date.now() / 1000);
-      const bgJsonPath = path.join(backgroundsDir, folderName, "bg.json");
+      const bgJsonPath = await idToBgJson(folderName);
       if (fs.existsSync(bgJsonPath)) {
         try {
           const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");

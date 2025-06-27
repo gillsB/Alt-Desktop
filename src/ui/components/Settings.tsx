@@ -68,6 +68,8 @@ const Settings: React.FC = () => {
       // Create a copy of the current settings to work with
       const updatedSettings = { ...settings };
 
+      const externalPathsChanged = getSpecificChanges(["externalPaths"]);
+
       logger.info("Saving settings data to file:", updatedSettings);
 
       if (
@@ -89,6 +91,14 @@ const Settings: React.FC = () => {
         logger.info("Settings saved successfully.");
         // Update the state once after everything is done
         setSettings(updatedSettings);
+
+        // If externalPaths changed, trigger re-index for new external paths
+        if (externalPathsChanged) {
+          await window.electron.indexBackgrounds({
+            newExternalPathAdded: true,
+          });
+        }
+
         closeWindow();
       } else {
         logger.error("Failed to save settings.");

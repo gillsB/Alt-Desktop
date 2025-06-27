@@ -34,6 +34,7 @@ import {
   getSettingsFilePath,
   idToBackgroundFolder,
   idToBackgroundPath,
+  indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
   resetAllIconsFontColor,
@@ -1688,4 +1689,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("renameLocalTag", async (oldName: string, newName: string) => {
     return renameLocalTag(oldName, newName);
   });
+  ipcMainHandle(
+    "indexBackgrounds",
+    async (options?: { newExternalPathAdded?: boolean }) => {
+      return indexBackgrounds(options);
+    }
+  );
 }
