@@ -257,7 +257,7 @@ const EditBackground: React.FC = () => {
     let cancelled = false;
     (async () => {
       if (summary.bgFile) {
-        const path = await window.electron.resolveShortcut(summary.bgFile);
+        const path = await window.electron.resolveShortcut(summary.bgFile); // Save filetype for raw file not shortcut
         window.electron.getFileType(path).then((type: string) => {
           if (!cancelled) {
             setBgFileType(type);
@@ -333,9 +333,21 @@ const EditBackground: React.FC = () => {
     }
 
     if (updatedSummary.bgFile) {
-      const bgFileType = await window.electron.getFileType(
-        updatedSummary.bgFile
-      );
+      let bgFilePath = updatedSummary.bgFile;
+      const bgFileType = await window.electron.getFileType(bgFilePath);
+
+      // If saving as file (not shortcut), resolve shortcut to source file so we can get the raw file
+      if (
+        (bgFileType === "application/x-ms-shortcut" ||
+          bgFilePath.toLowerCase().endsWith(".lnk")) &&
+        !saveBgFileAsShortcut
+      ) {
+        const resolved = await window.electron.resolveShortcut(bgFilePath);
+        if (resolved) {
+          bgFilePath = resolved;
+        }
+      }
+
       if (
         bgFileType.startsWith("image") ||
         bgFileType.startsWith("video") ||
@@ -343,7 +355,7 @@ const EditBackground: React.FC = () => {
       ) {
         updatedSummary.bgFile = await saveFileToBackground(
           updatedSummary.id,
-          updatedSummary.bgFile,
+          bgFilePath,
           bgFileType.startsWith("image") ||
             bgFileType === "application/x-ms-shortcut" // Save images or shortcuts to folder.
             ? true
