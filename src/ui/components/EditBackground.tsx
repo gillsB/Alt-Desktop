@@ -253,18 +253,34 @@ const EditBackground: React.FC = () => {
     };
   }, [summary.id]);
 
+  // If set file is a .lnk default to saving as a shortcut.
+  useEffect(() => {
+    (async () => {
+      if (summary.bgFile) {
+        const isShortcut =
+          summary.bgFile.toLowerCase().endsWith(".lnk") ||
+          (await window.electron.getFileType(summary.bgFile)) ===
+            "application/x-ms-shortcut";
+        setSaveBgFileAsShortcut(isShortcut);
+      } else {
+        setSaveBgFileAsShortcut(false);
+      }
+    })();
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       if (summary.bgFile) {
-        const path = await window.electron.resolveShortcut(summary.bgFile); // Save filetype for raw file not shortcut
-        window.electron.getFileType(path).then((type: string) => {
-          if (!cancelled) {
-            setBgFileType(type);
-            // Default to shortcut for videos, file for images
-            setSaveBgFileAsShortcut(type.startsWith("video"));
-          }
-        });
+        // Always resolve to get the real file type for actual background file
+        const resolvedPath = await window.electron.resolveShortcut(
+          summary.bgFile
+        );
+        const type = await window.electron.getFileType(resolvedPath);
+
+        if (!cancelled) {
+          setBgFileType(type);
+        }
       } else {
         setBgFileType(null);
       }
@@ -672,8 +688,8 @@ const EditBackground: React.FC = () => {
                     setSaveBgFileAsShortcut(e.target.value === "shortcut")
                   }
                 >
-                  <option value="shortcut">Shortcut (recommended)</option>
                   <option value="file">Copy File</option>
+                  <option value="shortcut">Shortcut</option>
                 </select>
               </div>
             </div>
