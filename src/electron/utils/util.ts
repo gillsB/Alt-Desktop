@@ -6,6 +6,7 @@ import {
   WebFrameMain,
 } from "electron";
 import fs from "fs";
+import fsExtra from "fs-extra";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
 import { PUBLIC_TAG_CATEGORIES } from "../publicTags.js";
@@ -997,7 +998,23 @@ export async function moveToBackgroundFolder(
     if (fs.existsSync(targetDir))
       throw new Error(`Target folder already exists: ${targetDir}`);
 
-    await fs.promises.rename(sourceDir, targetDir);
+    try {
+      await fs.promises.rename(sourceDir, targetDir);
+    } catch (err) {
+      logger.warn(
+        `Rename failed (${(err as Error).message}), trying copy+remove...`
+      );
+      try {
+        await fsExtra.copy(sourceDir, targetDir);
+        await fsExtra.remove(sourceDir);
+      } catch (copyErr) {
+        logger.error(
+          `Failed to move background folder via copy+remove:`,
+          copyErr
+        );
+        throw copyErr;
+      }
+    }
 
     logger.info(
       `Moved background folder from ${sourceDir} to ${targetDir}. New ID: ${newId}`
@@ -1010,7 +1027,8 @@ export async function moveToBackgroundFolder(
 }
 
 /**
- * Finds a unique folder name in the target directory by appending _1, _2, etc. if needed.
+ * Finds a unique folder name in the target directory by incrementing a trailing _number if present,
+ * or appending _1, _2, etc. if not.
  * Returns the unique folder name (not the full path).
  */
 export async function getUniqueBackgroundFolderName(
@@ -1019,9 +1037,21 @@ export async function getUniqueBackgroundFolderName(
 ): Promise<string> {
   let candidate = baseId;
   let counter = 1;
+
+  // Check if baseId already ends with _number
+  const match = baseId.match(/^(.*?)(?:_(\d+))?$/);
+  let baseName = baseId;
+  let baseNumber = 0;
+  if (match) {
+    baseName = match[1];
+    baseNumber = match[2] ? parseInt(match[2], 10) : 0;
+  }
+
+  candidate = baseId;
   while (fs.existsSync(path.join(baseDir, candidate))) {
-    candidate = `${baseId}_${counter}`;
-    counter++;
+    counter = baseNumber + 1;
+    candidate = `${baseName}_${counter}`;
+    baseNumber = counter;
   }
   return candidate;
 }
