@@ -951,21 +951,32 @@ export async function moveToBackgroundFolder(
       sourceDir = path.join(getBackgroundFilePath(), baseId);
     }
 
-    // Determine target folder and new ID
-    let targetDir: string;
+    // Determine target base directory and newId
+    let targetBaseDir: string;
     let newId: string;
+    let uniqueFolderName: string;
     if (targetLocation === "default") {
-      targetDir = path.join(getBackgroundFilePath(), baseId);
-      newId = baseId;
+      targetBaseDir = getBackgroundFilePath();
+      uniqueFolderName = await getUniqueBackgroundFolderName(
+        targetBaseDir,
+        baseId
+      );
+      newId = uniqueFolderName;
     } else if (targetLocation.startsWith("external:")) {
       const extIdx = Number(targetLocation.split(":")[1]);
       const extBase = await getExternalPath(extIdx);
       if (!extBase) throw new Error(`External path ${extIdx} not found`);
-      targetDir = path.join(extBase, baseId);
-      newId = `ext::${extIdx}::${baseId}`;
+      targetBaseDir = extBase;
+      uniqueFolderName = await getUniqueBackgroundFolderName(
+        targetBaseDir,
+        baseId
+      );
+      newId = `ext::${extIdx}::${uniqueFolderName}`;
     } else {
       throw new Error("Invalid targetLocation");
     }
+
+    const targetDir = path.join(targetBaseDir, uniqueFolderName);
 
     // Prevent moving to the same location
     if (sourceDir === targetDir) {
@@ -991,4 +1002,21 @@ export async function moveToBackgroundFolder(
     logger.error("Failed to move background folder:", e);
     return null;
   }
+}
+
+/**
+ * Finds a unique folder name in the target directory by appending _1, _2, etc. if needed.
+ * Returns the unique folder name (not the full path).
+ */
+export async function getUniqueBackgroundFolderName(
+  baseDir: string,
+  baseId: string
+): Promise<string> {
+  let candidate = baseId;
+  let counter = 1;
+  while (fs.existsSync(path.join(baseDir, candidate))) {
+    candidate = `${baseId}_${counter}`;
+    counter++;
+  }
+  return candidate;
 }
