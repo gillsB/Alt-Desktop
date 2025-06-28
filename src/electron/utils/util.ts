@@ -471,18 +471,18 @@ export async function indexBackgrounds(options?: {
   }
 
   // Remove non-existent backgrounds
-  const removedIds = [];
+  const removedIds: { id: string; value: any }[] = [];
   for (const id of Object.keys(backgroundsData.backgrounds)) {
     if (!validIds.has(id)) {
       logger.info(`Removing non-existent background: ${id}`);
-      removedIds.push(id);
+      removedIds.push({ id, value: backgroundsData.backgrounds[id] });
       delete backgroundsData.backgrounds[id];
       updated = true;
     }
   }
 
   // Find suspected moves
-  for (const removedId of removedIds) {
+  for (const { id: removedId, value: removedValue } of removedIds) {
     let baseId = removedId;
     const extMatch = removedId.match(/^ext::\d+::(.+)$/);
     if (extMatch) {
@@ -496,6 +496,18 @@ export async function indexBackgrounds(options?: {
       }
       if (baseId === newBaseId) {
         logger.info(`suspected move from ${removedId} to ${newId}`);
+        // Transfer indexed time
+        const oldIndexed: number = removedValue;
+        if (
+          oldIndexed !== undefined &&
+          backgroundsData.backgrounds[newId] !== undefined
+        ) {
+          backgroundsData.backgrounds[newId] = oldIndexed;
+          logger.info(
+            `Suspected move from ${removedId} to ${newId}. Set indexed time of ${newId} to original time from ${removedId}: ${oldIndexed}`
+          );
+          updated = true;
+        }
         break;
       }
     }
