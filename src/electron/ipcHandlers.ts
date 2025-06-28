@@ -1695,4 +1695,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return indexBackgrounds(options);
     }
   );
+  ipcMainHandle(
+    "moveToBackgroundFolder",
+    async (id: string, targetLocation: string): Promise<string | null> => {
+      logger.info("Moving background:", id, "to", targetLocation);
+      return "";
+    }
+  );
 }

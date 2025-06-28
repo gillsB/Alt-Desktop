@@ -217,6 +217,7 @@ interface EventParamMapping {
   deleteCategory: [string];
   renameLocalTag: [string, string];
   indexBackgrounds: [options?: { newExternalPathAdded?: boolean }];
+  moveToBackgroundFolder: [string, string];
 }
 
 // The returns from the main process to the renderer
@@ -283,6 +284,7 @@ type EventPayloadMapping = {
   deleteCategory: boolean;
   renameLocalTag: boolean;
   indexBackgrounds: void;
+  moveToBackgroundFolder: string | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -402,5 +404,9 @@ interface Window {
     indexBackgrounds: (options?: {
       newExternalPathAdded?: boolean;
     }) => Promise<void>;
+    moveToBackgroundFolder: (
+      id: string,
+      targetLocation: string
+    ) => Promise<string | null>;
   };
 }

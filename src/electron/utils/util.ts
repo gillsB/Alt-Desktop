@@ -471,7 +471,7 @@ export async function indexBackgrounds(options?: {
   }
 
   // Remove non-existent backgrounds
-  const removedIds: { id: string; value: any }[] = [];
+  const removedIds: { id: string; value: number }[] = [];
   for (const id of Object.keys(backgroundsData.backgrounds)) {
     if (!validIds.has(id)) {
       logger.info(`Removing non-existent background: ${id}`);
