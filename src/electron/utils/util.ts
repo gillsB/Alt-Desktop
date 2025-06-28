@@ -488,12 +488,17 @@ export async function indexBackgrounds(options?: {
     if (extMatch) {
       baseId = extMatch[1];
     }
+    // Remove trailing _number if present
+    baseId = baseId.replace(/_\d+$/, "");
+
     for (const newId of newIds) {
       let newBaseId = newId;
       const newExtMatch = newId.match(/^ext::\d+::(.+)$/);
       if (newExtMatch) {
         newBaseId = newExtMatch[1];
       }
+      // Remove trailing _number if present
+      newBaseId = newBaseId.replace(/_\d+$/, "");
       if (baseId === newBaseId) {
         logger.info(`suspected move from ${removedId} to ${newId}`);
         // Transfer indexed time
