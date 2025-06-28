@@ -428,8 +428,10 @@ export async function indexBackgrounds(options?: {
     importWithSavedDate = choice === "Import with Saved Date";
   }
 
+  const newIds = [];
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
+      newIds.push(folderName);
       let indexedTime: number | undefined = Math.floor(Date.now() / 1000);
       const bgJsonPath = await idToBgJson(folderName);
       if (fs.existsSync(bgJsonPath)) {
@@ -469,11 +471,33 @@ export async function indexBackgrounds(options?: {
   }
 
   // Remove non-existent backgrounds
+  const removedIds = [];
   for (const id of Object.keys(backgroundsData.backgrounds)) {
     if (!validIds.has(id)) {
       logger.info(`Removing non-existent background: ${id}`);
+      removedIds.push(id);
       delete backgroundsData.backgrounds[id];
       updated = true;
+    }
+  }
+
+  // Find suspected moves
+  for (const removedId of removedIds) {
+    let baseId = removedId;
+    const extMatch = removedId.match(/^ext::\d+::(.+)$/);
+    if (extMatch) {
+      baseId = extMatch[1];
+    }
+    for (const newId of newIds) {
+      let newBaseId = newId;
+      const newExtMatch = newId.match(/^ext::\d+::(.+)$/);
+      if (newExtMatch) {
+        newBaseId = newExtMatch[1];
+      }
+      if (baseId === newBaseId) {
+        logger.info(`suspected move from ${removedId} to ${newId}`);
+        break;
+      }
     }
   }
 
