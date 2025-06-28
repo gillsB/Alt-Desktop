@@ -922,3 +922,73 @@ export function backupSettingsFile(settingsPath: string): boolean {
   }
   return false;
 }
+
+/**
+ * Moves a background folder (and its bg.json) from its current location to a new directory.
+ * @param id The background ID (may be ext::<index>::<baseId> or just <baseId> (for default location))
+ * @param targetLocation "default" or "external:<index>" (e.g., "external:0")
+ * @returns The new ID if successful, or null if failed.
+ */
+export async function moveToBackgroundFolder(
+  id: string,
+  targetLocation: string
+): Promise<string | null> {
+  try {
+    // Determine source folder and baseId
+    let baseId = id;
+    let sourceDir: string;
+    let sourceExtIndex: number | null = null;
+
+    const extMatch = id.match(/^ext::(\d+)::(.+)$/);
+    if (extMatch) {
+      sourceExtIndex = Number(extMatch[1]);
+      baseId = extMatch[2];
+      const extBase = await getExternalPath(sourceExtIndex);
+      if (!extBase)
+        throw new Error(`External path ${sourceExtIndex} not found`);
+      sourceDir = path.join(extBase, baseId);
+    } else {
+      sourceDir = path.join(getBackgroundFilePath(), baseId);
+    }
+
+    // Determine target folder and new ID
+    let targetDir: string;
+    let newId: string;
+    if (targetLocation === "default") {
+      targetDir = path.join(getBackgroundFilePath(), baseId);
+      newId = baseId;
+    } else if (targetLocation.startsWith("external:")) {
+      const extIdx = Number(targetLocation.split(":")[1]);
+      const extBase = await getExternalPath(extIdx);
+      if (!extBase) throw new Error(`External path ${extIdx} not found`);
+      targetDir = path.join(extBase, baseId);
+      newId = `ext::${extIdx}::${baseId}`;
+    } else {
+      throw new Error("Invalid targetLocation");
+    }
+
+    // Prevent moving to the same location
+    if (sourceDir === targetDir) {
+      logger.warn(
+        "Source and target directories are the same. No move performed."
+      );
+      return id;
+    }
+
+    // Move the folder
+    if (!fs.existsSync(sourceDir))
+      throw new Error(`Source folder does not exist: ${sourceDir}`);
+    if (fs.existsSync(targetDir))
+      throw new Error(`Target folder already exists: ${targetDir}`);
+
+    await fs.promises.rename(sourceDir, targetDir);
+
+    logger.info(
+      `Moved background folder from ${sourceDir} to ${targetDir}. New ID: ${newId}`
+    );
+    return newId;
+  } catch (e) {
+    logger.error("Failed to move background folder:", e);
+    return null;
+  }
+}
