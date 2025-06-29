@@ -429,7 +429,8 @@ export async function indexBackgrounds(options?: {
     importWithSavedDate = choice === "Import with Saved Date";
   }
 
-  const newIds = [];
+  const newIds: string[] = [];
+  const newBgIndexedTimes: Record<string, number> = {};
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
       newIds.push(folderName);
@@ -448,26 +449,18 @@ export async function indexBackgrounds(options?: {
           ) {
             // Use saved date from bg.json if user chose "Import with Saved Date"
             indexedTime = Number(bg.local.indexed);
-          } else {
-            // Use current time for "Import as New" or if no valid saved date
-            await saveBgJsonFile({ id: folderName, localIndexed: indexedTime });
           }
         } catch (e) {
           logger.warn(
             `Could not read indexed value from ${bgJsonPath}, using current time. error: ${e}`
           );
-          await saveBgJsonFile({ id: folderName, localIndexed: indexedTime });
         }
       }
       // In case saved time in bg.json is not valid or not found
       if (indexedTime === undefined) {
         indexedTime = Math.floor(Date.now() / 1000);
       }
-      logger.info(
-        `Adding new background: ${folderName}, indexed at ${indexedTime}`
-      );
-      backgroundsData.backgrounds[folderName] = indexedTime;
-      updated = true;
+      newBgIndexedTimes[folderName] = indexedTime;
     }
   }
 
@@ -483,6 +476,7 @@ export async function indexBackgrounds(options?: {
   }
 
   // Find suspected moves
+  const suspectedMoves = new Set<string>();
   for (const { id: removedId, value: removedValue } of removedIds) {
     let baseId = removedId;
     const extMatch = removedId.match(/^ext::\d+::(.+)$/);
@@ -506,7 +500,7 @@ export async function indexBackgrounds(options?: {
         const oldIndexed: number = removedValue;
         if (
           oldIndexed !== undefined &&
-          backgroundsData.backgrounds[newId] !== undefined
+          newBgIndexedTimes[newId] !== undefined
         ) {
           backgroundsData.backgrounds[newId] = oldIndexed;
           // reset the local.indexed time in bg.json
@@ -515,9 +509,24 @@ export async function indexBackgrounds(options?: {
             `Suspected move from ${removedId} to ${newId}. Set indexed time of ${newId} to original time from ${removedId}: ${oldIndexed}`
           );
           updated = true;
+          suspectedMoves.add(newId);
         }
         break;
       }
+    }
+  }
+
+  for (const newId of newIds) {
+    if (!suspectedMoves.has(newId)) {
+      backgroundsData.backgrounds[newId] = newBgIndexedTimes[newId];
+      await saveBgJsonFile({
+        id: newId,
+        localIndexed: newBgIndexedTimes[newId],
+      });
+      logger.info(
+        `Added new background: ${newId}, indexed at ${newBgIndexedTimes[newId]}`
+      );
+      updated = true;
     }
   }
 
