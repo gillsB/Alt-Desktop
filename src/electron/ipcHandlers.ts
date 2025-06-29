@@ -37,7 +37,7 @@ import {
   indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
-  moveToBackgroundFolder,
+  changeBackgroundDirectory,
   resetAllIconsFontColor,
   resolveShortcut,
   saveBgJsonFile,
@@ -1697,9 +1697,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
   ipcMainHandle(
-    "moveToBackgroundFolder",
+    "changeBackgroundDirectory",
     async (id: string, targetLocation: string): Promise<string | null> => {
-      return moveToBackgroundFolder(id, targetLocation);
+      return changeBackgroundDirectory(id, targetLocation);
     }
   );
 }

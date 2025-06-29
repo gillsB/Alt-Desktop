@@ -935,7 +935,7 @@ export function backupSettingsFile(settingsPath: string): boolean {
  * @param targetLocation "default" or "external:<index>" (e.g., "external:0")
  * @returns The new ID if successful, or null if failed.
  */
-export async function moveToBackgroundFolder(
+export async function changeBackgroundDirectory(
   id: string,
   targetLocation: string
 ): Promise<string | null> {
@@ -994,7 +994,9 @@ export async function moveToBackgroundFolder(
 
     // Move the folder
     if (!fs.existsSync(sourceDir))
-      throw new Error(`Source folder does not exist: ${sourceDir}`);
+      throw new Error(
+        `Source folder does not exist: ${sourceDir}. target: ${targetDir}`
+      );
     if (fs.existsSync(targetDir))
       throw new Error(`Target folder already exists: ${targetDir}`);
 
