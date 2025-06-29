@@ -509,6 +509,8 @@ export async function indexBackgrounds(options?: {
           backgroundsData.backgrounds[newId] !== undefined
         ) {
           backgroundsData.backgrounds[newId] = oldIndexed;
+          // reset the local.indexed time in bg.json
+          await saveBgJsonFile({ id: newId, localIndexed: oldIndexed });
           logger.info(
             `Suspected move from ${removedId} to ${newId}. Set indexed time of ${newId} to original time from ${removedId}: ${oldIndexed}`
           );
