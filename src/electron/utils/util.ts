@@ -339,39 +339,40 @@ export async function indexBackgrounds(options?: {
     }
   }
 
-  // External Paths
+  // Load External Paths from settings.json
   let externalPaths: string[] = [];
-  if (fs.existsSync(backgroundsJsonPath)) {
+  const settingsPath = getSettingsFilePath();
+  if (fs.existsSync(settingsPath)) {
     try {
-      const raw = await fs.promises.readFile(backgroundsJsonPath, "utf-8");
-      const data = JSON.parse(raw);
-      if (Array.isArray(data.externalPaths)) {
-        externalPaths = data.externalPaths.filter(
+      const rawSettings = await fs.promises.readFile(settingsPath, "utf-8");
+      const settings = JSON.parse(rawSettings);
+      if (Array.isArray(settings.externalPaths)) {
+        externalPaths = settings.externalPaths.filter(
           (p: string) => typeof p === "string"
         );
+        logger.info("Loaded externalPaths from settings.json:", externalPaths);
       }
     } catch (e) {
-      logger.warn("Failed to read externalPaths from backgrounds.json:", e);
+      logger.warn("Failed to read externalPaths from settings.json:", e);
     }
   }
-  for (const extDir of externalPaths) {
-    if (!fs.existsSync(extDir)) continue;
-    try {
-      const extEntries = await fs.promises.readdir(extDir, {
-        withFileTypes: true,
-      });
-      for (const entry of extEntries) {
-        if (entry.isDirectory()) {
-          const subfolderPath = path.join(extDir, entry.name);
-          const bgJsonPath = path.join(subfolderPath, "bg.json");
-          if (fs.existsSync(bgJsonPath)) {
-            const id = `ext::${externalPaths.indexOf(extDir)}::${entry.name}`;
-            subfoldersWithBgJson.push(id);
-          }
+
+  // index external paths backgrounds
+  for (let i = 0; i < externalPaths.length; i++) {
+    const extBase = externalPaths[i];
+    if (!extBase || !fs.existsSync(extBase)) continue;
+    const extEntries = await fs.promises.readdir(extBase, {
+      withFileTypes: true,
+    });
+    for (const entry of extEntries) {
+      if (entry.isDirectory()) {
+        const subfolderPath = path.join(extBase, entry.name);
+        const bgJsonPath = path.join(subfolderPath, "bg.json");
+        if (fs.existsSync(bgJsonPath)) {
+          // Use the external ID format: ext::<index>::<folder>
+          subfoldersWithBgJson.push(`ext::${i}::${entry.name}`);
         }
       }
-    } catch (e) {
-      logger.warn(`Failed to index external backgrounds in ${extDir}:`, e);
     }
   }
 
