@@ -7,7 +7,6 @@ import {
   getBackgroundsJsonFilePath,
   getSettingsFilePath,
   idToBgJson,
-  saveExternalPaths,
 } from "./utils/util.js";
 import { openSmallWindow } from "./windows/subWindowManager.js";
 
@@ -162,9 +161,6 @@ export const saveSettingsData = async (
     );
     logger.info("Settings data saved successfully.");
     ensureDefaultSettings(); // Add back any missing default settings
-    if (Array.isArray(data.externalPaths)) {
-      await saveExternalPaths(data.externalPaths);
-    }
     return true;
   } catch (error) {
     logger.error("Error saving settings data:", error);

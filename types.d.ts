@@ -45,7 +45,6 @@ interface BackgroundsData {
   backgrounds: Record<string, number>;
   tags?: Record<string, string[]>;
   names?: Record<string, string[]>;
-  externalPaths?: string[];
 }
 
 type DesktopIconData = {
