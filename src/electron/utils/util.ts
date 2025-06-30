@@ -560,9 +560,6 @@ export async function indexBackgrounds(options?: {
         id: newId,
         localIndexed: newBgIndexedTimes[newId],
       });
-      logger.info(
-        `Added new background: ${newId}, indexed at ${newBgIndexedTimes[newId]}`
-      );
       updated = true;
     }
   }
@@ -661,6 +658,9 @@ export async function indexBackgrounds(options?: {
       (activeSubWindow) => activeSubWindow.title === "AltDesktop"
     ) || (allWindows.length > 0 ? allWindows[0] : null);
   mainWindow?.webContents.send("backgrounds-updated");
+  logger.info(
+    `Indexed ${newIds.length} new background(s), removed ${removedIds.length} background(s).`
+  );
   logger.info("Finished indexing");
 }
 
@@ -725,7 +725,6 @@ export async function saveBgJsonFile(
       JSON.stringify(bgJson, null, 2),
       "utf-8"
     );
-    logger.info(`Saved bg.json for background ${summary.id} at ${bgJsonPath}`);
     return true;
   } catch (error) {
     logger.error("Failed to save bg.json:", error);
