@@ -477,7 +477,7 @@ export async function indexBackgrounds(options?: {
 
   // Find suspected moves
   const suspectedMoves = new Set<string>();
-  for (const { id: removedId, value: removedValue } of removedIds) {
+  for (const { id: removedId } of removedIds) {
     let baseId = removedId;
     const extMatch = removedId.match(/^ext::\d+::(.+)$/);
     if (extMatch) {
@@ -492,25 +492,46 @@ export async function indexBackgrounds(options?: {
       if (newExtMatch) {
         newBaseId = newExtMatch[1];
       }
-      // Remove trailing _number if present
       newBaseId = newBaseId.replace(/_\d+$/, "");
       if (baseId === newBaseId) {
         logger.info(`suspected move from ${removedId} to ${newId}`);
-        // Transfer indexed time
-        const oldIndexed: number = removedValue;
-        if (
-          oldIndexed !== undefined &&
-          newBgIndexedTimes[newId] !== undefined
-        ) {
-          backgroundsData.backgrounds[newId] = oldIndexed;
-          // reset the local.indexed time in bg.json
-          await saveBgJsonFile({ id: newId, localIndexed: oldIndexed });
-          logger.info(
-            `Suspected move from ${removedId} to ${newId}. Set indexed time of ${newId} to original time from ${removedId}: ${oldIndexed}`
+
+        // Try to fetch local.indexed from newId's bg.json
+        let indexedTime: number = Math.floor(Date.now() / 1000);
+        let foundValidIndexed = false;
+        try {
+          const newBgJsonPath = await idToBgJson(newId);
+          if (fs.existsSync(newBgJsonPath)) {
+            const rawBg = await fs.promises.readFile(newBgJsonPath, "utf-8");
+            const bg: BgJson = JSON.parse(rawBg);
+            if (
+              bg.local &&
+              typeof bg.local.indexed === "number" &&
+              !isNaN(bg.local.indexed)
+            ) {
+              indexedTime = bg.local.indexed;
+              foundValidIndexed = true;
+            }
+          }
+        } catch (e) {
+          logger.warn(
+            `Could not read local.indexed from bg.json for ${newId}:`,
+            e
           );
-          updated = true;
-          suspectedMoves.add(newId);
         }
+        backgroundsData.backgrounds[newId] = indexedTime;
+        if (!foundValidIndexed) {
+          // Write the new indexedTime to bg.json if it wasn't already present
+          await saveBgJsonFile({
+            id: newId,
+            localIndexed: indexedTime,
+          });
+        }
+        logger.info(
+          `Suspected move from ${removedId} to ${newId}. Set indexed time of ${newId} to ${indexedTime}`
+        );
+        updated = true;
+        suspectedMoves.add(newId);
         break;
       }
     }
