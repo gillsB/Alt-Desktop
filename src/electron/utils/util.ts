@@ -475,65 +475,81 @@ export async function indexBackgrounds(options?: {
     }
   }
 
+  // Build a map for quick lookup
+  const removedIdMap = new Map<string, number>();
+  for (const { id, value } of removedIds) {
+    removedIdMap.set(id, value);
+  }
+
   // Find suspected moves
   const suspectedMoves = new Set<string>();
-  for (const { id: removedId } of removedIds) {
-    let baseId = removedId;
-    const extMatch = removedId.match(/^ext::\d+::(.+)$/);
-    if (extMatch) {
-      baseId = extMatch[1];
-    }
-    // Remove trailing _number if present
-    baseId = baseId.replace(/_\d+$/, "");
+  for (const newId of newIds) {
+    let matchedRemovedId: string | null = null;
+    let indexedTime: number = Math.floor(Date.now() / 1000);
+    let foundValidIndexed = false;
 
-    for (const newId of newIds) {
+    // 1. Exact match
+    if (removedIdMap.has(newId)) {
+      matchedRemovedId = newId;
+    } else {
+      // 2. Fallback: base name match
       let newBaseId = newId;
       const newExtMatch = newId.match(/^ext::\d+::(.+)$/);
       if (newExtMatch) {
         newBaseId = newExtMatch[1];
       }
       newBaseId = newBaseId.replace(/_\d+$/, "");
-      if (baseId === newBaseId) {
-        logger.info(`suspected move from ${removedId} to ${newId}`);
 
-        // Try to fetch local.indexed from newId's bg.json
-        let indexedTime: number = Math.floor(Date.now() / 1000);
-        let foundValidIndexed = false;
-        try {
-          const newBgJsonPath = await idToBgJson(newId);
-          if (fs.existsSync(newBgJsonPath)) {
-            const rawBg = await fs.promises.readFile(newBgJsonPath, "utf-8");
-            const bg: BgJson = JSON.parse(rawBg);
-            if (
-              bg.local &&
-              typeof bg.local.indexed === "number" &&
-              !isNaN(bg.local.indexed)
-            ) {
-              indexedTime = bg.local.indexed;
-              foundValidIndexed = true;
-            }
-          }
-        } catch (e) {
-          logger.warn(
-            `Could not read local.indexed from bg.json for ${newId}:`,
-            e
-          );
+      for (const removedId of removedIdMap.keys()) {
+        let baseId = removedId;
+        const extMatch = removedId.match(/^ext::\d+::(.+)$/);
+        if (extMatch) {
+          baseId = extMatch[1];
         }
-        backgroundsData.backgrounds[newId] = indexedTime;
-        if (!foundValidIndexed) {
-          // Write the new indexedTime to bg.json if it wasn't already present
-          await saveBgJsonFile({
-            id: newId,
-            localIndexed: indexedTime,
-          });
+        baseId = baseId.replace(/_\d+$/, "");
+        if (baseId === newBaseId) {
+          matchedRemovedId = removedId;
+          break;
         }
-        logger.info(
-          `Suspected move from ${removedId} to ${newId}. Set indexed time of ${newId} to ${indexedTime}`
-        );
-        updated = true;
-        suspectedMoves.add(newId);
-        break;
       }
+    }
+
+    if (matchedRemovedId) {
+      logger.info(`suspected move from ${matchedRemovedId} to ${newId}`);
+
+      // Try to fetch local.indexed from newId's bg.json
+      try {
+        const newBgJsonPath = await idToBgJson(newId);
+        if (fs.existsSync(newBgJsonPath)) {
+          const rawBg = await fs.promises.readFile(newBgJsonPath, "utf-8");
+          const bg: BgJson = JSON.parse(rawBg);
+          if (
+            bg.local &&
+            typeof bg.local.indexed === "number" &&
+            !isNaN(bg.local.indexed)
+          ) {
+            indexedTime = bg.local.indexed;
+            foundValidIndexed = true;
+          }
+        }
+      } catch (e) {
+        logger.warn(
+          `Could not read local.indexed from bg.json for ${newId}:`,
+          e
+        );
+      }
+      backgroundsData.backgrounds[newId] = indexedTime;
+      if (!foundValidIndexed) {
+        await saveBgJsonFile({
+          id: newId,
+          localIndexed: indexedTime,
+        });
+      }
+      logger.info(
+        `Suspected move from ${matchedRemovedId} to ${newId}. Set indexed time of ${newId} to ${indexedTime}`
+      );
+      updated = true;
+      suspectedMoves.add(newId);
     }
   }
 
