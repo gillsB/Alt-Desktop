@@ -790,23 +790,25 @@ const EditBackground: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="edit-bg-field">
-            <label>Save to</label>
-            <div className="edit-bg-field dropdown-container">
-              <select
-                id="save-to-location"
-                value={saveLocation}
-                onChange={(e) => setSaveLocation(e.target.value)}
-              >
-                <option value="default">Default</option>
-                {externalPaths.map((path, idx) => (
-                  <option key={path} value={`external:${idx}`}>
-                    {path}
-                  </option>
-                ))}
-              </select>
+          {externalPaths.length > 0 && (
+            <div className="edit-bg-field">
+              <label>Save to</label>
+              <div className="edit-bg-field dropdown-container">
+                <select
+                  id="save-to-location"
+                  value={saveLocation}
+                  onChange={(e) => setSaveLocation(e.target.value)}
+                >
+                  <option value="default">Default</option>
+                  {externalPaths.map((path, idx) => (
+                    <option key={path} value={`external:${idx}`}>
+                      {path}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
+          )}
         </div>
         {/* Right: Tag management */}
         <div className="edit-background-tags-panel">
