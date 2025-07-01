@@ -422,10 +422,13 @@ const EditBackground: React.FC = () => {
         logger.info(
           `Save location changed from ${originalSaveLocationRef.current} to ${saveLocation}, moving background...`
         );
-        await window.electron.changeBackgroundDirectory(
+        const newId = await window.electron.changeBackgroundDirectory(
           updatedSummary.id,
           saveLocation
         );
+        if (newId) {
+          updatedSummary.id = newId;
+        }
       }
       if (applyBg) {
         await window.electron.saveSettingsData({
