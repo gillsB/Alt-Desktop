@@ -3,7 +3,7 @@ import {
   FolderOpenIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { PUBLIC_TAG_CATEGORIES } from "../../electron/publicTags";
 import "../App.css";
@@ -65,6 +65,7 @@ const EditBackground: React.FC = () => {
 
   const [externalPaths, setExternalPaths] = useState<string[]>([]);
   const [saveLocation, setSaveLocation] = useState<string>("default");
+  const originalSaveLocationRef = useRef<string>("default");
 
   const [tagContextMenu, setTagContextMenu] = useState<{
     x: number;
@@ -651,6 +652,18 @@ const EditBackground: React.FC = () => {
     (async () => {
       const paths = await window.electron.getSetting("externalPaths");
       if (Array.isArray(paths)) setExternalPaths(paths);
+
+      if (summary.id && summary.id.startsWith("ext::")) {
+        const match = summary.id.match(/^ext::(\d+)::/);
+        if (match) {
+          const extIdx = match[1];
+          setSaveLocation(`external:${extIdx}`);
+          originalSaveLocationRef.current = `external:${extIdx}`;
+        }
+      } else {
+        setSaveLocation("default");
+        originalSaveLocationRef.current = "default";
+      }
     })();
   }, []);
 
