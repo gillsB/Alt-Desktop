@@ -63,6 +63,9 @@ const EditBackground: React.FC = () => {
   const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
   const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
 
+  const [externalPaths, setExternalPaths] = useState<string[]>([]);
+  const [saveLocation, setSaveLocation] = useState<string>("default");
+
   const [tagContextMenu, setTagContextMenu] = useState<{
     x: number;
     y: number;
@@ -644,6 +647,13 @@ const EditBackground: React.FC = () => {
     return filtered;
   }, [groupedLocalTags, localTagSearch]);
 
+  useEffect(() => {
+    (async () => {
+      const paths = await window.electron.getSetting("externalPaths");
+      if (Array.isArray(paths)) setExternalPaths(paths);
+    })();
+  }, []);
+
   return (
     <div className="edit-background-root">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -778,6 +788,23 @@ const EditBackground: React.FC = () => {
                   />
                 </button>
               )}
+            </div>
+          </div>
+          <div className="edit-bg-field">
+            <label>Save to</label>
+            <div className="edit-bg-field dropdown-container">
+              <select
+                id="save-to-location"
+                value={saveLocation}
+                onChange={(e) => setSaveLocation(e.target.value)}
+              >
+                <option value="default">Default</option>
+                {externalPaths.map((path, idx) => (
+                  <option key={path} value={`external:${idx}`}>
+                    {path}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
