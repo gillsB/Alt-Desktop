@@ -417,12 +417,21 @@ const EditBackground: React.FC = () => {
     const success = await window.electron.saveBgJson(updatedSummary);
     if (success) {
       logger.info("Background saved successfully.");
+      // if saved location changed, move background file
+      if (saveLocation !== originalSaveLocationRef.current) {
+        logger.info(
+          `Save location changed from ${originalSaveLocationRef.current} to ${saveLocation}, moving background...`
+        );
+        await window.electron.changeBackgroundDirectory(
+          updatedSummary.id,
+          saveLocation
+        );
+      }
       if (applyBg) {
         await window.electron.saveSettingsData({
           background: updatedSummary.id,
         });
       }
-
       handleClose();
     } else {
       logger.error("Failed to save background.");
@@ -812,7 +821,7 @@ const EditBackground: React.FC = () => {
                   value={saveLocation}
                   onChange={(e) => setSaveLocation(e.target.value)}
                 >
-                  <option value="default">Default</option>
+                  <option value="default">Default save location</option>
                   {externalPaths.map((path, idx) => (
                     <option key={path} value={`external:${idx}`}>
                       {path}
