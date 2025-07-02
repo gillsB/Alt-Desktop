@@ -913,26 +913,21 @@ export async function promisePool<T>(
   limit: number,
   fn: (item: T) => Promise<void>
 ) {
-  const executing: Promise<void>[] = [];
-  let i = 0;
+  const queue = [...items]; // Clone the input
 
-  async function enqueue() {
-    if (i >= items.length) return;
-    const item = items[i++];
-    const p = fn(item).then(() => {
-      // Remove this promise from executing when done
-      executing.splice(executing.indexOf(p), 1);
-    });
-    executing.push(p);
-    if (executing.length < limit) {
-      await enqueue();
+  const workers = Array.from({ length: limit }, async () => {
+    while (queue.length > 0) {
+      const item = queue.shift();
+      if (!item) continue;
+      try {
+        await fn(item);
+      } catch (err) {
+        logger.warn("Error processing item in promisePool: " + `${item}`, err);
+      }
     }
-  }
+  });
 
-  // Start initial batch
-  await Promise.all(Array(Math.min(limit, items.length)).fill(0).map(enqueue));
-  // Wait for all to finish
-  await Promise.all(executing);
+  await Promise.all(workers);
 }
 
 /**
