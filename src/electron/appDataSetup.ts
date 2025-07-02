@@ -8,9 +8,7 @@ import {
   getDataFolderPath,
   getDesktopIconsFilePath,
   getLogsFolderPath,
-  getNamesJsonFilePath,
   getSettingsFilePath,
-  getTagsJsonFilePath,
 } from "./utils/util.js";
 
 const logger = createLoggerForFile("appDataSetup.ts");
@@ -33,8 +31,6 @@ export const ensureAppDataFiles = () => {
     const settingsFilePath = getSettingsFilePath();
     const backgroundFilePath = getBackgroundFilePath();
     const backgroundsFilePath = getBackgroundsJsonFilePath();
-    const namesFilePath = getNamesJsonFilePath();
-    const tagsFilePath = getTagsJsonFilePath();
 
     // Ensure directories exist
     if (!fs.existsSync(logsFolderPath)) {
@@ -66,12 +62,6 @@ export const ensureAppDataFiles = () => {
     ensureFileExists(desktopIconsFilePath, { icons: [] });
     ensureFileExists(backgroundsFilePath, {
       backgrounds: {},
-    });
-    ensureFileExists(namesFilePath, {
-      names: {},
-    });
-    ensureFileExists(tagsFilePath, {
-      tags: {},
     });
     ensureFileExists(settingsFilePath, defaultSettings);
     ensureDefaultSettings();
