@@ -97,6 +97,7 @@ const BackgroundSelect: React.FC = () => {
   }
 
   const fetchPage = async () => {
+    if (page === -1) return; // Prevent fetching page before initial page load.
     logger.info(`Fetching page ${page + 1} with search "${search}"`);
     const offset = page * PAGE_SIZE;
 
