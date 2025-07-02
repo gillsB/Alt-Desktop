@@ -172,7 +172,10 @@ export const RenameTagModal: React.FC<{
     <div className="modal-window-content">
       <div className="modal-content">
         <div className="subwindow-field">
-          <label>Rename Tag:</label>
+          <h3>Renaming: {initialName}</h3>
+        </div>
+        <div className="subwindow-field">
+          <label>New name:</label>
           <input
             type="text"
             value={value}
