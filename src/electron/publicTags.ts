@@ -8,7 +8,7 @@ export const PUBLIC_TAG_CATEGORIES = [
   },
   {
     name: "Aspect Ratio",
-    tags: ["16:9", "21:9", "32:9", "Portrait"],
+    tags: ["16:9", "21:9", "32:9", "Portrait", "Other"],
   },
   {
     name: "Resolution",

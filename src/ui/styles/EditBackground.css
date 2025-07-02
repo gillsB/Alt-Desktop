@@ -143,7 +143,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background-color: #2e2e35;
+  background-color: #33333d;
   justify-content: right;
   user-select: none;
 }
@@ -359,7 +359,7 @@
 }
 
 .edit-bg-field .public-tags-header {
-  background: #2e2e35;
+  background: #33333d;
   color: #ffffff;
   border-radius: 8px;
   padding: 6px 14px;
