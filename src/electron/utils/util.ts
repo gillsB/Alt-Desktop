@@ -900,6 +900,13 @@ export const getBackgroundsJsonFilePath = (): string => {
   return path.join(getBasePath(), "backgrounds.json");
 };
 
+export const getNamesJsonFilePath = (): string => {
+  return path.join(getBasePath(), "names.json");
+};
+export const getTagsJsonFilePath = (): string => {
+  return path.join(getBasePath(), "tags.json");
+};
+
 // Helper: concurrency-limited promise pool
 export async function promisePool<T>(
   items: T[],
