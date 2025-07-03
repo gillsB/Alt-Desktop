@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { PUBLIC_TAG_CATEGORIES } from "../../electron/publicTags";
 import { createLogger } from "../util/uiLogger";
 
@@ -29,7 +29,20 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
     return grouped;
   }, [localTags]);
 
-  const localCategories = Object.keys(groupedLocalTags);
+  // Fetch category order
+  const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
+  useEffect(() => {
+    (async () => {
+      const categories: string[] = await window.electron.getTagCategories();
+      setCategoryOrder(categories);
+    })();
+  }, []);
+
+  // "" category on top
+  const sortedCategoryOrder = [
+    ...categoryOrder.filter((c) => !c || c.trim() === ""),
+    ...categoryOrder.filter((c) => c && c.trim() !== ""),
+  ];
 
   return (
     <div className="filter-search-panel">
@@ -57,31 +70,33 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
         </div>
       ))}
       {/* Local tags grouped by category */}
-      {localCategories.map((category) => (
-        <div key={category} className="filter-category-block">
-          <div className="filter-category-title">
-            {category || "Uncategorized"}
+      {sortedCategoryOrder
+        .filter((category) => groupedLocalTags[category])
+        .map((category) => (
+          <div key={category} className="filter-category-block">
+            <div className="filter-category-title">
+              {category || "No Category"}
+            </div>
+            {(groupedLocalTags[category] || []).map((tag) => (
+              <label key={tag.name} className="filter-tag-label">
+                <input
+                  type="checkbox"
+                  checked={!!filterOptions[tag.name]}
+                  onChange={() => {
+                    setFilterOptions((prev) => {
+                      const updated = { ...prev, [tag.name]: !prev[tag.name] };
+                      logger?.info?.(
+                        `Filter ${tag.name} set to ${updated[tag.name]}`
+                      );
+                      return updated;
+                    });
+                  }}
+                />
+                {tag.name}
+              </label>
+            ))}
           </div>
-          {(groupedLocalTags[category] || []).map((tag) => (
-            <label key={tag.name} className="filter-tag-label">
-              <input
-                type="checkbox"
-                checked={!!filterOptions[tag.name]}
-                onChange={() => {
-                  setFilterOptions((prev) => {
-                    const updated = { ...prev, [tag.name]: !prev[tag.name] };
-                    logger?.info?.(
-                      `Filter ${tag.name} set to ${updated[tag.name]}`
-                    );
-                    return updated;
-                  });
-                }}
-              />
-              {tag.name}
-            </label>
-          ))}
-        </div>
-      ))}
+        ))}
       <button onClick={onClose}>Close</button>
     </div>
   );
