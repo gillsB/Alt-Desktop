@@ -4,6 +4,7 @@ import "../App.css";
 import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
 import { fileNameNoExt, parseAdvancedSearch } from "../util/uiUtil";
+import BackgroundFilterPanel from "./BackgroundFilterPanel";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -697,47 +698,12 @@ const BackgroundSelect: React.FC = () => {
         {/* Right side: details or filter */}
         <div className="background-right-panel">
           {showFilterPanel ? (
-            <div className="filter-search-panel">
-              <h3>Filter Backgrounds</h3>
-              {PUBLIC_TAG_CATEGORIES.map((cat) => (
-                <div key={cat.name} className="filter-category-block">
-                  <div className="filter-category-title">{cat.name}</div>
-                  {cat.tags.map((tag) => (
-                    <label key={tag} className="filter-tag-label">
-                      <input
-                        type="checkbox"
-                        checked={!!filterOptions[tag]}
-                        onChange={() => {
-                          setFilterOptions((prev) => {
-                            const updated = { ...prev, [tag]: !prev[tag] };
-                            logger.info(`Filter ${tag} set to ${updated[tag]}`);
-                            return updated;
-                          });
-                        }}
-                      />
-                      {tag}
-                    </label>
-                  ))}
-                </div>
-              ))}{" "}
-              {localTags.map((tag) => (
-                <label key={tag}>
-                  <input
-                    type="checkbox"
-                    checked={!!filterOptions[tag]}
-                    onChange={() => {
-                      setFilterOptions((prev) => {
-                        const updated = { ...prev, [tag]: !prev[tag] };
-                        logger.info(`Filter ${tag} set to ${updated[tag]}`);
-                        return updated;
-                      });
-                    }}
-                  />
-                  {tag}
-                </label>
-              ))}
-              <button onClick={() => setShowFilterPanel(false)}>Close</button>
-            </div>
+            <BackgroundFilterPanel
+              filterOptions={filterOptions}
+              setFilterOptions={setFilterOptions}
+              localTags={localTags}
+              onClose={() => setShowFilterPanel(false)}
+            />
           ) : selectedBg ? (
             <div className="background-details-panel" key={selectedBg.id}>
               <div key={selectedBg.id}>
