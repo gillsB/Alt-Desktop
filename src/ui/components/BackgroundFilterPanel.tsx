@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { PUBLIC_TAG_CATEGORIES } from "../../electron/publicTags";
+import "../styles/BackgroundFilterPanel.css";
 import { createLogger } from "../util/uiLogger";
 
 const logger = createLogger("BackgroundFilterPanel.tsx");
@@ -77,19 +78,18 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
   ];
 
   return (
-    <div className="filter-search-panel">
-      <h3>Filter Backgrounds</h3>
+    <div className="bgfilter-search-panel">
       {/* Public tags */}
       {PUBLIC_TAG_CATEGORIES.map((cat) => (
-        <div key={cat.name} className="filter-category-block">
+        <div key={cat.name} className="bgfilter-category-block">
           <div
-            className="filter-category-title"
+            className="bgfilter-category-title"
             style={{ cursor: "pointer" }}
             onClick={() => togglePublicCategory(cat.name)}
           >
             {cat.name}
             <button
-              className="tag-toggle-button"
+              className="bgfilter-tag-toggle-button"
               style={{ marginLeft: 8 }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -101,7 +101,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
           </div>
           {!collapsedPublicCategories.has(cat.name) &&
             cat.tags.map((tag) => (
-              <label key={tag} className="filter-tag-label">
+              <label key={tag} className="bgfilter-tag-label">
                 <input
                   type="checkbox"
                   checked={!!filterOptions[tag]}
@@ -122,15 +122,15 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
       {sortedCategoryOrder
         .filter((category) => groupedLocalTags[category])
         .map((category) => (
-          <div key={category} className="filter-category-block">
+          <div key={category} className="bgfilter-category-block">
             <div
-              className="filter-category-title"
+              className="bgfilter-category-title"
               style={{ cursor: "pointer" }}
               onClick={() => toggleCategory(category)}
             >
               {category || "Uncategorized"}
               <button
-                className="tag-toggle-button"
+                className="bgfilter-tag-toggle-button"
                 style={{ marginLeft: 8 }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -142,7 +142,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
             </div>
             {!collapsedCategories.has(category) &&
               (groupedLocalTags[category] || []).map((tag) => (
-                <label key={tag.name} className="filter-tag-label">
+                <label key={tag.name} className="bgfilter-tag-label">
                   <input
                     type="checkbox"
                     checked={!!filterOptions[tag.name]}
@@ -164,7 +164,9 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
               ))}
           </div>
         ))}
-      <button onClick={onClose}>Close</button>
+      <button className="bgfilter-close-btn" onClick={onClose}>
+        Close
+      </button>
     </div>
   );
 };
