@@ -44,7 +44,7 @@ const BackgroundSelect: React.FC = () => {
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
 
-  const [localTags, setLocalTags] = useState<string[]>([]);
+  const [localTags, setLocalTags] = useState<LocalTag[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
@@ -54,9 +54,12 @@ const BackgroundSelect: React.FC = () => {
     (async () => {
       const tags = await window.electron.getSetting("localTags");
       if (Array.isArray(tags)) {
-        const local = tags.map((t: LocalTag) => t.name);
-        setLocalTags(local);
-        setAllTags(Array.from(new Set([...publicTagsFlat, ...local])));
+        setLocalTags(tags);
+        setAllTags(
+          Array.from(
+            new Set([...publicTagsFlat, ...tags.map((t: LocalTag) => t.name)])
+          )
+        );
       } else {
         setAllTags([...publicTagsFlat]);
       }
