@@ -71,6 +71,18 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
     });
   };
 
+  // Collapse categories based on settings
+  useEffect(() => {
+    (async () => {
+      const categoriesObj: Record<string, boolean> =
+        (await window.electron.getSetting("categories")) ?? {};
+      const collapsed = Object.entries(categoriesObj)
+        .filter(([, expanded]) => !expanded)
+        .map(([cat]) => cat);
+      setCollapsedCategories(new Set(collapsed));
+    })();
+  }, []);
+
   // "" category on top
   const sortedCategoryOrder = [
     ...categoryOrder.filter((c) => !c || c.trim() === ""),
