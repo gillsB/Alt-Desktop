@@ -38,6 +38,38 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
     })();
   }, []);
 
+  // Collapsed state for local categories
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
+    new Set()
+  );
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
+
+  // Collapsed state for public categories
+  const [collapsedPublicCategories, setCollapsedPublicCategories] = useState<
+    Set<string>
+  >(new Set());
+  const togglePublicCategory = (category: string) => {
+    setCollapsedPublicCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
+
   // "" category on top
   const sortedCategoryOrder = [
     ...categoryOrder.filter((c) => !c || c.trim() === ""),
@@ -50,23 +82,40 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
       {/* Public tags */}
       {PUBLIC_TAG_CATEGORIES.map((cat) => (
         <div key={cat.name} className="filter-category-block">
-          <div className="filter-category-title">{cat.name}</div>
-          {cat.tags.map((tag) => (
-            <label key={tag} className="filter-tag-label">
-              <input
-                type="checkbox"
-                checked={!!filterOptions[tag]}
-                onChange={() => {
-                  setFilterOptions((prev) => {
-                    const updated = { ...prev, [tag]: !prev[tag] };
-                    logger?.info?.(`Filter ${tag} set to ${updated[tag]}`);
-                    return updated;
-                  });
-                }}
-              />
-              {tag}
-            </label>
-          ))}
+          <div
+            className="filter-category-title"
+            style={{ cursor: "pointer" }}
+            onClick={() => togglePublicCategory(cat.name)}
+          >
+            {cat.name}
+            <button
+              className="tag-toggle-button"
+              style={{ marginLeft: 8 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePublicCategory(cat.name);
+              }}
+            >
+              {collapsedPublicCategories.has(cat.name) ? "▸" : "▾"}
+            </button>
+          </div>
+          {!collapsedPublicCategories.has(cat.name) &&
+            cat.tags.map((tag) => (
+              <label key={tag} className="filter-tag-label">
+                <input
+                  type="checkbox"
+                  checked={!!filterOptions[tag]}
+                  onChange={() => {
+                    setFilterOptions((prev) => {
+                      const updated = { ...prev, [tag]: !prev[tag] };
+                      logger?.info?.(`Filter ${tag} set to ${updated[tag]}`);
+                      return updated;
+                    });
+                  }}
+                />
+                {tag}
+              </label>
+            ))}
         </div>
       ))}
       {/* Local tags grouped by category */}
@@ -74,27 +123,45 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
         .filter((category) => groupedLocalTags[category])
         .map((category) => (
           <div key={category} className="filter-category-block">
-            <div className="filter-category-title">
-              {category || "No Category"}
+            <div
+              className="filter-category-title"
+              style={{ cursor: "pointer" }}
+              onClick={() => toggleCategory(category)}
+            >
+              {category || "Uncategorized"}
+              <button
+                className="tag-toggle-button"
+                style={{ marginLeft: 8 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCategory(category);
+                }}
+              >
+                {collapsedCategories.has(category) ? "▸" : "▾"}
+              </button>
             </div>
-            {(groupedLocalTags[category] || []).map((tag) => (
-              <label key={tag.name} className="filter-tag-label">
-                <input
-                  type="checkbox"
-                  checked={!!filterOptions[tag.name]}
-                  onChange={() => {
-                    setFilterOptions((prev) => {
-                      const updated = { ...prev, [tag.name]: !prev[tag.name] };
-                      logger?.info?.(
-                        `Filter ${tag.name} set to ${updated[tag.name]}`
-                      );
-                      return updated;
-                    });
-                  }}
-                />
-                {tag.name}
-              </label>
-            ))}
+            {!collapsedCategories.has(category) &&
+              (groupedLocalTags[category] || []).map((tag) => (
+                <label key={tag.name} className="filter-tag-label">
+                  <input
+                    type="checkbox"
+                    checked={!!filterOptions[tag.name]}
+                    onChange={() => {
+                      setFilterOptions((prev) => {
+                        const updated = {
+                          ...prev,
+                          [tag.name]: !prev[tag.name],
+                        };
+                        logger?.info?.(
+                          `Filter ${tag.name} set to ${updated[tag.name]}`
+                        );
+                        return updated;
+                      });
+                    }}
+                  />
+                  {tag.name}
+                </label>
+              ))}
           </div>
         ))}
       <button onClick={onClose}>Close</button>
