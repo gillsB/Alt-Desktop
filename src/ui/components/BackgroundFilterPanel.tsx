@@ -90,19 +90,19 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
   ];
 
   const [collapsedPublicTags, setCollapsedPublicTags] = useState(false);
+  const [collapsedLocalTags, setCollapsedLocalTags] = useState(false);
 
   return (
     <div className="bgfilter-search-panel">
       {/* Public tags section header */}
       <div
         className={
-          "bgfilter-public-tags-header" +
-          (collapsedPublicTags ? "" : " expanded")
+          "bgfilter-section-header" + (collapsedPublicTags ? "" : " expanded")
         }
         style={{ cursor: "pointer" }}
         onClick={() => setCollapsedPublicTags((prev) => !prev)}
       >
-        <label className="bgfilter-label" style={{ marginBottom: 0 }}>
+        <label className="bgfilter-section-label" style={{ marginBottom: 0 }}>
           Public Tags:
         </label>
         <button
@@ -160,50 +160,69 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
         </div>
       )}
       {/* Local tags grouped by category */}
-      {sortedCategoryOrder
-        .filter((category) => groupedLocalTags[category])
-        .map((category) => (
-          <div key={category} className="bgfilter-category-block">
-            <div
-              className="bgfilter-category-title"
-              style={{ cursor: "pointer" }}
-              onClick={() => toggleCategory(category)}
-            >
-              {category || "No Category"}
-              <button
-                className="bgfilter-tag-toggle-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleCategory(category);
-                }}
+      <div
+        className={
+          "bgfilter-section-header" + (collapsedLocalTags ? "" : " expanded")
+        }
+        style={{ cursor: "pointer", marginBottom: 4 }}
+        onClick={() => setCollapsedLocalTags((prev) => !prev)}
+      >
+        <label className="bgfilter-section-label">Local Tags:</label>
+        <button
+          className="bgfilter-tag-toggle-button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCollapsedLocalTags((prev) => !prev);
+          }}
+        >
+          {collapsedLocalTags ? "▸" : "▾"}
+        </button>
+      </div>
+      {!collapsedLocalTags &&
+        sortedCategoryOrder
+          .filter((category) => groupedLocalTags[category])
+          .map((category) => (
+            <div key={category} className="bgfilter-category-block">
+              <div
+                className="bgfilter-category-title"
+                style={{ cursor: "pointer" }}
+                onClick={() => toggleCategory(category)}
               >
-                {collapsedCategories.has(category) ? "▸" : "▾"}
-              </button>
+                {category || "No Category"}
+                <button
+                  className="bgfilter-tag-toggle-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleCategory(category);
+                  }}
+                >
+                  {collapsedCategories.has(category) ? "▸" : "▾"}
+                </button>
+              </div>
+              {!collapsedCategories.has(category) &&
+                (groupedLocalTags[category] || []).map((tag) => (
+                  <label key={tag.name} className="bgfilter-tag-label">
+                    <input
+                      type="checkbox"
+                      checked={!!filterOptions[tag.name]}
+                      onChange={() => {
+                        setFilterOptions((prev) => {
+                          const updated = {
+                            ...prev,
+                            [tag.name]: !prev[tag.name],
+                          };
+                          logger?.info?.(
+                            `Filter ${tag.name} set to ${updated[tag.name]}`
+                          );
+                          return updated;
+                        });
+                      }}
+                    />
+                    {tag.name}
+                  </label>
+                ))}
             </div>
-            {!collapsedCategories.has(category) &&
-              (groupedLocalTags[category] || []).map((tag) => (
-                <label key={tag.name} className="bgfilter-tag-label">
-                  <input
-                    type="checkbox"
-                    checked={!!filterOptions[tag.name]}
-                    onChange={() => {
-                      setFilterOptions((prev) => {
-                        const updated = {
-                          ...prev,
-                          [tag.name]: !prev[tag.name],
-                        };
-                        logger?.info?.(
-                          `Filter ${tag.name} set to ${updated[tag.name]}`
-                        );
-                        return updated;
-                      });
-                    }}
-                  />
-                  {tag.name}
-                </label>
-              ))}
-          </div>
-        ))}
+          ))}
       <button className="bgfilter-close-btn" onClick={onClose}>
         Close
       </button>
