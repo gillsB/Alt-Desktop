@@ -114,16 +114,45 @@ const EditBackground: React.FC = () => {
   // Load categories collapsed/expanded state from settings
   useEffect(() => {
     (async () => {
-      const categoriesObj: Record<string, boolean> =
+      const categoriesObj: Record<string, boolean> & { show?: boolean } =
         (await window.electron.getSetting("categories")) ?? {};
+      if (typeof categoriesObj.show === "boolean") {
+        setCollapsedLocalTags(!categoriesObj.show);
+      }
       // Categories with value === false should be collapsed
       const collapsed = Object.entries(categoriesObj)
-        .filter(([, expanded]) => !expanded)
+        .filter(([cat, expanded]) => cat !== "show" && !expanded)
         .map(([cat]) => cat);
       setCollapsedCategories(new Set(collapsed));
     })();
   }, []);
 
+  // Handles toggle for section
+  const toggleLocalTags = () => {
+    setCollapsedLocalTags((prev) => {
+      const newVal = !prev;
+      // Save the correct value to settings: show = !collapsed
+      window.electron
+        .getSetting("categories")
+        .then(
+          (
+            categoriesObj:
+              | (Record<string, boolean> & { show?: boolean })
+              | undefined
+          ) => {
+            if (categoriesObj && typeof categoriesObj === "object") {
+              categoriesObj.show = !newVal;
+              window.electron.saveSettingsData({
+                categories: categoriesObj,
+              });
+            }
+          }
+        );
+      return newVal;
+    });
+  };
+
+  // handles toggle for individual categories
   const toggleCategory = async (category: string) => {
     setCollapsedCategories((prev) => {
       const newSet = new Set(prev);
@@ -148,6 +177,50 @@ const EditBackground: React.FC = () => {
     });
   };
 
+  useEffect(() => {
+    (async () => {
+      const publicCategoriesObj: Record<string, boolean> & { show?: boolean } =
+        (await window.electron.getSetting("publicCategories")) ?? {};
+      if (typeof publicCategoriesObj.show === "boolean") {
+        setCollapsedPublicTags(!publicCategoriesObj.show);
+      }
+      // Categories with value === false should be collapsed (ignore "show" key)
+      const collapsed = Object.entries(publicCategoriesObj)
+        .filter(([cat, expanded]) => cat !== "show" && !expanded)
+        .map(([cat]) => cat);
+      setCollapsedPublicCategories(new Set(collapsed));
+    })();
+  }, []);
+
+  // Handles toggle for section
+  const togglePublicTags = () => {
+    setCollapsedPublicTags((prev) => {
+      const newVal = !prev;
+      // Save the correct value to settings: show = !collapsed
+      window.electron
+        .getSetting("publicCategories")
+        .then(
+          (
+            publicCategoriesObj:
+              | (Record<string, boolean> & { show?: boolean })
+              | undefined
+          ) => {
+            if (
+              publicCategoriesObj &&
+              typeof publicCategoriesObj === "object"
+            ) {
+              publicCategoriesObj.show = !newVal;
+              window.electron.saveSettingsData({
+                publicCategories: publicCategoriesObj,
+              });
+            }
+          }
+        );
+      return newVal;
+    });
+  };
+
+  // handles toggle for individual categories
   const togglePublicCategory = (category: string) => {
     setCollapsedPublicCategories((prev) => {
       const newSet = new Set(prev);
@@ -180,48 +253,6 @@ const EditBackground: React.FC = () => {
           }
         );
       return newSet;
-    });
-  };
-
-  useEffect(() => {
-    (async () => {
-      const publicCategoriesObj: Record<string, boolean> & { show?: boolean } =
-        (await window.electron.getSetting("publicCategories")) ?? {};
-      if (typeof publicCategoriesObj.show === "boolean") {
-        setCollapsedPublicTags(!publicCategoriesObj.show);
-      }
-      // Categories with value === false should be collapsed (ignore "show" key)
-      const collapsed = Object.entries(publicCategoriesObj)
-        .filter(([cat, expanded]) => cat !== "show" && !expanded)
-        .map(([cat]) => cat);
-      setCollapsedPublicCategories(new Set(collapsed));
-    })();
-  }, []);
-
-  const togglePublicTags = () => {
-    setCollapsedPublicTags((prev) => {
-      const newVal = !prev;
-      // Save the correct value to settings: show = !collapsed
-      window.electron
-        .getSetting("publicCategories")
-        .then(
-          (
-            publicCategoriesObj:
-              | (Record<string, boolean> & { show?: boolean })
-              | undefined
-          ) => {
-            if (
-              publicCategoriesObj &&
-              typeof publicCategoriesObj === "object"
-            ) {
-              publicCategoriesObj.show = !newVal;
-              window.electron.saveSettingsData({
-                publicCategories: publicCategoriesObj,
-              });
-            }
-          }
-        );
-      return newVal;
     });
   };
 
@@ -953,7 +984,7 @@ const EditBackground: React.FC = () => {
                 (collapsedLocalTags ? "" : " expanded")
               }
               style={{ cursor: "pointer" }}
-              onClick={() => setCollapsedLocalTags((prev) => !prev)}
+              onClick={toggleLocalTags}
             >
               <label className="edit-bg-label" style={{ marginBottom: 0 }}>
                 Local Tags:
@@ -962,7 +993,7 @@ const EditBackground: React.FC = () => {
                 className="tag-toggle-button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setCollapsedLocalTags((prev) => !prev);
+                  toggleLocalTags();
                 }}
               >
                 {collapsedLocalTags ? "▸" : "▾"}
