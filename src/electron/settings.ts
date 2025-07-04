@@ -26,7 +26,7 @@ export const defaultSettings: SettingsData = {
   newBackgroundID: 1,
   externalPaths: [],
   publicCategories: defaultPublicCategories,
-  categories: {} as Record<string, boolean>,
+  categories: { show: true } as Record<string, boolean> & { show?: boolean },
   localTags: [],
 };
 
@@ -409,7 +409,9 @@ function migrateCategoriesSetting(settings: Record<string, unknown>): boolean {
   // If categories is an array, convert to object
   if (Array.isArray(settings.categories)) {
     logger.info("Migrating categories from array to object format.");
-    const migrated: Record<string, boolean> = {};
+    const migrated: Record<string, boolean> & { show?: boolean } = {
+      show: true,
+    };
     for (const cat of settings.categories) {
       if (typeof cat === "string") {
         migrated[cat] = true;
@@ -418,7 +420,7 @@ function migrateCategoriesSetting(settings: Record<string, unknown>): boolean {
     settings.categories = migrated;
     updated = true;
   }
-  // Otherwise replace with default if its not an array.
+  // Otherwise replace with default if its not an object.
   else if (
     typeof settings.categories !== "object" ||
     settings.categories === null ||
@@ -426,6 +428,16 @@ function migrateCategoriesSetting(settings: Record<string, unknown>): boolean {
   ) {
     logger.info("Replacing invalid categories setting with default.");
     settings.categories = { ...defaultSettings.categories };
+    updated = true;
+  }
+  // Ensure show is present for categories (local tags)
+  if (
+    typeof settings.categories === "object" &&
+    settings.categories !== null &&
+    !("show" in settings.categories)
+  ) {
+    (settings.categories as Record<string, boolean> & { show?: boolean }).show =
+      true;
     updated = true;
   }
   return updated;
