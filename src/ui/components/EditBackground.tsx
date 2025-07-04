@@ -56,6 +56,22 @@ const EditBackground: React.FC = () => {
 
   const [localTagSearch, setLocalTagSearch] = useState("");
 
+  // Filtered public categories/tags
+  const filteredPublicTagCategories = React.useMemo(() => {
+    if (!localTagSearch.trim()) return PUBLIC_TAG_CATEGORIES;
+    const search = localTagSearch.trim().toLowerCase();
+    return PUBLIC_TAG_CATEGORIES.map((cat) => {
+      // If category matches, show all tags in it
+      if (cat.name.toLowerCase().includes(search)) return cat;
+      // Otherwise, only show tags that match
+      const filteredTags = cat.tags.filter((tag) =>
+        tag.toLowerCase().includes(search)
+      );
+      if (filteredTags.length > 0) return { ...cat, tags: filteredTags };
+      return null;
+    }).filter(Boolean);
+  }, [localTagSearch]);
+
   const [draggedTag, setDraggedTag] = useState<{
     tag: LocalTag;
     fromCategory: string;
@@ -837,6 +853,30 @@ const EditBackground: React.FC = () => {
         </div>
         {/* Right: Tag management */}
         <div className="edit-background-tags-panel">
+          <div className="local-tags-header input-row">
+            <label>Search Tags:</label>
+            <input
+              type="text"
+              placeholder="Search tags..."
+              value={localTagSearch}
+              onChange={(e) => setLocalTagSearch(e.target.value)}
+            />
+            <button
+              type="button"
+              className="button"
+              onClick={handleAddTagClick}
+            >
+              Add Tag
+            </button>
+            <button
+              type="button"
+              className="button"
+              onClick={handleCategoriesClick}
+            >
+              Categories
+            </button>
+          </div>
+          {/* --- Public Tags --- */}
           <div className="edit-bg-field">
             <div
               className={
@@ -861,27 +901,29 @@ const EditBackground: React.FC = () => {
             </div>
             {!collapsedPublicTags && (
               <div>
-                {PUBLIC_TAG_CATEGORIES.map((catObj) => (
-                  <div key={catObj.name} className="public-tag-category-block">
+                {filteredPublicTagCategories.map((catObj) => (
+                  <div key={catObj!.name} className="public-tag-category-block">
                     <div
                       className="tag-category-header"
-                      onClick={() => togglePublicCategory(catObj.name)}
+                      onClick={() => togglePublicCategory(catObj!.name)}
                       style={{ cursor: "pointer" }}
                     >
-                      <span>{catObj.name}</span>
+                      <span>{catObj!.name}</span>
                       <button
                         className="tag-toggle-button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          togglePublicCategory(catObj.name);
+                          togglePublicCategory(catObj!.name);
                         }}
                       >
-                        {collapsedPublicCategories.has(catObj.name) ? "▸" : "▾"}
+                        {collapsedPublicCategories.has(catObj!.name)
+                          ? "▸"
+                          : "▾"}
                       </button>
                     </div>
-                    {!collapsedPublicCategories.has(catObj.name) && (
+                    {!collapsedPublicCategories.has(catObj!.name) && (
                       <div className="tag-row">
-                        {catObj.tags.map((tag) => (
+                        {catObj!.tags.map((tag) => (
                           <button
                             key={tag}
                             type="button"
@@ -902,31 +944,10 @@ const EditBackground: React.FC = () => {
               </div>
             )}
           </div>
+          {/* --- Local Tags (rest of your code remains the same) --- */}
           <div className="local-tags">
             <div className="local-tags-header input-row">
               <label style={{ marginRight: 8 }}>Local Tags:</label>
-              <input
-                type="text"
-                placeholder="Search tags..."
-                value={localTagSearch}
-                onChange={(e) => setLocalTagSearch(e.target.value)}
-              />
-              <button
-                type="button"
-                className="button"
-                style={{ marginLeft: 8 }}
-                onClick={handleAddTagClick}
-              >
-                Add Tag
-              </button>
-              <button
-                type="button"
-                className="button"
-                style={{ marginLeft: 8 }}
-                onClick={handleCategoriesClick}
-              >
-                Categories
-              </button>
             </div>
             <div>
               <div
