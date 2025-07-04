@@ -89,47 +89,76 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
     ...categoryOrder.filter((c) => c && c.trim() !== ""),
   ];
 
+  const [collapsedPublicTags, setCollapsedPublicTags] = useState(false);
+
   return (
     <div className="bgfilter-search-panel">
-      {/* Public tags */}
-      {PUBLIC_TAG_CATEGORIES.map((cat) => (
-        <div key={cat.name} className="bgfilter-category-block">
-          <div
-            className="bgfilter-category-title"
-            style={{ cursor: "pointer" }}
-            onClick={() => togglePublicCategory(cat.name)}
-          >
-            {cat.name}
-            <button
-              className="bgfilter-tag-toggle-button"
-              style={{ marginLeft: 8 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                togglePublicCategory(cat.name);
-              }}
-            >
-              {collapsedPublicCategories.has(cat.name) ? "▸" : "▾"}
-            </button>
-          </div>
-          {!collapsedPublicCategories.has(cat.name) &&
-            cat.tags.map((tag) => (
-              <label key={tag} className="bgfilter-tag-label">
-                <input
-                  type="checkbox"
-                  checked={!!filterOptions[tag]}
-                  onChange={() => {
-                    setFilterOptions((prev) => {
-                      const updated = { ...prev, [tag]: !prev[tag] };
-                      logger?.info?.(`Filter ${tag} set to ${updated[tag]}`);
-                      return updated;
-                    });
+      {/* Public tags section header */}
+      <div
+        className={
+          "bgfilter-public-tags-header" +
+          (collapsedPublicTags ? "" : " expanded")
+        }
+        style={{ cursor: "pointer" }}
+        onClick={() => setCollapsedPublicTags((prev) => !prev)}
+      >
+        <label className="bgfilter-label" style={{ marginBottom: 0 }}>
+          Public Tags:
+        </label>
+        <button
+          className="bgfilter-tag-toggle-button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCollapsedPublicTags((prev) => !prev);
+          }}
+        >
+          {collapsedPublicTags ? "▸" : "▾"}
+        </button>
+      </div>
+      {/* Public tag categories */}
+      {!collapsedPublicTags && (
+        <div>
+          {PUBLIC_TAG_CATEGORIES.map((cat) => (
+            <div key={cat.name} className="bgfilter-category-block">
+              <div
+                className="bgfilter-category-title"
+                style={{ cursor: "pointer" }}
+                onClick={() => togglePublicCategory(cat.name)}
+              >
+                {cat.name}
+                <button
+                  className="bgfilter-tag-toggle-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePublicCategory(cat.name);
                   }}
-                />
-                {tag}
-              </label>
-            ))}
+                >
+                  {collapsedPublicCategories.has(cat.name) ? "▸" : "▾"}
+                </button>
+              </div>
+              {!collapsedPublicCategories.has(cat.name) &&
+                cat.tags.map((tag) => (
+                  <label key={tag} className="bgfilter-tag-label">
+                    <input
+                      type="checkbox"
+                      checked={!!filterOptions[tag]}
+                      onChange={() => {
+                        setFilterOptions((prev) => {
+                          const updated = { ...prev, [tag]: !prev[tag] };
+                          logger?.info?.(
+                            `Filter ${tag} set to ${updated[tag]}`
+                          );
+                          return updated;
+                        });
+                      }}
+                    />
+                    {tag}
+                  </label>
+                ))}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
       {/* Local tags grouped by category */}
       {sortedCategoryOrder
         .filter((category) => groupedLocalTags[category])
@@ -143,7 +172,6 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
               {category || "No Category"}
               <button
                 className="bgfilter-tag-toggle-button"
-                style={{ marginLeft: 8 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleCategory(category);

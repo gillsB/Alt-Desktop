@@ -1,11 +1,11 @@
 .bgfilter-category-title {
   font-weight: 700;
   font-size: 0.9rem;
-  color: #e0e0ff;
+  color: #fff;
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #282840;
+  background-color: #33333d;
   padding: 0px 14px;
   border-radius: 8px;
   user-select: none;
@@ -16,13 +16,7 @@
   box-shadow: 0 2px 8px rgba(0, 64, 128, 0.1);
 }
 
-.bgfilter-category-title.expanded {
-  background: #232346;
-  color: #fff;
-}
-
 .bgfilter-category-block {
-  margin-bottom: 10px;
   width: 100%;
   display: block;
 }
@@ -51,7 +45,7 @@
 }
 
 .bgfilter-search-panel {
-  padding: 18px 12px 12px 12px;
+  padding: 12px 12px 12px 12px;
   background: #33333d;
   border-radius: 8px;
   width: 100%;
@@ -65,4 +59,26 @@
   margin-bottom: 16px;
   font-weight: 700;
   letter-spacing: 0.01em;
+}
+
+.bgfilter-public-tags-header {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #33333d;
+  padding: 0px 14px 0px 0px;
+  border-radius: 8px;
+  user-select: none;
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    color 0.18s;
+  box-shadow: 0 2px 8px rgba(0, 64, 128, 0.1);
+}
+.bgfilter-label {
+  font-size: 1.08rem;
+  font-weight: 700;
 }
