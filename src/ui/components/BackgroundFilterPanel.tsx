@@ -140,7 +140,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
               style={{ cursor: "pointer" }}
               onClick={() => toggleCategory(category)}
             >
-              {category || "Uncategorized"}
+              {category || "No Category"}
               <button
                 className="bgfilter-tag-toggle-button"
                 style={{ marginLeft: 8 }}
