@@ -109,6 +109,7 @@ const EditBackground: React.FC = () => {
     Set<string>
   >(new Set());
   const [collapsedPublicTags, setCollapsedPublicTags] = useState(false);
+  const [collapsedLocalTags, setCollapsedLocalTags] = useState(false);
 
   // Load categories collapsed/expanded state from settings
   useEffect(() => {
@@ -853,7 +854,7 @@ const EditBackground: React.FC = () => {
         </div>
         {/* Right: Tag management */}
         <div className="edit-background-tags-panel">
-          <div className="local-tags-header input-row">
+          <div className="search-header">
             <label>Search Tags:</label>
             <input
               type="text"
@@ -880,10 +881,10 @@ const EditBackground: React.FC = () => {
           <div className="edit-bg-field">
             <div
               className={
-                "public-tags-header tag-category-header" +
+                "section-header  tag-category-header" +
                 (collapsedPublicTags ? "" : " expanded")
               }
-              style={{ cursor: "pointer", marginBottom: 4 }}
+              style={{ cursor: "pointer" }}
               onClick={togglePublicTags}
             >
               <label className="edit-bg-label" style={{ marginBottom: 0 }}>
@@ -944,216 +945,245 @@ const EditBackground: React.FC = () => {
               </div>
             )}
           </div>
-          {/* --- Local Tags (rest of your code remains the same) --- */}
-          <div className="local-tags">
-            <div className="local-tags-header input-row">
-              <label style={{ marginRight: 8 }}>Local Tags:</label>
-            </div>
-            <div>
-              <div
-                className={`tag-category-block${dragOverCategory === "" ? " drag-over-category" : ""}`}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  handleDragOverCategory("");
+          {/* --- Local Tags --- */}
+          <div className="edit-bg-field">
+            <div
+              className={
+                "section-header tag-category-header" +
+                (collapsedLocalTags ? "" : " expanded")
+              }
+              style={{ cursor: "pointer" }}
+              onClick={() => setCollapsedLocalTags((prev) => !prev)}
+            >
+              <label className="edit-bg-label" style={{ marginBottom: 0 }}>
+                Local Tags:
+              </label>
+              <button
+                className="tag-toggle-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCollapsedLocalTags((prev) => !prev);
                 }}
-                onDrop={() => handleDropOnCategory("")}
-                onDragLeave={() => setDragOverCategory(null)}
               >
-                <div
-                  className="tag-category-header"
-                  onClick={() => toggleCategory("")}
-                >
-                  <span></span>
-                  <button
-                    className="tag-toggle-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCategory("");
-                    }}
-                  >
-                    {collapsedCategories.has("") ? "▸" : "▾"}
-                  </button>
-                </div>
-                {!collapsedCategories.has("") && (
-                  <div className="tag-grid">
-                    {(filteredGroupedLocalTags[""] || []).map((tagObj) => (
-                      <div
-                        key={tagObj.name}
-                        className={
-                          "tag-checkbox-row draggable-tag" +
-                          (summary.localTags?.includes(tagObj.name)
-                            ? " selected"
-                            : "") +
-                          (draggedTag?.tag.name === tagObj.name
-                            ? " dragging"
-                            : "")
-                        }
-                        draggable
-                        onDragStart={() => handleDragStart(tagObj, "")}
-                        onDragEnd={handleDragEnd}
-                        onContextMenu={(e) => {
-                          e.preventDefault();
-                          setTagContextMenu({
-                            x: e.clientX,
-                            y: e.clientY,
-                            tag: tagObj,
-                            category: "",
-                          });
-                        }}
-                        onClick={() => handlePersonalTagToggle(tagObj.name)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <input
-                          type="checkbox"
-                          className="tag-checkbox"
-                          checked={summary.localTags?.includes(tagObj.name)}
-                          readOnly
-                          tabIndex={-1}
-                          id={`tag-checkbox--${tagObj.name}`}
-                          style={{ pointerEvents: "none" }}
-                        />
-                        <label
-                          className="tag-name"
-                          htmlFor={`tag-checkbox--${tagObj.name}`}
-                          title={tagObj.name}
-                        >
-                          {tagObj.name}
-                        </label>
-                        <span
-                          className={
-                            "tag-fav-star" + (tagObj.favorite ? "" : " not-fav")
-                          }
-                          title={tagObj.favorite ? "Favorite" : "Not favorite"}
-                          style={{ cursor: "pointer", marginLeft: "auto" }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleFavorite(tagObj);
-                          }}
-                        >
-                          ★
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* Render all other categories in order, even if empty */}
-              {categoryOrder
-                .filter((category) =>
-                  localTagSearch.trim()
-                    ? filteredGroupedLocalTags[category] &&
-                      filteredGroupedLocalTags[category].length > 0
-                    : true
-                )
-                .filter((category) => category !== "")
-                .map((category) => {
-                  const isCollapsed = collapsedCategories.has(category);
-                  const isDragOver = dragOverCategory === category;
-                  const tags = filteredGroupedLocalTags[category] || [];
-                  return (
-                    <div
-                      key={category}
-                      className={`tag-category-block${isDragOver ? " drag-over-category" : ""}`}
-                      onDragOver={(e) => {
-                        e.preventDefault();
-                        handleDragOverCategory(category);
-                      }}
-                      onDrop={() => handleDropOnCategory(category)}
-                      onDragLeave={() => setDragOverCategory(null)}
-                    >
-                      <div
-                        className="tag-category-header"
-                        onClick={() => toggleCategory(category)}
-                      >
-                        <span>{category}</span>
-                        <button
-                          className="tag-toggle-button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleCategory(category);
-                          }}
-                        >
-                          {isCollapsed ? "▸" : "▾"}
-                        </button>
-                      </div>
-                      {!isCollapsed && (
-                        <div className="tag-grid">
-                          {tags.map((tagObj) => (
-                            <div
-                              key={tagObj.name}
-                              className={
-                                "tag-checkbox-row draggable-tag" +
-                                (summary.localTags?.includes(tagObj.name)
-                                  ? " selected"
-                                  : "") +
-                                (draggedTag?.tag.name === tagObj.name
-                                  ? " dragging"
-                                  : "")
-                              }
-                              draggable
-                              onDragStart={() =>
-                                handleDragStart(tagObj, category)
-                              }
-                              onDragEnd={handleDragEnd}
-                              onContextMenu={(e) => {
-                                e.preventDefault();
-                                setTagContextMenu({
-                                  x: e.clientX,
-                                  y: e.clientY,
-                                  tag: tagObj,
-                                  category,
-                                });
-                              }}
-                              onClick={() =>
-                                handlePersonalTagToggle(tagObj.name)
-                              }
-                              style={{ cursor: "pointer" }}
-                            >
-                              <input
-                                type="checkbox"
-                                className="tag-checkbox"
-                                checked={summary.localTags?.includes(
-                                  tagObj.name
-                                )}
-                                readOnly
-                                tabIndex={-1}
-                                id={`tag-checkbox-${category}-${tagObj.name}`}
-                                style={{ pointerEvents: "none" }} // Prevent input from blocking row click
-                              />
-                              <label
-                                className="tag-name"
-                                htmlFor={`tag-checkbox-${category}-${tagObj.name}`}
-                                title={tagObj.name}
-                              >
-                                {tagObj.name}
-                              </label>
-                              <span
-                                className={
-                                  "tag-fav-star" +
-                                  (tagObj.favorite ? "" : " not-fav")
-                                }
-                                title={
-                                  tagObj.favorite ? "Favorite" : "Not favorite"
-                                }
-                                style={{
-                                  cursor: "pointer",
-                                  marginLeft: "auto",
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation(); // Prevent row click
-                                  handleToggleFavorite(tagObj);
-                                }}
-                              >
-                                ★
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                {collapsedLocalTags ? "▸" : "▾"}
+              </button>
             </div>
+            {!collapsedLocalTags && (
+              <div>
+                <div
+                  className={`tag-category-block${
+                    dragOverCategory === "" ? " drag-over-category" : ""
+                  }`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    handleDragOverCategory("");
+                  }}
+                  onDrop={() => handleDropOnCategory("")}
+                  onDragLeave={() => setDragOverCategory(null)}
+                >
+                  <div
+                    className="tag-category-header"
+                    onClick={() => toggleCategory("")}
+                  >
+                    <span></span>
+                    <button
+                      className="tag-toggle-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleCategory("");
+                      }}
+                    >
+                      {collapsedCategories.has("") ? "▸" : "▾"}
+                    </button>
+                  </div>
+                  {!collapsedCategories.has("") && (
+                    <div className="tag-grid">
+                      {(filteredGroupedLocalTags[""] || []).map((tagObj) => (
+                        <div
+                          key={tagObj.name}
+                          className={
+                            "tag-checkbox-row draggable-tag" +
+                            (summary.localTags?.includes(tagObj.name)
+                              ? " selected"
+                              : "") +
+                            (draggedTag?.tag.name === tagObj.name
+                              ? " dragging"
+                              : "")
+                          }
+                          draggable
+                          onDragStart={() => handleDragStart(tagObj, "")}
+                          onDragEnd={handleDragEnd}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            setTagContextMenu({
+                              x: e.clientX,
+                              y: e.clientY,
+                              tag: tagObj,
+                              category: "",
+                            });
+                          }}
+                          onClick={() => handlePersonalTagToggle(tagObj.name)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <input
+                            type="checkbox"
+                            className="tag-checkbox"
+                            checked={summary.localTags?.includes(tagObj.name)}
+                            readOnly
+                            tabIndex={-1}
+                            id={`tag-checkbox--${tagObj.name}`}
+                            style={{ pointerEvents: "none" }}
+                          />
+                          <label
+                            className="tag-name"
+                            htmlFor={`tag-checkbox--${tagObj.name}`}
+                            title={tagObj.name}
+                          >
+                            {tagObj.name}
+                          </label>
+                          <span
+                            className={
+                              "tag-fav-star" +
+                              (tagObj.favorite ? "" : " not-fav")
+                            }
+                            title={
+                              tagObj.favorite ? "Favorite" : "Not favorite"
+                            }
+                            style={{ cursor: "pointer", marginLeft: "auto" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleFavorite(tagObj);
+                            }}
+                          >
+                            ★
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {/* Render all other categories in order, even if empty */}
+                {categoryOrder
+                  .filter((category) =>
+                    localTagSearch.trim()
+                      ? filteredGroupedLocalTags[category] &&
+                        filteredGroupedLocalTags[category].length > 0
+                      : true
+                  )
+                  .filter((category) => category !== "")
+                  .map((category) => {
+                    const isCollapsed = collapsedCategories.has(category);
+                    const isDragOver = dragOverCategory === category;
+                    const tags = filteredGroupedLocalTags[category] || [];
+                    return (
+                      <div
+                        key={category}
+                        className={`tag-category-block${
+                          isDragOver ? " drag-over-category" : ""
+                        }`}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          handleDragOverCategory(category);
+                        }}
+                        onDrop={() => handleDropOnCategory(category)}
+                        onDragLeave={() => setDragOverCategory(null)}
+                      >
+                        <div
+                          className="tag-category-header"
+                          onClick={() => toggleCategory(category)}
+                        >
+                          <span>{category}</span>
+                          <button
+                            className="tag-toggle-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleCategory(category);
+                            }}
+                          >
+                            {isCollapsed ? "▸" : "▾"}
+                          </button>
+                        </div>
+                        {!isCollapsed && (
+                          <div className="tag-grid">
+                            {tags.map((tagObj) => (
+                              <div
+                                key={tagObj.name}
+                                className={
+                                  "tag-checkbox-row draggable-tag" +
+                                  (summary.localTags?.includes(tagObj.name)
+                                    ? " selected"
+                                    : "") +
+                                  (draggedTag?.tag.name === tagObj.name
+                                    ? " dragging"
+                                    : "")
+                                }
+                                draggable
+                                onDragStart={() =>
+                                  handleDragStart(tagObj, category)
+                                }
+                                onDragEnd={handleDragEnd}
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  setTagContextMenu({
+                                    x: e.clientX,
+                                    y: e.clientY,
+                                    tag: tagObj,
+                                    category,
+                                  });
+                                }}
+                                onClick={() =>
+                                  handlePersonalTagToggle(tagObj.name)
+                                }
+                                style={{ cursor: "pointer" }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="tag-checkbox"
+                                  checked={summary.localTags?.includes(
+                                    tagObj.name
+                                  )}
+                                  readOnly
+                                  tabIndex={-1}
+                                  id={`tag-checkbox-${category}-${tagObj.name}`}
+                                  style={{ pointerEvents: "none" }} // Prevent input from blocking row click
+                                />
+                                <label
+                                  className="tag-name"
+                                  htmlFor={`tag-checkbox-${category}-${tagObj.name}`}
+                                  title={tagObj.name}
+                                >
+                                  {tagObj.name}
+                                </label>
+                                <span
+                                  className={
+                                    "tag-fav-star" +
+                                    (tagObj.favorite ? "" : " not-fav")
+                                  }
+                                  title={
+                                    tagObj.favorite
+                                      ? "Favorite"
+                                      : "Not favorite"
+                                  }
+                                  style={{
+                                    cursor: "pointer",
+                                    marginLeft: "auto",
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent row click
+                                    handleToggleFavorite(tagObj);
+                                  }}
+                                >
+                                  ★
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
           </div>
         </div>
       </div>

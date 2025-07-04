@@ -31,11 +31,15 @@
   gap: 8px;
 }
 
-.local-tags-header {
-  padding: 5px 14px;
+.search-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.local-tags-header label {
+.search-header label {
   margin-bottom: 12px;
   font-size: 1.12rem;
   font-weight: 700;
@@ -44,7 +48,7 @@
   min-width: 80px;
 }
 
-.local-tags-header input[type="text"] {
+.search-header input[type="text"] {
   padding: 4px;
   font-size: 14px;
   border: 1px solid #ccc;
@@ -54,8 +58,10 @@
   background: #000000;
   margin-bottom: 0;
   margin-right: 0;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-width: 0;
+  max-width: 100%;
+  width: 220px;
 }
 
 .edit-background-tags-panel,
@@ -358,15 +364,14 @@
   box-shadow: 0 0 0 2px #007bff;
 }
 
-.edit-bg-field .public-tags-header {
+.edit-bg-field .section-header {
   background: #33333d;
   color: #ffffff;
   border-radius: 8px;
-  padding: 6px 14px;
+  padding: 6px 8px;
   font-size: 1.12rem;
   font-weight: 700;
   letter-spacing: 0.01em;
-  margin-bottom: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -375,11 +380,11 @@
     background 0.18s,
     color 0.18s;
 }
-.edit-bg-field .public-tags-header.expanded {
+.edit-bg-field .section-header.expanded {
   background: #232323;
   color: #fff;
 }
-.edit-bg-field .public-tags-header .tag-toggle-button {
+.edit-bg-field .section-header .tag-toggle-button {
   color: inherit;
   font-size: 1.1rem;
   margin-left: auto;
