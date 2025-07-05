@@ -41,7 +41,9 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       setCategoriesObj(catsObj);
       // Separate out "" category for appending on save
       setEmptyCategory(Object.prototype.hasOwnProperty.call(catsObj, ""));
-      setCategories(Object.keys(catsObj).filter((name) => name !== ""));
+      setCategories(
+        Object.keys(catsObj).filter((name) => name !== "" && name !== "show")
+      );
       logger.info(`Categories: ${Object.keys(catsObj)}`);
     } catch (e) {
       logger.error("Failed to fetch categories", e);

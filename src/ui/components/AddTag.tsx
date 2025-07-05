@@ -22,7 +22,7 @@ const AddTagWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         const categories: string[] = await window.electron.getTagCategories();
         logger.info(`Categories: ${categories}`);
         const dynamicOptions = categories
-          .filter((cat) => cat && cat !== "" && cat !== "new")
+          .filter((cat) => cat && cat !== "" && cat !== "new" && cat !== "show")
           .map((cat) => ({ value: cat, label: cat }));
         setCategoryOptions([...STATIC_OPTIONS, ...dynamicOptions]);
       } catch (e) {
