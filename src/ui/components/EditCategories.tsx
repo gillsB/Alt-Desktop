@@ -58,7 +58,8 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   };
 
   const handleAddCategory = async () => {
-    if (!categoryInput) {
+    const trimmedInput = categoryInput.trim();
+    if (!trimmedInput) {
       await showSmallWindow(
         "Invalid Category",
         "Please enter a category name.",
@@ -66,7 +67,15 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       );
       return;
     }
-    const lowercasedCategoryInput = categoryInput.toLowerCase();
+    const lowercasedCategoryInput = trimmedInput.toLowerCase();
+    if (lowercasedCategoryInput === "show") {
+      await showSmallWindow(
+        "Invalid Category",
+        "The category name 'show' is reserved and cannot be used.",
+        ["Okay"]
+      );
+      return;
+    }
     if (
       categories.some(
         (category) => category.toLowerCase() === lowercasedCategoryInput
@@ -81,10 +90,10 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     }
 
     try {
-      const newObj = { [categoryInput]: true, ...categoriesObj };
+      const newObj = { [trimmedInput]: true, ...categoriesObj };
       await saveCategories(newObj);
       setCategoryInput("");
-      logger.info(`Category added: ${categoryInput}`);
+      logger.info(`Category added: ${trimmedInput}`);
     } catch (error) {
       logger.error("Failed to add category", error);
     }
@@ -155,7 +164,9 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     }
     await window.electron.saveSettingsData({ categories: newObj });
     setCategoriesObj(newObj);
-    setCategories(Object.keys(newObj).filter((name) => name !== ""));
+    setCategories(
+      Object.keys(newObj).filter((name) => name !== "" && name !== "show")
+    );
   };
 
   const handleDrop = async (
@@ -268,7 +279,9 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
           }
         }
         setCategoriesObj(newObj);
-        setCategories(Object.keys(newObj));
+        setCategories(
+          Object.keys(newObj).filter((name) => name !== "" && name !== "show")
+        );
         fetchCategories();
       }
     }
