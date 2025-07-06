@@ -51,11 +51,33 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
   const togglePublicCategory = (category: string) => {
     setCollapsedPublicCategories((prev) => {
       const newSet = new Set(prev);
+      let expanded = true;
       if (newSet.has(category)) {
         newSet.delete(category);
+        expanded = true;
       } else {
         newSet.add(category);
+        expanded = false;
       }
+      window.electron
+        .getSetting("publicCategories")
+        .then(
+          (
+            publicCategoriesObj:
+              | (Record<string, boolean> & { show?: boolean })
+              | undefined
+          ) => {
+            if (
+              publicCategoriesObj &&
+              typeof publicCategoriesObj === "object"
+            ) {
+              publicCategoriesObj[category] = expanded;
+              window.electron.saveSettingsData({
+                publicCategories: publicCategoriesObj,
+              });
+            }
+          }
+        );
       return newSet;
     });
   };
