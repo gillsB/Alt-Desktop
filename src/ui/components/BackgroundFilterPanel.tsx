@@ -81,6 +81,32 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
       return newSet;
     });
   };
+  const togglePublicTagsSection = () => {
+    setCollapsedPublicTags((prev) => {
+      const newVal = !prev;
+      window.electron
+        .getSetting("publicCategories")
+        .then(
+          (
+            publicCategoriesObj:
+              | (Record<string, boolean> & { show?: boolean })
+              | undefined
+          ) => {
+            if (
+              publicCategoriesObj &&
+              typeof publicCategoriesObj === "object"
+            ) {
+              publicCategoriesObj.show = !newVal;
+              window.electron.saveSettingsData({
+                publicCategories: publicCategoriesObj,
+              });
+            }
+          }
+        );
+      return newVal;
+    });
+  };
+
   // Collapse public categories based on settings
   useEffect(() => {
     (async () => {
@@ -136,7 +162,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
           "bgfilter-section-header" + (collapsedPublicTags ? "" : " expanded")
         }
         style={{ cursor: "pointer" }}
-        onClick={() => setCollapsedPublicTags((prev) => !prev)}
+        onClick={togglePublicTagsSection}
       >
         <label className="bgfilter-section-label" style={{ marginBottom: 0 }}>
           Public Tags:
@@ -145,7 +171,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
           className="bgfilter-tag-toggle-button"
           onClick={(e) => {
             e.stopPropagation();
-            setCollapsedPublicTags((prev) => !prev);
+            togglePublicTagsSection();
           }}
         >
           {collapsedPublicTags ? "▸" : "▾"}
