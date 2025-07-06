@@ -20,6 +20,15 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
   localTags,
   onClose,
 }) => {
+  const [collapsedPublicTags, setCollapsedPublicTags] = useState(false);
+  const [collapsedPublicCategories, setCollapsedPublicCategories] = useState<
+    Set<string>
+  >(new Set());
+  const [collapsedLocalTags, setCollapsedLocalTags] = useState(false);
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
+    new Set()
+  );
+
   // Group localTags by category
   const groupedLocalTags: Record<string, LocalTag[]> = React.useMemo(() => {
     const grouped: Record<string, LocalTag[]> = {};
@@ -39,10 +48,6 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
     })();
   }, []);
 
-  // Collapsed state for local categories
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
-    new Set()
-  );
   const toggleCategory = (category: string) => {
     setCollapsedCategories((prev) => {
       const newSet = new Set(prev);
@@ -55,10 +60,20 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
     });
   };
 
-  // Collapsed state for public categories
-  const [collapsedPublicCategories, setCollapsedPublicCategories] = useState<
-    Set<string>
-  >(new Set());
+  useEffect(() => {
+    (async () => {
+      const publicCategoriesObj: Record<string, boolean> & { show?: boolean } =
+        (await window.electron.getSetting("publicCategories")) ?? {};
+      if (typeof publicCategoriesObj.show === "boolean") {
+        setCollapsedPublicTags(!publicCategoriesObj.show);
+      }
+      const collapsed = Object.entries(publicCategoriesObj)
+        .filter(([cat, expanded]) => cat !== "show" && !expanded)
+        .map(([cat]) => cat);
+      setCollapsedPublicCategories(new Set(collapsed));
+    })();
+  }, []);
+
   const togglePublicCategory = (category: string) => {
     setCollapsedPublicCategories((prev) => {
       const newSet = new Set(prev);
@@ -88,9 +103,6 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
     ...categoryOrder.filter((c) => !c || c.trim() === ""),
     ...categoryOrder.filter((c) => c && c.trim() !== ""),
   ];
-
-  const [collapsedPublicTags, setCollapsedPublicTags] = useState(false);
-  const [collapsedLocalTags, setCollapsedLocalTags] = useState(false);
 
   return (
     <div className="bgfilter-search-panel">
