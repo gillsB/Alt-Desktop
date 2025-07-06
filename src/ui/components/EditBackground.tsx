@@ -886,7 +886,6 @@ const EditBackground: React.FC = () => {
         {/* Right: Tag management */}
         <div className="edit-background-tags-panel">
           <div className="search-header">
-            <label>Search Tags:</label>
             <input
               type="text"
               placeholder="Search tags..."
