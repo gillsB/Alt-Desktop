@@ -16,6 +16,27 @@ body,
   gap: 1rem;
 }
 
+input,
+select,
+textarea {
+  background: #121212;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  outline: none;
+  box-sizing: border-box;
+  border: none;
+  transition:
+    box-shadow 0.2s,
+    background 0.2s;
+  resize: vertical;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  background: #121212;
+  box-shadow: 0 0 0 2px #007bff88;
+}
+
 .menu-separator {
   border-top: 1px solid #444;
   margin: 0.25rem 0;
@@ -113,11 +134,7 @@ body,
 .subwindow-field textarea {
   padding: 8px;
   font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
   flex: 1;
-  box-sizing: border-box;
-  color: #fff;
 }
 .subwindow-field input[disabled] {
   opacity: 0.7;
