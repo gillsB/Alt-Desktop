@@ -932,7 +932,7 @@ const EditBackground: React.FC = () => {
               </button>
             </div>
             {!collapsedPublicTags && (
-              <div>
+              <div className="tags-container">
                 {filteredPublicTagCategories.map((catObj) => (
                   <div key={catObj!.name} className="public-tag-category-block">
                     <div
@@ -940,7 +940,6 @@ const EditBackground: React.FC = () => {
                       onClick={() => togglePublicCategory(catObj!.name)}
                       style={{ cursor: "pointer" }}
                     >
-                      <span>{catObj!.name}</span>
                       <button
                         className="tag-toggle-button"
                         onClick={(e) => {
@@ -952,6 +951,7 @@ const EditBackground: React.FC = () => {
                           ? "▸"
                           : "▾"}
                       </button>
+                      <span>{catObj!.name}</span>
                     </div>
                     {!collapsedPublicCategories.has(catObj!.name) && (
                       <div className="tag-row">
@@ -1000,7 +1000,7 @@ const EditBackground: React.FC = () => {
               </button>
             </div>
             {!collapsedLocalTags && (
-              <div>
+              <div className="tags-container">
                 <div
                   className={`tag-category-block${
                     dragOverCategory === "" ? " drag-over-category" : ""
@@ -1016,7 +1016,6 @@ const EditBackground: React.FC = () => {
                     className="tag-category-header"
                     onClick={() => toggleCategory("")}
                   >
-                    <span></span>
                     <button
                       className="tag-toggle-button"
                       onClick={(e) => {
@@ -1026,6 +1025,7 @@ const EditBackground: React.FC = () => {
                     >
                       {collapsedCategories.has("") ? "▸" : "▾"}
                     </button>
+                    <span></span>
                   </div>
                   {!collapsedCategories.has("") && (
                     <div className="tag-grid">
@@ -1125,7 +1125,6 @@ const EditBackground: React.FC = () => {
                           className="tag-category-header"
                           onClick={() => toggleCategory(category)}
                         >
-                          <span>{category}</span>
                           <button
                             className="tag-toggle-button"
                             onClick={(e) => {
@@ -1135,6 +1134,7 @@ const EditBackground: React.FC = () => {
                           >
                             {isCollapsed ? "▸" : "▾"}
                           </button>
+                          <span>{category}</span>
                         </div>
                         {!isCollapsed && (
                           <div className="tag-grid">

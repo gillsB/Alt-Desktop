@@ -150,7 +150,7 @@
   align-items: center;
   gap: 6px;
   background-color: #33333d;
-  justify-content: right;
+  justify-content: left;
   user-select: none;
 }
 
@@ -387,5 +387,8 @@
 .edit-bg-field .section-header .tag-toggle-button {
   color: inherit;
   font-size: 1.1rem;
-  margin-left: auto;
+}
+
+.tags-container {
+  margin-bottom: 16px;
 }
