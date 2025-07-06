@@ -28,6 +28,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
     new Set()
   );
+  const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
 
   // Group localTags by category
   const groupedLocalTags: Record<string, LocalTag[]> = React.useMemo(() => {
@@ -40,37 +41,10 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
   }, [localTags]);
 
   // Fetch category order
-  const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
   useEffect(() => {
     (async () => {
       const categories: string[] = await window.electron.getTagCategories();
       setCategoryOrder(categories);
-    })();
-  }, []);
-
-  const toggleCategory = (category: string) => {
-    setCollapsedCategories((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(category)) {
-        newSet.delete(category);
-      } else {
-        newSet.add(category);
-      }
-      return newSet;
-    });
-  };
-
-  useEffect(() => {
-    (async () => {
-      const publicCategoriesObj: Record<string, boolean> & { show?: boolean } =
-        (await window.electron.getSetting("publicCategories")) ?? {};
-      if (typeof publicCategoriesObj.show === "boolean") {
-        setCollapsedPublicTags(!publicCategoriesObj.show);
-      }
-      const collapsed = Object.entries(publicCategoriesObj)
-        .filter(([cat, expanded]) => cat !== "show" && !expanded)
-        .map(([cat]) => cat);
-      setCollapsedPublicCategories(new Set(collapsed));
     })();
   }, []);
 
@@ -85,14 +59,42 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
       return newSet;
     });
   };
+  // Collapse public categories based on settings
+  useEffect(() => {
+    (async () => {
+      const publicCategoriesObj: Record<string, boolean> & { show?: boolean } =
+        (await window.electron.getSetting("publicCategories")) ?? {};
+      if (typeof publicCategoriesObj.show === "boolean") {
+        setCollapsedPublicTags(!publicCategoriesObj.show);
+      }
+      const collapsed = Object.entries(publicCategoriesObj)
+        .filter(([cat, expanded]) => cat !== "show" && !expanded)
+        .map(([cat]) => cat);
+      setCollapsedPublicCategories(new Set(collapsed));
+    })();
+  }, []);
 
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
   // Collapse categories based on settings
   useEffect(() => {
     (async () => {
-      const categoriesObj: Record<string, boolean> =
+      const categoriesObj: Record<string, boolean> & { show?: boolean } =
         (await window.electron.getSetting("categories")) ?? {};
+      if (typeof categoriesObj.show === "boolean") {
+        setCollapsedLocalTags(!categoriesObj.show);
+      }
       const collapsed = Object.entries(categoriesObj)
-        .filter(([, expanded]) => !expanded)
+        .filter(([cat, expanded]) => cat !== "show" && !expanded)
         .map(([cat]) => cat);
       setCollapsedCategories(new Set(collapsed));
     })();
