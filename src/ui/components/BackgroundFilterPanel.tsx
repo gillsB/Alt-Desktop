@@ -38,15 +38,20 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
       grouped[tag.category].push(tag);
     }
     return grouped;
-  }, [localTags]);
+  }, [localTags]); // localTags must be updated in BackgroundSelect to trigger this dependency.
 
   // Fetch category order
   useEffect(() => {
     (async () => {
-      const categories: string[] = await window.electron.getTagCategories();
+      let categories: string[] = await window.electron.getTagCategories();
+      // Ensure "" is included if there are tags with no category
+      const hasNoCategory = localTags.some((tag) => !tag.category);
+      if (hasNoCategory && !categories.includes("")) {
+        categories = [""].concat(categories);
+      }
       setCategoryOrder(categories);
     })();
-  }, []);
+  }, [localTags]);
 
   const togglePublicCategory = (category: string) => {
     setCollapsedPublicCategories((prev) => {
@@ -285,7 +290,11 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
       </div>
       {!collapsedLocalTags &&
         sortedCategoryOrder
-          .filter((category) => groupedLocalTags[category])
+          .filter(
+            (category) =>
+              groupedLocalTags[category] &&
+              groupedLocalTags[category].length > 0
+          )
           .map((category) => (
             <div key={category} className="bgfilter-category-block">
               <div
