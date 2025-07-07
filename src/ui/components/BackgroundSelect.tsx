@@ -760,7 +760,17 @@ const BackgroundSelect: React.FC = () => {
                   <label>Local Tags</label>
                   <div className="details-value">
                     {selectedBg.localTags && selectedBg.localTags.length > 0 ? (
-                      selectedBg.localTags.join(", ")
+                      selectedBg.localTags.map((tag, index) => (
+                        <span
+                          key={index}
+                          onClick={() => handleTagClick(tag)}
+                          style={{
+                            cursor: "pointer",
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))
                     ) : (
                       <em>None</em>
                     )}
