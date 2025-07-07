@@ -152,6 +152,30 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
       return newSet;
     });
   };
+
+  const toggleLocalTagsSection = () => {
+    setCollapsedLocalTags((prev) => {
+      const newVal = !prev;
+      window.electron
+        .getSetting("categories")
+        .then(
+          (
+            categoriesObj:
+              | (Record<string, boolean> & { show?: boolean })
+              | undefined
+          ) => {
+            if (categoriesObj && typeof categoriesObj === "object") {
+              categoriesObj.show = !newVal;
+              window.electron.saveSettingsData({
+                categories: categoriesObj,
+              });
+            }
+          }
+        );
+      return newVal;
+    });
+    return;
+  };
   // Collapse categories based on settings
   useEffect(() => {
     (async () => {
@@ -246,14 +270,14 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
           "bgfilter-section-header" + (collapsedLocalTags ? "" : " expanded")
         }
         style={{ cursor: "pointer", marginBottom: 4 }}
-        onClick={() => setCollapsedLocalTags((prev) => !prev)}
+        onClick={toggleLocalTagsSection}
       >
         <label className="bgfilter-section-label">Local Tags:</label>
         <button
           className="bgfilter-tag-toggle-button"
           onClick={(e) => {
             e.stopPropagation();
-            setCollapsedLocalTags((prev) => !prev);
+            toggleLocalTagsSection();
           }}
         >
           {collapsedLocalTags ? "▸" : "▾"}
