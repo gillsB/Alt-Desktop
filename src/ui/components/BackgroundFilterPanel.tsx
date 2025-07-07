@@ -125,11 +125,30 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
   const toggleCategory = (category: string) => {
     setCollapsedCategories((prev) => {
       const newSet = new Set(prev);
+      let expanded = true;
       if (newSet.has(category)) {
         newSet.delete(category);
+        expanded = true;
       } else {
         newSet.add(category);
+        expanded = false;
       }
+      window.electron
+        .getSetting("categories")
+        .then(
+          (
+            categoriesObj:
+              | (Record<string, boolean> & { show?: boolean })
+              | undefined
+          ) => {
+            if (categoriesObj && typeof categoriesObj === "object") {
+              categoriesObj[category] = expanded;
+              window.electron.saveSettingsData({
+                categories: categoriesObj,
+              });
+            }
+          }
+        );
       return newSet;
     });
   };

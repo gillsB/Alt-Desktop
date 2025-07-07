@@ -58,7 +58,10 @@ export function registerWindowKeybinds(mainWindow: BrowserWindow) {
 
       // Restore the window to its last bounds if available
       if (lastBounds) {
-        logger.info("Restoring window to last bounds:", lastBounds);
+        logger.info(
+          "Restoring window to last bounds:",
+          JSON.stringify(lastBounds)
+        );
         mainWindow.setBounds(lastBounds);
       }
 
