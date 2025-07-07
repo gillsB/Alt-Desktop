@@ -509,6 +509,10 @@ const BackgroundSelect: React.FC = () => {
     );
   };
 
+  const handleTagClick = async (tag: string) => {
+    logger.info("Tag clicked:", tag);
+  };
+
   return (
     <div
       className="background-select-root"
@@ -736,7 +740,17 @@ const BackgroundSelect: React.FC = () => {
                   <label>Tags</label>
                   <div className="details-value">
                     {selectedBg.tags && selectedBg.tags.length > 0 ? (
-                      selectedBg.tags.join(", ")
+                      selectedBg.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          onClick={() => handleTagClick(tag)}
+                          style={{
+                            cursor: "pointer",
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))
                     ) : (
                       <em>None</em>
                     )}

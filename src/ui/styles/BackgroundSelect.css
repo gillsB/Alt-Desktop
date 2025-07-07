@@ -381,3 +381,10 @@
   margin-right: 10px;
   margin-bottom: 2px;
 }
+
+.details-value span {
+  white-space: nowrap;
+  color: #469fff;
+  font-weight: normal;
+  margin-right: 4px;
+}
