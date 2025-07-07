@@ -543,9 +543,9 @@ const BackgroundSelect: React.FC = () => {
                 setPage(0);
                 setSearch(value);
                 // This only works for adding tag: at the current end of a message.
-                const tagMatch = value.match(/(?:^|\s)tag:([^\s]*)$/i);
+                const tagMatch = value.match(/(?:^|\s)(-?)tag:([^\s]*)$/i);
                 if (tagMatch) {
-                  const partial = tagMatch[1].toLowerCase();
+                  const partial = tagMatch[2].toLowerCase();
                   const matches = allTags
                     .filter((tag) => tag.toLowerCase().startsWith(partial))
                     .slice(0, 5);
@@ -570,11 +570,14 @@ const BackgroundSelect: React.FC = () => {
                     e.preventDefault();
                   } else if (e.key === "Tab" || e.key === "Enter") {
                     const value = search.replace(
-                      /(?:^|\s)tag:[^\s]*$/i,
-                      (m) => {
+                      /(?:^|\s)(-?)tag:[^\s]*$/i,
+                      (m, neg) => {
                         const prefix = m.match(/^\s/) ? " " : "";
                         return (
-                          prefix + "tag:" + tagSuggestions[suggestionIndex]
+                          prefix +
+                          (neg || "") +
+                          "tag:" +
+                          tagSuggestions[suggestionIndex]
                         );
                       }
                     );
