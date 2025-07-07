@@ -511,6 +511,14 @@ const BackgroundSelect: React.FC = () => {
 
   const handleTagClick = async (tag: string) => {
     logger.info("Tag clicked:", tag);
+    setSearch((prev) => {
+      // If tag is already in search, do nothing
+      if (prev.includes(`tag:${tag}`)) return prev;
+
+      setPage(0);
+      // Otherwise, add it to the search
+      return `${prev} tag:${tag}`.trim();
+    });
   };
 
   return (
