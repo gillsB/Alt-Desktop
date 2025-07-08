@@ -1,4 +1,5 @@
 import React from "react";
+import "../styles/ClearableInput.css";
 import { createLogger } from "../util/uiLogger";
 
 const logger = createLogger("Background.tsx");
@@ -48,25 +49,27 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
   };
 
   return (
-    <div className={`clearable-input-wrapper ${className}`}>
-      <input
-        type="text"
-        className={`clearable-input ${inputClassName}`}
-        value={inputValue}
-        onChange={handleChange}
-        placeholder={placeholder}
-        {...props}
-      />
-      {inputValue && (
-        <button
-          type="button"
-          className="clear-input-button"
-          onClick={handleClear}
-          aria-label="Clear input"
-        >
-          ×
-        </button>
-      )}
+    <div className="search-input-wrapper">
+      <div className={`clearable-input-wrapper ${className}`}>
+        <input
+          type="text"
+          className={`clearable-input ${inputClassName}`}
+          value={inputValue}
+          onChange={handleChange}
+          placeholder={placeholder}
+          {...props}
+        />
+        {inputValue && (
+          <button
+            type="button"
+            className="clear-input-button"
+            onClick={handleClear}
+            aria-label="Clear input"
+          >
+            ×
+          </button>
+        )}
+      </div>
     </div>
   );
 };

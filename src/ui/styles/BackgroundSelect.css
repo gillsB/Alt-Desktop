@@ -248,11 +248,6 @@
   position: relative;
 }
 
-.search-input-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
 .search-menu input[type="text"] {
   width: 240px;
   padding: 8px 14px;

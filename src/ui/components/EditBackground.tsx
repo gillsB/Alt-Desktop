@@ -11,6 +11,7 @@ import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
 import AddTagWindow, { RenameTagModal } from "./AddTag";
+import ClearableInput from "./ClearableInput";
 import EditCategories from "./EditCategories";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
@@ -743,12 +744,12 @@ const EditBackground: React.FC = () => {
           </div>
           <div className="edit-bg-field">
             <label>Name</label>
-            <input
-              type="text"
+            <ClearableInput
               value={summary.name ?? ""}
               onChange={(e) =>
                 setSummary((prev) => ({ ...prev, name: e.target.value }))
               }
+              placeholder="Enter background name"
             />
           </div>
           <div className="edit-bg-field">
@@ -758,6 +759,7 @@ const EditBackground: React.FC = () => {
               onChange={(e) =>
                 setSummary((prev) => ({ ...prev, description: e.target.value }))
               }
+              placeholder="Enter background description"
             />
           </div>
           {bgFileType?.startsWith("video") && (
@@ -886,8 +888,7 @@ const EditBackground: React.FC = () => {
         {/* Right: Tag management */}
         <div className="edit-background-tags-panel">
           <div className="search-header">
-            <input
-              type="text"
+            <ClearableInput
               placeholder="Search tags..."
               value={localTagSearch}
               onChange={(e) => setLocalTagSearch(e.target.value)}
