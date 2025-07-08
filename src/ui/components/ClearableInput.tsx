@@ -25,7 +25,7 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
   ...props
 }) => {
   if (flex) inputClassName += " flex-input";
-  
+
   const [internalValue, setInternalValue] = React.useState("");
 
   const isControlled = value !== undefined;
@@ -69,6 +69,8 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
           <button
             type="button"
             className="clear-input-button"
+            onMouseDown={(e) => e.preventDefault()}
+            tabIndex={-1}
             onClick={handleClear}
             aria-label="Clear input"
           >

@@ -26,6 +26,14 @@
   height: 24px;
   width: 24px;
   border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.clearable-input-wrapper:focus-within .clear-input-button {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .clear-input-button:hover {
