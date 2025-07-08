@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import "../styles/ClearableInput.css";
 import { createLogger } from "../util/uiLogger";
 
@@ -27,6 +27,7 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
   if (flex) inputClassName += " flex-input";
 
   const [internalValue, setInternalValue] = React.useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const isControlled = value !== undefined;
 
@@ -41,14 +42,18 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
 
   const handleClear = () => {
     onClear?.();
-    if (!isControlled) {
-      logger.info("Clearing input value by default function");
-      setInternalValue("");
-    } else {
-      logger.info("Clearing input value by onChange callback");
-      onChange?.({
-        target: { value: "" },
-      } as React.ChangeEvent<HTMLInputElement>);
+
+    if (inputRef.current && inputValue) {
+      inputRef.current.focus();
+
+      inputRef.current.select();
+
+      setTimeout(() => {
+        if (inputRef.current) {
+          document.execCommand("delete"); // deprecated but still works in electron
+          logger.info("Cleared input value");
+        }
+      }, 0);
     }
   };
 
@@ -58,6 +63,7 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
     >
       <div className={`clearable-input-wrapper ${className}`}>
         <input
+          ref={inputRef}
           type="text"
           className={`clearable-input ${inputClassName}`}
           value={inputValue}
