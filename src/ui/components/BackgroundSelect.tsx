@@ -5,6 +5,7 @@ import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
 import { fileNameNoExt, parseAdvancedSearch } from "../util/uiUtil";
 import BackgroundFilterPanel from "./BackgroundFilterPanel";
+import ClearableInput from "./ClearableInput";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -535,10 +536,9 @@ const BackgroundSelect: React.FC = () => {
         <div className="background-left-panel">
           <div className="search-menu">
             <div className="search-input-wrapper">
-              <input
-                type="text"
-                placeholder="Search backgrounds..."
+              <ClearableInput
                 value={search}
+                placeholder="Search backgrounds..."
                 onChange={(e) => {
                   const value = e.target.value;
                   setPage(0);
@@ -595,19 +595,6 @@ const BackgroundSelect: React.FC = () => {
                   }
                 }}
               />
-              {search && (
-                <button
-                  className="clear-input-button"
-                  onClick={() => {
-                    setSearch("");
-                    setShowTagSuggestions(false);
-                    setTagSuggestions([]);
-                  }}
-                  aria-label="Clear search"
-                >
-                  X
-                </button>
-              )}
             </div>
 
             <button className="filter-button" onClick={handleFilterClick}>
