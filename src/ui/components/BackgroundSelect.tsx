@@ -534,63 +534,82 @@ const BackgroundSelect: React.FC = () => {
         {/* Left side: search, grid, paging */}
         <div className="background-left-panel">
           <div className="search-menu">
-            <input
-              type="text"
-              placeholder="Search backgrounds..."
-              value={search}
-              onChange={(e) => {
-                const value = e.target.value;
-                setPage(0);
-                setSearch(value);
-                // This only works for adding tag: at the current end of a message.
-                const tagMatch = value.match(/(?:^|\s)(-?)tag:([^\s]*)$/i);
-                if (tagMatch) {
-                  const partial = tagMatch[2].toLowerCase();
-                  const matches = allTags
-                    .filter((tag) => tag.toLowerCase().startsWith(partial))
-                    .slice(0, 5);
-                  setTagSuggestions(matches);
-                  setShowTagSuggestions(matches.length > 0);
-                  setSuggestionIndex(0);
-                } else {
-                  setShowTagSuggestions(false);
-                  setTagSuggestions([]);
-                }
-              }}
-              onKeyDown={(e) => {
-                if (showTagSuggestions && tagSuggestions.length > 0) {
-                  if (e.key === "ArrowDown") {
-                    setSuggestionIndex((i) => (i + 1) % tagSuggestions.length);
-                    e.preventDefault();
-                  } else if (e.key === "ArrowUp") {
-                    setSuggestionIndex(
-                      (i) =>
-                        (i - 1 + tagSuggestions.length) % tagSuggestions.length
-                    );
-                    e.preventDefault();
-                  } else if (e.key === "Tab" || e.key === "Enter") {
-                    const value = search.replace(
-                      /(?:^|\s)(-?)tag:[^\s]*$/i,
-                      (m, neg) => {
-                        const prefix = m.match(/^\s/) ? " " : "";
-                        return (
-                          prefix +
-                          (neg || "") +
-                          "tag:" +
-                          tagSuggestions[suggestionIndex]
-                        );
-                      }
-                    );
-                    setSearch(value + " ");
+            <div className="search-input-wrapper">
+              <input
+                type="text"
+                placeholder="Search backgrounds..."
+                value={search}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setPage(0);
+                  setSearch(value);
+                  // This only works for adding tag: at the current end of a message.
+                  const tagMatch = value.match(/(?:^|\s)(-?)tag:([^\s]*)$/i);
+                  if (tagMatch) {
+                    const partial = tagMatch[2].toLowerCase();
+                    const matches = allTags
+                      .filter((tag) => tag.toLowerCase().startsWith(partial))
+                      .slice(0, 5);
+                    setTagSuggestions(matches);
+                    setShowTagSuggestions(matches.length > 0);
+                    setSuggestionIndex(0);
+                  } else {
                     setShowTagSuggestions(false);
                     setTagSuggestions([]);
-                    e.preventDefault();
-                  } else if (e.key === "Escape") {
-                    setShowTagSuggestions(false);
                   }
-                }
-              }}
-            />
+                }}
+                onKeyDown={(e) => {
+                  if (showTagSuggestions && tagSuggestions.length > 0) {
+                    if (e.key === "ArrowDown") {
+                      setSuggestionIndex(
+                        (i) => (i + 1) % tagSuggestions.length
+                      );
+                      e.preventDefault();
+                    } else if (e.key === "ArrowUp") {
+                      setSuggestionIndex(
+                        (i) =>
+                          (i - 1 + tagSuggestions.length) %
+                          tagSuggestions.length
+                      );
+                      e.preventDefault();
+                    } else if (e.key === "Tab" || e.key === "Enter") {
+                      const value = search.replace(
+                        /(?:^|\s)(-?)tag:[^\s]*$/i,
+                        (m, neg) => {
+                          const prefix = m.match(/^\s/) ? " " : "";
+                          return (
+                            prefix +
+                            (neg || "") +
+                            "tag:" +
+                            tagSuggestions[suggestionIndex]
+                          );
+                        }
+                      );
+                      setSearch(value + " ");
+                      setShowTagSuggestions(false);
+                      setTagSuggestions([]);
+                      e.preventDefault();
+                    } else if (e.key === "Escape") {
+                      setShowTagSuggestions(false);
+                    }
+                  }
+                }}
+              />
+              {search && (
+                <button
+                  className="clear-input-button"
+                  onClick={() => {
+                    setSearch("");
+                    setShowTagSuggestions(false);
+                    setTagSuggestions([]);
+                  }}
+                  aria-label="Clear search"
+                >
+                  X
+                </button>
+              )}
+            </div>
+
             <button className="filter-button" onClick={handleFilterClick}>
               Filter Search
             </button>

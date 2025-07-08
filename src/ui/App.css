@@ -37,6 +37,31 @@ textarea:focus {
   box-shadow: 0 0 0 2px #007bff88;
 }
 
+.clear-input-button {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+}
+
+.clear-input-button:hover {
+  color: #ff0000;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .menu-separator {
   border-top: 1px solid #444;
   margin: 0.25rem 0;

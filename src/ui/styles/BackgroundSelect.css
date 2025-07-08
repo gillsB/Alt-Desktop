@@ -236,7 +236,7 @@
   padding: 12px;
   color: #bbb;
   font-size: 1.1em;
-  box-sizing: border-box; /* <-- ADD THIS */
+  box-sizing: border-box;
 }
 
 .search-menu {
@@ -248,23 +248,16 @@
   position: relative;
 }
 
+.search-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .search-menu input[type="text"] {
   width: 240px;
   padding: 8px 14px;
-  border: none;
-  background: #121212;
-  color: #fff;
   font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  outline: none;
-  transition:
-    box-shadow 0.2s,
-    background 0.2s;
-}
-
-.search-menu input[type="text"]:focus {
-  background: #121212;
-  box-shadow: 0 0 0 2px #007bff88;
+  padding-right: 30px;
 }
 
 .background-paging-bar {
