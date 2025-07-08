@@ -11,6 +11,7 @@ type ClearableInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   placeholder?: string;
   inputClassName?: string;
   className?: string;
+  flex?: boolean;
 };
 
 const ClearableInput: React.FC<ClearableInputProps> = ({
@@ -20,8 +21,11 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
   placeholder = "",
   className = "",
   inputClassName = "",
+  flex = false,
   ...props
 }) => {
+  if (flex) inputClassName += " flex-input";
+  
   const [internalValue, setInternalValue] = React.useState("");
 
   const isControlled = value !== undefined;
@@ -49,7 +53,9 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
   };
 
   return (
-    <div className="search-input-wrapper">
+    <div
+      className={flex ? "search-input-wrapper-flex" : "search-input-wrapper"}
+    >
       <div className={`clearable-input-wrapper ${className}`}>
         <input
           type="text"

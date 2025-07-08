@@ -892,6 +892,7 @@ const EditBackground: React.FC = () => {
               placeholder="Search tags..."
               value={localTagSearch}
               onChange={(e) => setLocalTagSearch(e.target.value)}
+              flex={true}
             />
             <button
               type="button"
