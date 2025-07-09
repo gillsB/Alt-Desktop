@@ -22,6 +22,7 @@ import {
 import { generateIcon } from "./utils/generateIcon.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import {
+  changeBackgroundDirectory,
   ensureFileExists,
   escapeRegExp,
   filterBackgroundEntries,
@@ -37,7 +38,6 @@ import {
   indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
-  changeBackgroundDirectory,
   resetAllIconsFontColor,
   resolveShortcut,
   saveBgJsonFile,
@@ -1077,9 +1077,25 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "saveSettingsData",
     async (data: Partial<SettingsData>): Promise<boolean> => {
       logger.info("SaveSettingsData called with data:", JSON.stringify(data));
+
       const result = await saveSettingsData(data);
-      mainWindow.webContents.send("reload-grid");
-      updateHeader(mainWindow);
+
+      // Specific keys which require a reload of the grid
+      const gridReloadKeys = [
+        "background",
+        "defaultFontSize",
+        "defaultIconSize",
+        "defaultFontColor",
+        "newBackgroundID",
+      ] as const;
+
+      const gridShouldReload = gridReloadKeys.some((key) => key in data);
+
+      if (gridShouldReload) {
+        mainWindow.webContents.send("reload-grid");
+        updateHeader(mainWindow);
+      }
+
       return result;
     }
   );
