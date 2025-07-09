@@ -3,7 +3,7 @@ import { openSubWindow } from "./subWindowManager.js";
 export function openBackgroundSelectWindow() {
   const options = {
     width: 910,
-    height: 812,
+    height: 815,
     frame: false,
     minWidth: 645,
     minHeight: 450,
