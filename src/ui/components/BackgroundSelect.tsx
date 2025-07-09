@@ -29,6 +29,7 @@ const BackgroundSelect: React.FC = () => {
 
   const [isDragging, setIsDragging] = useState(false);
   const [page, setPage] = useState(-1);
+  const [reloadKey, setReloadKey] = useState(0); // force reload for fetchPage useEffect
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const dragCounter = useRef(0);
@@ -143,7 +144,6 @@ const BackgroundSelect: React.FC = () => {
 
     return { page: bgPage, summary };
   };
-
   // Handle scrolling after summaries are updated
   useEffect(() => {
     if (!scrollToId || !summaries.length || !gridItemRefs.current[scrollToId])
@@ -165,7 +165,7 @@ const BackgroundSelect: React.FC = () => {
   }, [summaries, scrollToId, gridItemRefs]);
 
   useEffect(() => {
-    (async () => {
+    const loadSavedBackground = async () => {
       const savedBackground = await window.electron.getSetting("background");
       if (savedBackground) {
         const { page: bgPage, summary } =
@@ -175,25 +175,34 @@ const BackgroundSelect: React.FC = () => {
           setPage(bgPage);
           setSelectedIds([savedBackground]);
           setSelectedBg(summary ?? null);
+          return;
         } else {
           logger.info("Saved background not found in backgrounds list");
-          setPage(0);
-          setSelectedIds([]);
-          setSelectedBg(null);
         }
       } else {
         logger.info("No saved background found");
-        setPage(0);
-        setSelectedIds([]);
-        setSelectedBg(null);
       }
-    })();
+
+      // Fallback show page 0 (1)
+      setPage(0);
+      setSelectedIds([]);
+      setSelectedBg(null);
+    };
+
+    const init = async () => {
+      await loadSavedBackground(); // Load from saved backgrounds.json
+      await window.electron.indexBackgrounds(); // Re-index backgrounds
+      setReloadKey((k) => k + 1);
+      await loadSavedBackground(); // Reload and jump to savedBackground again after indexing.
+    };
+
+    init();
   }, []);
 
   useEffect(() => {
     if (page === -1) return; // prevent OnMount call.
     fetchPage();
-  }, [page, search]);
+  }, [page, search, reloadKey]);
 
   useEffect(() => {
     window.electron.on("backgrounds-updated", fetchPage);

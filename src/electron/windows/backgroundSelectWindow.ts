@@ -1,4 +1,3 @@
-import { indexBackgrounds } from "../utils/util.js";
 import { openSubWindow } from "./subWindowManager.js";
 
 export function openBackgroundSelectWindow() {
@@ -12,6 +11,5 @@ export function openBackgroundSelectWindow() {
 
   const subWindowHash = `background-select`;
 
-  indexBackgrounds();
   return openSubWindow(options, subWindowHash, "Background Select");
 }
