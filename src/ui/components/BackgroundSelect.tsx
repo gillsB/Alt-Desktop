@@ -48,7 +48,11 @@ const BackgroundSelect: React.FC = () => {
   const [localTags, setLocalTags] = useState<LocalTag[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
 
+  const [scrollToId, setScrollToId] = useState<string | null>(null);
+  const didAttemptScrollRef = useRef(false);
+
   const contextMenuRef = useRef<HTMLDivElement>(null);
+  const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
   // Sets up allTags reference for all tags, public and local.
   useEffect(() => {
@@ -140,6 +144,26 @@ const BackgroundSelect: React.FC = () => {
     return { page: bgPage, summary };
   };
 
+  // Handle scrolling after summaries are updated
+  useEffect(() => {
+    if (!scrollToId || !summaries.length || !gridItemRefs.current[scrollToId])
+      return;
+    if (didAttemptScrollRef.current) return;
+    didAttemptScrollRef.current = true;
+
+    requestAnimationFrame(() => {
+      const selectedElement = gridItemRefs.current[scrollToId];
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+      setScrollToId(null);
+      didAttemptScrollRef.current = false;
+    });
+  }, [summaries, scrollToId, gridItemRefs]);
+
   useEffect(() => {
     (async () => {
       const savedBackground = await window.electron.getSetting("background");
@@ -147,20 +171,10 @@ const BackgroundSelect: React.FC = () => {
         const { page: bgPage, summary } =
           await getBackgroundPage(savedBackground);
         if (bgPage !== -1) {
+          setScrollToId(savedBackground);
           setPage(bgPage);
           setSelectedIds([savedBackground]);
           setSelectedBg(summary ?? null);
-
-          // Wait for grid to render, then scroll to the item
-          setTimeout(() => {
-            const selectedElement = gridItemRefs.current[savedBackground];
-            if (selectedElement) {
-              selectedElement.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-            }
-          }, 100);
         } else {
           logger.info("Saved background not found in backgrounds list");
           setPage(0);
@@ -444,15 +458,9 @@ const BackgroundSelect: React.FC = () => {
 
     const { page: bgPage } = await getBackgroundPage(selectedBg.id);
     if (bgPage !== -1) {
+      setScrollToId(selectedBg.id);
       setPage(bgPage);
       setSelectedIds([selectedBg.id]);
-      // Wait for grid to render, then scroll to the item
-      setTimeout(() => {
-        const el = gridItemRefs.current[selectedBg.id];
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 100);
     } else {
       // TODO fix this when excluding is eventually added. No set in stone idea for what it does when
       // it is not in the current filter yet. Either discard filter, show regardless, or show a message.
@@ -469,8 +477,6 @@ const BackgroundSelect: React.FC = () => {
     }
     return bg.id;
   }
-
-  const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
   useLayoutEffect(() => {
     if (contextMenu) {
