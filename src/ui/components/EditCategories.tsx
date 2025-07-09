@@ -37,7 +37,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const fetchCategories = async () => {
     try {
       const catsObj: Record<string, boolean> =
-        (await window.electron.getSetting("categories")) ?? {};
+        (await window.electron.getSetting("localCategories")) ?? {};
       setCategoriesObj(catsObj);
       // Separate out "" category for appending on save
       setEmptyCategory(Object.prototype.hasOwnProperty.call(catsObj, ""));
@@ -162,7 +162,7 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     if (emptyCategory) {
       newObj[""] = categoriesObj[""];
     }
-    await window.electron.saveSettingsData({ categories: newObj });
+    await window.electron.saveSettingsData({ localCategories: newObj });
     setCategoriesObj(newObj);
     setCategories(
       Object.keys(newObj).filter((name) => name !== "" && name !== "show")

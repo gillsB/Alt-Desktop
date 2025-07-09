@@ -13,7 +13,7 @@ import {
   addCategory,
   defaultSettings,
   deleteCategory,
-  getCategories,
+  getLocalCategories,
   getSetting,
   renameCategory,
   renameLocalTag,
@@ -1691,8 +1691,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
-  ipcMainHandle("getTagCategories", async (): Promise<string[]> => {
-    return getCategories();
+  ipcMainHandle("getLocalCategories", async (): Promise<string[]> => {
+    return getLocalCategories();
   });
   ipcMainHandle(
     "renameCategory",

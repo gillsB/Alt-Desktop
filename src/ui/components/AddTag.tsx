@@ -19,7 +19,7 @@ const AddTagWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   useEffect(() => {
     (async () => {
       try {
-        const categories: string[] = await window.electron.getTagCategories();
+        const categories: string[] = await window.electron.getLocalCategories();
         logger.info(`Categories: ${categories}`);
         const dynamicOptions = categories
           .filter((cat) => cat && cat !== "" && cat !== "new" && cat !== "show")

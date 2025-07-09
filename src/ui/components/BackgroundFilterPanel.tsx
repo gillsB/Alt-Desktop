@@ -43,7 +43,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
   // Fetch category order
   useEffect(() => {
     (async () => {
-      let categories: string[] = await window.electron.getTagCategories();
+      let categories: string[] = await window.electron.getLocalCategories();
       // Ensure "" is included if there are tags with no category
       const hasNoCategory = localTags.some((tag) => !tag.category);
       if (hasNoCategory && !categories.includes("")) {
@@ -139,7 +139,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
         expanded = false;
       }
       window.electron
-        .getSetting("categories")
+        .getSetting("localCategories")
         .then(
           (
             categoriesObj:
@@ -149,7 +149,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
             if (categoriesObj && typeof categoriesObj === "object") {
               categoriesObj[category] = expanded;
               window.electron.saveSettingsData({
-                categories: categoriesObj,
+                localCategories: categoriesObj,
               });
             }
           }
@@ -162,7 +162,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
     setCollapsedLocalTags((prev) => {
       const newVal = !prev;
       window.electron
-        .getSetting("categories")
+        .getSetting("localCategories")
         .then(
           (
             categoriesObj:
@@ -172,7 +172,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
             if (categoriesObj && typeof categoriesObj === "object") {
               categoriesObj.show = !newVal;
               window.electron.saveSettingsData({
-                categories: categoriesObj,
+                localCategories: categoriesObj,
               });
             }
           }
@@ -185,7 +185,7 @@ const BackgroundFilterPanel: React.FC<BackgroundFilterPanelProps> = ({
   useEffect(() => {
     (async () => {
       const categoriesObj: Record<string, boolean> & { show?: boolean } =
-        (await window.electron.getSetting("categories")) ?? {};
+        (await window.electron.getSetting("localCategories")) ?? {};
       if (typeof categoriesObj.show === "boolean") {
         setCollapsedLocalTags(!categoriesObj.show);
       }

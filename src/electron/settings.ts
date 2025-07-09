@@ -26,7 +26,9 @@ export const defaultSettings: SettingsData = {
   newBackgroundID: 1,
   externalPaths: [],
   publicCategories: defaultPublicCategories,
-  categories: { show: true } as Record<string, boolean> & { show?: boolean },
+  localCategories: { show: true } as Record<string, boolean> & {
+    show?: boolean;
+  },
   localTags: [],
 };
 
@@ -61,7 +63,6 @@ export const ensureDefaultSettings = (): void => {
 
     // Type check for all other settings (replace if type does not match default)
     for (const [key, defaultValue] of Object.entries(defaultSettings)) {
-      if (key === "categories") continue; // already handled above
       const currentValue = settings[key];
       if (
         typeof currentValue !== typeof defaultValue ||
@@ -256,14 +257,14 @@ export async function renameLocalTag(
 }
 
 /**
- * Ensures all categories from localTags are present in the categories setting.
- * Adds any missing categories to the beginning of the categories array, saves, and returns the updated array.
+ * Ensures all categories from localTags are present in the localCategories setting.
+ * Adds any missing localCategories to the beginning of the localCategories array, saves, and returns the updated array.
  */
-export async function getCategories(): Promise<string[]> {
+export async function getLocalCategories(): Promise<string[]> {
   try {
     // Get current categories and localTags from settings
     const categoriesObj =
-      (getSetting("categories") as Record<string, boolean>) ?? {};
+      (getSetting("localCategories") as Record<string, boolean>) ?? {};
     const localTags = (getSetting("localTags") as LocalTag[]) ?? [];
 
     // Get all unique, non-empty categories from localTags
@@ -288,7 +289,7 @@ export async function getCategories(): Promise<string[]> {
       logger.info(
         `Adding missing categories: ${tagCategories.filter((cat) => !(cat in categoriesObj))}`
       );
-      await saveSettingsData({ categories: categoriesObj });
+      await saveSettingsData({ localCategories: categoriesObj });
     }
 
     return Object.keys(categoriesObj);
@@ -304,10 +305,10 @@ export async function addCategory(name: string, expanded = true) {
       return;
     }
     const categoriesObj =
-      (getSetting("categories") as Record<string, boolean>) ?? {};
+      (getSetting("localCategories") as Record<string, boolean>) ?? {};
     if (!(name in categoriesObj)) {
       categoriesObj[name] = expanded;
-      await saveSettingsData({ categories: categoriesObj });
+      await saveSettingsData({ localCategories: categoriesObj });
       logger.info("Added category", name);
     } else {
       logger.info("Category already exists", name);
@@ -326,7 +327,7 @@ export async function renameCategory(
       return false;
     }
     const categoriesObj =
-      (getSetting("categories") as Record<string, boolean>) ?? {};
+      (getSetting("localCategories") as Record<string, boolean>) ?? {};
     let updated = false;
 
     if (oldName in categoriesObj) {
@@ -351,7 +352,7 @@ export async function renameCategory(
 
     if (updated || tagsUpdated) {
       await saveSettingsData({
-        categories: categoriesObj,
+        localCategories: categoriesObj,
         localTags,
       });
       logger.info(
@@ -372,7 +373,7 @@ export async function deleteCategory(name: string): Promise<boolean> {
     }
     // Remove from categories
     const categoriesObj =
-      (getSetting("categories") as Record<string, boolean>) ?? {};
+      (getSetting("localCategories") as Record<string, boolean>) ?? {};
     if (!(name in categoriesObj)) {
       logger.warn(`Category ${name} not found for deletion`);
       return false;
@@ -389,7 +390,7 @@ export async function deleteCategory(name: string): Promise<boolean> {
     });
 
     await saveSettingsData({
-      categories: categoriesObj,
+      localCategories: categoriesObj,
       localTags,
     });
     logger.info(`Deleted category "${name}" and reverted affected tags to ""`);
@@ -406,39 +407,55 @@ export async function deleteCategory(name: string): Promise<boolean> {
  */
 function migrateCategoriesSetting(settings: Record<string, unknown>): boolean {
   let updated = false;
-  // If categories is an array, convert to object
-  if (Array.isArray(settings.categories)) {
-    logger.info("Migrating categories from array to object format.");
-    const migrated: Record<string, boolean> & { show?: boolean } = {
-      show: true,
-    };
-    for (const cat of settings.categories) {
-      if (typeof cat === "string") {
-        migrated[cat] = true;
+
+  // Step 1: Migrate from old "categories" key if present
+  if ("categories" in settings) {
+    logger.info("Found old 'categories' key. Beginning migration.");
+
+    // If categories is an array, convert to object
+    if (Array.isArray(settings.categories)) {
+      logger.info("Migrating categories from array to object format.");
+      const migrated: Record<string, boolean> & { show?: boolean } = {
+        show: true,
+      };
+      for (const cat of settings.categories) {
+        if (typeof cat === "string") {
+          migrated[cat] = true;
+        }
       }
+      settings.localCategories = migrated;
+      updated = true;
     }
-    settings.categories = migrated;
-    updated = true;
+    // Otherwise replace with default if it's not an object
+    else if (
+      typeof settings.categories !== "object" ||
+      settings.categories === null ||
+      Array.isArray(settings.categories)
+    ) {
+      logger.info("Replacing invalid categories setting with default.");
+      settings.localCategories = { ...defaultSettings.localCategories };
+      updated = true;
+    }
+    // If it is a valid object, move it directly
+    else {
+      settings.localCategories = { ...(settings.categories as object) };
+      updated = true;
+    }
+
+    delete settings.categories; // Remove old key
   }
-  // Otherwise replace with default if its not an object.
-  else if (
-    typeof settings.categories !== "object" ||
-    settings.categories === null ||
-    Array.isArray(settings.categories)
-  ) {
-    logger.info("Replacing invalid categories setting with default.");
-    settings.categories = { ...defaultSettings.categories };
-    updated = true;
-  }
-  // Ensure show is present for categories (local tags)
+
+  // Step 2: Ensure "show" is present on localCategories
   if (
-    typeof settings.categories === "object" &&
-    settings.categories !== null &&
-    !("show" in settings.categories)
+    typeof settings.localCategories === "object" &&
+    settings.localCategories !== null &&
+    !("show" in settings.localCategories)
   ) {
-    (settings.categories as Record<string, boolean> & { show?: boolean }).show =
-      true;
+    (
+      settings.localCategories as Record<string, boolean> & { show?: boolean }
+    ).show = true;
     updated = true;
   }
+
   return updated;
 }

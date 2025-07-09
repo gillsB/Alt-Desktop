@@ -116,7 +116,7 @@ const EditBackground: React.FC = () => {
   useEffect(() => {
     (async () => {
       const categoriesObj: Record<string, boolean> & { show?: boolean } =
-        (await window.electron.getSetting("categories")) ?? {};
+        (await window.electron.getSetting("localCategories")) ?? {};
       if (typeof categoriesObj.show === "boolean") {
         setCollapsedLocalTags(!categoriesObj.show);
       }
@@ -134,7 +134,7 @@ const EditBackground: React.FC = () => {
       const newVal = !prev;
       // Save the correct value to settings: show = !collapsed
       window.electron
-        .getSetting("categories")
+        .getSetting("localCategories")
         .then(
           (
             categoriesObj:
@@ -144,7 +144,7 @@ const EditBackground: React.FC = () => {
             if (categoriesObj && typeof categoriesObj === "object") {
               categoriesObj.show = !newVal;
               window.electron.saveSettingsData({
-                categories: categoriesObj,
+                localCategories: categoriesObj,
               });
             }
           }
@@ -167,11 +167,13 @@ const EditBackground: React.FC = () => {
       }
       // Update settings.json
       window.electron
-        .getSetting("categories")
+        .getSetting("localCategories")
         .then((categoriesObj: Record<string, boolean> | undefined) => {
           if (categoriesObj && typeof categoriesObj === "object") {
             categoriesObj[category] = expanded;
-            window.electron.saveSettingsData({ categories: categoriesObj });
+            window.electron.saveSettingsData({
+              localCategories: categoriesObj,
+            });
           }
         });
       return newSet;
@@ -258,7 +260,7 @@ const EditBackground: React.FC = () => {
   };
 
   const loadLocalTags = async () => {
-    const categories: string[] = await window.electron.getTagCategories();
+    const categories: string[] = await window.electron.getLocalCategories();
     setCategoryOrder(categories);
 
     const tags = await window.electron.getSetting("localTags");

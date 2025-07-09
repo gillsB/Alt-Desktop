@@ -66,7 +66,7 @@ type SettingsData = {
   newBackgroundID?: number;
   externalPaths?: string[];
   publicCategories?: Record<string, boolean>;
-  categories?: Record<string, boolean>;
+  localCategories?: Record<string, boolean>;
   localTags?: LocalTag[];
 };
 
@@ -211,7 +211,7 @@ interface EventParamMapping {
   addLocalTag: [LocalTag];
   updateLocalTag: [string, LocalTag];
   deleteLocalTag: [string];
-  getTagCategories: [];
+  getLocalCategories: [];
   renameCategory: [string, string];
   deleteCategory: [string];
   renameLocalTag: [string, string];
@@ -278,7 +278,7 @@ type EventPayloadMapping = {
   addLocalTag: boolean;
   updateLocalTag: boolean;
   deleteLocalTag: boolean;
-  getTagCategories: string[];
+  getLocalCategories: string[];
   renameCategory: boolean;
   deleteCategory: boolean;
   renameLocalTag: boolean;
@@ -396,7 +396,7 @@ interface Window {
     addLocalTag: (tag: localTag) => Promise<boolean>;
     updateLocalTag: (name: string, tag: LocalTag) => Promise<boolean>;
     deleteLocalTag: (name: string) => Promise<boolean>;
-    getTagCategories: () => Promise<string[]>;
+    getLocalCategories: () => Promise<string[]>;
     renameCategory: (oldName: string, newName: string) => Promise<boolean>;
     deleteCategory: (name: string) => Promise<boolean>;
     renameLocalTag: (oldName: string, newName: string) => Promise<boolean>;
