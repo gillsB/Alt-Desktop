@@ -198,7 +198,7 @@ interface EventParamMapping {
   selectIconFromList: [string, string[], number, number];
   resetAllIconsFontColor: [];
   desktopSetShowIcons: [boolean];
-  openBackgroundSelect: [];
+  openBackgroundSelect: [id?: string];
   getBackgroundIDs: [];
   getBackgroundSummaries: [GetBackgroundSummariesRequest?];
   getBackgroundPageForId: [GetBackgroundPageForIdRequest];
@@ -307,7 +307,7 @@ interface Window {
     getSubWindowTitle: () => Promise<string>;
     reloadIcon: (row: number, col: number) => Promise<boolean>;
     openSettings: () => Promise<boolean>;
-    openBackgroundSelect: () => Promise<boolean>;
+    openBackgroundSelect: (id?: string) => Promise<boolean>;
     editIcon: (row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;

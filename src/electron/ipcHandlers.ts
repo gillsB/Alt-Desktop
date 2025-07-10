@@ -326,16 +326,20 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
-  ipcMainHandle("openBackgroundSelect", async (): Promise<boolean> => {
-    try {
-      logger.info(`ipcMainHandle openBackgroundSelect called`);
-      openBackgroundSelectWindow();
-      return true;
-    } catch (error) {
-      logger.error(`Error opening settings window: ${error}`);
-      return false;
+  ipcMainHandle(
+    "openBackgroundSelect",
+    async (id?: string): Promise<boolean> => {
+      try {
+        if (id) logger.info("called openBackgroundSelect with ID: ", id);
+        logger.info(`ipcMainHandle openBackgroundSelect called`);
+        openBackgroundSelectWindow();
+        return true;
+      } catch (error) {
+        logger.error(`Error opening settings window: ${error}`);
+        return false;
+      }
     }
-  });
+  );
 
   ipcMainHandle(
     "editIcon",
