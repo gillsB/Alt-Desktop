@@ -332,7 +332,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       try {
         if (id) logger.info("called openBackgroundSelect with ID: ", id);
         logger.info(`ipcMainHandle openBackgroundSelect called`);
-        openBackgroundSelectWindow();
+        if (id) {
+          openBackgroundSelectWindow(id);
+        } else {
+          openBackgroundSelectWindow();
+        }
+
         return true;
       } catch (error) {
         logger.error(`Error opening settings window: ${error}`);

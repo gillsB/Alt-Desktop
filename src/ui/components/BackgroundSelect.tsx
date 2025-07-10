@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { PUBLIC_TAG_CATEGORIES } from "../../electron/publicTags";
 import "../App.css";
 import "../styles/BackgroundSelect.css";
@@ -18,6 +19,10 @@ const excludeTags: string[] = [];
 const publicTagsFlat = PUBLIC_TAG_CATEGORIES.flatMap((cat) => cat.tags);
 
 const BackgroundSelect: React.FC = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const backgroundSelectId = params.get("id") || undefined;
+
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedBg, setSelectedBg] = useState<BackgroundSummary | null>(null);
@@ -190,6 +195,12 @@ const BackgroundSelect: React.FC = () => {
     };
 
     const init = async () => {
+      if (backgroundSelectId) {
+        logger.info(
+          "Passed with id to scrollTo on launch:",
+          backgroundSelectId
+        );
+      }
       await loadSavedBackground(); // Load from saved backgrounds.json
       await window.electron.indexBackgrounds(); // Re-index backgrounds
       setReloadKey((k) => k + 1);
