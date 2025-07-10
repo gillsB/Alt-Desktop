@@ -782,6 +782,12 @@ const BackgroundSelect: React.FC = () => {
                   </div>
                 )}
                 <div className="button-center">
+                  <button
+                    className="button"
+                    onClick={() => handleEditBackground(selectedBg.id)}
+                  >
+                    Edit
+                  </button>
                   <button className="button" onClick={handleJumpToClick}>
                     Jump to
                   </button>
