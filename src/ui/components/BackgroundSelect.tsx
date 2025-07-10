@@ -21,7 +21,7 @@ const publicTagsFlat = PUBLIC_TAG_CATEGORIES.flatMap((cat) => cat.tags);
 const BackgroundSelect: React.FC = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const backgroundSelectId = params.get("id") || undefined;
+  const initialId = params.get("id") || undefined;
 
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -170,7 +170,22 @@ const BackgroundSelect: React.FC = () => {
   }, [summaries, scrollToId, gridItemRefs]);
 
   useEffect(() => {
-    const loadSavedBackground = async () => {
+    const loadInitialBackground = async () => {
+      if (initialId) {
+        logger.info("Passed with id to scrollTo on launch:", initialId);
+
+        const { page: bgPage } = await getBackgroundPage(initialId);
+
+        if (bgPage !== -1) {
+          setScrollToId(initialId);
+          setPage(bgPage);
+          return;
+        } else {
+          logger.info("Initial ID not found in backgrounds list");
+        }
+      }
+
+      // Fall back to saved background if no initialId
       const savedBackground = await window.electron.getSetting("background");
       if (savedBackground) {
         const { page: bgPage, summary } =
@@ -188,23 +203,20 @@ const BackgroundSelect: React.FC = () => {
         logger.info("No saved background found");
       }
 
-      // Fallback show page 0 (1)
+      // Fallback show page 0
       setPage(0);
       setSelectedIds([]);
       setSelectedBg(null);
     };
 
     const init = async () => {
-      if (backgroundSelectId) {
-        logger.info(
-          "Passed with id to scrollTo on launch:",
-          backgroundSelectId
-        );
+      if (initialId) {
+        logger.info("Passed with id to scrollTo on launch:", initialId);
       }
-      await loadSavedBackground(); // Load from saved backgrounds.json
+      await loadInitialBackground(); // Load from initialID or saved backgrounds.json
       await window.electron.indexBackgrounds(); // Re-index backgrounds
       setReloadKey((k) => k + 1);
-      await loadSavedBackground(); // Reload and jump to savedBackground again after indexing.
+      await loadInitialBackground(); // Reload and jump to initialID or savedBackground again after indexing.
     };
 
     init();

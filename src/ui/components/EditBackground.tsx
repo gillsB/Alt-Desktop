@@ -367,8 +367,7 @@ const EditBackground: React.FC = () => {
   const handleClose = () => {
     logger.info("Closing EditBackground");
     window.electron.reloadBackground();
-    //window.electron.openBackgroundSelect(summary.id); disabled until works.
-    window.electron.openBackgroundSelect();
+    window.electron.openBackgroundSelect(summary.id);
   };
 
   // Save handler
