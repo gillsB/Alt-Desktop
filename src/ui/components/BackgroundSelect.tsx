@@ -484,6 +484,10 @@ const BackgroundSelect: React.FC = () => {
     setShowFilterPanel((prev) => !prev);
   };
 
+  const handleAddBackgroundClick = () => {
+    window.electron.openEditBackground({} as BackgroundSummary);
+  };
+
   const handleJumpToClick = async () => {
     if (!selectedBg) return;
     // Get the page and position for the currently selected background
@@ -632,6 +636,9 @@ const BackgroundSelect: React.FC = () => {
 
             <button className="filter-button" onClick={handleFilterClick}>
               Filter Search
+            </button>
+            <button className="button" onClick={handleAddBackgroundClick}>
+              +
             </button>
             {showTagSuggestions && (
               <div className="tag-suggestion-dropdown">
