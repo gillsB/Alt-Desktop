@@ -10,6 +10,7 @@ import "../App.css";
 import "../styles/EditIcon.css";
 import { createLogger } from "../util/uiLogger";
 import { fileNameNoExt, showSmallWindow } from "../util/uiUtil";
+import ClearableInput from "./ClearableInput";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditIcon.tsx");
@@ -400,9 +401,9 @@ const EditIcon: React.FC = () => {
           <>
             <div className="subwindow-field">
               <label htmlFor="icon-name">Icon Name</label>
-              <input
+              <ClearableInput
                 id="icon-name"
-                type="text"
+                flex={true}
                 value={icon.name}
                 onChange={(e) => {
                   const updatedValue = e.target.value;
@@ -413,9 +414,9 @@ const EditIcon: React.FC = () => {
             </div>
             <div className="subwindow-field">
               <label htmlFor="image-path">Image Path</label>
-              <input
+              <ClearableInput
                 id="image-path"
-                type="text"
+                flex={true}
                 value={icon.image}
                 onChange={(e) => {
                   const updatedValue = e.target.value;
@@ -451,9 +452,9 @@ const EditIcon: React.FC = () => {
             </div>
             <div className="subwindow-field">
               <label htmlFor="program-path">Program Path</label>
-              <input
+              <ClearableInput
                 id="program-path"
-                type="text"
+                flex={true}
                 value={icon.programLink}
                 onChange={(e) =>
                   setIcon((prevIcon) =>
@@ -478,9 +479,9 @@ const EditIcon: React.FC = () => {
             </div>
             <div className="subwindow-field">
               <label htmlFor="website-path">Website Link</label>
-              <input
+              <ClearableInput
                 id="website-link"
-                type="text"
+                flex={true}
                 value={icon.websiteLink}
                 onChange={(e) =>
                   setIcon((prevIcon) =>
@@ -494,9 +495,9 @@ const EditIcon: React.FC = () => {
             <div className="subwindow-field" style={{ position: "relative" }}>
               <label htmlFor="font-color">Font Color</label>
               <div className="color-input-container">
-                <input
+                <ClearableInput
                   id="font-color"
-                  type="text"
+                  flex={true}
                   value={icon.fontColor}
                   title="Leave blank for default font color (in settings)"
                   onChange={(e) => {
