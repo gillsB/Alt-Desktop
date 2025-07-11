@@ -1086,8 +1086,8 @@ export function calculateSubWindowDimensions(
     currentDisplay.workAreaSize;
 
   // Check if current window is maximized
-  const currentWindow = BrowserWindow.getFocusedWindow();
-  const isMaximized = currentWindow?.isMaximized() || false;
+  const mainWindow = getMainWindow();
+  const isMaximized = mainWindow?.isMaximized() || false;
 
   let actualWidth, actualHeight;
 
@@ -1096,7 +1096,7 @@ export function calculateSubWindowDimensions(
     actualHeight = Math.min(defaultHeight, screenHeight - padding);
   } else {
     // Scale based on window dimensions if not fullscreen
-    const currentWindowBounds = currentWindow?.getBounds();
+    const currentWindowBounds = mainWindow?.getBounds();
     if (currentWindowBounds) {
       const maxWidth = currentWindowBounds.width - padding;
       const maxHeight = currentWindowBounds.height - padding;
