@@ -1,6 +1,7 @@
 import {
   BrowserWindow,
   ipcMain,
+  screen,
   shell,
   WebContents,
   WebFrameMain,
@@ -1069,4 +1070,44 @@ export async function getUniqueBackgroundFolderName(
     baseNumber = counter;
   }
   return candidate;
+}
+
+export function calculateSubWindowDimensions(
+  defaultWidth: number,
+  defaultHeight: number
+) {
+  const padding = 50;
+
+  // Get current display dimensions
+  const currentDisplay = screen.getDisplayNearestPoint(
+    screen.getCursorScreenPoint()
+  );
+  const { width: screenWidth, height: screenHeight } =
+    currentDisplay.workAreaSize;
+
+  // Check if current window is maximized
+  const currentWindow = BrowserWindow.getFocusedWindow();
+  const isMaximized = currentWindow?.isMaximized() || false;
+
+  let actualWidth, actualHeight;
+
+  if (isMaximized) {
+    actualWidth = Math.min(defaultWidth, screenWidth - padding);
+    actualHeight = Math.min(defaultHeight, screenHeight - padding);
+  } else {
+    // Scale based on window dimensions if not fullscreen
+    const currentWindowBounds = currentWindow?.getBounds();
+    if (currentWindowBounds) {
+      const maxWidth = currentWindowBounds.width - padding;
+      const maxHeight = currentWindowBounds.height - padding;
+      actualWidth = Math.min(defaultWidth, maxWidth);
+      actualHeight = Math.min(defaultHeight, maxHeight);
+    } else {
+      // Fallback to screen dimensions if window dimensions fail
+      actualWidth = Math.min(defaultWidth, screenWidth - padding);
+      actualHeight = Math.min(defaultHeight, screenHeight - padding);
+    }
+  }
+
+  return { actualWidth, actualHeight };
 }
