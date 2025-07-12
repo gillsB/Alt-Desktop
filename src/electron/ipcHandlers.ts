@@ -29,9 +29,11 @@ import {
   getAppDataPath,
   getBackgroundFilePath,
   getBackgroundsJsonFilePath,
+  getBasePath,
   getDataFolderPath,
   getDesktopIconsFilePath,
   getExternalPath,
+  getLogsFolderPath,
   getSettingsFilePath,
   idToBackgroundFolder,
   idToBackgroundPath,
@@ -1727,4 +1729,26 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return changeBackgroundDirectory(id, targetLocation);
     }
   );
+  ipcMainHandle("getBaseFilePaths", async (name?: string): Promise<string> => {
+    if (!name) {
+      return getBasePath();
+    }
+    const normalizedName = name.toLowerCase().replace(/\s+/g, "");
+    switch (normalizedName) {
+      case "datafolderpath":
+        return getDataFolderPath();
+      case "logsfolderpath":
+        return getLogsFolderPath();
+      case "desktopiconsfilepath":
+        return getDesktopIconsFilePath();
+      case "settingsfilepath":
+        return getSettingsFilePath();
+      case "backgroundfilepath":
+        return getBackgroundFilePath();
+      case "backgroundsjsonfilepath":
+        return getBackgroundsJsonFilePath();
+    }
+    logger.info("getBaseFilePaths, returning empty due to name = " + name);
+    return "";
+  });
 }

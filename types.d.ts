@@ -217,6 +217,7 @@ interface EventParamMapping {
   renameLocalTag: [string, string];
   indexBackgrounds: [options?: { newExternalPathAdded?: boolean }];
   changeBackgroundDirectory: [string, string];
+  getBaseFilePaths: [name?: string];
 }
 
 // The returns from the main process to the renderer
@@ -284,6 +285,7 @@ type EventPayloadMapping = {
   renameLocalTag: boolean;
   indexBackgrounds: void;
   changeBackgroundDirectory: string | null;
+  getBaseFilePaths: string;
 };
 
 type UnsubscribeFunction = () => void;
@@ -407,5 +409,6 @@ interface Window {
       id: string,
       targetLocation: string
     ) => Promise<string | null>;
+    getBaseFilePaths: (name?: string) => Promise<string>;
   };
 }

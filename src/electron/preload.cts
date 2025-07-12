@@ -143,6 +143,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
       : ipcInvoke("indexBackgrounds").then(() => {}),
   changeBackgroundDirectory: (id: string, targetLocation: string) =>
     ipcInvoke("changeBackgroundDirectory", id, targetLocation),
+  getBaseFilePaths: (name?: string) => ipcInvoke("getBaseFilePaths", name),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
