@@ -57,6 +57,8 @@ const EditBackground: React.FC = () => {
 
   const [localTagSearch, setLocalTagSearch] = useState("");
 
+  const [defaultSaveLocation, setDefaultSaveLocation] = useState("");
+
   // Filtered public categories/tags
   const filteredPublicTagCategories = React.useMemo(() => {
     if (!localTagSearch.trim()) return PUBLIC_TAG_CATEGORIES;
@@ -280,6 +282,9 @@ const EditBackground: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      setDefaultSaveLocation(
+        await window.electron.getBaseFilePaths("backgroundfilepath")
+      );
       if (!cancelled) await loadLocalTags();
     })();
     return () => {
@@ -876,7 +881,9 @@ const EditBackground: React.FC = () => {
                   value={saveLocation}
                   onChange={(e) => setSaveLocation(e.target.value)}
                 >
-                  <option value="default">Default save location</option>
+                  <option value="default">
+                    {"Default: (" + defaultSaveLocation + ")"}
+                  </option>
                   {externalPaths.map((path, idx) => (
                     <option key={path} value={`external:${idx}`}>
                       {path}

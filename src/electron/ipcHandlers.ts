@@ -1748,7 +1748,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       case "backgroundsjsonfilepath":
         return getBackgroundsJsonFilePath();
     }
-    logger.info("getBaseFilePaths, returning empty due to name = " + name);
+    logger.warn("getBaseFilePaths, returning empty due to name = " + name);
     return "";
   });
 }
