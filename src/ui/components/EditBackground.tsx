@@ -775,14 +775,14 @@ const EditBackground: React.FC = () => {
                     setSaveBgFileAsShortcut(e.target.value === "shortcut")
                   }
                 >
-                  <option value="file">Copy File</option>
+                  <option value="file">Copy of File</option>
                   <option value="shortcut">Shortcut</option>
                 </select>
               </div>
             </div>
           )}
           <div className="edit-bg-field">
-            <label>Background File Path</label>
+            <label>Background File</label>
             <div className="input-row">
               <input
                 type="text"
@@ -825,7 +825,7 @@ const EditBackground: React.FC = () => {
             </div>
           </div>
           <div className="edit-bg-field">
-            <label>Icon Preview Image</label>
+            <label>Preview Thumbnail</label>
             <div className="input-row">
               <input
                 type="text"
