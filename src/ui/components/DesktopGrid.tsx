@@ -821,22 +821,116 @@ const DesktopGrid: React.FC = () => {
 
         {/* Render all icons as highlighted if enabled */}
         {showAllHighlights &&
-          Array.from(iconsMap.values()).map((icon) => (
-            <div
-              key={`multi-highlight-${icon.row}-${icon.col}`}
-              className="multi-highlight-box"
-              style={{
-                left:
-                  icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
-                  ICON_ROOT_OFFSET_LEFT,
-                top:
-                  icon.row * (iconBox + ICON_VERTICAL_PADDING) +
-                  ICON_ROOT_OFFSET_TOP,
-                width: iconBox,
-                height: iconBox + ICON_VERTICAL_PADDING,
-              }}
-            />
-          ))}
+          Array.from(iconsMap.values()).map((icon) => {
+            // Calculate Icon home position
+            const homeLeft =
+              icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+              ICON_ROOT_OFFSET_LEFT;
+            const homeTop =
+              icon.row * (iconBox + ICON_VERTICAL_PADDING) +
+              ICON_ROOT_OFFSET_TOP;
+
+            // Actual position of icon
+            const actualLeft =
+              icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+              (icon.offsetX || 0) +
+              ICON_ROOT_OFFSET_LEFT;
+            const actualTop =
+              icon.row * (iconBox + ICON_VERTICAL_PADDING) +
+              (icon.offsetY || 0) +
+              ICON_ROOT_OFFSET_TOP;
+
+            const hasOffset =
+              (icon.offsetX ?? 0) !== 0 || (icon.offsetY ?? 0) !== 0;
+            const isOversized =
+              (icon.width || defaultIconSize) > iconBox ||
+              (icon.height || defaultIconSize) > iconBox;
+
+            // Color logic
+            let borderColor = "#2196f3";
+            let backgroundColor = "rgba(33,150,243,0.1)";
+
+            if (hasOffset && isOversized) {
+              borderColor = "#9e170dff";
+              backgroundColor = "rgba(158,23,13,0.25)";
+            } else if (hasOffset) {
+              borderColor = "#ff5722";
+              backgroundColor = "rgba(255,87,34,0.25)";
+            } else if (isOversized) {
+              borderColor = "#be8900ff";
+              backgroundColor = "rgba(190,137,0,0.25)";
+            }
+
+            const iconWidth = icon.width || defaultIconSize;
+            const iconHeight = icon.height || defaultIconSize;
+
+            return (
+              <React.Fragment key={`multi-highlight-${icon.row}-${icon.col}`}>
+                {/* For icons that are "good" (no offset and not oversized), show the full line blue border around the home box */}
+                {!hasOffset && !isOversized && (
+                  <div
+                    className="multi-highlight-box"
+                    style={{
+                      left: homeLeft,
+                      top: homeTop,
+                      width: iconBox,
+                      height: iconBox + ICON_VERTICAL_PADDING,
+                    }}
+                    title="Icon in default position/size"
+                  />
+                )}
+
+                {/* Highlight home box for icons which are oversized or offset*/}
+                {(hasOffset || isOversized) && (
+                  <>
+                    <div
+                      className="multi-highlight-home-box"
+                      style={{
+                        position: "absolute",
+                        left: homeLeft,
+                        top: homeTop,
+                        width: iconBox,
+                        height: iconBox + ICON_VERTICAL_PADDING,
+                        border: `2px dashed ${borderColor}`,
+                        background: backgroundColor,
+                      }}
+                      title={
+                        hasOffset && isOversized
+                          ? "Icon home: offset and oversized"
+                          : hasOffset
+                            ? "Icon home: offset"
+                            : isOversized
+                              ? "Icon home: oversized"
+                              : "Icon home: default position/size"
+                      }
+                    />
+
+                    {/* Highlight the actual icon position */}
+                    <div
+                      className="multi-highlight-box"
+                      style={{
+                        left: actualLeft,
+                        top: actualTop,
+                        width: iconWidth,
+                        height: iconHeight,
+                        border: `2px solid ${borderColor}`,
+                        background: backgroundColor,
+                      }}
+                      title={
+                        hasOffset && isOversized
+                          ? "Icon is offset and oversized"
+                          : hasOffset
+                            ? "Icon is offset"
+                            : isOversized
+                              ? "Icon is oversized"
+                              : "Icon in default position/size"
+                      }
+                    />
+                  </>
+                )}
+              </React.Fragment>
+            );
+          })}
 
         {/* Render desktop icons */}
         {showIcons &&

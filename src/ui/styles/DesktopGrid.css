@@ -112,3 +112,24 @@
   background: rgba(33, 150, 243, 0.1);
   pointer-events: none;
 }
+
+.multi-highlight-box {
+  position: "absolute";
+  border-color: 2px solid #2196f3;
+  background: rgba(33, 150, 243, 0.1);
+  pointer-events: "none";
+  z-index: 2;
+}
+
+.multi-highlight-home-box {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.multi-highlight-box {
+  position: absolute;
+  border-radius: 8;
+  pointer-events: none;
+  z-index: 2;
+}
