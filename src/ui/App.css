@@ -11,9 +11,6 @@ body,
 
 .main {
   position: relative;
-  display: grid;
-  grid-template-columns: 16rem auto;
-  gap: 1rem;
 }
 
 input,

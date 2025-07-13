@@ -1008,6 +1008,29 @@ const DesktopGrid: React.FC = () => {
               </div>
             );
           })}
+
+        {showAllHighlights && (
+          <div className="show-all-highlights-legend">
+            <span className="show-all-highlights-legend-item">
+              <span className={`show-all-highlights-legend-circle default`} />
+              Default
+            </span>
+            <span className="show-all-highlights-legend-item">
+              <span className={`show-all-highlights-legend-circle offset`} />
+              Offset
+            </span>
+            <span className="show-all-highlights-legend-item">
+              <span className={`show-all-highlights-legend-circle oversized`} />
+              Oversized
+            </span>
+            <span className="show-all-highlights-legend-item">
+              <span
+                className={`show-all-highlights-legend-circle offset-oversized`}
+              />
+              Offset & Oversized
+            </span>
+          </div>
+        )}
       </div>
 
       {contextMenu && (
