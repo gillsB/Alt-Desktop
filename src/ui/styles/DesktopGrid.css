@@ -127,6 +127,20 @@
   z-index: 1;
 }
 
+.multi-highlight-home-label {
+  position: absolute;
+  font-size: 0.8em;
+  color: #fff;
+  font-weight: bold;
+  z-index: 3;
+  pointer-events: none;
+  text-align: center;
+  border-radius: 4px;
+  overflow: hidden;
+  line-height: 1.2em;
+  word-wrap: "break-word";
+}
+
 .multi-highlight-box {
   position: absolute;
   border-radius: 8;

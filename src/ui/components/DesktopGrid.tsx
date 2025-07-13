@@ -905,6 +905,21 @@ const DesktopGrid: React.FC = () => {
                       }
                     />
 
+                    {/* Label to help identify which homes correspond to which icons*/}
+                    <div
+                      className="multi-highlight-home-label"
+                      style={{
+                        left: homeLeft + 10, // Position the label in the center of the home box
+                        top: homeTop + 10, // Adjust the label vertically
+                        backgroundColor: borderColor, // Set background to match border
+                        border: `2px solid ${borderColor}`, // High contrast border
+                        maxWidth: iconBox - 20, // Limit the width of the label
+                        maxHeight: iconBox - 20, // Limit to 3 lines of text
+                      }}
+                    >
+                      {icon.name} {/* Use the icon's name as the label */}
+                    </div>
+
                     {/* Highlight the actual icon position */}
                     <div
                       className="multi-highlight-box"
