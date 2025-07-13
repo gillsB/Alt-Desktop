@@ -37,6 +37,7 @@ const DesktopGrid: React.FC = () => {
     col: 0,
     visible: false,
   });
+  const [showAllHighlights, setShowAllHighlights] = useState(false);
   const [reloadTimestamps, setReloadTimestamps] =
     useState<IconReloadTimestamps>({});
   const [defaultFontSize, setDefaultFontSize] = useState<number>(16);
@@ -508,6 +509,11 @@ const DesktopGrid: React.FC = () => {
     }
   };
 
+  const toggleHighlightAllIcons = () => {
+    setShowAllHighlights(!showAllHighlights);
+    hideHighlightBox();
+  };
+
   useEffect(() => {
     const handlePreview = (...args: unknown[]) => {
       const updates = args[1] as Partial<SettingsData>; // Extract the second argument as updates
@@ -813,6 +819,25 @@ const DesktopGrid: React.FC = () => {
           />
         )}
 
+        {/* Render all icons as highlighted if enabled */}
+        {showAllHighlights &&
+          Array.from(iconsMap.values()).map((icon) => (
+            <div
+              key={`multi-highlight-${icon.row}-${icon.col}`}
+              className="multi-highlight-box"
+              style={{
+                left:
+                  icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+                  ICON_ROOT_OFFSET_LEFT,
+                top:
+                  icon.row * (iconBox + ICON_VERTICAL_PADDING) +
+                  ICON_ROOT_OFFSET_TOP,
+                width: iconBox,
+                height: iconBox + ICON_VERTICAL_PADDING,
+              }}
+            />
+          ))}
+
         {/* Render desktop icons */}
         {showIcons &&
           Array.from(iconsMap.values()).map((icon) => {
@@ -935,10 +960,8 @@ const DesktopGrid: React.FC = () => {
                       All icon boxes
                       <input
                         type="checkbox"
-                        checked={false}
-                        onChange={() => {
-                          logger.info("All icon boxes is not implemented yet");
-                        }}
+                        checked={showAllHighlights}
+                        onChange={toggleHighlightAllIcons}
                       />
                     </label>
                   </div>
@@ -989,10 +1012,8 @@ const DesktopGrid: React.FC = () => {
                       All icon boxes
                       <input
                         type="checkbox"
-                        checked={false}
-                        onChange={() => {
-                          logger.info("All icon boxes is not implemented yet");
-                        }}
+                        checked={showAllHighlights}
+                        onChange={toggleHighlightAllIcons}
                       />
                     </label>
                   </div>
