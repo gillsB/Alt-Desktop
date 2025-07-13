@@ -914,14 +914,36 @@ const DesktopGrid: React.FC = () => {
                   onChange={toggleIconNames}
                 />
               </label>
-              <label className="menu-checkbox">
-                Show Grid
-                <input
-                  type="checkbox"
-                  checked={showGrid}
-                  onChange={toggleGrid}
-                />
-              </label>
+              <div
+                className="menu-item has-submenu"
+                onMouseEnter={() => setShowOpenSubmenu(true)}
+                onMouseLeave={() => setShowOpenSubmenu(false)}
+              >
+                Display
+                <span className="submenu-arrow">▶</span>
+                {showOpenSubmenu && (
+                  <div className="submenu">
+                    <label className="menu-checkbox">
+                      Grid
+                      <input
+                        type="checkbox"
+                        checked={showGrid}
+                        onChange={toggleGrid}
+                      />
+                    </label>
+                    <label className="menu-checkbox">
+                      All icon boxes
+                      <input
+                        type="checkbox"
+                        checked={false}
+                        onChange={() => {
+                          logger.info("All icon boxes is not implemented yet");
+                        }}
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
               <div className="menu-separator" />
               <div className="menu-item" onClick={handleReloadDesktop}>
                 Reload Desktop
@@ -946,14 +968,36 @@ const DesktopGrid: React.FC = () => {
                 Settings
               </div>
               <div className="menu-separator" />
-              <label className="menu-checkbox">
-                Show Grid
-                <input
-                  type="checkbox"
-                  checked={showGrid}
-                  onChange={toggleGrid}
-                />
-              </label>
+              <div
+                className="menu-item has-submenu"
+                onMouseEnter={() => setShowOpenSubmenu(true)}
+                onMouseLeave={() => setShowOpenSubmenu(false)}
+              >
+                Display
+                <span className="submenu-arrow">▶</span>
+                {showOpenSubmenu && (
+                  <div className="submenu">
+                    <label className="menu-checkbox">
+                      Grid
+                      <input
+                        type="checkbox"
+                        checked={showGrid}
+                        onChange={toggleGrid}
+                      />
+                    </label>
+                    <label className="menu-checkbox">
+                      All icon boxes
+                      <input
+                        type="checkbox"
+                        checked={false}
+                        onChange={() => {
+                          logger.info("All icon boxes is not implemented yet");
+                        }}
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
               <div className="menu-separator" />
               <div className="menu-item" onClick={handleReloadDesktop}>
                 Reload Desktop
