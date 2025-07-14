@@ -852,6 +852,18 @@ const DesktopGrid: React.FC = () => {
               (icon.width || defaultIconSize) > iconBox ||
               (icon.height || defaultIconSize) > iconBox;
 
+            // Determine which highlight to show
+            let showHighlight = false;
+            if (hasOffset && isOversized) {
+              showHighlight = allHighlightsBoth;
+            } else if (hasOffset) {
+              showHighlight = allHighlightsOffset;
+            } else if (isOversized) {
+              showHighlight = allHighlightsOversized;
+            } else {
+              showHighlight = allHighlightsDefault;
+            }
+
             // Color logic
             let borderColor = "#2196f3";
             let backgroundColor = "rgba(33,150,243,0.1)";
@@ -872,25 +884,19 @@ const DesktopGrid: React.FC = () => {
 
             return (
               <React.Fragment key={`multi-highlight-${icon.row}-${icon.col}`}>
-                {/* For icons that are "good" (no offset and not oversized), show the full line blue border around the home box */}
-                {!hasOffset && !isOversized && (
-                  <div
-                    className="multi-highlight-box"
-                    style={{
-                      left: homeLeft,
-                      top: homeTop,
-                      width: iconBox,
-                      height: iconBox + ICON_VERTICAL_PADDING,
-                    }}
-                    title="Icon in default position/size"
-                  />
-                )}
-
-                {/* Highlight home box for icons which are oversized or offset*/}
-                {(hasOffset || isOversized) && (
+                {showHighlight && (
                   <>
+                    {/* Home box */}
                     <div
-                      className="multi-highlight-home-box"
+                      className={
+                        hasOffset && isOversized
+                          ? "multi-highlight-home-box offset-oversized"
+                          : hasOffset
+                            ? "multi-highlight-home-box offset"
+                            : isOversized
+                              ? "multi-highlight-home-box oversized"
+                              : "multi-highlight-home-box default"
+                      }
                       style={{
                         position: "absolute",
                         left: homeLeft,
@@ -910,22 +916,20 @@ const DesktopGrid: React.FC = () => {
                               : "Icon home: default position/size"
                       }
                     />
-
-                    {/* Label to help identify which homes correspond to which icons*/}
+                    {/* Label */}
                     <div
                       className="multi-highlight-home-label"
                       style={{
-                        left: homeLeft + 10, // Position the label in the center of the home box
-                        top: homeTop + 10, // Adjust the label vertically
-                        backgroundColor: borderColor, // Set background to match border
-                        border: `2px solid ${borderColor}`, // High contrast border
-                        maxWidth: iconBox - 20, // Limit the width of the label
-                        maxHeight: iconBox - 20, // Limit to 3 lines of text
+                        left: homeLeft + 10,
+                        top: homeTop + 10,
+                        backgroundColor: borderColor,
+                        border: `2px solid ${borderColor}`,
+                        maxWidth: iconBox - 20,
+                        maxHeight: iconBox - 20,
                       }}
                     >
-                      {icon.name} {/* Use the icon's name as the label */}
+                      {icon.name}
                     </div>
-
                     {/* Highlight the actual icon position */}
                     <div
                       className="multi-highlight-box"
