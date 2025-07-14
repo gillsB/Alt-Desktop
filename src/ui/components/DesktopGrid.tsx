@@ -45,6 +45,10 @@ const DesktopGrid: React.FC = () => {
   const [defaultFontColor, setDefaultFontColor] = useState<string>("white");
 
   const [dimmerValue, setDimmerValue] = useState(50);
+  const [allHighlightsDefault, setAllHighlightsDefault] = useState(true);
+  const [allHighlightsOffset, setAllHighlightsOffset] = useState(true);
+  const [allHighlightsOversized, setAllHighlightsOversized] = useState(true);
+  const [allHighlightsBoth, setAllHighlightsBoth] = useState(true);
 
   // iconBox refers to the rectangular size (width) of the icon box, not the icon's size in pixels.
   const iconBox = defaultIconSize * 1.5625;
@@ -1014,22 +1018,74 @@ const DesktopGrid: React.FC = () => {
         {showAllHighlights && (
           <div className="show-all-highlights-legend">
             <span className="show-all-highlights-legend-item">
-              <span className={`show-all-highlights-legend-circle default`} />
-              Default
-            </span>
-            <span className="show-all-highlights-legend-item">
-              <span className={`show-all-highlights-legend-circle offset`} />
-              Offset
-            </span>
-            <span className="show-all-highlights-legend-item">
-              <span className={`show-all-highlights-legend-circle oversized`} />
-              Oversized
-            </span>
-            <span className="show-all-highlights-legend-item">
-              <span
-                className={`show-all-highlights-legend-circle offset-oversized`}
+              <input
+                type="checkbox"
+                checked={allHighlightsDefault}
+                onChange={() => setAllHighlightsDefault(!allHighlightsDefault)}
+                style={{ display: "none" }}
+                id="legend-default"
               />
-              Offset & Oversized
+              <label htmlFor="legend-default" style={{ cursor: "pointer" }}>
+                {allHighlightsDefault ? (
+                  <span className="show-all-highlights-legend-circle default" />
+                ) : (
+                  <span className="show-all-highlights-legend-circle legend-x" />
+                )}
+                Default
+              </label>
+            </span>
+            <span className="show-all-highlights-legend-item">
+              <input
+                type="checkbox"
+                checked={allHighlightsOffset}
+                onChange={() => setAllHighlightsOffset(!allHighlightsOffset)}
+                style={{ display: "none" }}
+                id="legend-offset"
+              />
+              <label htmlFor="legend-offset" style={{ cursor: "pointer" }}>
+                {allHighlightsOffset ? (
+                  <span className="show-all-highlights-legend-circle offset" />
+                ) : (
+                  <span className="show-all-highlights-legend-circle legend-x" />
+                )}
+                Offset
+              </label>
+            </span>
+            <span className="show-all-highlights-legend-item">
+              <input
+                type="checkbox"
+                checked={allHighlightsOversized}
+                onChange={() =>
+                  setAllHighlightsOversized(!allHighlightsOversized)
+                }
+                style={{ display: "none" }}
+                id="legend-oversized"
+              />
+              <label htmlFor="legend-oversized" style={{ cursor: "pointer" }}>
+                {allHighlightsOversized ? (
+                  <span className="show-all-highlights-legend-circle oversized" />
+                ) : (
+                  <span className="show-all-highlights-legend-circle legend-x" />
+                )}
+                Oversized
+              </label>
+            </span>
+            <span className="show-all-highlights-legend-item">
+              <input
+                type="checkbox"
+                checked={allHighlightsBoth}
+                onChange={() => setAllHighlightsBoth(!allHighlightsBoth)}
+                style={{ display: "none" }}
+                id="legend-both"
+              />
+              <label htmlFor="legend-both" style={{ cursor: "pointer" }}>
+                {allHighlightsBoth ? (
+                  <span className="show-all-highlights-legend-circle offset-oversized" />
+                ) : (
+                  <span className="show-all-highlights-legend-circle legend-x" />
+                )}
+                Offset & Oversized
+              </label>
             </span>
             <span className={`show-all-highlights-legend-item`}>
               <label htmlFor="dimmer-slider">Dim Background</label>
