@@ -164,7 +164,6 @@
   font-size: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   align-items: center;
-  pointer-events: none;
   user-select: none;
   white-space: nowrap;
 }
@@ -208,7 +207,6 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
   z-index: -1;
   pointer-events: none;
   user-select: none;

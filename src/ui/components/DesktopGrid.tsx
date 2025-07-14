@@ -44,6 +44,8 @@ const DesktopGrid: React.FC = () => {
   const [defaultIconSize, setDefaultIconSize] = useState<number>(64);
   const [defaultFontColor, setDefaultFontColor] = useState<string>("white");
 
+  const [dimmerValue, setDimmerValue] = useState(50);
+
   // iconBox refers to the rectangular size (width) of the icon box, not the icon's size in pixels.
   const iconBox = defaultIconSize * 1.5625;
 
@@ -1029,6 +1031,18 @@ const DesktopGrid: React.FC = () => {
               />
               Offset & Oversized
             </span>
+            <span className={`show-all-highlights-legend-item`}>
+              <label htmlFor="dimmer-slider">Dim Background</label>
+              <input
+                id="dimmer-slider"
+                type="range"
+                min={0}
+                max={100}
+                value={dimmerValue}
+                onChange={(e) => setDimmerValue(Number(e.target.value))}
+                style={{ verticalAlign: "middle" }}
+              />
+            </span>
           </div>
         )}
       </div>
@@ -1228,7 +1242,12 @@ const DesktopGrid: React.FC = () => {
         </div>
       )}
 
-      {showAllHighlights && <div className="background-dimmer" />}
+      {showAllHighlights && (
+        <div
+          className="background-dimmer"
+          style={{ background: `rgba(0,0,0,${dimmerValue / 100})` }}
+        />
+      )}
     </>
   );
 
