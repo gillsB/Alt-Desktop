@@ -61,13 +61,6 @@ const DesktopGrid: React.FC = () => {
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
-  // Function to toggle grid visibility
-  const toggleGrid = () => {
-    setShowGrid((prev) => !prev);
-    setContextMenu(null); // Close the context menu after toggling
-    hideHighlightBox();
-  };
-
   const toggleIcons = () => {
     setShowIcons((prev) => !prev);
     setContextMenu(null);
@@ -76,6 +69,18 @@ const DesktopGrid: React.FC = () => {
 
   const toggleIconNames = () => {
     setShowIconNames((prev) => !prev);
+    setContextMenu(null);
+    hideHighlightBox();
+  };
+
+  const toggleGrid = () => {
+    setShowGrid((prev) => !prev);
+    setContextMenu(null);
+    hideHighlightBox();
+  };
+
+  const toggleHighlightAllIcons = () => {
+    setShowAllHighlights(!showAllHighlights);
     setContextMenu(null);
     hideHighlightBox();
   };
@@ -507,11 +512,6 @@ const DesktopGrid: React.FC = () => {
       hideHighlightBox();
       handleReloadIcon();
     }
-  };
-
-  const toggleHighlightAllIcons = () => {
-    setShowAllHighlights(!showAllHighlights);
-    hideHighlightBox();
   };
 
   useEffect(() => {
