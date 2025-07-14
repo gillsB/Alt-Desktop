@@ -1227,6 +1227,8 @@ const DesktopGrid: React.FC = () => {
           )}
         </div>
       )}
+
+      {showAllHighlights && <div className="background-dimmer" />}
     </>
   );
 
