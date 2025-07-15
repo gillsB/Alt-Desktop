@@ -658,9 +658,21 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
 
       try {
-        fs.copyFileSync(sourcePath, targetPath);
-        logger.info(`File saved to: ${targetPath}`);
+        await new Promise<void>((resolve, reject) => {
+          const readStream = fs.createReadStream(sourcePath);
+          const writeStream = fs.createWriteStream(targetPath);
 
+          readStream.on("error", reject);
+          writeStream.on("error", reject);
+
+          writeStream.on("finish", () => {
+            resolve();
+          });
+
+          readStream.pipe(writeStream);
+        });
+
+        logger.info(`File saved to: ${targetPath}`);
         return localFileName;
       } catch (error) {
         logger.error("Failed to save file:", error);
