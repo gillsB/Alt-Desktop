@@ -12,7 +12,7 @@ export const PUBLIC_TAG_CATEGORIES = [
   },
   {
     name: "Resolution",
-    tags: ["4K+", "1440", "1080"],
+    tags: ["4K+", "1440", "1080", "Pixel-Art"],
   },
   {
     name: "Theme",
