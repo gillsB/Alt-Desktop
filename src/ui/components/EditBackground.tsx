@@ -59,6 +59,8 @@ const EditBackground: React.FC = () => {
 
   const [defaultSaveLocation, setDefaultSaveLocation] = useState("");
 
+  const [bgSaveProgress, setBgSaveProgress] = useState<number | null>(null);
+
   // Filtered public categories/tags
   const filteredPublicTagCategories = React.useMemo(() => {
     if (!localTagSearch.trim()) return PUBLIC_TAG_CATEGORIES;
@@ -733,6 +735,30 @@ const EditBackground: React.FC = () => {
         originalSaveLocationRef.current = "default";
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    const handler = (
+      _event: Electron.IpcMainEvent,
+      payload: BackgroundFileProgressEvent
+    ) => {
+      const { progress, done } = payload;
+
+      setBgSaveProgress(done ? null : progress);
+      logger.info(progress);
+    };
+
+    window.electron.on(
+      "background-file-progress",
+      handler as (...args: unknown[]) => void
+    );
+
+    return () => {
+      window.electron.off(
+        "background-file-progress",
+        handler as (...args: unknown[]) => void
+      );
+    };
   }, []);
 
   return (

@@ -149,6 +149,11 @@ type VideoMetadata = {
   }>;
 };
 
+interface BackgroundFileProgressEvent {
+  progress: number;
+  done: boolean;
+}
+
 interface CustomBrowserWindow extends Electron.BrowserWindow {
   customTitle?: string;
 }

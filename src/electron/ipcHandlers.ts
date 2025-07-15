@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { dialog, screen, shell } from "electron";
+import { BrowserWindow, dialog, screen, shell } from "electron";
 import ffprobeStatic from "ffprobe-static";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
@@ -658,14 +658,39 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
 
       try {
+        const stat = fs.statSync(sourcePath);
+        const totalSize = stat.size;
+        let copied = 0;
+        let currentProgress = 0;
+
+        const win = BrowserWindow.getAllWindows()[0];
+
         await new Promise<void>((resolve, reject) => {
           const readStream = fs.createReadStream(sourcePath);
           const writeStream = fs.createWriteStream(targetPath);
+
+          readStream.on("data", (chunk) => {
+            copied += chunk.length;
+            const newProgress = Math.round((copied / totalSize) * 100);
+            if (win && newProgress > currentProgress) {
+              win.webContents.send("background-file-progress", {
+                progress: Math.round((copied / totalSize) * 100),
+                done: copied >= totalSize,
+              });
+              currentProgress = newProgress;
+            }
+          });
 
           readStream.on("error", reject);
           writeStream.on("error", reject);
 
           writeStream.on("finish", () => {
+            if (win) {
+              win.webContents.send("background-file-progress", {
+                progress: 100,
+                done: true,
+              });
+            }
             resolve();
           });
 
