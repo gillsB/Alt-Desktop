@@ -898,7 +898,6 @@ const DesktopGrid: React.FC = () => {
                               : "multi-highlight-home-box default"
                       }
                       style={{
-                        position: "absolute",
                         left: homeLeft,
                         top: homeTop,
                         width: iconBox,

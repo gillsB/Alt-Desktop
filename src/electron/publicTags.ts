@@ -22,8 +22,6 @@ export const PUBLIC_TAG_CATEGORIES = [
       "Cars",
       "City",
       "Fantasy",
-      "Girl",
-      "Guy",
       "Landscape",
       "Ocean",
       "Sci-Fi",
