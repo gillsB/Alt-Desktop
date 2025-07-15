@@ -745,7 +745,9 @@ const EditBackground: React.FC = () => {
       const { progress, done } = payload;
 
       setBgSaveProgress(done ? null : progress);
-      logger.info(progress);
+      if (progress % 20 === 0) {
+        logger.info("Save progress = " + progress);
+      }
     };
 
     window.electron.on(
@@ -1337,6 +1339,22 @@ const EditBackground: React.FC = () => {
               onCancel={handleCancelRenameTag}
               existingNames={localTags.map((t) => t.name)}
             />
+          </div>
+        </div>
+      )}
+      {bgSaveProgress !== null && (
+        <div className="bg-save-progress-modal-overlay">
+          <div className="bg-save-progress-modal-content">
+            <div className="bg-save-progress-bar">
+              <div
+                className="bg-save-progress-fill"
+                style={{ width: `${bgSaveProgress}%` }}
+              />
+              <span>{bgSaveProgress}%</span>
+            </div>
+            <div className="bg-save-progress-label">
+              Saving background file...
+            </div>
           </div>
         </div>
       )}
