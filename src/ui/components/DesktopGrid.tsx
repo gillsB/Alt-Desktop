@@ -773,18 +773,10 @@ const DesktopGrid: React.FC = () => {
 
   useEffect(() => {
     const fetchBackgroundType = async () => {
-      try {
-        const type = await window.electron.getBackgroundType();
-        logger.info("Fetched background type:", type);
-        setBackgroundType(type);
-      } catch (error) {
-        logger.error("Failed to get background type:", error);
-        setBackgroundType("image");
-      }
+      setBackgroundType(await window.electron.getBackgroundType());
     };
     fetchBackgroundType();
 
-    // Optionally, listen for background reloads to update type
     window.electron.on("reload-background", fetchBackgroundType);
     return () => {
       window.electron.off("reload-background", fetchBackgroundType);
@@ -1196,7 +1188,7 @@ const DesktopGrid: React.FC = () => {
                 )}
               </div>
               <div className="menu-separator" />
-              {backgroundType === "video" && (
+              {backgroundType.startsWith("video") && (
                 <label className="menu-checkbox">
                   Pause Video
                   <input

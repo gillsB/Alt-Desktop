@@ -1790,28 +1790,23 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle("getBackgroundType", async (): Promise<"image" | "video"> => {
     try {
-      const settingsFilePath = getSettingsFilePath();
-      const settings = JSON.parse(fs.readFileSync(settingsFilePath, "utf-8"));
-      const background = settings.background;
+      const id = getSetting("background") as string | undefined;
+      if (!id) return "image";
 
-      logger.info("background:", background);
+      let filePath = await idToBackgroundPath(id);
+      if (!filePath) return "image";
 
-      if (!background) return "image";
-
-      // Await the async function
-      let bgFilePath = await idToBackgroundPath(background);
-      logger.info("bgFilePath:", bgFilePath);
-
-      if (!bgFilePath) return "image";
-
-      if (!path.isAbsolute(bgFilePath)) {
-        const backgroundsDir = getBackgroundFilePath();
-        bgFilePath = path.join(backgroundsDir, bgFilePath);
+      // Always resolve shortcut if the file is a shortcut
+      let fileType = mime.lookup(filePath) || "";
+      if (fileType === "application/x-ms-shortcut") {
+        const resolved = resolveShortcut(filePath);
+        if (resolved) {
+          filePath = resolved;
+          fileType = mime.lookup(filePath) || "";
+        }
       }
 
-      const mimeType = mime.lookup(bgFilePath);
-      logger.info("MIME type of background file:", mimeType);
-      if (mimeType && mimeType.startsWith("video")) return "video";
+      if (fileType.startsWith("video")) return "video";
       return "image";
     } catch (error) {
       logger.error("Error in getBackgroundType:", error);
