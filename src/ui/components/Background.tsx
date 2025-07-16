@@ -93,6 +93,19 @@ const Background: React.FC<BackgroundProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    const pauseVideo = async (...args: unknown[]) => {
+      // args[1] is the payload (pause boolean)
+      logger.info("Setting video paused state to:", args[1]);
+    };
+
+    window.electron.on("set-video-bg-paused", pauseVideo);
+
+    return () => {
+      window.electron.off("set-video-bg-paused", pauseVideo);
+    };
+  }, []);
+
   const convertIDToFilePath = async (id: string) => {
     return await window.electron.idToFilePath(id);
   };
