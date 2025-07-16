@@ -97,6 +97,17 @@ const Background: React.FC<BackgroundProps> = ({
     const pauseVideo = async (...args: unknown[]) => {
       // args[1] is the payload (pause boolean)
       logger.info("Setting video paused state to:", args[1]);
+      const pause = args[1] as boolean;
+      const video = videoRef.current;
+      if (video) {
+        if (pause) {
+          video.pause();
+        } else {
+          video.play().catch((err) => {
+            logger.warn("Failed to play video:", err);
+          });
+        }
+      }
     };
 
     window.electron.on("set-video-bg-paused", pauseVideo);
