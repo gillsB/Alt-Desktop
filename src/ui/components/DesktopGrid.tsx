@@ -773,6 +773,7 @@ const DesktopGrid: React.FC = () => {
 
   useEffect(() => {
     const fetchBackgroundType = async () => {
+      setIsVideoPaused(false); // Always start as unpaused on load/reload
       setBackgroundType(await window.electron.getBackgroundType());
     };
     fetchBackgroundType();
@@ -782,6 +783,11 @@ const DesktopGrid: React.FC = () => {
       window.electron.off("reload-background", fetchBackgroundType);
     };
   }, []);
+
+  const handlePause = async () => {
+    await window.electron.setVideoBgPaused(!isVideoPaused);
+    setIsVideoPaused(!isVideoPaused);
+  };
 
   return (
     <>
@@ -1194,7 +1200,7 @@ const DesktopGrid: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={isVideoPaused}
-                    onChange={() => setIsVideoPaused(!isVideoPaused)}
+                    onChange={handlePause}
                   />
                 </label>
               )}

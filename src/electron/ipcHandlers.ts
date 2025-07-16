@@ -1813,4 +1813,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return "image";
     }
   });
+  ipcMainHandle("setVideoBgPaused", async (paused: boolean) => {
+    try {
+      logger.info(`Setting video background paused state to: ${paused}`);
+      mainWindow?.webContents.send("set-video-bg-paused", paused);
+      return;
+    } catch (error) {
+      logger.error("Error in setVideoBgPaused:", error);
+      return;
+    }
+  });
 }
