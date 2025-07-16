@@ -50,6 +50,9 @@ const DesktopGrid: React.FC = () => {
   const [allHighlightsOversized, setAllHighlightsOversized] = useState(true);
   const [allHighlightsBoth, setAllHighlightsBoth] = useState(true);
 
+  const [backgroundType, setBackgroundType] = useState<string>("image");
+  const [isVideoPaused, setIsVideoPaused] = useState<boolean>(false);
+
   // iconBox refers to the rectangular size (width) of the icon box, not the icon's size in pixels.
   const iconBox = defaultIconSize * 1.5625;
 
@@ -768,6 +771,26 @@ const DesktopGrid: React.FC = () => {
     }
   }, [contextMenu]);
 
+  useEffect(() => {
+    const fetchBackgroundType = async () => {
+      try {
+        const type = await window.electron.getBackgroundType();
+        logger.info("Fetched background type:", type);
+        setBackgroundType(type);
+      } catch (error) {
+        logger.error("Failed to get background type:", error);
+        setBackgroundType("image");
+      }
+    };
+    fetchBackgroundType();
+
+    // Optionally, listen for background reloads to update type
+    window.electron.on("reload-background", fetchBackgroundType);
+    return () => {
+      window.electron.off("reload-background", fetchBackgroundType);
+    };
+  }, []);
+
   return (
     <>
       <div className="desktop-grid" onContextMenu={handleDesktopRightClick}>
@@ -1173,6 +1196,16 @@ const DesktopGrid: React.FC = () => {
                 )}
               </div>
               <div className="menu-separator" />
+              {backgroundType === "video" && (
+                <label className="menu-checkbox">
+                  Pause Video
+                  <input
+                    type="checkbox"
+                    checked={isVideoPaused}
+                    onChange={() => setIsVideoPaused(!isVideoPaused)}
+                  />
+                </label>
+              )}
               <div className="menu-item" onClick={handleReloadDesktop}>
                 Reload Desktop
               </div>

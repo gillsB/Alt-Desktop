@@ -1788,4 +1788,34 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     logger.warn("getBaseFilePaths, returning empty due to name = " + name);
     return "";
   });
+  ipcMainHandle("getBackgroundType", async (): Promise<"image" | "video"> => {
+    try {
+      const settingsFilePath = getSettingsFilePath();
+      const settings = JSON.parse(fs.readFileSync(settingsFilePath, "utf-8"));
+      const background = settings.background;
+
+      logger.info("background:", background);
+
+      if (!background) return "image";
+
+      // Await the async function
+      let bgFilePath = await idToBackgroundPath(background);
+      logger.info("bgFilePath:", bgFilePath);
+
+      if (!bgFilePath) return "image";
+
+      if (!path.isAbsolute(bgFilePath)) {
+        const backgroundsDir = getBackgroundFilePath();
+        bgFilePath = path.join(backgroundsDir, bgFilePath);
+      }
+
+      const mimeType = mime.lookup(bgFilePath);
+      logger.info("MIME type of background file:", mimeType);
+      if (mimeType && mimeType.startsWith("video")) return "video";
+      return "image";
+    } catch (error) {
+      logger.error("Error in getBackgroundType:", error);
+      return "image";
+    }
+  });
 }

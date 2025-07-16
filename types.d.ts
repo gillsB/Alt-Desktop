@@ -223,6 +223,7 @@ interface EventParamMapping {
   indexBackgrounds: [options?: { newExternalPathAdded?: boolean }];
   changeBackgroundDirectory: [string, string];
   getBaseFilePaths: [name?: string];
+  getBackgroundType: [];
 }
 
 // The returns from the main process to the renderer
@@ -291,6 +292,7 @@ type EventPayloadMapping = {
   indexBackgrounds: void;
   changeBackgroundDirectory: string | null;
   getBaseFilePaths: string;
+  getBackgroundType: "image" | "video";
 };
 
 type UnsubscribeFunction = () => void;
@@ -415,5 +417,6 @@ interface Window {
       targetLocation: string
     ) => Promise<string | null>;
     getBaseFilePaths: (name?: string) => Promise<string>;
+    getBackgroundType: () => Promise<"image" | "video">;
   };
 }
