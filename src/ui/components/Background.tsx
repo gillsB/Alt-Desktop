@@ -632,6 +632,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
         max={100}
         value={progress}
         onInput={handleSeek}
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       />
 
