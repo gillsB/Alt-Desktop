@@ -499,7 +499,6 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
   const [dragging, setDragging] = useState(false);
   const [position, setPosition] = useState({ x: 40, y: 40 });
   const dragOffset = useRef({ x: 0, y: 0 });
-  const [seeking, setSeeking] = useState(false);
 
   // Sync play/pause state
   useEffect(() => {
@@ -556,14 +555,29 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
     setProgress((newTime / video.duration) * 100);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Check if the pressed key is the left or right arrow key
+    if (e.key === "ArrowRight") {
+      // Jump 10 seconds forward
+      const newTime = video.currentTime + 10;
+      video.currentTime = Math.min(newTime, video.duration);
+      e.preventDefault();
+      setProgress((video.currentTime / video.duration) * 100);
+    } else if (e.key === "ArrowLeft") {
+      // Jump 10 seconds backward
+      const newTime = video.currentTime - 10;
+      video.currentTime = Math.max(newTime, 0);
+      e.preventDefault();
+      setProgress((video.currentTime / video.duration) * 100);
+    }
+  };
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    const handleSeeked = () => setSeeking(false);
-    video.addEventListener("seeked", handleSeeked);
-    return () => {
-      video.removeEventListener("seeked", handleSeeked);
-    };
   }, [videoRef]);
 
   // Drag logic
@@ -618,7 +632,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
         }}
         title={playing ? "Pause" : "Play"}
       >
-        {playing ? "⏸" : "▶️"}
+        {playing ? "⏸" : "▶"}
       </button>
 
       {/* Current time display */}
@@ -634,6 +648,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
         onInput={handleSeek}
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={handleKeyDown}
       />
 
       {/* Video length display */}
