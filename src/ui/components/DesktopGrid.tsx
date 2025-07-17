@@ -18,6 +18,7 @@ interface HighlightPosition {
   row: number;
   col: number;
   visible: boolean;
+  pulse: boolean;
 }
 
 interface IconReloadTimestamps {
@@ -36,6 +37,7 @@ const DesktopGrid: React.FC = () => {
     row: 0,
     col: 0,
     visible: false,
+    pulse: false,
   });
   const [showAllHighlights, setShowAllHighlights] = useState(false);
   const [reloadTimestamps, setReloadTimestamps] =
@@ -100,11 +102,12 @@ const DesktopGrid: React.FC = () => {
    * @param {number} row - The row position for the highlight box.
    * @param {number} col - The column position for the highlight box.
    */
-  const showHighlightAt = (row: number, col: number) => {
+  const showHighlightAt = (row: number, col: number, pulse?: boolean) => {
     setHighlightBox({
       row,
       col,
       visible: true,
+      pulse: pulse || false,
     });
   };
 
@@ -432,7 +435,7 @@ const DesktopGrid: React.FC = () => {
     }
     e.stopPropagation();
     handleRightClick(e, "icon", row, col);
-    showHighlightAt(row, col);
+    showHighlightAt(row, col, true);
 
     logger.info(
       `Icon right click at row: ${row}, col: ${col} with icon name: ${iconsMap.get(`${row},${col}`)?.name}`
@@ -831,7 +834,7 @@ const DesktopGrid: React.FC = () => {
         {/* Render highlight box if visible */}
         {highlightBox.visible && (
           <div
-            className="highlight-box pulsing"
+            className={`highlight-box ${highlightBox.pulse ? "pulsing" : ""}`}
             style={{
               position: "absolute",
               left:
