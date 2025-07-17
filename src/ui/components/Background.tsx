@@ -46,7 +46,7 @@ const Background: React.FC<BackgroundProps> = ({
     lastSuspendTime: 0,
   });
 
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null!);
   const imageRef = useRef<HTMLImageElement>(null);
   const metricsIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const suspendLogThresholdRef = useRef<number>(10);
@@ -441,27 +441,30 @@ const Background: React.FC<BackgroundProps> = ({
 
   if (isVideo && videoSrc && !videoError) {
     return (
-      <div className="video-background">
-        <video
-          id="video-bg"
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          loop
-          style={videoStyle}
-          src={videoSrc}
-          onError={() => handleVideoError("initial")}
-          crossOrigin="anonymous"
-          onLoadStart={() => {
-            if (logLevel === "verbose") {
-              videoLogger.info("Video load started");
-            }
-          }}
-          onStalled={() => videoLogger.warn("Video stalled")}
-          onCanPlayThrough={() => setIsLoading(false)}
-        ></video>
-      </div>
+      <>
+        <div className="video-background">
+          <video
+            id="video-bg"
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            loop
+            style={videoStyle}
+            src={videoSrc}
+            onError={() => handleVideoError("initial")}
+            crossOrigin="anonymous"
+            onLoadStart={() => {
+              if (logLevel === "verbose") {
+                videoLogger.info("Video load started");
+              }
+            }}
+            onStalled={() => videoLogger.warn("Video stalled")}
+            onCanPlayThrough={() => setIsLoading(false)}
+          ></video>
+        </div>
+        <VideoControls videoRef={videoRef} />
+      </>
     );
   }
 
@@ -485,3 +488,157 @@ const Background: React.FC<BackgroundProps> = ({
 };
 
 export default Background;
+
+interface VideoControlsProps {
+  videoRef: React.RefObject<HTMLVideoElement>;
+}
+
+const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
+  const [playing, setPlaying] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 40, y: 40 });
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const [seeking, setSeeking] = useState(false);
+
+  // Sync play/pause state
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handlePlay = () => setPlaying(true);
+    const handlePause = () => setPlaying(false);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+    };
+  }, [videoRef]);
+
+  // Throttled progress sync
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const updateProgress = () => {
+      if (!video.duration) return;
+      setProgress((video.currentTime / video.duration) * 100);
+    };
+
+    video.addEventListener("timeupdate", updateProgress);
+    video.addEventListener("seeked", updateProgress); // update immediately after seek
+    video.addEventListener("loadedmetadata", updateProgress); // also update when metadata is loaded
+
+    return () => {
+      video.removeEventListener("timeupdate", updateProgress);
+      video.removeEventListener("seeked", updateProgress);
+      video.removeEventListener("loadedmetadata", updateProgress);
+    };
+  }, [videoRef]);
+
+  // Play/pause toggle
+  const handlePlayPause = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  };
+
+  // Seek bar change
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const video = videoRef.current;
+    if (!video || !video.duration) return;
+    const newTime = (parseFloat(e.target.value) / 100) * video.duration;
+    video.currentTime = newTime;
+    setProgress((newTime / video.duration) * 100);
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handleSeeked = () => setSeeking(false);
+    video.addEventListener("seeked", handleSeeked);
+    return () => {
+      video.removeEventListener("seeked", handleSeeked);
+    };
+  }, [videoRef]);
+
+  // Drag logic
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDragging(true);
+    dragOffset.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+    document.body.style.userSelect = "none";
+  };
+
+  useEffect(() => {
+    if (!dragging) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      setPosition({
+        x: e.clientX - dragOffset.current.x,
+        y: e.clientY - dragOffset.current.y,
+      });
+    };
+    const handleMouseUp = () => {
+      setDragging(false);
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [dragging]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  };
+
+  return (
+    <div
+      className={`video-controls ${dragging ? "dragging" : ""}`}
+      style={{
+        left: position.x,
+        top: position.y,
+      }}
+      onMouseDown={handleMouseDown}
+    >
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handlePlayPause();
+        }}
+        title={playing ? "Pause" : "Play"}
+      >
+        {playing ? "⏸" : "▶️"}
+      </button>
+
+      {/* Current time display */}
+      <span className="time">
+        {formatTime(videoRef.current?.currentTime ?? 0)}
+      </span>
+
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={progress}
+        onInput={handleSeek}
+        onClick={(e) => e.stopPropagation()}
+      />
+
+      {/* Video length display */}
+      <span className="time">
+        {formatTime(videoRef.current?.duration ?? 0)}
+      </span>
+    </div>
+  );
+};
