@@ -27,6 +27,5 @@
   box-sizing: border-box;
   border: 2px solid #00ff00;
   box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
-  animation: highlight-pulse 2s infinite;
   overflow: hidden;
 }

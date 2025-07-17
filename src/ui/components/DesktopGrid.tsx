@@ -831,7 +831,7 @@ const DesktopGrid: React.FC = () => {
         {/* Render highlight box if visible */}
         {highlightBox.visible && (
           <div
-            className="highlight-box"
+            className="highlight-box pulsing"
             style={{
               position: "absolute",
               left:
