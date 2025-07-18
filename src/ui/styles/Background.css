@@ -52,13 +52,13 @@
 }
 
 .video-controls {
-  max-width: 370px;
-  max-height: 55px;
+  width: 370px;
+  height: 55px;
   position: fixed;
   z-index: 110;
   background: rgba(30, 30, 30, 0.85);
   border-radius: 8px;
-  padding: 5px 5px 5px 10px;
+  padding: 0px 5px 0px 10px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;

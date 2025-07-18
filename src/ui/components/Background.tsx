@@ -504,8 +504,14 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
   const [previousVolume, setPreviousVolume] = useState(1);
 
   // Hard defined width and height for the controls
-  const componentWidth = 370;
+  const componentWidth = 385;
   const componentHeight = 55;
+
+  useEffect(() => {
+    const x = window.innerWidth / 2 - componentWidth / 2;
+    const y = window.innerHeight - componentHeight - 50;
+    setPosition({ x, y });
+  }, []);
 
   // Sync play/pause state
   useEffect(() => {
