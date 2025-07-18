@@ -503,6 +503,10 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [previousVolume, setPreviousVolume] = useState(1);
 
+  // Hard defined width and height for the controls
+  const componentWidth = 370;
+  const componentHeight = 55;
+
   // Sync play/pause state
   useEffect(() => {
     const video = videoRef.current;
@@ -624,15 +628,25 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
   useEffect(() => {
     if (!dragging) return;
     const handleMouseMove = (e: MouseEvent) => {
-      setPosition({
-        x: e.clientX - dragOffset.current.x,
-        y: e.clientY - dragOffset.current.y,
-      });
+      const newX = e.clientX - dragOffset.current.x;
+      const newY = e.clientY - dragOffset.current.y;
+
+      // Ensure the controls stay within the viewport
+      const maxX = window.innerWidth - componentWidth;
+      const maxY = window.innerHeight - componentHeight;
+
+      // Prevent dragging off-screen
+      const boundedX = Math.max(0, Math.min(newX, maxX));
+      const boundedY = Math.max(0, Math.min(newY, maxY));
+
+      setPosition({ x: boundedX, y: boundedY });
     };
+
     const handleMouseUp = () => {
       setDragging(false);
       document.body.style.userSelect = "";
     };
+
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
     return () => {
