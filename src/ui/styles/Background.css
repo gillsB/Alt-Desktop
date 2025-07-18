@@ -56,7 +56,7 @@
   z-index: 5000;
   background: rgba(30, 30, 30, 0.85);
   border-radius: 8px;
-  padding: 10px;
+  padding: 5px 5px 5px 10px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
@@ -82,12 +82,25 @@
   border: none;
   color: #fff;
   min-width: 36px;
-  font-size: 22px;
+  font-size: 27px;
   cursor: pointer;
-  padding: 4px;
+  padding-bottom: 4px;
   border-radius: 4px;
   transition: background-color 0.2s;
   text-align: center;
+}
+.video-controls svg {
+  width: 22px;
+  height: 22px;
+}
+.video-controls button svg,
+.video-controls button span {
+  vertical-align: middle;
+  display: inline-block;
+}
+.video-controls button span {
+  line-height: 0; /* Remove extra space around the pause character */
+  padding-top: 2px; /* Fine-tune this if necessary */
 }
 
 .video-controls button:hover {
@@ -120,8 +133,8 @@
 }
 
 .volume-slider {
-  writing-mode: bt-lr; /* IE */
-  -webkit-appearance: slider-vertical; /* WebKit */
+  appearance: vertical;
+  -webkit-appearance: slider-vertical;
   width: 20px;
   height: 100px;
   background: transparent;

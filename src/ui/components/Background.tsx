@@ -1,3 +1,4 @@
+import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 import React, { useEffect, useRef, useState } from "react";
 import "../styles/Background.css";
 import { createLogger, createVideoLogger } from "../util/uiLogger";
@@ -679,7 +680,11 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
           title={volume === 0 ? "Unmute" : "Mute"}
           className="volume-button"
         >
-          {volume === 0 ? "🔇" : volume < 0.5 ? "🔉" : "🔊"}
+          {volume === 0 ? (
+            <SpeakerXMarkIcon className="h-6 w-6 text-gray-500" />
+          ) : (
+            <SpeakerWaveIcon className="h-6 w-6 text-gray-500" />
+          )}
         </button>
         {showVolumeSlider && (
           <div className="volume-slider-container">
