@@ -499,6 +499,8 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
   const [position, setPosition] = useState({ x: 40, y: 40 });
   const dragOffset = useRef({ x: 0, y: 0 });
   const [volume, setVolume] = useState(1);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [previousVolume, setPreviousVolume] = useState(1);
 
   // Sync play/pause state
   useEffect(() => {
@@ -541,6 +543,26 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
     video.volume = newVolume;
+    if (newVolume > 0) {
+      setPreviousVolume(newVolume);
+    }
+  };
+
+  const handleVolumeToggle = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (volume === 0) {
+      // Unmute: restore to previous volume
+      const newVolume = previousVolume > 0 ? previousVolume : 1;
+      setVolume(newVolume);
+      video.volume = newVolume;
+    } else {
+      // Mute: save current volume and set to 0
+      setPreviousVolume(volume);
+      setVolume(0);
+      video.volume = 0;
+    }
   };
 
   // Play/pause toggle
@@ -643,40 +665,60 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
         {playing ? "⏸" : "▶"}
       </button>
 
+      {/* Volume Control */}
+      <div
+        className="volume-control"
+        onMouseEnter={() => setShowVolumeSlider(true)}
+        onMouseLeave={() => setShowVolumeSlider(false)}
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleVolumeToggle();
+          }}
+          title={volume === 0 ? "Unmute" : "Mute"}
+          className="volume-button"
+        >
+          {volume === 0 ? "🔇" : volume < 0.5 ? "🔉" : "🔊"}
+        </button>
+        {showVolumeSlider && (
+          <div className="volume-slider-container">
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              onChange={handleVolumeChange}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className="volume-slider"
+            />
+          </div>
+        )}
+      </div>
+
       {/* Current time display */}
       <span className="time">
         {formatTime(videoRef.current?.currentTime ?? 0)}
       </span>
-
-      <input
-        type="range"
-        min={0}
-        max={100}
-        value={progress}
-        onInput={handleSeek}
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={handleKeyDown}
-      />
+      <div className="seek-bar">
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={progress}
+          onInput={handleSeek}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
 
       {/* Video length display */}
       <span className="time">
         {formatTime(videoRef.current?.duration ?? 0)}
       </span>
-
-      {/* Volume Control */}
-      <div className="volume-control">
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.01}
-          value={volume}
-          onChange={handleVolumeChange}
-          onMouseDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-        />
-      </div>
     </div>
   );
 };
