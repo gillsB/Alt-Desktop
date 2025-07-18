@@ -447,7 +447,6 @@ const Background: React.FC<BackgroundProps> = ({
             id="video-bg"
             ref={videoRef}
             autoPlay
-            muted
             playsInline
             loop
             style={videoStyle}
@@ -499,6 +498,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
   const [dragging, setDragging] = useState(false);
   const [position, setPosition] = useState({ x: 40, y: 40 });
   const dragOffset = useRef({ x: 0, y: 0 });
+  const [volume, setVolume] = useState(1);
 
   // Sync play/pause state
   useEffect(() => {
@@ -534,6 +534,14 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
       video.removeEventListener("loadedmetadata", updateProgress);
     };
   }, [videoRef]);
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const video = videoRef.current;
+    if (!video) return;
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    video.volume = newVolume;
+  };
 
   // Play/pause toggle
   const handlePlayPause = () => {
@@ -655,6 +663,20 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
       <span className="time">
         {formatTime(videoRef.current?.duration ?? 0)}
       </span>
+
+      {/* Volume Control */}
+      <div className="volume-control">
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={volume}
+          onChange={handleVolumeChange}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
     </div>
   );
 };
