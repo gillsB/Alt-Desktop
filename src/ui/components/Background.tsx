@@ -38,6 +38,9 @@ const Background: React.FC<BackgroundProps> = ({
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
+  const [playing, setPlaying] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [volume, setVolume] = useState(1);
 
   // Performance tracking states
   const [suspendCount, setSuspendCount] = useState(0);
@@ -453,7 +456,17 @@ const Background: React.FC<BackgroundProps> = ({
             onCanPlayThrough={() => setIsLoading(false)}
           ></video>
         </div>
-        {showVideoControls && <VideoControls videoRef={videoRef} />}
+        {showVideoControls && (
+          <VideoControls
+            videoRef={videoRef}
+            playing={playing}
+            setPlaying={setPlaying}
+            progress={progress}
+            setProgress={setProgress}
+            volume={volume}
+            setVolume={setVolume}
+          />
+        )}
       </>
     );
   }
@@ -481,15 +494,26 @@ export default Background;
 
 interface VideoControlsProps {
   videoRef: React.RefObject<HTMLVideoElement>;
+  playing: boolean;
+  setPlaying: (playing: boolean) => void;
+  progress: number;
+  setProgress: (progress: number) => void;
+  volume: number;
+  setVolume: (volume: number) => void;
 }
 
-const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
-  const [playing, setPlaying] = useState(true);
-  const [progress, setProgress] = useState(0);
+const VideoControls: React.FC<VideoControlsProps> = ({
+  videoRef,
+  playing,
+  setPlaying,
+  progress,
+  setProgress,
+  volume,
+  setVolume,
+}) => {
   const [dragging, setDragging] = useState(false);
   const [position, setPosition] = useState({ x: 40, y: 40 });
   const dragOffset = useRef({ x: 0, y: 0 });
-  const [volume, setVolume] = useState(1);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [previousVolume, setPreviousVolume] = useState(1);
 
