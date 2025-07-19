@@ -224,7 +224,7 @@ interface EventParamMapping {
   changeBackgroundDirectory: [string, string];
   getBaseFilePaths: [name?: string];
   getBackgroundType: [];
-  setVideoBgPaused: [boolean];
+  showVideoControls: [boolean];
 }
 
 // The returns from the main process to the renderer
@@ -294,7 +294,7 @@ type EventPayloadMapping = {
   changeBackgroundDirectory: string | null;
   getBaseFilePaths: string;
   getBackgroundType: "image" | "video";
-  setVideoBgPaused: void;
+  showVideoControls: void;
 };
 
 type UnsubscribeFunction = () => void;
@@ -420,6 +420,6 @@ interface Window {
     ) => Promise<string | null>;
     getBaseFilePaths: (name?: string) => Promise<string>;
     getBackgroundType: () => Promise<"image" | "video">;
-    setVideoBgPaused: (paused: boolean) => Promise<void>;
+    showVideoControls: (show: boolean) => Promise<void>;
   };
 }

@@ -95,26 +95,14 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   useEffect(() => {
-    const pauseVideo = async (...args: unknown[]) => {
-      // args[1] is the payload (pause boolean)
-      logger.info("Setting video paused state to:", args[1]);
-      const pause = args[1] as boolean;
-      const video = videoRef.current;
-      if (video) {
-        if (pause) {
-          video.pause();
-        } else {
-          video.play().catch((err) => {
-            logger.warn("Failed to play video:", err);
-          });
-        }
-      }
+    const showVideoControls = async (...args: unknown[]) => {
+      logger.info("showVideoControls event received:", args[1]);
     };
 
-    window.electron.on("set-video-bg-paused", pauseVideo);
+    window.electron.on("show-video-controls", showVideoControls);
 
     return () => {
-      window.electron.off("set-video-bg-paused", pauseVideo);
+      window.electron.off("show-video-controls", showVideoControls);
     };
   }, []);
 

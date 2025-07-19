@@ -53,7 +53,7 @@ const DesktopGrid: React.FC = () => {
   const [allHighlightsBoth, setAllHighlightsBoth] = useState(true);
 
   const [backgroundType, setBackgroundType] = useState<string>("image");
-  const [isVideoPaused, setIsVideoPaused] = useState<boolean>(false);
+  const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
 
   // iconBox refers to the rectangular size (width) of the icon box, not the icon's size in pixels.
   const iconBox = defaultIconSize * 1.5625;
@@ -776,7 +776,7 @@ const DesktopGrid: React.FC = () => {
 
   useEffect(() => {
     const fetchBackgroundType = async () => {
-      setIsVideoPaused(false); // Always start as unpaused on load/reload
+      setShowVideoControls(false); // Always start as unpaused on load/reload
       setBackgroundType(await window.electron.getBackgroundType());
     };
     fetchBackgroundType();
@@ -787,9 +787,9 @@ const DesktopGrid: React.FC = () => {
     };
   }, []);
 
-  const handlePause = async () => {
-    await window.electron.setVideoBgPaused(!isVideoPaused);
-    setIsVideoPaused(!isVideoPaused);
+  const handleShowVideoControls = async () => {
+    await window.electron.showVideoControls(!showVideoControls);
+    setShowVideoControls(!showVideoControls);
   };
 
   return (
@@ -1199,11 +1199,11 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-separator" />
               {backgroundType.startsWith("video") && (
                 <label className="menu-checkbox">
-                  Pause Video
+                  Show Video Controls
                   <input
                     type="checkbox"
-                    checked={isVideoPaused}
-                    onChange={handlePause}
+                    checked={showVideoControls}
+                    onChange={handleShowVideoControls}
                   />
                 </label>
               )}
