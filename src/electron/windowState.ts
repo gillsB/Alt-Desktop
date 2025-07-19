@@ -11,6 +11,8 @@ let lastBounds: Electron.Rectangle | null = null; // Store the last window bound
 
 export function handleWindowState(mainWindow: BrowserWindow) {
   mainWindow.on("minimize", () => {
+    logger.info("Minimizing main window");
+    mainWindow.webContents.send("window-visibility", "minimize");
     const activeSubWindow = getActiveSubWindow();
     if (activeSubWindow) activeSubWindow.hide();
 
@@ -21,6 +23,8 @@ export function handleWindowState(mainWindow: BrowserWindow) {
   });
 
   mainWindow.on("restore", () => {
+    logger.info("Restoring main window");
+    mainWindow.webContents.send("window-visibility", "restore");
     const activeSubWindow = getActiveSubWindow();
     if (activeSubWindow) activeSubWindow.show();
 
@@ -31,9 +35,15 @@ export function handleWindowState(mainWindow: BrowserWindow) {
   });
 
   mainWindow.on("hide", () => {
+    logger.info("Hiding main window");
+    mainWindow.webContents.send("window-visibility", "hide");
     // Save the window bounds before hiding it to the tray
     lastBounds = mainWindow.getBounds();
     logger.info("Saved window bounds before hiding:");
+  });
+  mainWindow.on("show", () => {
+    logger.info("Showing main window");
+    mainWindow.webContents.send("window-visibility", "show");
   });
 }
 

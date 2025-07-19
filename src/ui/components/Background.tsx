@@ -99,6 +99,24 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   useEffect(() => {
+    const handleVisibility = async (...args: unknown[]) => {
+      logger.info("Window visibility event received:", args[1]);
+      const video = videoRef.current;
+      if (!video) return;
+      if (args[1] === "minimize" || args[1] === "hide") {
+        video.pause();
+      } else if (args[1] === "restore" || args[1] === "show") {
+        video.play().catch(() => {});
+      }
+    };
+
+    window.electron.on("window-visibility", handleVisibility);
+    return () => {
+      window.electron.off("window-visibility", handleVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
     const showVideoControls = async (...args: unknown[]) => {
       logger.info("showVideoControls event received:", args[1]);
       setShowVideoControls(args[1] as boolean);
