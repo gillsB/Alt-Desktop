@@ -776,7 +776,6 @@ const DesktopGrid: React.FC = () => {
 
   useEffect(() => {
     const fetchBackgroundType = async () => {
-      setShowVideoControls(false); // Always start as unpaused on load/reload
       setBackgroundType(await window.electron.getBackgroundType());
     };
     fetchBackgroundType();
