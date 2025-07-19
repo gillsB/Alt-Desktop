@@ -37,6 +37,7 @@ const Background: React.FC<BackgroundProps> = ({
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
 
   // Performance tracking states
   const [suspendCount, setSuspendCount] = useState(0);
@@ -97,6 +98,7 @@ const Background: React.FC<BackgroundProps> = ({
   useEffect(() => {
     const showVideoControls = async (...args: unknown[]) => {
       logger.info("showVideoControls event received:", args[1]);
+      setShowVideoControls(args[1] as boolean);
     };
 
     window.electron.on("show-video-controls", showVideoControls);
@@ -451,7 +453,7 @@ const Background: React.FC<BackgroundProps> = ({
             onCanPlayThrough={() => setIsLoading(false)}
           ></video>
         </div>
-        <VideoControls videoRef={videoRef} />
+        {showVideoControls && <VideoControls videoRef={videoRef} />}
       </>
     );
   }
