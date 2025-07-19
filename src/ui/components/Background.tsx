@@ -57,6 +57,7 @@ const Background: React.FC<BackgroundProps> = ({
   const suspendLogThresholdRef = useRef<number>(10);
   const suspendLogTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasLoggedSuspendsRef = useRef<boolean>(false);
+  const wasPlayingRef = useRef(false);
 
   // Clear timers on unmount
   useEffect(() => {
@@ -99,20 +100,23 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   useEffect(() => {
-    const handleVisibility = async (...args: unknown[]) => {
-      logger.info("Window visibility event received:", args[1]);
+    const handlePauseOnWindowState = async (...args: unknown[]) => {
+      logger.info("PauseOnWindowState event received:", args[1]);
       const video = videoRef.current;
       if (!video) return;
       if (args[1] === "minimize" || args[1] === "hide") {
+        wasPlayingRef.current = !video.paused;
         video.pause();
       } else if (args[1] === "restore" || args[1] === "show") {
-        video.play().catch(() => {});
+        if (wasPlayingRef.current) {
+          video.play().catch(() => {});
+        }
       }
     };
 
-    window.electron.on("window-visibility", handleVisibility);
+    window.electron.on("window-visibility", handlePauseOnWindowState);
     return () => {
-      window.electron.off("window-visibility", handleVisibility);
+      window.electron.off("window-visibility", handlePauseOnWindowState);
     };
   }, []);
 
