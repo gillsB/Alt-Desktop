@@ -228,6 +228,7 @@ interface EventParamMapping {
   getBaseFilePaths: [name?: string];
   getBackgroundType: [];
   showVideoControls: [boolean];
+  getBackgroundVolume: [string];
 }
 
 // The returns from the main process to the renderer
@@ -298,6 +299,7 @@ type EventPayloadMapping = {
   getBaseFilePaths: string;
   getBackgroundType: "image" | "video";
   showVideoControls: void;
+  getBackgroundVolume: number | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -424,5 +426,6 @@ interface Window {
     getBaseFilePaths: (name?: string) => Promise<string>;
     getBackgroundType: () => Promise<"image" | "video">;
     showVideoControls: (show: boolean) => Promise<void>;
+    getBackgroundVolume: (id: string) => Promise<number | null>;
   };
 }

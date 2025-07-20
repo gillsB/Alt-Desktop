@@ -37,6 +37,7 @@ import {
   getSettingsFilePath,
   idToBackgroundFolder,
   idToBackgroundPath,
+  idToBgJson,
   indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
@@ -1823,4 +1824,23 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return;
     }
   });
+  ipcMainHandle(
+    "getBackgroundVolume",
+    async (id: string): Promise<number | null> => {
+      try {
+        const bgJsonPath = await idToBgJson(id);
+        if (!fs.existsSync(bgJsonPath)) {
+          logger.warn(`bg.json not found for background id: ${id}`);
+          return null;
+        }
+        const raw = await fs.promises.readFile(bgJsonPath, "utf-8");
+        const bg = JSON.parse(raw);
+        // Return local.volume if it exists, else null
+        return bg?.local?.volume ?? null;
+      } catch (e) {
+        logger.error(`Failed to get background volume for id ${id}:`, e);
+        return null;
+      }
+    }
+  );
 }

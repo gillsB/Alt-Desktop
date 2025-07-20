@@ -79,12 +79,12 @@ const Background: React.FC<BackgroundProps> = ({
 
   useEffect(() => {
     const fetchFromSettings = async () => {
-      const bgPath = await window.electron.getSetting("background");
-      if (bgPath === undefined) {
+      const id = await window.electron.getSetting("background");
+      if (id === undefined) {
         logger.error("Background returned undefined from settings.");
         return;
       }
-      let filePath = await convertIDToFilePath(bgPath);
+      let filePath = await convertIDToFilePath(id);
       if (filePath) {
         // Always resolve shortcut if the file is a shortcut
         const fileType = await window.electron.getFileType(filePath);
@@ -95,11 +95,13 @@ const Background: React.FC<BackgroundProps> = ({
       }
       setBackgroundPath(filePath || "");
       logger.info("Background reloaded with path:", filePath);
+      if (!showVideoControlsRef.current) {
+        const vol = await window.electron.getBackgroundVolume(id || "");
+        logger.info("vol = " + vol + "setVol = " + (vol || 0.5));
+        setVolume(vol === 0 ? 0 : 0.5);
+      }
     };
     fetchFromSettings();
-    if (!showVideoControlsRef.current) {
-      setVolume(0.0);
-    }
 
     window.electron.on("reload-background", fetchFromSettings);
 
@@ -187,8 +189,11 @@ const Background: React.FC<BackgroundProps> = ({
         }
         setBackgroundPath(filePath || "");
       }
-      if (showVideoControlsRef.current) {
-        setVolume(1.0);
+      if (!showVideoControlsRef.current) {
+        const vol = await window.electron.getBackgroundVolume(
+          updates.background || ""
+        );
+        setVolume(vol === 0 ? 0 : 0.5);
       }
     };
     window.electron.on("update-background-preview", handlePreview);
@@ -560,10 +565,10 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   setVolume,
 }) => {
   const [dragging, setDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 40, y: 40 });
+  const [position, setPosition] = useState({ x: 40, y: 40 }); //TODO make useRef swapping backgrounds resets
   const dragOffset = useRef({ x: 0, y: 0 });
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [previousVolume, setPreviousVolume] = useState(1);
+  const [previousVolume, setPreviousVolume] = useState(1); //TODO make useRef swapping backgrounds resets
 
   // Hard defined width and height for the controls
   const componentWidth = 385;
