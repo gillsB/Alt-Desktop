@@ -7,8 +7,6 @@ import {
 
 const logger = createLoggerForFile("windowState.ts");
 
-let lastBounds: Electron.Rectangle | null = null; // Store the last window bounds
-
 export function handleWindowState(mainWindow: BrowserWindow) {
   mainWindow.on("minimize", () => {
     logger.info("Minimizing main window");
@@ -38,7 +36,6 @@ export function handleWindowState(mainWindow: BrowserWindow) {
     logger.info("Hiding main window");
     mainWindow.webContents.send("window-visibility", "hide");
     // Save the window bounds before hiding it to the tray
-    lastBounds = mainWindow.getBounds();
     logger.info("Saved window bounds before hiding:");
   });
   mainWindow.on("show", () => {
@@ -67,15 +64,6 @@ export function registerWindowKeybinds(mainWindow: BrowserWindow) {
       } else if (!mainWindow.isVisible()) {
         // If the window is hidden (e.g., sent to the tray), show it
         mainWindow.show();
-      }
-
-      // Restore the window to its last bounds if available
-      if (lastBounds) {
-        logger.info(
-          "Restoring window to last bounds:",
-          JSON.stringify(lastBounds)
-        );
-        mainWindow.setBounds(lastBounds);
       }
     }
 
