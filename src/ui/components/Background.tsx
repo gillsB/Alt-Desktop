@@ -37,7 +37,6 @@ const Background: React.FC<BackgroundProps> = ({
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
   const [playing, setPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -58,6 +57,13 @@ const Background: React.FC<BackgroundProps> = ({
   const suspendLogTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasLoggedSuspendsRef = useRef<boolean>(false);
   const wasPlayingRef = useRef(false);
+  const showVideoControlsRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = volume;
+    }
+  }, [volume, videoRef, videoSrc]);
 
   // Clear timers on unmount
   useEffect(() => {
@@ -91,6 +97,9 @@ const Background: React.FC<BackgroundProps> = ({
       logger.info("Background reloaded with path:", filePath);
     };
     fetchFromSettings();
+    if (!showVideoControlsRef.current) {
+      setVolume(0.0);
+    }
 
     window.electron.on("reload-background", fetchFromSettings);
 
@@ -135,15 +144,15 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   useEffect(() => {
-    const showVideoControls = async (...args: unknown[]) => {
+    const showControls = async (...args: unknown[]) => {
       logger.info("showVideoControls event received:", args[1]);
-      setShowVideoControls(args[1] as boolean);
+      showVideoControlsRef.current = args[1] as boolean;
     };
 
-    window.electron.on("show-video-controls", showVideoControls);
+    window.electron.on("show-video-controls", showControls);
 
     return () => {
-      window.electron.off("show-video-controls", showVideoControls);
+      window.electron.off("show-video-controls", showControls);
     };
   }, []);
 
@@ -177,6 +186,9 @@ const Background: React.FC<BackgroundProps> = ({
           }
         }
         setBackgroundPath(filePath || "");
+      }
+      if (showVideoControlsRef.current) {
+        setVolume(1.0);
       }
     };
     window.electron.on("update-background-preview", handlePreview);
@@ -492,7 +504,7 @@ const Background: React.FC<BackgroundProps> = ({
             onCanPlayThrough={() => setIsLoading(false)}
           ></video>
         </div>
-        {showVideoControls && (
+        {showVideoControlsRef.current && (
           <VideoControls
             videoRef={videoRef}
             playing={playing}
@@ -603,7 +615,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     if (!video) return;
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
-    video.volume = newVolume;
+    //video.volume = newVolume;
     if (newVolume > 0) {
       setPreviousVolume(newVolume);
     }
