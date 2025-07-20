@@ -36,6 +36,7 @@ type BgJson = {
     tags?: string[];
   };
   local?: {
+    volume?: number;
     tags?: string[];
     indexed?: number;
   };
@@ -68,6 +69,7 @@ type SettingsData = {
   publicCategories?: Record<string, boolean>;
   localCategories?: Record<string, boolean>;
   localTags?: LocalTag[];
+  localVolume?: number;
 };
 
 type SettingKey = keyof SettingsData;
@@ -81,6 +83,7 @@ type BackgroundSummary = {
   tags?: string[];
   localTags?: string[];
   localIndexed?: number;
+  localVolume?: number;
 };
 
 type GetBackgroundSummariesRequest = {

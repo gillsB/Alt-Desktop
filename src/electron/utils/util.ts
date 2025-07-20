@@ -685,6 +685,7 @@ export async function saveBgJsonFile(
 
     const localData = {
       tags: summary.localTags ?? oldBg.local?.tags ?? [],
+      volume: summary.localVolume ?? oldBg.local?.volume ?? 0.5,
       indexed,
     };
 

@@ -32,6 +32,7 @@ const EditBackground: React.FC = () => {
         bgFile: "",
         tags: [],
         localTags: [],
+        localVolume: 0.5,
       };
 
   const [summary, setSummary] = useState<BackgroundSummary>(initialSummary);
