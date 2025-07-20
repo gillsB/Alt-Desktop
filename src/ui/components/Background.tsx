@@ -99,15 +99,29 @@ const Background: React.FC<BackgroundProps> = ({
     };
   }, []);
 
+  const lastEventRef = useRef<string>("");
   useEffect(() => {
     const handlePauseOnWindowState = async (...args: unknown[]) => {
-      logger.info("PauseOnWindowState event received:", args[1]);
+      const event = args[1] as string;
+
+      // Skip duplicate events in development mode (strict mode).
+      if (event === lastEventRef.current) {
+        logger.warn(
+          "Duplicate window state event ignored (This happens in Dev due to strict mode, if in Prod this is likely an error):",
+          event
+        );
+        return;
+      }
+      lastEventRef.current = event;
+      logger.info("PauseOnWindowState event received:", event);
+
       const video = videoRef.current;
       if (!video) return;
-      if (args[1] === "minimize" || args[1] === "hide") {
+
+      if (event === "minimize" || event === "hide") {
         wasPlayingRef.current = !video.paused;
         video.pause();
-      } else if (args[1] === "restore" || args[1] === "show") {
+      } else if (event === "restore" || event === "show") {
         if (wasPlayingRef.current) {
           video.play().catch(() => {});
         }
