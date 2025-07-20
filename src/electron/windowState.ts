@@ -61,8 +61,11 @@ export function registerWindowKeybinds(mainWindow: BrowserWindow) {
     } else {
       logger.info("Restoring main window");
 
-      // If the window is hidden (e.g., sent to the tray), show it first
-      if (!mainWindow.isVisible()) {
+      // Ensure the window is not minimized
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      } else if (!mainWindow.isVisible()) {
+        // If the window is hidden (e.g., sent to the tray), show it
         mainWindow.show();
       }
 
@@ -73,11 +76,6 @@ export function registerWindowKeybinds(mainWindow: BrowserWindow) {
           JSON.stringify(lastBounds)
         );
         mainWindow.setBounds(lastBounds);
-      }
-
-      // Ensure the window is not minimized
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore();
       }
     }
 
