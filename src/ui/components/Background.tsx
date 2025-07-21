@@ -57,7 +57,7 @@ const Background: React.FC<BackgroundProps> = ({
   const suspendLogTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasLoggedSuspendsRef = useRef<boolean>(false);
   const wasPlayingRef = useRef(false);
-  const showVideoControlsRef = useRef<boolean>(false);
+  const [showVideoControls, setShowVideoControls] = useState(false);
   const videoControlsPositionRef = useRef({ x: 40, y: 40 });
   const previousVolumeRef = useRef<number>(1);
 
@@ -148,13 +148,11 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   useEffect(() => {
-    const showControls = async (...args: unknown[]) => {
+    const showControls = (...args: unknown[]) => {
       logger.info("showVideoControls event received:", args[1]);
-      showVideoControlsRef.current = args[1] as boolean;
+      setShowVideoControls(!!args[1]);
     };
-
     window.electron.on("show-video-controls", showControls);
-
     return () => {
       window.electron.off("show-video-controls", showControls);
     };
@@ -511,7 +509,7 @@ const Background: React.FC<BackgroundProps> = ({
             onCanPlayThrough={() => setIsLoading(false)}
           ></video>
         </div>
-        {showVideoControlsRef.current && (
+        {showVideoControls && (
           <VideoControls
             videoRef={videoRef}
             playing={playing}
