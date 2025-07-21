@@ -59,6 +59,7 @@ const Background: React.FC<BackgroundProps> = ({
   const wasPlayingRef = useRef(false);
   const showVideoControlsRef = useRef<boolean>(false);
   const videoControlsPositionRef = useRef({ x: 40, y: 40 });
+  const previousVolumeRef = useRef<number>(1);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -520,6 +521,7 @@ const Background: React.FC<BackgroundProps> = ({
             volume={volume}
             setVolume={setVolume}
             positionRef={videoControlsPositionRef}
+            previousVolumeRef={previousVolumeRef}
           />
         )}
       </>
@@ -555,7 +557,8 @@ interface VideoControlsProps {
   setProgress: (progress: number) => void;
   volume: number;
   setVolume: (volume: number) => void;
-  positionRef: React.MutableRefObject<{ x: number; y: number }>;
+  positionRef: React.RefObject<{ x: number; y: number }>;
+  previousVolumeRef: React.RefObject<number>;
 }
 
 const VideoControls: React.FC<VideoControlsProps> = ({
@@ -567,11 +570,11 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   volume,
   setVolume,
   positionRef,
+  previousVolumeRef,
 }) => {
   const [dragging, setDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [previousVolume, setPreviousVolume] = useState(1); //TODO make useRef swapping backgrounds resets
 
   // Hard defined width and height for the controls
   const componentWidth = 385;
@@ -629,7 +632,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     setVolume(newVolume);
     //video.volume = newVolume;
     if (newVolume > 0) {
-      setPreviousVolume(newVolume);
+      previousVolumeRef.current = newVolume;
     }
   };
 
@@ -639,12 +642,13 @@ const VideoControls: React.FC<VideoControlsProps> = ({
 
     if (volume === 0) {
       // Unmute: restore to previous volume
-      const newVolume = previousVolume > 0 ? previousVolume : 1;
+      const newVolume =
+        previousVolumeRef.current > 0 ? previousVolumeRef.current : 1;
       setVolume(newVolume);
       video.volume = newVolume;
     } else {
       // Mute: save current volume and set to 0
-      setPreviousVolume(volume);
+      previousVolumeRef.current = volume;
       setVolume(0);
       video.volume = 0;
     }
