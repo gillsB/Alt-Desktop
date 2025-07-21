@@ -707,6 +707,11 @@ const VideoControls: React.FC<VideoControlsProps> = ({
 
   useEffect(() => {
     if (!dragging) return;
+
+    const controlsElement = document.querySelector(
+      ".video-controls"
+    ) as HTMLElement;
+
     const handleMouseMove = (e: MouseEvent) => {
       const newX = e.clientX - dragOffset.current.x;
       const newY = e.clientY - dragOffset.current.y;
@@ -720,6 +725,12 @@ const VideoControls: React.FC<VideoControlsProps> = ({
       const boundedY = Math.max(0, Math.min(newY, maxY));
 
       positionRef.current = { x: boundedX, y: boundedY };
+
+      // Update DOM directly for smooth dragging
+      if (controlsElement) {
+        controlsElement.style.left = `${boundedX}px`;
+        controlsElement.style.top = `${boundedY}px`;
+      }
     };
 
     const handleMouseUp = () => {
