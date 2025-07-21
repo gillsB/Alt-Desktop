@@ -58,6 +58,7 @@ const Background: React.FC<BackgroundProps> = ({
   const hasLoggedSuspendsRef = useRef<boolean>(false);
   const wasPlayingRef = useRef(false);
   const showVideoControlsRef = useRef<boolean>(false);
+  const videoControlsPositionRef = useRef({ x: 40, y: 40 });
 
   useEffect(() => {
     if (videoRef.current) {
@@ -518,6 +519,7 @@ const Background: React.FC<BackgroundProps> = ({
             setProgress={setProgress}
             volume={volume}
             setVolume={setVolume}
+            positionRef={videoControlsPositionRef}
           />
         )}
       </>
@@ -553,6 +555,7 @@ interface VideoControlsProps {
   setProgress: (progress: number) => void;
   volume: number;
   setVolume: (volume: number) => void;
+  positionRef: React.MutableRefObject<{ x: number; y: number }>;
 }
 
 const VideoControls: React.FC<VideoControlsProps> = ({
@@ -563,9 +566,9 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   setProgress,
   volume,
   setVolume,
+  positionRef,
 }) => {
   const [dragging, setDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 40, y: 40 }); //TODO make useRef swapping backgrounds resets
   const dragOffset = useRef({ x: 0, y: 0 });
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [previousVolume, setPreviousVolume] = useState(1); //TODO make useRef swapping backgrounds resets
@@ -574,10 +577,14 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   const componentWidth = 385;
   const componentHeight = 55;
 
+  // TODO actually this should reset every time the user sets showVideoControls to true (in case it gets stuck off screen or something).
   useEffect(() => {
-    const x = window.innerWidth / 2 - componentWidth / 2;
-    const y = window.innerHeight - componentHeight - 50;
-    setPosition({ x, y });
+    // Only set location to default if it's never been set.
+    if (positionRef.current.x === 40 && positionRef.current.y === 40) {
+      const x = window.innerWidth / 2 - componentWidth / 2;
+      const y = window.innerHeight - componentHeight - 50;
+      positionRef.current = { x, y };
+    }
   }, []);
 
   // Sync play/pause state
@@ -692,8 +699,8 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     setDragging(true);
     dragOffset.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
+      x: e.clientX - positionRef.current.x,
+      y: e.clientY - positionRef.current.y,
     };
     document.body.style.userSelect = "none";
   };
@@ -712,7 +719,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
       const boundedX = Math.max(0, Math.min(newX, maxX));
       const boundedY = Math.max(0, Math.min(newY, maxY));
 
-      setPosition({ x: boundedX, y: boundedY });
+      positionRef.current = { x: boundedX, y: boundedY };
     };
 
     const handleMouseUp = () => {
@@ -738,8 +745,8 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     <div
       className={`video-controls ${dragging ? "dragging" : ""}`}
       style={{
-        left: position.x,
-        top: position.y,
+        left: positionRef.current.x,
+        top: positionRef.current.y,
       }}
       onMouseDown={handleMouseDown}
     >
