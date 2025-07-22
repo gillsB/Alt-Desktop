@@ -215,9 +215,9 @@ const BackgroundSelect: React.FC = () => {
         logger.info("Passed with id to scrollTo on launch:", initialId);
       }
       await loadInitialBackground(); // Load from initialID or saved backgrounds.json
-      const newBgs = await window.electron.indexBackgrounds(); // Re-index backgrounds
+      const [newBgs, remBgs] = await window.electron.indexBackgrounds(); // Re-index backgrounds
       setReloadKey((k) => k + 1);
-      if (newBgs) {
+      if (newBgs || remBgs) {
         setPendingJump(true); // Jump to background (when selectedBg is available)
       }
     };

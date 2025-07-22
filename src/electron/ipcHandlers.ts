@@ -1758,8 +1758,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle(
     "indexBackgrounds",
-    async (options?: { newExternalPathAdded?: boolean }): Promise<number> => {
-      return indexBackgrounds(options);
+    async (options?: {
+      newExternalPathAdded?: boolean;
+    }): Promise<[number, number]> => {
+      return await indexBackgrounds(options);
     }
   );
   ipcMainHandle(

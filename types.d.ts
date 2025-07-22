@@ -294,7 +294,7 @@ type EventPayloadMapping = {
   renameCategory: boolean;
   deleteCategory: boolean;
   renameLocalTag: boolean;
-  indexBackgrounds: number;
+  indexBackgrounds: [number, number];
   changeBackgroundDirectory: string | null;
   getBaseFilePaths: string;
   getBackgroundType: "image" | "video";
@@ -418,7 +418,7 @@ interface Window {
     renameLocalTag: (oldName: string, newName: string) => Promise<boolean>;
     indexBackgrounds: (options?: {
       newExternalPathAdded?: boolean;
-    }) => Promise<number>;
+    }) => Promise<number, number>;
     changeBackgroundDirectory: (
       id: string,
       targetLocation: string
