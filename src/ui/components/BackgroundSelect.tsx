@@ -31,6 +31,7 @@ const BackgroundSelect: React.FC = () => {
     y: number;
     backgroundId: string;
   } | null>(null);
+  const [pendingJump, setPendingJump] = useState(false);
 
   const [isDragging, setIsDragging] = useState(false);
   const [page, setPage] = useState(-1);
@@ -216,11 +217,19 @@ const BackgroundSelect: React.FC = () => {
       await loadInitialBackground(); // Load from initialID or saved backgrounds.json
       await window.electron.indexBackgrounds(); // Re-index backgrounds
       setReloadKey((k) => k + 1);
-      await handleJumpToClick(); // jump to selectedBg again after indexing.
+      setPendingJump(true); // Jump to background (when selectedBg is available)
     };
 
     init();
   }, []);
+
+  useEffect(() => {
+    if (pendingJump && selectedBg) {
+      logger.info("Jumping to background after indexing:", selectedBg.id);
+      handleJumpToClick();
+      setPendingJump(false);
+    }
+  }, [pendingJump, selectedBg]);
 
   useEffect(() => {
     if (page === -1) return; // prevent OnMount call.
@@ -788,7 +797,10 @@ const BackgroundSelect: React.FC = () => {
                   >
                     Edit
                   </button>
-                  <button className="button" onClick={handleJumpToClick}>
+                  <button
+                    className="button"
+                    onClick={() => setPendingJump(true)}
+                  >
                     Jump to
                   </button>
                 </div>
