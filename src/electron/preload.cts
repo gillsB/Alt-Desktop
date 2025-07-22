@@ -138,9 +138,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   renameLocalTag: (oldName: string, newName: string) =>
     ipcInvoke("renameLocalTag", oldName, newName),
   indexBackgrounds: (options?: { newExternalPathAdded?: boolean }) =>
-    options
-      ? ipcInvoke("indexBackgrounds", options).then(() => {})
-      : ipcInvoke("indexBackgrounds").then(() => {}),
+    ipcInvoke("indexBackgrounds", options),
   changeBackgroundDirectory: (id: string, targetLocation: string) =>
     ipcInvoke("changeBackgroundDirectory", id, targetLocation),
   getBaseFilePaths: (name?: string) => ipcInvoke("getBaseFilePaths", name),

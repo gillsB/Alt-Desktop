@@ -636,6 +636,7 @@ export async function indexBackgrounds(options?: {
     `Indexed ${newIds.length} new background(s), removed ${removedIds.length} background(s).`
   );
   logger.info("Finished indexing");
+  return newIds.length;
 }
 
 /**
