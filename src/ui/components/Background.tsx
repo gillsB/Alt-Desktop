@@ -97,7 +97,7 @@ const Background: React.FC<BackgroundProps> = ({
       }
       setBackgroundPath(filePath || "");
       logger.info("Background reloaded with path:", filePath);
-      if (!showVideoControlsRef.current) {
+      if (!showVideoControls) {
         const vol = await window.electron.getBackgroundVolume(id || "");
         logger.info("vol = " + vol + "setVol = " + (vol || 0.5));
         setVolume(vol === 0 ? 0 : 0.5);
@@ -189,7 +189,7 @@ const Background: React.FC<BackgroundProps> = ({
         }
         setBackgroundPath(filePath || "");
       }
-      if (!showVideoControlsRef.current) {
+      if (!showVideoControls) {
         const vol = await window.electron.getBackgroundVolume(
           updates.background || ""
         );
