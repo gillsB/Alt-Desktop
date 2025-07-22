@@ -216,7 +216,7 @@ const BackgroundSelect: React.FC = () => {
       await loadInitialBackground(); // Load from initialID or saved backgrounds.json
       await window.electron.indexBackgrounds(); // Re-index backgrounds
       setReloadKey((k) => k + 1);
-      await loadInitialBackground(); // Reload and jump to initialID or savedBackground again after indexing.
+      await handleJumpToClick(); // jump to selectedBg again after indexing.
     };
 
     init();
