@@ -1453,6 +1453,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
               )
             ),
             localIndexed: bg.local?.indexed,
+            localVolume: bg.local?.volume,
           });
         } catch (e) {
           logger.error(`Failed to read bg.json for ${id}:`, e);

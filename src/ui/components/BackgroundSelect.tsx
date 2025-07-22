@@ -794,6 +794,29 @@ const BackgroundSelect: React.FC = () => {
                 </div>
                 <h3>{getDisplayName(selectedBg)}</h3>
                 <div className="details-row">
+                  <label htmlFor="volume-slider">Volume</label>
+                  <div className="details-value">
+                    <input
+                      id="volume-slider"
+                      type="range"
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      value={selectedBg.localVolume ?? 0.5}
+                      onChange={async (e) => {
+                        const newVolume = parseFloat(e.target.value);
+                        setSelectedBg({
+                          ...selectedBg,
+                          localVolume: newVolume,
+                        });
+                      }}
+                    />
+                    <span>
+                      {Math.round((selectedBg.localVolume ?? 0.5) * 100)}%
+                    </span>
+                  </div>
+                </div>
+                <div className="details-row">
                   <label>Description</label>
                   <div className="details-value">
                     {selectedBg.description || <em>No description</em>}
