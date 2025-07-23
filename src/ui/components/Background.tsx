@@ -99,7 +99,9 @@ const Background: React.FC<BackgroundProps> = ({
       logger.info("Background reloaded with path:", filePath);
       if (!showVideoControls) {
         const vol = await window.electron.getBackgroundVolume(id || "");
-        setVolume(vol === 0 ? 0 : 0.5);
+        setVolume(
+          vol === 0 ? 0 : typeof vol === "number" && !isNaN(vol) ? vol : 0.5
+        );
       }
     };
     fetchFromSettings();
@@ -110,6 +112,11 @@ const Background: React.FC<BackgroundProps> = ({
       window.electron.off("reload-background", fetchFromSettings);
     };
   }, []);
+
+  // TODO debug logger, remove later
+  useEffect(() => {
+    logger.info("Volume update, set to :", volume);
+  }, [volume]);
 
   const lastEventRef = useRef<string>("");
   useEffect(() => {
@@ -192,7 +199,9 @@ const Background: React.FC<BackgroundProps> = ({
         const vol = await window.electron.getBackgroundVolume(
           updates.background || ""
         );
-        setVolume(vol === 0 ? 0 : 0.5);
+        setVolume(
+          vol === 0 ? 0 : typeof vol === "number" && !isNaN(vol) ? vol : 0.5
+        );
       }
     };
     window.electron.on("update-background-preview", handlePreview);
