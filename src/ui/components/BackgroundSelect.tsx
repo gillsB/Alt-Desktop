@@ -863,6 +863,9 @@ const BackgroundSelect: React.FC = () => {
                             id: selectedBg.id,
                             localVolume: newVolume,
                           });
+                          await window.electron.previewBackgroundUpdate({
+                            background: selectedBg.id,
+                          });
                         }, 300);
                       }}
                     />
