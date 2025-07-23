@@ -69,7 +69,6 @@ type SettingsData = {
   publicCategories?: Record<string, boolean>;
   localCategories?: Record<string, boolean>;
   localTags?: LocalTag[];
-  localVolume?: number;
 };
 
 type SettingKey = keyof SettingsData;

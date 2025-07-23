@@ -62,6 +62,8 @@ const BackgroundSelect: React.FC = () => {
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Sets up allTags reference for all tags, public and local.
   useEffect(() => {
     (async () => {
@@ -831,10 +833,19 @@ const BackgroundSelect: React.FC = () => {
                       value={selectedBg.localVolume ?? 0.5}
                       onChange={async (e) => {
                         const newVolume = parseFloat(e.target.value);
+                        if (timeoutRef.current) {
+                          clearTimeout(timeoutRef.current);
+                        }
                         setSelectedBg({
                           ...selectedBg,
                           localVolume: newVolume,
                         });
+                        timeoutRef.current = setTimeout(async () => {
+                          await window.electron.saveBgJson({
+                            id: selectedBg.id,
+                            localVolume: newVolume,
+                          });
+                        }, 300);
                       }}
                     />
                     <span>
