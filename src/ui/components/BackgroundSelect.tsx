@@ -32,6 +32,7 @@ const BackgroundSelect: React.FC = () => {
     backgroundId: string;
   } | null>(null);
   const [pendingJump, setPendingJump] = useState(false);
+  const fetching = useRef(false);
 
   const [isDragging, setIsDragging] = useState(false);
   const [page, setPage] = useState(-1);
@@ -132,6 +133,7 @@ const BackgroundSelect: React.FC = () => {
     });
     setSummaries(results);
     setTotal(total);
+    fetching.current = false;
   };
 
   const getBackgroundPage = async (id: string) => {
@@ -152,10 +154,17 @@ const BackgroundSelect: React.FC = () => {
   };
   // Handle scrolling after summaries are updated
   useEffect(() => {
-    if (!scrollToId || !summaries.length || !gridItemRefs.current[scrollToId])
+    if (
+      !scrollToId ||
+      !summaries.length ||
+      !gridItemRefs.current[scrollToId] ||
+      fetching.current // Bounce if still fetching page
+    )
       return;
+
     if (didAttemptScrollRef.current) return;
     didAttemptScrollRef.current = true;
+    logger.info("Scrolling to ID:", scrollToId);
 
     requestAnimationFrame(() => {
       const selectedElement = gridItemRefs.current[scrollToId];
@@ -214,10 +223,13 @@ const BackgroundSelect: React.FC = () => {
       if (initialId) {
         logger.info("Passed with id to scrollTo on launch:", initialId);
       }
-      await loadInitialBackground(); // Load from initialID or saved backgrounds.json
+      await loadInitialBackground();
       const [newBgs, remBgs] = await window.electron.indexBackgrounds(); // Re-index backgrounds
-      setReloadKey((k) => k + 1);
+      // If new or removed backgrounds, reload backgrounds and scroll to selectedBg
       if (newBgs || remBgs) {
+        fetching.current = true;
+        await loadInitialBackground(); // Load from initialID or saved backgrounds.json
+        setReloadKey((k) => k + 1);
         setPendingJump(true); // Jump to background (when selectedBg is available)
       }
     };
