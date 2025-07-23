@@ -589,6 +589,20 @@ const BackgroundSelect: React.FC = () => {
     });
   };
 
+  const updateSummary = (id: string, updates: Partial<BackgroundSummary>) => {
+    if (selectedBg) {
+      setSelectedBg((prevSelectedBg) => ({
+        ...prevSelectedBg,
+        id,
+        ...updates,
+      }));
+    }
+    // Update the summaries list with the new values
+    setSummaries((prevSummaries) =>
+      prevSummaries.map((bg) => (bg.id === id ? { ...bg, ...updates } : bg))
+    );
+  };
+
   return (
     <div
       className="background-select-root"
@@ -833,13 +847,17 @@ const BackgroundSelect: React.FC = () => {
                       value={selectedBg.localVolume ?? 0.5}
                       onChange={async (e) => {
                         const newVolume = parseFloat(e.target.value);
-                        if (timeoutRef.current) {
-                          clearTimeout(timeoutRef.current);
-                        }
                         setSelectedBg({
                           ...selectedBg,
                           localVolume: newVolume,
                         });
+                        // update fetched summary to keep it in sync
+                        updateSummary(selectedBg.id, {
+                          localVolume: newVolume,
+                        });
+                        if (timeoutRef.current) {
+                          clearTimeout(timeoutRef.current);
+                        }
                         timeoutRef.current = setTimeout(async () => {
                           await window.electron.saveBgJson({
                             id: selectedBg.id,
