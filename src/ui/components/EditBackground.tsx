@@ -298,7 +298,7 @@ const EditBackground: React.FC = () => {
   // Preview background update when bgFile changes
   useEffect(() => {
     if (summary.bgFile) {
-      window.electron.previewBackgroundUpdate({ background: summary.bgFile });
+      window.electron.previewBackgroundUpdate({ id: summary.bgFile });
     }
   }, [summary.bgFile]);
 

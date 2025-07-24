@@ -42,6 +42,11 @@ type BgJson = {
   };
 };
 
+type BackgroundPreviewUpdate = {
+  id?: string;
+  volume?: number;
+};
+
 interface BackgroundsData {
   backgrounds: Record<string, number>;
   tags?: Record<string, string[]>;
@@ -188,7 +193,7 @@ interface EventParamMapping {
   openInExplorer: ["image" | "programLink" | "background", string];
   showSmallWindow: [string, string, string[]];
   previewIconUpdate: [number, number, Partial<DesktopIcon>];
-  previewBackgroundUpdate: [Partial<SettingsData>];
+  previewBackgroundUpdate: [Partial<BackgroundPreviewUpdate>];
   previewGridUpdate: [Partial<SettingsData>];
   previewHeaderUpdate: [Partial<SettingsData>];
   getSubWindowTitle: [];
@@ -370,7 +375,7 @@ interface Window {
       updates: Partial<DesktopIcon>
     ) => Promise<boolean>;
     previewBackgroundUpdate: (
-      updates: Partial<SettingsData>
+      updates: Partial<BackgroundPreviewUpdate>
     ) => Promise<boolean>;
     previewGridUpdate: (updates: Partial<SettingsData>) => Promise<boolean>;
     previewHeaderUpdate: (updates: Partial<SettingsData>) => Promise<boolean>;

@@ -177,18 +177,15 @@ const Background: React.FC<BackgroundProps> = ({
 
   useEffect(() => {
     const handlePreview = async (...args: unknown[]) => {
-      const updates = args[1] as Partial<SettingsData>;
-      if (
-        typeof updates.background === "string" &&
-        updates.background !== backgroundPath
-      ) {
-        logger.info("Updating background to:", updates.background);
-        if (updates.background === "fallback") {
+      const updates = args[1] as Partial<BackgroundPreviewUpdate>;
+      if (typeof updates.id === "string" && updates.id !== backgroundPath) {
+        logger.info("Updating background to:", updates.id);
+        if (updates.id === "fallback") {
           logger.info("Background set to fallback, skipping background logic.");
           setBackgroundPath("");
           return;
         }
-        let filePath = updates.background;
+        let filePath = updates.id;
         if (filePath && !isAbsolutePath(filePath)) {
           filePath = (await convertIDToFilePath(filePath)) || "";
         }
@@ -200,16 +197,20 @@ const Background: React.FC<BackgroundProps> = ({
             if (resolved) filePath = resolved;
           }
         }
-        setBgJson(await window.electron.getBgJson(updates.background));
+        setBgJson(await window.electron.getBgJson(updates.id));
         setBackgroundPath(filePath || "");
       }
       if (!showVideoControls) {
-        const vol = await window.electron.getBackgroundVolume(
-          updates.background || ""
-        );
-        setVolume(
-          vol === 0 ? 0 : typeof vol === "number" && !isNaN(vol) ? vol : 0.5
-        );
+        if (updates.volume === 0 || updates.volume) {
+          setVolume(updates.volume);
+        } else {
+          const vol = await window.electron.getBackgroundVolume(
+            updates.id || ""
+          );
+          setVolume(
+            vol === 0 ? 0 : typeof vol === "number" && !isNaN(vol) ? vol : 0.5
+          );
+        }
       }
     };
     window.electron.on("update-background-preview", handlePreview);

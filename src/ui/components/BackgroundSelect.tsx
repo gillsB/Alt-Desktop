@@ -312,7 +312,7 @@ const BackgroundSelect: React.FC = () => {
         }
         // If the next selection is empty, preview fallback.
         if (next.length === 0) {
-          window.electron.previewBackgroundUpdate({ background: "fallback" });
+          window.electron.previewBackgroundUpdate({ id: "fallback" });
           setSelectedBg(null);
         } else if (
           // If the selection just went from 0 to 1, or selectedBg is not in next
@@ -321,7 +321,7 @@ const BackgroundSelect: React.FC = () => {
         ) {
           const newBg = summaries.find((bg) => bg.id === next[0]);
           window.electron.previewBackgroundUpdate({
-            background: newBg?.id ?? "fallback",
+            id: newBg?.id ?? "fallback",
           });
           setSelectedBg(newBg ?? null);
         }
@@ -350,7 +350,7 @@ const BackgroundSelect: React.FC = () => {
       else setSelectedBg(null);
     }
     if (id) {
-      await window.electron.previewBackgroundUpdate({ background: id });
+      await window.electron.previewBackgroundUpdate({ id: id });
     }
   };
 
@@ -419,7 +419,7 @@ const BackgroundSelect: React.FC = () => {
         if (selectedBg && selectedBg.id === backgroundId) {
           setSelectedBg(null);
           await window.electron.previewBackgroundUpdate({
-            background: "fallback",
+            id: "fallback",
           });
         }
       }
@@ -858,13 +858,13 @@ const BackgroundSelect: React.FC = () => {
                         if (timeoutRef.current) {
                           clearTimeout(timeoutRef.current);
                         }
+                        await window.electron.previewBackgroundUpdate({
+                          volume: newVolume,
+                        });
                         timeoutRef.current = setTimeout(async () => {
                           await window.electron.saveBgJson({
                             id: selectedBg.id,
                             localVolume: newVolume,
-                          });
-                          await window.electron.previewBackgroundUpdate({
-                            background: selectedBg.id,
                           });
                         }, 300);
                       }}

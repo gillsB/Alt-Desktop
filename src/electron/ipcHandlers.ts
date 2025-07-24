@@ -1043,7 +1043,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
   ipcMainHandle(
     "previewBackgroundUpdate",
-    async (updates: Partial<SettingsData>): Promise<boolean> => {
+    async (updates: Partial<BackgroundPreviewUpdate>): Promise<boolean> => {
       try {
         logger.info(
           "Received previewBackgroundUpdate with updates:",
@@ -1573,12 +1573,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
-  ipcMainHandle(
-    "getBgJson",
-    async (id: string): Promise<BgJson | null> => {
-      return await getBgJsonFile(id);
-    }
-  );
+  ipcMainHandle("getBgJson", async (id: string): Promise<BgJson | null> => {
+    return await getBgJsonFile(id);
+  });
   ipcMainHandle(
     "saveBgJson",
     async (summary: BackgroundSummary): Promise<boolean> => {
