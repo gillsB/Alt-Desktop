@@ -30,6 +30,7 @@ import {
   getBackgroundFilePath,
   getBackgroundsJsonFilePath,
   getBasePath,
+  getBgJsonFile,
   getDataFolderPath,
   getDesktopIconsFilePath,
   getExternalPath,
@@ -1570,6 +1571,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         logger.error(`Error opening EditBackground window: ${error}`);
         return false;
       }
+    }
+  );
+  ipcMainHandle(
+    "getBgJson",
+    async (id: string): Promise<BgJson | null> => {
+      return await getBgJsonFile(id);
     }
   );
   ipcMainHandle(

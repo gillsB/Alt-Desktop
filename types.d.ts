@@ -212,6 +212,7 @@ interface EventParamMapping {
   idToFilePath: [string];
   resolveShortcut: [string];
   openEditBackground: [BackgroundSummary];
+  getBgJson: [string];
   saveBgJson: [BackgroundSummary];
   deleteBackground: [string];
   idToBackgroundFolder: [string];
@@ -283,6 +284,7 @@ type EventPayloadMapping = {
   idToFilePath: string | null;
   resolveShortcut: string;
   openEditBackground: boolean;
+  getBgJson: BgJson | null;
   saveBgJson: boolean;
   deleteBackground: boolean;
   idToBackgroundFolder: string | null;
@@ -405,6 +407,7 @@ interface Window {
     idToFilePath: (id: string) => Promise<string | null>;
     resolveShortcut: (filePath: string) => Promise<string>;
     openEditBackground: (summary: BackgroundSummary) => Promise<boolean>;
+    getBgJson: (id: string) => Promise<BgJson | null>;
     saveBgJson: (data: BackgroundSummary) => Promise<boolean>;
     deleteBackground: (id: string) => Promise<boolean>;
     idToBackgroundFolder: (id: string) => Promise<string | null>;

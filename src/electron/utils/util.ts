@@ -639,6 +639,28 @@ export async function indexBackgrounds(options?: {
   return [newIds.length, removedIds.length] as [number, number];
 }
 
+export async function getBgJsonFile(id: string): Promise<BgJson | null> {
+  try {
+    if (!id) throw new Error("Missing background id");
+
+    const bgJsonPath = await idToBgJson(id);
+
+    // Check if the file exists
+    if (!fs.existsSync(bgJsonPath)) {
+      logger.warn(`Background file for id ${id} not found.`);
+      return null;
+    }
+
+    // Read and parse the existing bg.json
+    const rawBgJson = await fs.promises.readFile(bgJsonPath, "utf-8");
+    const bgJson: BgJson = JSON.parse(rawBgJson);
+
+    return bgJson;
+  } catch (error) {
+    logger.error("Failed to get bg.json:", error);
+    return null;
+  }
+}
 /**
  * Saves a bg.json file for a background summary.
  * Accepts full or partial summary and only updates the provided fields, leaving others unchanged.
