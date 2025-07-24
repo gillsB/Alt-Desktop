@@ -40,6 +40,7 @@ const Background: React.FC<BackgroundProps> = ({
   const [playing, setPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [bgJson, setBgJson] = useState<BgJson | null>(null);
 
   // Performance tracking states
   const [suspendCount, setSuspendCount] = useState(0);
@@ -80,6 +81,11 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   useEffect(() => {
+    logger.info("bgJson updated to: ", JSON.stringify(bgJson));
+    logger.info("volume = " + bgJson?.local?.volume);
+  }, [bgJson]);
+
+  useEffect(() => {
     const fetchFromSettings = async () => {
       const id = await window.electron.getSetting("background");
       if (id === undefined) {
@@ -95,6 +101,7 @@ const Background: React.FC<BackgroundProps> = ({
           if (resolved) filePath = resolved;
         }
       }
+      setBgJson(await window.electron.getBgJson(id));
       setBackgroundPath(filePath || "");
       logger.info("Background reloaded with path:", filePath);
       if (!showVideoControls) {
@@ -193,6 +200,7 @@ const Background: React.FC<BackgroundProps> = ({
             if (resolved) filePath = resolved;
           }
         }
+        setBgJson(await window.electron.getBgJson(updates.background));
         setBackgroundPath(filePath || "");
       }
       if (!showVideoControls) {
