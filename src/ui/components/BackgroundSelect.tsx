@@ -62,7 +62,9 @@ const BackgroundSelect: React.FC = () => {
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
+  // Volume Slider references
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSaveRef = useRef(false);
 
   // Sets up allTags reference for all tags, public and local.
   useEffect(() => {
@@ -847,26 +849,34 @@ const BackgroundSelect: React.FC = () => {
                       value={selectedBg.localVolume ?? 0.5}
                       onChange={async (e) => {
                         const newVolume = parseFloat(e.target.value);
+
                         setSelectedBg({
                           ...selectedBg,
                           localVolume: newVolume,
                         });
-                        // update fetched summary to keep it in sync
                         updateSummary(selectedBg.id, {
                           localVolume: newVolume,
                         });
-                        if (timeoutRef.current) {
-                          clearTimeout(timeoutRef.current);
-                        }
                         await window.electron.previewBackgroundUpdate({
                           volume: newVolume,
                         });
-                        timeoutRef.current = setTimeout(async () => {
-                          await window.electron.saveBgJson({
-                            id: selectedBg.id,
-                            localVolume: newVolume,
-                          });
-                        }, 300);
+
+                        // saves every 400ms (as long as changes have happened)
+                        if (!pendingSaveRef.current) {
+                          pendingSaveRef.current = true;
+
+                          if (timeoutRef.current) {
+                            clearTimeout(timeoutRef.current);
+                          }
+
+                          timeoutRef.current = setTimeout(async () => {
+                            await window.electron.saveBgJson({
+                              id: selectedBg.id,
+                              localVolume: newVolume,
+                            });
+                            pendingSaveRef.current = false;
+                          }, 400);
+                        }
                       }}
                     />
                     <span>
