@@ -1045,11 +1045,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "previewBackgroundUpdate",
     async (updates: Partial<BackgroundPreviewUpdate>): Promise<boolean> => {
       try {
-        logger.info(
-          "Received previewBackgroundUpdate with updates:",
-          JSON.stringify(updates)
-        );
-
         // Ensure updates is not null or undefined
         if (!updates || typeof updates !== "object") {
           logger.error("Invalid updates object:", updates);
@@ -1058,10 +1053,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         if (mainWindow) {
           mainWindow.webContents.send("update-background-preview", updates);
-          logger.info(
-            "Sent 'update-background-preview' event to renderer with data:",
-            JSON.stringify(updates)
-          );
         }
 
         return true;

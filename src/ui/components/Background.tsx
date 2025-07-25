@@ -122,7 +122,7 @@ const Background: React.FC<BackgroundProps> = ({
 
   // TODO debug logger, remove later
   useEffect(() => {
-    logger.info("Volume update, set to :", volume);
+    videoLogger.info("Volume update, set to :", volume);
   }, [volume]);
 
   const lastEventRef = useRef<string>("");

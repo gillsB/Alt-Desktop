@@ -686,6 +686,7 @@ export async function saveBgJsonFile(
         logger.info(
           `Failed to read existing bg.json for ${summary.id}, will use defaults. error: ${e}`
         );
+        return false;
       }
     }
 
@@ -718,6 +719,7 @@ export async function saveBgJsonFile(
       local: localData,
     };
 
+    logger.info("saving bg.json");
     await fs.promises.writeFile(
       bgJsonPath,
       JSON.stringify(bgJson, null, 2),
