@@ -65,6 +65,7 @@ const BackgroundSelect: React.FC = () => {
   // Volume Slider references
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSaveRef = useRef(false);
+  const currentVolumeRef = useRef(selectedBg?.localVolume ?? 0.5); // keep up to date volume
 
   // Sets up allTags reference for all tags, public and local.
   useEffect(() => {
@@ -850,6 +851,8 @@ const BackgroundSelect: React.FC = () => {
                       onChange={async (e) => {
                         const newVolume = parseFloat(e.target.value);
 
+                        currentVolumeRef.current = newVolume;
+
                         setSelectedBg({
                           ...selectedBg,
                           localVolume: newVolume,
@@ -872,7 +875,7 @@ const BackgroundSelect: React.FC = () => {
                           timeoutRef.current = setTimeout(async () => {
                             await window.electron.saveBgJson({
                               id: selectedBg.id,
-                              localVolume: newVolume,
+                              localVolume: currentVolumeRef.current,
                             });
                             pendingSaveRef.current = false;
                           }, 400);
