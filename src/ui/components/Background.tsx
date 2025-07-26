@@ -59,8 +59,7 @@ const Background: React.FC<BackgroundProps> = ({
   const hasLoggedSuspendsRef = useRef<boolean>(false);
   const wasPlayingRef = useRef(false);
   const [showVideoControls, setShowVideoControls] = useState(false);
-  const videoControlsPositionRef = useRef({ x: 40, y: 40 });
-  const videoControlsPosAdjusted = useRef(false);
+  const videoControlsPositionRef = useRef({ x: -100, y: -100 });
   const previousVolumeRef = useRef<number>(1);
 
   useEffect(() => {
@@ -166,7 +165,7 @@ const Background: React.FC<BackgroundProps> = ({
       logger.info("showVideoControls event received:", args[1]);
       //
       if (!args[1] as boolean) {
-        videoControlsPosAdjusted.current = false;
+        videoControlsPositionRef.current = { x: -100, y: -100 };
       }
       setShowVideoControls(args[1] as boolean);
     };
@@ -542,7 +541,6 @@ const Background: React.FC<BackgroundProps> = ({
             setVolume={setVolume}
             positionRef={videoControlsPositionRef}
             previousVolumeRef={previousVolumeRef}
-            videoControlsPosAdjusted={videoControlsPosAdjusted}
           />
         )}
       </>
@@ -580,7 +578,6 @@ interface VideoControlsProps {
   setVolume: (volume: number) => void;
   positionRef: React.RefObject<{ x: number; y: number }>;
   previousVolumeRef: React.RefObject<number>;
-  videoControlsPosAdjusted: React.RefObject<boolean>;
 }
 
 const VideoControls: React.FC<VideoControlsProps> = ({
@@ -593,7 +590,6 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   setVolume,
   positionRef,
   previousVolumeRef,
-  videoControlsPosAdjusted,
 }) => {
   const [dragging, setDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -604,11 +600,10 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   const componentHeight = 55;
 
   useEffect(() => {
-    if (!videoControlsPosAdjusted.current) {
+    if (positionRef.current.x === -100 && positionRef.current.y === -100) {
       const x = window.innerWidth / 2 - componentWidth / 2;
       const y = window.innerHeight - componentHeight - 50;
       positionRef.current = { x, y };
-      videoControlsPosAdjusted.current = true;
     }
   }, []);
 
