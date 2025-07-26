@@ -30,6 +30,7 @@ const Background: React.FC<BackgroundProps> = ({
   fallbackColor = "#2c2c2c",
   logLevel = "verbose",
 }) => {
+  const backgroundId = useRef<string>("");
   const [backgroundPath, setBackgroundPath] = useState<string>("");
   const [isVideo, setIsVideo] = useState<boolean>(false);
   const [videoError, setVideoError] = useState(false);
@@ -93,6 +94,7 @@ const Background: React.FC<BackgroundProps> = ({
   useEffect(() => {
     const fetchFromSettings = async () => {
       const id = await window.electron.getSetting("background");
+      backgroundId.current = id || "";
       if (id === undefined) {
         logger.error("Background returned undefined from settings.");
         return;
@@ -122,8 +124,10 @@ const Background: React.FC<BackgroundProps> = ({
     };
   }, []);
 
-  const setVolumeFromDefault = async (id: string) => {
-    const vol = await window.electron.getBackgroundVolume(id || "");
+  const setVolumeFromDefault = async (id?: string) => {
+    const vol = await window.electron.getBackgroundVolume(
+      id || backgroundId.current || ""
+    );
     const newVol =
       vol === 0 ? 0 : typeof vol === "number" && !isNaN(vol) ? vol : 0.5;
     videoLogger.info("setVolumeFromDefault = " + newVol);
@@ -173,9 +177,9 @@ const Background: React.FC<BackgroundProps> = ({
   useEffect(() => {
     const showControls = (...args: unknown[]) => {
       logger.info("showVideoControls event received:", args[1]);
-      //
       if (!args[1] as boolean) {
         videoControlsPositionRef.current = { x: -100, y: -100 };
+        setVolumeFromDefault();
       }
       setShowVideoControls(args[1] as boolean);
     };
@@ -194,6 +198,7 @@ const Background: React.FC<BackgroundProps> = ({
       const updates = args[1] as Partial<BackgroundPreviewUpdate>;
       if (typeof updates.id === "string" && updates.id !== backgroundPath) {
         logger.info("Updating background to:", updates.id);
+        backgroundId.current = updates.id || "";
         if (updates.id === "fallback") {
           logger.info("Background set to fallback, skipping background logic.");
           setBackgroundPath("");
