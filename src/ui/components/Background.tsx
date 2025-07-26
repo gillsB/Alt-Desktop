@@ -60,6 +60,7 @@ const Background: React.FC<BackgroundProps> = ({
   const wasPlayingRef = useRef(false);
   const [showVideoControls, setShowVideoControls] = useState(false);
   const videoControlsPositionRef = useRef({ x: 40, y: 40 });
+  const videoControlsPosAdjusted = useRef(false);
   const previousVolumeRef = useRef<number>(1);
 
   useEffect(() => {
@@ -163,7 +164,11 @@ const Background: React.FC<BackgroundProps> = ({
   useEffect(() => {
     const showControls = (...args: unknown[]) => {
       logger.info("showVideoControls event received:", args[1]);
-      setShowVideoControls(!!args[1]);
+      //
+      if (!args[1] as boolean) {
+        videoControlsPosAdjusted.current = false;
+      }
+      setShowVideoControls(args[1] as boolean);
     };
     window.electron.on("show-video-controls", showControls);
     return () => {
@@ -201,7 +206,7 @@ const Background: React.FC<BackgroundProps> = ({
         setBackgroundPath(filePath || "");
       }
       if (!showVideoControls) {
-        if (updates.volume === 0 || updates.volume) {
+        if (updates.volume === 0 || (updates.volume && updates.volume <= 1)) {
           setVolume(updates.volume);
         } else {
           const vol = await window.electron.getBackgroundVolume(
@@ -537,6 +542,7 @@ const Background: React.FC<BackgroundProps> = ({
             setVolume={setVolume}
             positionRef={videoControlsPositionRef}
             previousVolumeRef={previousVolumeRef}
+            videoControlsPosAdjusted={videoControlsPosAdjusted}
           />
         )}
       </>
@@ -574,6 +580,7 @@ interface VideoControlsProps {
   setVolume: (volume: number) => void;
   positionRef: React.RefObject<{ x: number; y: number }>;
   previousVolumeRef: React.RefObject<number>;
+  videoControlsPosAdjusted: React.RefObject<boolean>;
 }
 
 const VideoControls: React.FC<VideoControlsProps> = ({
@@ -586,6 +593,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   setVolume,
   positionRef,
   previousVolumeRef,
+  videoControlsPosAdjusted,
 }) => {
   const [dragging, setDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -595,13 +603,12 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   const componentWidth = 385;
   const componentHeight = 55;
 
-  // TODO actually this should reset every time the user sets showVideoControls to true (in case it gets stuck off screen or something).
   useEffect(() => {
-    // Only set location to default if it's never been set.
-    if (positionRef.current.x === 40 && positionRef.current.y === 40) {
+    if (!videoControlsPosAdjusted.current) {
       const x = window.innerWidth / 2 - componentWidth / 2;
       const y = window.innerHeight - componentHeight - 50;
       positionRef.current = { x, y };
+      videoControlsPosAdjusted.current = true;
     }
   }, []);
 
@@ -822,6 +829,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
               onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
               className="volume-slider"
+              title="This volume is temporary, change in background select for permanent."
             />
           </div>
         )}
