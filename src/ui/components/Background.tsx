@@ -39,7 +39,7 @@ const Background: React.FC<BackgroundProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [playing, setPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(0.5);
   const [bgJson, setBgJson] = useState<BgJson | null>(null);
 
   // Performance tracking states
@@ -58,9 +58,14 @@ const Background: React.FC<BackgroundProps> = ({
   const suspendLogTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasLoggedSuspendsRef = useRef<boolean>(false);
   const wasPlayingRef = useRef(false);
-  const [showVideoControls, setShowVideoControls] = useState(false);
+  const [showVideoControls, setShowVideoControls] = useState(false); // Required for update to draw VideoControls
+  const showVideoControlsRef = useRef(showVideoControls); // Persists its state across redraws due to changing backgrounds
   const videoControlsPositionRef = useRef({ x: -100, y: -100 });
   const previousVolumeRef = useRef<number>(1);
+
+  useEffect(() => {
+    showVideoControlsRef.current = showVideoControls;
+  }, [showVideoControls]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -104,11 +109,8 @@ const Background: React.FC<BackgroundProps> = ({
       setBgJson(await window.electron.getBgJson(id));
       setBackgroundPath(filePath || "");
       logger.info("Background reloaded with path:", filePath);
-      if (!showVideoControls) {
-        const vol = await window.electron.getBackgroundVolume(id || "");
-        setVolume(
-          vol === 0 ? 0 : typeof vol === "number" && !isNaN(vol) ? vol : 0.5
-        );
+      if (!showVideoControlsRef.current) {
+        setVolumeFromDefault(id);
       }
     };
     fetchFromSettings();
@@ -119,6 +121,14 @@ const Background: React.FC<BackgroundProps> = ({
       window.electron.off("reload-background", fetchFromSettings);
     };
   }, []);
+
+  const setVolumeFromDefault = async (id: string) => {
+    const vol = await window.electron.getBackgroundVolume(id || "");
+    const newVol =
+      vol === 0 ? 0 : typeof vol === "number" && !isNaN(vol) ? vol : 0.5;
+    videoLogger.info("setVolumeFromDefault = " + newVol);
+    setVolume(newVol);
+  };
 
   // TODO debug logger, remove later
   useEffect(() => {
@@ -204,16 +214,15 @@ const Background: React.FC<BackgroundProps> = ({
         setBgJson(await window.electron.getBgJson(updates.id));
         setBackgroundPath(filePath || "");
       }
-      if (!showVideoControls) {
+      logger.info("showVideoControls status = " + showVideoControls);
+      if (!showVideoControlsRef.current) {
         if (updates.volume === 0 || (updates.volume && updates.volume <= 1)) {
+          videoLogger.info(
+            "Setting new volume from updates: " + updates.volume
+          );
           setVolume(updates.volume);
         } else {
-          const vol = await window.electron.getBackgroundVolume(
-            updates.id || ""
-          );
-          setVolume(
-            vol === 0 ? 0 : typeof vol === "number" && !isNaN(vol) ? vol : 0.5
-          );
+          setVolumeFromDefault(updates.id || "");
         }
       }
     };
@@ -646,6 +655,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     const video = videoRef.current;
     if (!video) return;
     const newVolume = parseFloat(e.target.value);
+    videoLogger.info("Volume changed from VideoControls: ", newVolume);
     setVolume(newVolume);
     //video.volume = newVolume;
     if (newVolume > 0) {
@@ -661,11 +671,13 @@ const VideoControls: React.FC<VideoControlsProps> = ({
       // Unmute: restore to previous volume
       const newVolume =
         previousVolumeRef.current > 0 ? previousVolumeRef.current : 1;
+      videoLogger.info("Video unmuted via VideoControls to: ", newVolume);
       setVolume(newVolume);
       video.volume = newVolume;
     } else {
       // Mute: save current volume and set to 0
       previousVolumeRef.current = volume;
+      videoLogger.info("Video muted via VideoControls.");
       setVolume(0);
       video.volume = 0;
     }
