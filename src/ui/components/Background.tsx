@@ -180,6 +180,8 @@ const Background: React.FC<BackgroundProps> = ({
       if (!args[1] as boolean) {
         videoControlsPositionRef.current = { x: -100, y: -100 };
         setVolumeFromDefault();
+        const video = videoRef.current;
+        video.play();
       }
       setShowVideoControls(args[1] as boolean);
     };
