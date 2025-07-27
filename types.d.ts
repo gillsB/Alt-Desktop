@@ -240,6 +240,7 @@ interface EventParamMapping {
   showVideoControls: [boolean];
   getBackgroundVolume: [string];
   setRendererStates: [Partial<RendererStates>];
+  getRendererStates: [];
 }
 
 // The returns from the main process to the renderer
@@ -313,6 +314,7 @@ type EventPayloadMapping = {
   showVideoControls: void;
   getBackgroundVolume: number | null;
   setRendererStates: boolean;
+  getRendererStates: RendererStates;
 };
 
 type UnsubscribeFunction = () => void;
@@ -442,5 +444,6 @@ interface Window {
     showVideoControls: (show: boolean) => Promise<void>;
     getBackgroundVolume: (id: string) => Promise<number | null>;
     setRendererStates: (updates: RendererStates) => Promise<boolean>;
+    getRendererStates: () => Promise<RendererStates>;
   };
 }

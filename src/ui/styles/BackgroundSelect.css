@@ -376,3 +376,7 @@
   font-weight: normal;
   margin-right: 4px;
 }
+
+.highlighted {
+  border: 2px solid red;
+}

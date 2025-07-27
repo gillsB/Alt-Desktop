@@ -7,10 +7,9 @@ let rendererStates: RendererStates = {
   testValue: "default",
 };
 
-export function getRendererStates(): RendererStates {
+export async function getRendererStates(): Promise<RendererStates> {
   return rendererStates;
 }
-
 export function setRendererStates(updates: Partial<RendererStates>) {
   rendererStates = { ...rendererStates, ...updates };
   logger.info("Renderer states updated:", JSON.stringify(rendererStates));

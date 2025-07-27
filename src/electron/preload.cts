@@ -148,6 +148,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getBackgroundVolume: (id: string) => ipcInvoke("getBackgroundVolume", id),
   setRendererStates: (updates: Partial<RendererStates>) =>
     ipcInvoke("setRendererStates", updates),
+  getRendererStates: () => ipcInvoke("getRendererStates"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
