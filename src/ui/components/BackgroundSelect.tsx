@@ -66,6 +66,19 @@ const BackgroundSelect: React.FC = () => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSaveRef = useRef(false);
   const currentVolumeRef = useRef(selectedBg?.localVolume ?? 0.5); // keep up to date volume
+  const [showVideoControls, setShowVideoControls] = useState(false);
+
+  useEffect(() => {
+    const updateRendererStates = async () => {
+      const rendererStates = await window.electron.getRendererStates();
+      setShowVideoControls(rendererStates.showVideoControls || false);
+      logger.info(
+        "setting showVideoControls to",
+        rendererStates.showVideoControls || false
+      );
+    };
+    updateRendererStates();
+  }, []);
 
   // Sets up allTags reference for all tags, public and local.
   useEffect(() => {
@@ -840,7 +853,13 @@ const BackgroundSelect: React.FC = () => {
                 <h3>{getDisplayName(selectedBg)}</h3>
                 <div className="details-row">
                   <label htmlFor="volume-slider">Volume</label>
-                  <div className="details-value">
+                  <div
+                    className={
+                      showVideoControls
+                        ? "details-value highlighted"
+                        : "details-value"
+                    }
+                  >
                     <input
                       id="volume-slider"
                       type="range"
