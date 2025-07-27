@@ -1047,7 +1047,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
   ipcMainHandle(
     "previewBackgroundUpdate",
-    async (updates: Partial<BackgroundPreviewUpdate>): Promise<boolean> => {
+    async (updates: Partial<PreviewBackgroundUpdate>): Promise<boolean> => {
       try {
         // Ensure updates is not null or undefined
         if (!updates || typeof updates !== "object") {
@@ -1056,7 +1056,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         }
 
         if (mainWindow) {
-          mainWindow.webContents.send("update-background-preview", updates);
+          mainWindow.webContents.send("preview-background-update", updates);
         }
 
         return true;

@@ -200,7 +200,7 @@ const Background: React.FC<BackgroundProps> = ({
 
   useEffect(() => {
     const handlePreview = async (...args: unknown[]) => {
-      const updates = args[1] as Partial<BackgroundPreviewUpdate>;
+      const updates = args[1] as Partial<PreviewBackgroundUpdate>;
       if (typeof updates.id === "string" && updates.id !== backgroundPath) {
         logger.info("Updating background to:", updates.id);
         backgroundId.current = updates.id || "";
@@ -236,10 +236,10 @@ const Background: React.FC<BackgroundProps> = ({
         }
       }
     };
-    window.electron.on("update-background-preview", handlePreview);
+    window.electron.on("preview-background-update", handlePreview);
 
     return () => {
-      window.electron.off("update-background-preview", handlePreview);
+      window.electron.off("preview-background-update", handlePreview);
     };
   }, []);
 
