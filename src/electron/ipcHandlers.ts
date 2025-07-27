@@ -20,6 +20,7 @@ import {
   saveSettingsData,
 } from "./settings.js";
 import { generateIcon } from "./utils/generateIcon.js";
+import { setRendererStates } from "./utils/rendererStates.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import {
   changeBackgroundDirectory,
@@ -1841,4 +1842,15 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle("setRendererStates", (updates: Partial<RendererStates>) => {
+    setRendererStates(updates);
+
+    // Optional: broadcast updates to all windows
+    for (const win of BrowserWindow.getAllWindows()) {
+      win.webContents.send("renderer-state-updated", updates);
+    }
+
+    // Return the updated full state if needed
+    return true;
+  });
 }

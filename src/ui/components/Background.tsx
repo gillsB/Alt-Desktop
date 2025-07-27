@@ -183,6 +183,9 @@ const Background: React.FC<BackgroundProps> = ({
         const video = videoRef.current;
         video.play();
       }
+      window.electron.setRendererStates({
+        showVideoControls: args[1] as boolean,
+      });
       setShowVideoControls(args[1] as boolean);
     };
     window.electron.on("show-video-controls", showControls);

@@ -165,6 +165,11 @@ interface CustomBrowserWindow extends Electron.BrowserWindow {
   customTitle?: string;
 }
 
+type RendererStates = {
+  showVideoControls?: boolean;
+  testValue?: string;
+};
+
 // Items/objects being sent from the renderer to the main process
 interface EventParamMapping {
   statistics: [];
@@ -234,6 +239,7 @@ interface EventParamMapping {
   getBackgroundType: [];
   showVideoControls: [boolean];
   getBackgroundVolume: [string];
+  setRendererStates: [Partial<RendererStates>];
 }
 
 // The returns from the main process to the renderer
@@ -306,6 +312,7 @@ type EventPayloadMapping = {
   getBackgroundType: "image" | "video";
   showVideoControls: void;
   getBackgroundVolume: number | null;
+  setRendererStates: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -434,5 +441,6 @@ interface Window {
     getBackgroundType: () => Promise<"image" | "video">;
     showVideoControls: (show: boolean) => Promise<void>;
     getBackgroundVolume: (id: string) => Promise<number | null>;
+    setRendererStates: (updates: RendererStates) => Promise<boolean>;
   };
 }
