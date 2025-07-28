@@ -619,10 +619,6 @@ const BackgroundSelect: React.FC = () => {
     );
   };
 
-  function handleVolumeDisabledClick(): void {
-    logger.info("disabled button clicked");
-  }
-
   return (
     <div
       className="background-select-root"
@@ -858,57 +854,50 @@ const BackgroundSelect: React.FC = () => {
                 <div className="details-row">
                   <label htmlFor="volume-slider">Volume</label>
                   <div className="details-value">
-                    {showVideoControls && (
-                      <button
-                        className="volume-disabled-btn"
-                        onClick={() => handleVolumeDisabledClick()}
-                      >
-                        Disabled
-                      </button>
-                    )}
                     <input
                       id="volume-slider"
+                      className={`volume-slider ${showVideoControls ? "red-slider" : ""}`}
                       type="range"
                       min={0}
                       max={1}
                       step={0.01}
                       value={selectedBg.localVolume ?? 0.5}
+                      style={
+                        {
+                          "--progress": `${(selectedBg.localVolume ?? 0.5) * 100}%`,
+                        } as React.CSSProperties
+                      }
                       onChange={async (e) => {
-                        if (!showVideoControls) {
-                          // Only update if not locked
-                          const newVolume = parseFloat(e.target.value);
-                          currentVolumeRef.current = newVolume;
+                        const newVolume = parseFloat(e.target.value);
+                        currentVolumeRef.current = newVolume;
 
-                          setSelectedBg({
-                            ...selectedBg,
-                            localVolume: newVolume,
-                          });
-                          updateSummary(selectedBg.id, {
-                            localVolume: newVolume,
-                          });
-                          await window.electron.previewBackgroundUpdate({
-                            volume: newVolume,
-                          });
+                        setSelectedBg({
+                          ...selectedBg,
+                          localVolume: newVolume,
+                        });
+                        updateSummary(selectedBg.id, {
+                          localVolume: newVolume,
+                        });
+                        await window.electron.previewBackgroundUpdate({
+                          volume: newVolume,
+                        });
 
-                          // saves every 400ms (as long as changes have happened)
-                          if (!pendingSaveRef.current) {
-                            pendingSaveRef.current = true;
+                        if (!pendingSaveRef.current) {
+                          pendingSaveRef.current = true;
 
-                            if (timeoutRef.current) {
-                              clearTimeout(timeoutRef.current);
-                            }
-
-                            timeoutRef.current = setTimeout(async () => {
-                              await window.electron.saveBgJson({
-                                id: selectedBg.id,
-                                localVolume: currentVolumeRef.current,
-                              });
-                              pendingSaveRef.current = false;
-                            }, 400);
+                          if (timeoutRef.current) {
+                            clearTimeout(timeoutRef.current);
                           }
+
+                          timeoutRef.current = setTimeout(async () => {
+                            await window.electron.saveBgJson({
+                              id: selectedBg.id,
+                              localVolume: currentVolumeRef.current,
+                            });
+                            pendingSaveRef.current = false;
+                          }, 400);
                         }
                       }}
-                      disabled={showVideoControls}
                     />
                     <span>
                       {Math.round((selectedBg.localVolume ?? 0.5) * 100)}%
