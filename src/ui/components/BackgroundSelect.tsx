@@ -216,13 +216,11 @@ const BackgroundSelect: React.FC = () => {
       // Fall back to saved background if no initialId
       const savedBackground = await window.electron.getSetting("background");
       if (savedBackground) {
-        const { page: bgPage, summary } =
-          await getBackgroundPage(savedBackground);
+        const { page: bgPage } = await getBackgroundPage(savedBackground);
         if (bgPage !== -1) {
           setScrollToId(savedBackground);
           setPage(bgPage);
           setSelectedIds([savedBackground]);
-          setSelectedBg(summary ?? null);
           return;
         } else {
           logger.info("Saved background not found in backgrounds list");
