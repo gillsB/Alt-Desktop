@@ -412,10 +412,24 @@ const BackgroundSelect: React.FC = () => {
 
   useEffect(() => {
     const getBackgroundType = async () => {
-      const type = await window.electron.idToBackgroundType(
-        selectedBg?.id || ""
+      if (!selectedBg?.id) {
+        logger.warn("No selected background to determine type");
+        setBackgroundType("image");
+        return;
+      }
+      const type = await window.electron.getInfoFromID(
+        selectedBg?.id || "",
+        "fileType"
       );
-      setBackgroundType(type);
+      if (type) {
+        setBackgroundType(type);
+      } else {
+        logger.error(
+          "Failed to get background type for selectedBg: ",
+          selectedBg?.id || "none"
+        );
+        setBackgroundType("image");
+      }
     };
     getBackgroundType();
   }, [selectedBg]);

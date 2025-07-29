@@ -259,7 +259,6 @@ interface EventParamMapping {
   getBackgroundVolume: [string];
   setRendererStates: [Partial<RendererStates>];
   getRendererStates: [];
-  idToBackgroundType: [string];
   getInfoFromID: [string, InfoKey];
 }
 
@@ -335,7 +334,6 @@ type EventPayloadMapping = {
   getBackgroundVolume: number | null;
   setRendererStates: boolean;
   getRendererStates: RendererStates;
-  idToBackgroundType: "image" | "video";
   getInfoFromID: IDInfo[K] | null;
 };
 
@@ -467,7 +465,6 @@ interface Window {
     getBackgroundVolume: (id: string) => Promise<number | null>;
     setRendererStates: (updates: RendererStates) => Promise<boolean>;
     getRendererStates: () => Promise<RendererStates>;
-    idToBackgroundType: (id: string) => Promise<"image" | "video">;
     getInfoFromID: <K extends InfoKey>(
       id: string,
       type: K
