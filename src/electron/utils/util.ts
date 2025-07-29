@@ -16,6 +16,7 @@ import {
   getAllowedUrls,
   openSmallWindow,
 } from "../windows/subWindowManager.js";
+import { idToBgJsonPath } from "./idToInfo.js";
 
 const logger = createLoggerForFile("util.ts");
 
@@ -411,7 +412,7 @@ export async function indexBackgrounds(options?: {
     if (!(folderName in backgroundsData.backgrounds)) {
       newIds.push(folderName);
       let indexedTime: number | undefined = Math.floor(Date.now() / 1000);
-      const bgJsonPath = await idToBgJson(folderName);
+      const bgJsonPath = await idToBgJsonPath(folderName);
       if (fs.existsSync(bgJsonPath)) {
         try {
           const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
@@ -495,7 +496,7 @@ export async function indexBackgrounds(options?: {
 
       // Try to fetch local.indexed from newId's bg.json
       try {
-        const newBgJsonPath = await idToBgJson(newId);
+        const newBgJsonPath = await idToBgJsonPath(newId);
         if (fs.existsSync(newBgJsonPath)) {
           const rawBg = await fs.promises.readFile(newBgJsonPath, "utf-8");
           const bg: BgJson = JSON.parse(rawBg);
@@ -555,7 +556,7 @@ export async function indexBackgrounds(options?: {
 
   const ids = Object.keys(backgroundsData.backgrounds);
   await promisePool(ids, 50, async (id) => {
-    const bgJsonPath = await idToBgJson(id);
+    const bgJsonPath = await idToBgJsonPath(id);
     try {
       if (fs.existsSync(bgJsonPath)) {
         const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
@@ -643,7 +644,7 @@ export async function getBgJsonFile(id: string): Promise<BgJson | null> {
   try {
     if (!id) throw new Error("Missing background id");
 
-    const bgJsonPath = await idToBgJson(id);
+    const bgJsonPath = await idToBgJsonPath(id);
 
     // Check if the file exists
     if (!fs.existsSync(bgJsonPath)) {
@@ -671,7 +672,7 @@ export async function saveBgJsonFile(
 ): Promise<boolean> {
   try {
     if (!summary.id) throw new Error("Missing background id");
-    const bgJsonPath = await idToBgJson(summary.id);
+    const bgJsonPath = await idToBgJsonPath(summary.id);
 
     // Ensure the directory exists
     await fs.promises.mkdir(path.dirname(bgJsonPath), { recursive: true });
@@ -746,35 +747,6 @@ export async function getExternalPath(index: number) {
   }
   return null;
 }
-
-/**
- * Gets the background folder path for an ID.
- * Supports external backgrounds with id format ext::<num>::<folder>
- */
-export const idToBackgroundFolder = async (id: string) => {
-  const extMatch = id.match(/^ext::(\d+)::(.+)$/);
-  if (extMatch) {
-    const extIndex = Number(extMatch[1]);
-    const folder = extMatch[2];
-    const extBase = await getExternalPath(extIndex);
-    if (extBase) {
-      return path.join(extBase, folder);
-    }
-  }
-  const baseDir = getBackgroundFilePath();
-  const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
-  return path.join(baseDir, folderPath);
-};
-
-/**
- * Gets the path of the bg.json file for an ID.
- * Supports external backgrounds.
- */
-export const idToBgJson = async (id: string) => {
-  const backgroundFolder = await idToBackgroundFolder(id);
-  return path.join(backgroundFolder, "bg.json");
-};
-
 
 export async function filterBackgroundEntries(
   entries: [string, number][],

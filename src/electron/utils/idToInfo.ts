@@ -2,7 +2,11 @@ import fs from "fs";
 import mime from "mime-types";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
-import { idToBackgroundFolder, idToBgJson, resolveShortcut } from "./util.js";
+import {
+  getBackgroundFilePath,
+  getExternalPath,
+  resolveShortcut,
+} from "./util.js";
 
 const logger = createLoggerForFile("util.ts");
 
@@ -17,7 +21,7 @@ export const idToBackgroundPath = async (
 ): Promise<string | null> => {
   try {
     const backgroundFolder = await idToBackgroundFolder(id);
-    const bgJsonPath = await idToBgJson(id);
+    const bgJsonPath = await idToBgJsonPath(id);
     if (!fs.existsSync(bgJsonPath)) {
       logger.warn(`bg.json not found at ${bgJsonPath}`);
       return null;
@@ -55,4 +59,32 @@ export const idToBackgroundType = async (
     logger.error(`Failed to get background type for id ${id}:`, e);
     return "image"; // Default to image on error
   }
+};
+
+/**
+ * Gets the background folder path for an ID.
+ * Supports external backgrounds with id format ext::<num>::<folder>
+ */
+export const idToBackgroundFolder = async (id: string) => {
+  const extMatch = id.match(/^ext::(\d+)::(.+)$/);
+  if (extMatch) {
+    const extIndex = Number(extMatch[1]);
+    const folder = extMatch[2];
+    const extBase = await getExternalPath(extIndex);
+    if (extBase) {
+      return path.join(extBase, folder);
+    }
+  }
+  const baseDir = getBackgroundFilePath();
+  const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
+  return path.join(baseDir, folderPath);
+};
+
+/**
+ * Gets the path of the bg.json file for an ID.
+ * Supports external backgrounds.
+ */
+export const idToBgJsonPath = async (id: string) => {
+  const backgroundFolder = await idToBackgroundFolder(id);
+  return path.join(backgroundFolder, "bg.json");
 };

@@ -20,7 +20,12 @@ import {
   saveSettingsData,
 } from "./settings.js";
 import { generateIcon } from "./utils/generateIcon.js";
-import { idToBackgroundPath, idToBackgroundType } from "./utils/idToInfo.js";
+import {
+  idToBackgroundFolder,
+  idToBackgroundPath,
+  idToBackgroundType,
+  idToBgJsonPath,
+} from "./utils/idToInfo.js";
 import {
   getRendererStates,
   setRendererStates,
@@ -41,8 +46,6 @@ import {
   getExternalPath,
   getLogsFolderPath,
   getSettingsFilePath,
-  idToBackgroundFolder,
-  idToBgJson,
   indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
@@ -74,6 +77,8 @@ const PUBLIC_TAGS_FLAT = PUBLIC_TAG_CATEGORIES.flatMap((cat) => cat.tags);
 const infoHandlers = {
   fileType: idToBackgroundType,
   backgroundPath: idToBackgroundPath,
+  backgroundFolder: idToBackgroundFolder,
+  bgJsonFilePath: idToBgJsonPath,
 } as const;
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
@@ -1614,12 +1619,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
-  ipcMainHandle(
-    "idToBackgroundFolder",
-    async (id: string): Promise<string | null> => {
-      return idToBackgroundFolder(id);
-    }
-  );
   ipcMainHandle("addLocalTag", async (tag: LocalTag): Promise<boolean> => {
     try {
       // Validate name: no spaces, must be lowercase, not in PUBLIC_TAGS or localTags
@@ -1835,7 +1834,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "getBackgroundVolume",
     async (id: string): Promise<number | null> => {
       try {
-        const bgJsonPath = await idToBgJson(id);
+        const bgJsonPath = await idToBgJsonPath(id);
         if (!fs.existsSync(bgJsonPath)) {
           logger.warn(`bg.json not found for background id: ${id}`);
           return null;

@@ -2,11 +2,11 @@ import { app } from "electron";
 import fs from "fs";
 import { createLoggerForFile } from "./logging.js";
 import { PUBLIC_TAG_CATEGORIES } from "./publicTags.js";
+import { idToBgJsonPath } from "./utils/idToInfo.js";
 import {
   backupSettingsFile,
   getBackgroundsJsonFilePath,
   getSettingsFilePath,
-  idToBgJson,
 } from "./utils/util.js";
 import { openSmallWindow } from "./windows/subWindowManager.js";
 
@@ -203,7 +203,7 @@ export async function renameLocalTag(
     const bgIds = Object.keys(backgroundsData.backgrounds);
 
     for (const id of bgIds) {
-      const bgJsonPath = await idToBgJson(id);
+      const bgJsonPath = await idToBgJsonPath(id);
       if (fs.existsSync(bgJsonPath)) {
         const bgData = JSON.parse(fs.readFileSync(bgJsonPath, "utf-8"));
         // Update local tags if present

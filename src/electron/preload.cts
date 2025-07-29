@@ -127,7 +127,6 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getBgJson: (id: string) => ipcInvoke("getBgJson", id),
   saveBgJson: (summary: BackgroundSummary) => ipcInvoke("saveBgJson", summary),
   deleteBackground: (id: string) => ipcInvoke("deleteBackground", id),
-  idToBackgroundFolder: (id: string) => ipcInvoke("idToBackgroundFolder", id),
   addLocalTag: (tag: LocalTag) => ipcInvoke("addLocalTag", tag),
   updateLocalTag: (name: string, tag: LocalTag) =>
     ipcInvoke("updateLocalTag", name, tag),

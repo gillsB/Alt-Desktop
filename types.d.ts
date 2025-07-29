@@ -50,6 +50,9 @@ type PreviewBackgroundUpdate = {
 type IDInfo = {
   name?: string;
   backgroundPath?: string;
+  backgroundFolder?: string;
+  bgJson?: BgJson;
+  bgJsonFilePath?: string;
   iconPath?: string;
   tags?: string[];
   localTags?: string[];
@@ -243,7 +246,6 @@ interface EventParamMapping {
   getBgJson: [string];
   saveBgJson: [BackgroundSummary];
   deleteBackground: [string];
-  idToBackgroundFolder: [string];
   addLocalTag: [LocalTag];
   updateLocalTag: [string, LocalTag];
   deleteLocalTag: [string];
@@ -318,7 +320,6 @@ type EventPayloadMapping = {
   getBgJson: BgJson | null;
   saveBgJson: boolean;
   deleteBackground: boolean;
-  idToBackgroundFolder: string | null;
   addLocalTag: boolean;
   updateLocalTag: boolean;
   deleteLocalTag: boolean;
@@ -444,7 +445,6 @@ interface Window {
     getBgJson: (id: string) => Promise<BgJson | null>;
     saveBgJson: (data: BackgroundSummary) => Promise<boolean>;
     deleteBackground: (id: string) => Promise<boolean>;
-    idToBackgroundFolder: (id: string) => Promise<string | null>;
     addLocalTag: (tag: localTag) => Promise<boolean>;
     updateLocalTag: (name: string, tag: LocalTag) => Promise<boolean>;
     deleteLocalTag: (name: string) => Promise<boolean>;

@@ -305,9 +305,11 @@ const EditBackground: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
     if (summary.id) {
-      window.electron.idToBackgroundFolder(summary.id).then((folder) => {
-        if (!cancelled) setHasBackgroundFolder(!!folder);
-      });
+      window.electron
+        .getInfoFromID(summary.id, "backgroundFolder")
+        .then((folder) => {
+          if (!cancelled) setHasBackgroundFolder(!!folder);
+        });
     } else {
       setHasBackgroundFolder(false);
     }
@@ -577,7 +579,10 @@ const EditBackground: React.FC = () => {
   };
 
   const handleGlassClick = async (type: "bgFile" | "iconPath") => {
-    const folder = await window.electron.idToBackgroundFolder(summary.id);
+    const folder = await window.electron.getInfoFromID(
+      summary.id,
+      "backgroundFolder"
+    );
     logger.info(`Opening background folder for ${type}:`, folder);
     if (folder) {
       const fileType = type === "bgFile" ? "image,video" : "image";
