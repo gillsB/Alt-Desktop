@@ -1544,9 +1544,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return { page, summary };
     }
   );
-  ipcMainHandle("idToFilePath", async (id: string) => {
-    return idToBackgroundPath(id);
-  });
 
   ipcMainHandle(
     "resolveShortcut",

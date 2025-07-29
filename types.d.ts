@@ -240,7 +240,6 @@ interface EventParamMapping {
   getBackgroundIDs: [];
   getBackgroundSummaries: [GetBackgroundSummariesRequest?];
   getBackgroundPageForId: [GetBackgroundPageForIdRequest];
-  idToFilePath: [string];
   resolveShortcut: [string];
   openEditBackground: [BackgroundSummary];
   getBgJson: [string];
@@ -314,7 +313,6 @@ type EventPayloadMapping = {
   getBackgroundIDs: string[];
   getBackgroundSummaries: GetBackgroundSummariesResponse;
   getBackgroundPageForId: GetBackgroundPageForIdResponse;
-  idToFilePath: string | null;
   resolveShortcut: string;
   openEditBackground: boolean;
   getBgJson: BgJson | null;
@@ -439,7 +437,6 @@ interface Window {
     getBackgroundPageForId: (
       params: GetBackgroundPageForIdRequest
     ) => Promise<GetBackgroundPageForIdResponse>;
-    idToFilePath: (id: string) => Promise<string | null>;
     resolveShortcut: (filePath: string) => Promise<string>;
     openEditBackground: (summary: BackgroundSummary) => Promise<boolean>;
     getBgJson: (id: string) => Promise<BgJson | null>;

@@ -11,8 +11,8 @@ import {
 const logger = createLoggerForFile("util.ts");
 
 /**
- * Gets the actual background file for an ID.
- * Supports external backgrounds.
+ * Gets the actual background file path for an ID.
+ * Supports external backgrounds and Resolves shortcuts.
  * @param id The ID of the background.
  * @returns Direct FilePath of the background ("bgFile")
  */

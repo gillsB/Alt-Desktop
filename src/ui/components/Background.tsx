@@ -195,7 +195,7 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   const convertIDToFilePath = async (id: string) => {
-    return await window.electron.idToFilePath(id);
+    return await window.electron.getInfoFromID(id, "backgroundPath");
   };
 
   useEffect(() => {
