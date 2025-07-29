@@ -23,6 +23,7 @@ const BackgroundSelect: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const initialId = params.get("id") || undefined;
 
+  const [backgroundType, setBackgroundType] = useState<string>("image");
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedBg, setSelectedBg] = useState<BackgroundSummary | null>(null);
@@ -408,6 +409,16 @@ const BackgroundSelect: React.FC = () => {
     await window.electron.openInExplorer("background", backgroundId);
     setContextMenu(null);
   };
+
+  useEffect(() => {
+    const getBackgroundType = async () => {
+      const type = await window.electron.idToBackgroundType(
+        selectedBg?.id || ""
+      );
+      setBackgroundType(type);
+    };
+    getBackgroundType();
+  }, [selectedBg]);
 
   // TODO fix this for recently in use larger files (video/maybe images).
   // Problem is that recently in use cannot be moved to trash. and attempting shows 2 admin
@@ -849,59 +860,61 @@ const BackgroundSelect: React.FC = () => {
                   </button>
                 </div>
                 <h3>{getDisplayName(selectedBg)}</h3>
-                <div className="details-row">
-                  <label htmlFor="volume-slider">Volume</label>
-                  <div className="details-value">
-                    <input
-                      id="volume-slider"
-                      className={`volume-slider ${showVideoControls ? "red-slider" : ""}`}
-                      type="range"
-                      min={0}
-                      max={1}
-                      step={0.01}
-                      value={selectedBg.localVolume ?? 0.5}
-                      style={
-                        {
-                          "--progress": `${(selectedBg.localVolume ?? 0.5) * 100}%`,
-                        } as React.CSSProperties
-                      }
-                      onChange={async (e) => {
-                        const newVolume = parseFloat(e.target.value);
-                        currentVolumeRef.current = newVolume;
-
-                        setSelectedBg({
-                          ...selectedBg,
-                          localVolume: newVolume,
-                        });
-                        updateSummary(selectedBg.id, {
-                          localVolume: newVolume,
-                        });
-                        await window.electron.previewBackgroundUpdate({
-                          volume: newVolume,
-                        });
-
-                        if (!pendingSaveRef.current) {
-                          pendingSaveRef.current = true;
-
-                          if (timeoutRef.current) {
-                            clearTimeout(timeoutRef.current);
-                          }
-
-                          timeoutRef.current = setTimeout(async () => {
-                            await window.electron.saveBgJson({
-                              id: selectedBg.id,
-                              localVolume: currentVolumeRef.current,
-                            });
-                            pendingSaveRef.current = false;
-                          }, 400);
+                {backgroundType.startsWith("video") && (
+                  <div className="details-row">
+                    <label htmlFor="volume-slider">Volume</label>
+                    <div className="details-value">
+                      <input
+                        id="volume-slider"
+                        className={`volume-slider ${showVideoControls ? "red-slider" : ""}`}
+                        type="range"
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        value={selectedBg.localVolume ?? 0.5}
+                        style={
+                          {
+                            "--progress": `${(selectedBg.localVolume ?? 0.5) * 100}%`,
+                          } as React.CSSProperties
                         }
-                      }}
-                    />
-                    <span>
-                      {Math.round((selectedBg.localVolume ?? 0.5) * 100)}%
-                    </span>
+                        onChange={async (e) => {
+                          const newVolume = parseFloat(e.target.value);
+                          currentVolumeRef.current = newVolume;
+
+                          setSelectedBg({
+                            ...selectedBg,
+                            localVolume: newVolume,
+                          });
+                          updateSummary(selectedBg.id, {
+                            localVolume: newVolume,
+                          });
+                          await window.electron.previewBackgroundUpdate({
+                            volume: newVolume,
+                          });
+
+                          if (!pendingSaveRef.current) {
+                            pendingSaveRef.current = true;
+
+                            if (timeoutRef.current) {
+                              clearTimeout(timeoutRef.current);
+                            }
+
+                            timeoutRef.current = setTimeout(async () => {
+                              await window.electron.saveBgJson({
+                                id: selectedBg.id,
+                                localVolume: currentVolumeRef.current,
+                              });
+                              pendingSaveRef.current = false;
+                            }, 400);
+                          }
+                        }}
+                      />
+                      <span>
+                        {Math.round((selectedBg.localVolume ?? 0.5) * 100)}%
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="details-row">
                   <label>Description</label>
                   <div className="details-value">
