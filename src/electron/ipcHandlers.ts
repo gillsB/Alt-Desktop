@@ -1857,4 +1857,25 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getRendererStates", (): Promise<RendererStates> => {
     return getRendererStates();
   });
+
+  ipcMainHandle("idToBackgroundType", async (id: string) => {
+    try {
+      const path = await idToBackgroundPath(id);
+      if (path) {
+        const truePath = await resolveShortcut(path);
+        if (!truePath) {
+          logger.warn(`No valid path found for background id: ${id}`);
+          return "image";
+        }
+        const fileType = mime.lookup(truePath) || "";
+        if (fileType.startsWith("video")) {
+          return "video";
+        }
+      }
+      return "image";
+    } catch (e) {
+      logger.error(`Failed to get background type for id ${id}:`, e);
+      return "image"; // Default to image on error
+    }
+  });
 }

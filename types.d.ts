@@ -241,6 +241,7 @@ interface EventParamMapping {
   getBackgroundVolume: [string];
   setRendererStates: [Partial<RendererStates>];
   getRendererStates: [];
+  idToBackgroundType: [string];
 }
 
 // The returns from the main process to the renderer
@@ -315,6 +316,7 @@ type EventPayloadMapping = {
   getBackgroundVolume: number | null;
   setRendererStates: boolean;
   getRendererStates: RendererStates;
+  idToBackgroundType: "image" | "video";
 };
 
 type UnsubscribeFunction = () => void;
@@ -445,5 +447,6 @@ interface Window {
     getBackgroundVolume: (id: string) => Promise<number | null>;
     setRendererStates: (updates: RendererStates) => Promise<boolean>;
     getRendererStates: () => Promise<RendererStates>;
+    idToBackgroundType: (id: string) => Promise<"image" | "video">;
   };
 }
