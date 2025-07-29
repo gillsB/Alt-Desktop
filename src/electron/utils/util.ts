@@ -775,31 +775,6 @@ export const idToBgJson = async (id: string) => {
   return path.join(backgroundFolder, "bg.json");
 };
 
-/**
- * Gets the actual background file for an ID.
- * Supports external backgrounds.
- * @param id The ID of the background.
- * @returns Direct FilePath of the background ("bgFile")
- */
-export const idToBackgroundPath = async (id: string) => {
-  try {
-    const backgroundFolder = await idToBackgroundFolder(id);
-    const bgJsonPath = await idToBgJson(id);
-    if (!fs.existsSync(bgJsonPath)) {
-      logger.warn(`bg.json not found at ${bgJsonPath}`);
-      return null;
-    }
-    const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
-    const bg = JSON.parse(rawBg);
-    if (bg.public && bg.public.bgFile) {
-      return path.join(backgroundFolder, bg.public.bgFile);
-    }
-    return null;
-  } catch (e) {
-    logger.warn(`Failed to resolve filePath for id ${id}:`, e);
-    return null;
-  }
-};
 
 export async function filterBackgroundEntries(
   entries: [string, number][],

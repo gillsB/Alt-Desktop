@@ -20,6 +20,7 @@ import {
   saveSettingsData,
 } from "./settings.js";
 import { generateIcon } from "./utils/generateIcon.js";
+import { idToBackgroundPath, idToBackgroundType } from "./utils/idToInfo.js";
 import {
   getRendererStates,
   setRendererStates,
@@ -41,7 +42,6 @@ import {
   getLogsFolderPath,
   getSettingsFilePath,
   idToBackgroundFolder,
-  idToBackgroundPath,
   idToBgJson,
   indexBackgrounds,
   ipcMainHandle,
@@ -70,6 +70,11 @@ ffmpeg.setFfprobePath(ffprobeStatic.path);
 
 const logger = createLoggerForFile("ipcHandlers.ts");
 const PUBLIC_TAGS_FLAT = PUBLIC_TAG_CATEGORIES.flatMap((cat) => cat.tags);
+
+const infoHandlers = {
+  fileType: idToBackgroundType,
+  backgroundPath: idToBackgroundPath,
+} as const;
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {
@@ -1878,4 +1883,20 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return "image"; // Default to image on error
     }
   });
+  ipcMainHandle(
+    "getInfoFromID",
+    async <K extends InfoKey>(
+      id: string,
+      type: K
+    ): Promise<IDInfo[K] | null> => {
+      const handler = infoHandlers[type as keyof typeof infoHandlers];
+
+      if (handler) {
+        return (await handler(id)) as IDInfo[K];
+      }
+      logger.warn(`No handler found for type: ${type}`);
+
+      return null;
+    }
+  );
 }

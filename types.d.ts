@@ -47,6 +47,24 @@ type PreviewBackgroundUpdate = {
   volume?: number;
 };
 
+type IDInfo = {
+  name?: string;
+  backgroundPath?: string;
+  iconPath?: string;
+  tags?: string[];
+  localTags?: string[];
+  localIndexed?: number;
+  localVolume?: number;
+  volume?: number; // same as localVolume
+  description?: string;
+  fileType?: "image" | "video";
+  folderPath?: string;
+};
+
+type IDInfoValue<K extends InfoKey> = IDInfo[K];
+
+type InfoKey = keyof IDInfo;
+
 interface BackgroundsData {
   backgrounds: Record<string, number>;
   tags?: Record<string, string[]>;
@@ -242,6 +260,7 @@ interface EventParamMapping {
   setRendererStates: [Partial<RendererStates>];
   getRendererStates: [];
   idToBackgroundType: [string];
+  getInfoFromID: [string, InfoKey];
 }
 
 // The returns from the main process to the renderer
@@ -317,6 +336,7 @@ type EventPayloadMapping = {
   setRendererStates: boolean;
   getRendererStates: RendererStates;
   idToBackgroundType: "image" | "video";
+  getInfoFromID: IDInfo[K] | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -448,5 +468,9 @@ interface Window {
     setRendererStates: (updates: RendererStates) => Promise<boolean>;
     getRendererStates: () => Promise<RendererStates>;
     idToBackgroundType: (id: string) => Promise<"image" | "video">;
+    getInfoFromID: <K extends InfoKey>(
+      id: string,
+      type: K
+    ) => Promise<IDInfo[K] | null>;
   };
 }
