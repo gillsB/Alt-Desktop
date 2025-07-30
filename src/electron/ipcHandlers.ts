@@ -22,6 +22,7 @@ import {
 import { generateIcon } from "./utils/generateIcon.js";
 import {
   idToBackgroundFolder,
+  idToBackgroundName,
   idToBackgroundPath,
   idToBackgroundType,
   idToBackgroundVolume,
@@ -82,6 +83,7 @@ const infoHandlers = {
   bgJsonFilePath: idToBgJsonPath,
   volume: idToBackgroundVolume,
   localVolume: idToBackgroundVolume, // Sometimes referred to as local volume (same as volume).
+  name: idToBackgroundName,
 } as const;
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
@@ -1690,6 +1692,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+  // TODO compare this to renameTag, this seems to allow renaming, but would not update the bg.jsons
+  // of the backgrounds that have this tag.
   ipcMainHandle(
     "updateLocalTag",
     async (name: string, tag: LocalTag): Promise<boolean> => {

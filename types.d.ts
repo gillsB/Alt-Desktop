@@ -51,17 +51,17 @@ type IDInfo = {
   name?: string;
   backgroundPath?: string;
   backgroundFolder?: string;
-  bgJson?: BgJson;
+  bgJson?: BgJson; // todo
   bgJsonFilePath?: string;
-  iconPath?: string;
-  tags?: string[];
-  localTags?: string[];
-  localIndexed?: number;
+  iconPath?: string; // todo
+  tags?: string[]; // todo
+  localTags?: string[]; // todo
+  localIndexed?: number; // todo
   localVolume?: number;
   volume?: number; // same as localVolume
-  description?: string;
+  description?: string; // todo
   fileType?: "image" | "video";
-  folderPath?: string;
+  folderPath?: string; // todo
 };
 
 type IDInfoValue<K extends InfoKey> = IDInfo[K];
