@@ -1795,31 +1795,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     logger.warn("getBaseFilePaths, returning empty due to name = " + name);
     return "";
   });
-  ipcMainHandle("getBackgroundType", async (): Promise<"image" | "video"> => {
-    try {
-      const id = getSetting("background") as string | undefined;
-      if (!id) return "image";
-
-      let filePath = await idToBackgroundPath(id);
-      if (!filePath) return "image";
-
-      // Always resolve shortcut if the file is a shortcut
-      let fileType = mime.lookup(filePath) || "";
-      if (fileType === "application/x-ms-shortcut") {
-        const resolved = resolveShortcut(filePath);
-        if (resolved) {
-          filePath = resolved;
-          fileType = mime.lookup(filePath) || "";
-        }
-      }
-
-      if (fileType.startsWith("video")) return "video";
-      return "image";
-    } catch (error) {
-      logger.error("Error in getBackgroundType:", error);
-      return "image";
-    }
-  });
   ipcMainHandle("showVideoControls", async (show: boolean) => {
     try {
       logger.info(`Show controls set to: ${show}`);

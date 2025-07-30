@@ -255,7 +255,6 @@ interface EventParamMapping {
   indexBackgrounds: [options?: { newExternalPathAdded?: boolean }];
   changeBackgroundDirectory: [string, string];
   getBaseFilePaths: [name?: string];
-  getBackgroundType: [];
   showVideoControls: [boolean];
   setRendererStates: [Partial<RendererStates>];
   getRendererStates: [];
@@ -327,7 +326,6 @@ type EventPayloadMapping = {
   indexBackgrounds: [number, number];
   changeBackgroundDirectory: string | null;
   getBaseFilePaths: string;
-  getBackgroundType: "image" | "video";
   showVideoControls: void;
   setRendererStates: boolean;
   getRendererStates: RendererStates;
@@ -455,7 +453,6 @@ interface Window {
       targetLocation: string
     ) => Promise<string | null>;
     getBaseFilePaths: (name?: string) => Promise<string>;
-    getBackgroundType: () => Promise<"image" | "video">;
     showVideoControls: (show: boolean) => Promise<void>;
     setRendererStates: (updates: RendererStates) => Promise<boolean>;
     getRendererStates: () => Promise<RendererStates>;

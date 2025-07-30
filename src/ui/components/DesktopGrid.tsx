@@ -776,7 +776,12 @@ const DesktopGrid: React.FC = () => {
 
   useEffect(() => {
     const fetchBackgroundType = async () => {
-      setBackgroundType(await window.electron.getBackgroundType());
+      const type = await window.electron.getInfoFromID("", "fileType");
+      if (type) {
+        setBackgroundType(type);
+      } else {
+        setBackgroundType("image");
+      }
     };
     fetchBackgroundType();
 

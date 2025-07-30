@@ -2,6 +2,7 @@ import fs from "fs";
 import mime from "mime-types";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
+import { getSetting } from "../settings.js";
 import {
   getBackgroundFilePath,
   getExternalPath,
@@ -38,13 +39,22 @@ export const idToBackgroundPath = async (
   }
 };
 
+/**
+ * Gets the type of the Background for an ID.
+ * Supports external backgrounds and Resolves shortcuts.
+ * @param id ID of background OR "" for current background
+ * @returns File type of the background, either "image" or "video".
+ */
 export const idToBackgroundType = async (
   id: string
 ): Promise<"image" | "video"> => {
   try {
+    if (id === "") {
+      id = getSetting("background") as string;
+    }
     const path = await idToBackgroundPath(id);
     if (path) {
-      const truePath = await resolveShortcut(path);
+      const truePath = resolveShortcut(path);
       if (!truePath) {
         logger.warn(`No valid path found for background id: ${id}`);
         return "image";
