@@ -134,8 +134,27 @@ export const idToBackgroundName = async (
     }
     const raw = await fs.promises.readFile(bgJsonPath, "utf-8");
     const bg: BgJson = JSON.parse(raw);
-    // Return local.volume if it exists, else null
+    // Return name if it exists, else null
     return bg?.public?.name ?? null;
+  } catch (e) {
+    logger.error(`Failed to get background volume for id ${id}:`, e);
+    return null;
+  }
+};
+export const idToBgJson = async (id: string): Promise<BgJson | null> => {
+  try {
+    if (id === "") {
+      id = getSetting("background") as string;
+    }
+    const bgJsonPath = await idToBgJsonPath(id);
+    if (!fs.existsSync(bgJsonPath)) {
+      logger.warn(`bg.json not found for background id: ${id}`);
+      return null;
+    }
+    const raw = await fs.promises.readFile(bgJsonPath, "utf-8");
+    const bg: BgJson = JSON.parse(raw);
+    // Return bj.json if it exists, else null
+    return bg;
   } catch (e) {
     logger.error(`Failed to get background volume for id ${id}:`, e);
     return null;

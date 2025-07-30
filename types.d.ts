@@ -50,8 +50,8 @@ type PreviewBackgroundUpdate = {
 type IDInfo = {
   name?: string;
   backgroundPath?: string;
-  backgroundFolder?: string;
-  bgJson?: BgJson; // todo
+  folderPath?: string; // base folder path (contains bg.json, icon, background/lnk etc.)
+  bgJson?: BgJson;
   bgJsonFilePath?: string;
   iconPath?: string; // todo
   tags?: string[]; // todo
@@ -60,8 +60,7 @@ type IDInfo = {
   localVolume?: number;
   volume?: number; // same as localVolume
   description?: string; // todo
-  fileType?: "image" | "video";
-  folderPath?: string; // todo
+  fileType?: "image" | "video"; // todo
 };
 
 type IDInfoValue<K extends InfoKey> = IDInfo[K];

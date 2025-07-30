@@ -26,6 +26,7 @@ import {
   idToBackgroundPath,
   idToBackgroundType,
   idToBackgroundVolume,
+  idToBgJson,
   idToBgJsonPath,
 } from "./utils/idToInfo.js";
 import {
@@ -79,11 +80,12 @@ const PUBLIC_TAGS_FLAT = PUBLIC_TAG_CATEGORIES.flatMap((cat) => cat.tags);
 const infoHandlers = {
   fileType: idToBackgroundType,
   backgroundPath: idToBackgroundPath,
-  backgroundFolder: idToBackgroundFolder,
+  folderPath: idToBackgroundFolder,
   bgJsonFilePath: idToBgJsonPath,
   volume: idToBackgroundVolume,
   localVolume: idToBackgroundVolume, // Sometimes referred to as local volume (same as volume).
   name: idToBackgroundName,
+  bgJson: idToBgJson,
 } as const;
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
