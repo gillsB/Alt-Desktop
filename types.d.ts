@@ -53,14 +53,14 @@ type IDInfo = {
   folderPath?: string; // base folder path (contains bg.json, icon, background/lnk etc.)
   bgJson?: BgJson;
   bgJsonFilePath?: string;
-  iconPath?: string; // todo
-  tags?: string[]; // todo
-  localTags?: string[]; // todo
+  iconPath?: string;
+  tags?: string[];
+  localTags?: string[];
   localIndexed?: number;
   indexed?: number; // same as localIndexed
   localVolume?: number;
   volume?: number; // same as localVolume
-  description?: string; // todo
+  description?: string;
   fileType?: "image" | "video";
 };
 

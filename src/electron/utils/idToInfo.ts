@@ -72,7 +72,7 @@ export const idToBackgroundFileType = async (
 };
 
 /**
- * Gets the background folder path for an ID.
+ * Gets the background folder path for an ID. (contains bg.json, icon, background/lnk file)
  * Supports external backgrounds with id format ext::<num>::<folder>
  */
 export const idToFolderPath = async (id: string) => {
@@ -99,6 +99,11 @@ export const idToBgJsonPath = async (id: string) => {
   return path.join(backgroundFolder, "bg.json");
 };
 
+/**
+ * Gets the background volume for an ID.
+ * @param id
+ * @returns number | null - Volume level (0-100) or null if not set.
+ */
 export const idToBackgroundVolume = async (
   id: string
 ): Promise<number | null> => {
@@ -120,6 +125,11 @@ export const idToBackgroundVolume = async (
     return null;
   }
 };
+/**
+ * Gets the background name for an ID.
+ * @param id
+ * @returns name of the background or null if not found.
+ */
 export const idToBackgroundName = async (
   id: string
 ): Promise<string | null> => {
@@ -141,6 +151,11 @@ export const idToBackgroundName = async (
     return null;
   }
 };
+/**
+ * Gets the BgJson type (from bg.json) for an ID.
+ * @param id
+ * @returns BgJson typed object or null if not found.
+ */
 export const idToBgJson = async (id: string): Promise<BgJson | null> => {
   try {
     if (id === "") {
@@ -157,6 +172,85 @@ export const idToBgJson = async (id: string): Promise<BgJson | null> => {
     return bg;
   } catch (e) {
     logger.error(`Failed to get background volume for id ${id}:`, e);
+    return null;
+  }
+};
+
+/**
+ * Gets the full icon path for an ID.
+ * @param id
+ * @returns Full path for the icon or null if not found.
+ */
+export const idToIconPath = async (id: string): Promise<string | null> => {
+  try {
+    const bgJson = await idToBgJson(id);
+    if (!bgJson || !bgJson.public || !bgJson.public.icon) {
+      logger.warn(`No icon found in bg.json for id: ${id}`);
+      return null;
+    }
+    const iconPath = bgJson.public.icon;
+    const backgroundFolder = await idToFolderPath(id);
+
+    return path.join(backgroundFolder, iconPath);
+  } catch (e) {
+    logger.error(`Failed to get icon path for id ${id}:`, e);
+    return null;
+  }
+};
+
+/**
+ * Gets the public tags for an ID.
+ * @param id
+ * @returns Public tags array or null if not found.
+ */
+export const idToTags = async (id: string): Promise<string[] | null> => {
+  try {
+    const bgJson = await idToBgJson(id);
+    if (!bgJson || !bgJson.public || !bgJson.public.tags) {
+      logger.warn(`No tags found in bg.json for id: ${id}`);
+      return null;
+    }
+    return bgJson.public.tags;
+  } catch (e) {
+    logger.error(`Failed to get tags for id ${id}:`, e);
+    return null;
+  }
+};
+
+/**
+ * Gets the local tags for an ID.
+ * @param id
+ * @returns Local tags array or null if not found.
+ */
+export const idToLocalTags = async (id: string): Promise<string[] | null> => {
+  try {
+    const bgJson = await idToBgJson(id);
+    if (!bgJson || !bgJson.local || !bgJson.local.tags) {
+      logger.warn(`No tags found in bg.json for id: ${id}`);
+      return null;
+    }
+    return bgJson.local.tags;
+  } catch (e) {
+    logger.error(`Failed to get tags for id ${id}:`, e);
+    return null;
+  }
+};
+
+/**
+ * Gets the description for an ID.
+ * @param id
+ * @returns Description or null if not found.
+ */
+export const idToDescription = async (id: string): Promise<string | null> => {
+  try {
+    const bgJson = await idToBgJson(id);
+    if (!bgJson || !bgJson.public || !bgJson.public.description) {
+      logger.warn(`No description found in bg.json for id: ${id}`);
+      return null;
+    }
+    return bgJson.public.description;
+  } catch (e) {
+    logger.error(`Failed to get description for id ${id}:`, e);
     return null;
   }
 };

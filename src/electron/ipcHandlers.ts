@@ -27,7 +27,11 @@ import {
   idToBackgroundVolume,
   idToBgJson,
   idToBgJsonPath,
+  idToDescription,
   idToFolderPath,
+  idToIconPath,
+  idToLocalTags,
+  idToTags,
 } from "./utils/idToInfo.js";
 import {
   getRendererStates,
@@ -86,6 +90,10 @@ const infoHandlers = {
   localVolume: idToBackgroundVolume, // Sometimes referred to as local volume (same as volume).
   name: idToBackgroundName,
   bgJson: idToBgJson,
+  iconPath: idToIconPath,
+  tags: idToTags,
+  localTags: idToLocalTags,
+  description: idToDescription,
 } as const;
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
