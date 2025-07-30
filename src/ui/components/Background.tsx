@@ -125,8 +125,10 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   const setVolumeFromDefault = async (id?: string) => {
-    const vol = await window.electron.getBackgroundVolume(
-      id || backgroundId.current || ""
+    logger.info("setVolumeFromDefault called with id:", id);
+    const vol = await window.electron.getInfoFromID(
+      id || backgroundId.current || "",
+      "volume"
     );
     const newVol =
       vol === 0 ? 0 : typeof vol === "number" && !isNaN(vol) ? vol : 0.5;

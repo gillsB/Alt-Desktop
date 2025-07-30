@@ -257,7 +257,6 @@ interface EventParamMapping {
   getBaseFilePaths: [name?: string];
   getBackgroundType: [];
   showVideoControls: [boolean];
-  getBackgroundVolume: [string];
   setRendererStates: [Partial<RendererStates>];
   getRendererStates: [];
   getInfoFromID: [string, InfoKey];
@@ -330,7 +329,6 @@ type EventPayloadMapping = {
   getBaseFilePaths: string;
   getBackgroundType: "image" | "video";
   showVideoControls: void;
-  getBackgroundVolume: number | null;
   setRendererStates: boolean;
   getRendererStates: RendererStates;
   getInfoFromID: IDInfo[K] | null;
@@ -459,7 +457,6 @@ interface Window {
     getBaseFilePaths: (name?: string) => Promise<string>;
     getBackgroundType: () => Promise<"image" | "video">;
     showVideoControls: (show: boolean) => Promise<void>;
-    getBackgroundVolume: (id: string) => Promise<number | null>;
     setRendererStates: (updates: RendererStates) => Promise<boolean>;
     getRendererStates: () => Promise<RendererStates>;
     getInfoFromID: <K extends InfoKey>(

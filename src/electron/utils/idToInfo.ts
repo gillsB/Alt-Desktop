@@ -88,3 +88,22 @@ export const idToBgJsonPath = async (id: string) => {
   const backgroundFolder = await idToBackgroundFolder(id);
   return path.join(backgroundFolder, "bg.json");
 };
+
+export const idToBackgroundVolume = async (
+  id: string
+): Promise<number | null> => {
+  try {
+    const bgJsonPath = await idToBgJsonPath(id);
+    if (!fs.existsSync(bgJsonPath)) {
+      logger.warn(`bg.json not found for background id: ${id}`);
+      return null;
+    }
+    const raw = await fs.promises.readFile(bgJsonPath, "utf-8");
+    const bg = JSON.parse(raw);
+    // Return local.volume if it exists, else null
+    return bg?.local?.volume ?? null;
+  } catch (e) {
+    logger.error(`Failed to get background volume for id ${id}:`, e);
+    return null;
+  }
+};
