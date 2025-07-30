@@ -56,11 +56,12 @@ type IDInfo = {
   iconPath?: string; // todo
   tags?: string[]; // todo
   localTags?: string[]; // todo
-  localIndexed?: number; // todo
+  localIndexed?: number;
+  indexed?: number; // same as localIndexed
   localVolume?: number;
   volume?: number; // same as localVolume
   description?: string; // todo
-  fileType?: "image" | "video"; // todo
+  fileType?: "image" | "video";
 };
 
 type IDInfoValue<K extends InfoKey> = IDInfo[K];

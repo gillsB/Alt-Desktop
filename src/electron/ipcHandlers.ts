@@ -21,13 +21,13 @@ import {
 } from "./settings.js";
 import { generateIcon } from "./utils/generateIcon.js";
 import {
-  idToBackgroundFolder,
+  idToBackgroundFileType,
   idToBackgroundName,
   idToBackgroundPath,
-  idToBackgroundType,
   idToBackgroundVolume,
   idToBgJson,
   idToBgJsonPath,
+  idToFolderPath,
 } from "./utils/idToInfo.js";
 import {
   getRendererStates,
@@ -78,9 +78,9 @@ const logger = createLoggerForFile("ipcHandlers.ts");
 const PUBLIC_TAGS_FLAT = PUBLIC_TAG_CATEGORIES.flatMap((cat) => cat.tags);
 
 const infoHandlers = {
-  fileType: idToBackgroundType,
+  fileType: idToBackgroundFileType,
   backgroundPath: idToBackgroundPath,
-  folderPath: idToBackgroundFolder,
+  folderPath: idToFolderPath,
   bgJsonFilePath: idToBgJsonPath,
   volume: idToBackgroundVolume,
   localVolume: idToBackgroundVolume, // Sometimes referred to as local volume (same as volume).
@@ -551,7 +551,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           saveFile,
         })
       );
-      const targetDir = await idToBackgroundFolder(id);
+      const targetDir = await idToFolderPath(id);
 
       const ext = path.extname(sourcePath);
       const baseName = path.basename(sourcePath, ext);
@@ -951,7 +951,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     ): Promise<boolean> => {
       try {
         if (type === "background") {
-          filePath = await idToBackgroundFolder(filePath);
+          filePath = await idToFolderPath(filePath);
           shell.openPath(filePath);
           logger.info(`Opened ${type} in Explorer: ${filePath}`);
           return true;
@@ -1594,7 +1594,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("deleteBackground", async (id: string): Promise<boolean> => {
     try {
       if (!id) throw new Error("Missing background id");
-      const bgDir = await idToBackgroundFolder(id);
+      const bgDir = await idToFolderPath(id);
 
       // Send the entire background directory to the recycle bin
       if (fs.existsSync(bgDir)) {

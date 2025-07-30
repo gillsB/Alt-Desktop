@@ -21,7 +21,7 @@ export const idToBackgroundPath = async (
   id: string
 ): Promise<string | null> => {
   try {
-    const backgroundFolder = await idToBackgroundFolder(id);
+    const backgroundFolder = await idToFolderPath(id);
     const bgJsonPath = await idToBgJsonPath(id);
     if (!fs.existsSync(bgJsonPath)) {
       logger.warn(`bg.json not found at ${bgJsonPath}`);
@@ -45,7 +45,7 @@ export const idToBackgroundPath = async (
  * @param id ID of background OR "" for current background
  * @returns File type of the background, either "image" or "video".
  */
-export const idToBackgroundType = async (
+export const idToBackgroundFileType = async (
   id: string
 ): Promise<"image" | "video"> => {
   try {
@@ -75,7 +75,7 @@ export const idToBackgroundType = async (
  * Gets the background folder path for an ID.
  * Supports external backgrounds with id format ext::<num>::<folder>
  */
-export const idToBackgroundFolder = async (id: string) => {
+export const idToFolderPath = async (id: string) => {
   const extMatch = id.match(/^ext::(\d+)::(.+)$/);
   if (extMatch) {
     const extIndex = Number(extMatch[1]);
@@ -95,7 +95,7 @@ export const idToBackgroundFolder = async (id: string) => {
  * Supports external backgrounds.
  */
 export const idToBgJsonPath = async (id: string) => {
-  const backgroundFolder = await idToBackgroundFolder(id);
+  const backgroundFolder = await idToFolderPath(id);
   return path.join(backgroundFolder, "bg.json");
 };
 
