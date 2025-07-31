@@ -9,7 +9,7 @@ import {
   resolveShortcut,
 } from "./util.js";
 
-const logger = createLoggerForFile("util.ts");
+const logger = createLoggerForFile("idToInfo.ts");
 
 /**
  * Gets the BgJson type (from bg.json) for an ID.
@@ -144,7 +144,12 @@ export const idToBackgroundVolume = async (
 ): Promise<number | null> => {
   try {
     const bgJson = await idToBgJson(id);
-    if (!bgJson || !bgJson.local || !bgJson.local.volume) {
+    if (
+      !bgJson ||
+      !bgJson.local ||
+      typeof bgJson.local.volume !== "number" ||
+      isNaN(bgJson.local.volume)
+    ) {
       logger.warn(`No local volume found in bg.json for id: ${id}`);
       return null;
     }
