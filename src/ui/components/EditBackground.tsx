@@ -298,9 +298,12 @@ const EditBackground: React.FC = () => {
   // Preview background update when bgFile changes
   useEffect(() => {
     if (summary.bgFile) {
-      window.electron.previewBackgroundUpdate({ id: summary.bgFile });
+      window.electron.previewBackgroundUpdate({
+        id: summary.bgFile,
+        volume: summary.localVolume,
+      });
     }
-  }, [summary.bgFile]);
+  }, [summary.bgFile, summary.localVolume]);
 
   useEffect(() => {
     let cancelled = false;
@@ -791,6 +794,46 @@ const EditBackground: React.FC = () => {
               placeholder="Enter background name"
             />
           </div>
+          {bgFileType?.startsWith("video") && (
+            <div className="details-row">
+              <label htmlFor="volume-slider">Volume</label>
+              <div className="details-value">
+                <input
+                  id="volume-slider"
+                  className="volume-slider"
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={
+                    typeof summary.localVolume === "number"
+                      ? summary.localVolume
+                      : 0.5
+                  }
+                  style={
+                    {
+                      "--progress": `${(typeof summary.localVolume === "number" ? summary.localVolume : 0.5) * 100}%`,
+                    } as React.CSSProperties
+                  }
+                  onChange={(e) => {
+                    const newVolume = parseFloat(e.target.value);
+                    setSummary((prev) => ({
+                      ...prev,
+                      localVolume: newVolume,
+                    }));
+                  }}
+                />
+                <span style={{ marginLeft: 8 }}>
+                  {Math.round(
+                    (typeof summary.localVolume === "number"
+                      ? summary.localVolume
+                      : 0.5) * 100
+                  )}
+                  %
+                </span>
+              </div>
+            </div>
+          )}
           <div className="edit-bg-field">
             <label>Description</label>
             <textarea
