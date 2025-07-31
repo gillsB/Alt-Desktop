@@ -73,10 +73,6 @@ const BackgroundSelect: React.FC = () => {
     const updateRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
       setShowVideoControls(rendererStates.showVideoControls || false);
-      logger.info(
-        "setting showVideoControls to",
-        rendererStates.showVideoControls || false
-      );
     };
     updateRendererStates();
   }, []);

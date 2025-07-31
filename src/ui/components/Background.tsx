@@ -226,7 +226,6 @@ const Background: React.FC<BackgroundProps> = ({
         setBgJson(await window.electron.getBgJson(updates.id));
         setBackgroundPath(filePath || "");
       }
-      logger.info("showVideoControls status = " + showVideoControls);
       if (!showVideoControlsRef.current) {
         if (updates.volume === 0 || (updates.volume && updates.volume <= 1)) {
           videoLogger.info(

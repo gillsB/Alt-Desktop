@@ -96,6 +96,16 @@ const EditBackground: React.FC = () => {
     category: string;
   } | null>(null);
 
+  const [showVideoControls, setShowVideoControls] = useState(false);
+
+  useEffect(() => {
+    const updateRendererStates = async () => {
+      const rendererStates = await window.electron.getRendererStates();
+      setShowVideoControls(rendererStates.showVideoControls || false);
+    };
+    updateRendererStates();
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     window.electron.getBackgroundIDs().then((idArray: string[]) => {
@@ -800,7 +810,7 @@ const EditBackground: React.FC = () => {
               <div className="details-value">
                 <input
                   id="volume-slider"
-                  className="volume-slider"
+                  className={`volume-slider ${showVideoControls ? "red-slider" : ""}`}
                   type="range"
                   min={0}
                   max={1}
