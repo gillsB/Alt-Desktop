@@ -82,18 +82,18 @@ const logger = createLoggerForFile("ipcHandlers.ts");
 const PUBLIC_TAGS_FLAT = PUBLIC_TAG_CATEGORIES.flatMap((cat) => cat.tags);
 
 const infoHandlers = {
-  fileType: idToBackgroundFileType,
-  backgroundPath: idToBackgroundPath,
-  folderPath: idToFolderPath,
   bgJsonFilePath: idToBgJsonPath,
-  volume: idToBackgroundVolume,
-  localVolume: idToBackgroundVolume, // Sometimes referred to as local volume (same as volume).
-  name: idToBackgroundName,
   bgJson: idToBgJson,
+  folderPath: idToFolderPath,
+  fileType: idToBackgroundFileType,
+  name: idToBackgroundName,
+  backgroundPath: idToBackgroundPath,
   iconPath: idToIconPath,
-  tags: idToTags,
-  localTags: idToLocalTags,
   description: idToDescription,
+  tags: idToTags,
+  localVolume: idToBackgroundVolume, // Sometimes referred to as local volume (same as volume).
+  volume: idToBackgroundVolume,
+  localTags: idToLocalTags,
 } as const;
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {

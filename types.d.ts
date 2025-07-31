@@ -48,20 +48,20 @@ type PreviewBackgroundUpdate = {
 };
 
 type IDInfo = {
+  bgJsonFilePath?: string;
+  bgJson?: BgJson;
+  folderPath?: string; // base folder path (contains bg.json, icon, background/lnk etc.)
+  fileType?: "image" | "video";
   name?: string;
   backgroundPath?: string;
-  folderPath?: string; // base folder path (contains bg.json, icon, background/lnk etc.)
-  bgJson?: BgJson;
-  bgJsonFilePath?: string;
   iconPath?: string;
+  description?: string;
   tags?: string[];
+  localVolume?: number;
+  volume?: number; // same as localVolume
   localTags?: string[];
   localIndexed?: number;
   indexed?: number; // same as localIndexed
-  localVolume?: number;
-  volume?: number; // same as localVolume
-  description?: string;
-  fileType?: "image" | "video";
 };
 
 type IDInfoValue<K extends InfoKey> = IDInfo[K];
