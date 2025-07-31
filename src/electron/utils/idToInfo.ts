@@ -12,6 +12,31 @@ import {
 const logger = createLoggerForFile("util.ts");
 
 /**
+ * Gets the BgJson type (from bg.json) for an ID.
+ * @param id
+ * @returns BgJson typed object or null if not found.
+ */
+export const idToBgJson = async (id: string): Promise<BgJson | null> => {
+  try {
+    if (id === "") {
+      id = getSetting("background") as string;
+    }
+    const bgJsonPath = await idToBgJsonPath(id);
+    if (!fs.existsSync(bgJsonPath)) {
+      logger.warn(`bg.json not found for background id: ${id}`);
+      return null;
+    }
+    const raw = await fs.promises.readFile(bgJsonPath, "utf-8");
+    const bg: BgJson = JSON.parse(raw);
+    // Return bj.json if it exists, else null
+    return bg;
+  } catch (e) {
+    logger.error(`Failed to get background volume for id ${id}:`, e);
+    return null;
+  }
+};
+
+/**
  * Gets the actual background file path for an ID.
  * Supports external backgrounds and Resolves shortcuts.
  * @param id The ID of the background.
@@ -21,17 +46,27 @@ export const idToBackgroundPath = async (
   id: string
 ): Promise<string | null> => {
   try {
-    const backgroundFolder = await idToFolderPath(id);
-    const bgJsonPath = await idToBgJsonPath(id);
-    if (!fs.existsSync(bgJsonPath)) {
-      logger.warn(`bg.json not found at ${bgJsonPath}`);
+    const bgJson = await idToBgJson(id);
+    let basePath = "";
+    let truePath = "";
+
+    if (!bgJson || !bgJson.public || !bgJson.public.icon) {
+      logger.warn(`No icon path found in bg.json for id: ${id}`);
       return null;
     }
-    const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
-    const bg = JSON.parse(rawBg);
-    if (bg.public && bg.public.bgFile) {
-      return path.join(backgroundFolder, bg.public.bgFile);
+    const backgroundFolder = await idToFolderPath(id);
+    if (bgJson.public && bgJson.public.bgFile) {
+      basePath = path.join(backgroundFolder, bgJson.public.bgFile);
+      if (basePath) {
+        truePath = resolveShortcut(basePath);
+        if (truePath) {
+          return truePath;
+        }
+      }
     }
+    logger.warn(
+      `Could not resolve background path: ${id}, basePath: ${basePath}, truePath: ${truePath}`
+    );
     return null;
   } catch (e) {
     logger.warn(`Failed to resolve filePath for id ${id}:`, e);
@@ -108,20 +143,14 @@ export const idToBackgroundVolume = async (
   id: string
 ): Promise<number | null> => {
   try {
-    if (id === "") {
-      id = getSetting("background") as string;
-    }
-    const bgJsonPath = await idToBgJsonPath(id);
-    if (!fs.existsSync(bgJsonPath)) {
-      logger.warn(`bg.json not found for background id: ${id}`);
+    const bgJson = await idToBgJson(id);
+    if (!bgJson || !bgJson.local || !bgJson.local.volume) {
+      logger.warn(`No local volume found in bg.json for id: ${id}`);
       return null;
     }
-    const raw = await fs.promises.readFile(bgJsonPath, "utf-8");
-    const bg: BgJson = JSON.parse(raw);
-    // Return local.volume if it exists, else null
-    return bg?.local?.volume ?? null;
+    return bgJson.local.volume;
   } catch (e) {
-    logger.error(`Failed to get background volume for id ${id}:`, e);
+    logger.error(`Failed to get local volume for id ${id}:`, e);
     return null;
   }
 };
@@ -134,44 +163,14 @@ export const idToBackgroundName = async (
   id: string
 ): Promise<string | null> => {
   try {
-    if (id === "") {
-      id = getSetting("background") as string;
-    }
-    const bgJsonPath = await idToBgJsonPath(id);
-    if (!fs.existsSync(bgJsonPath)) {
-      logger.warn(`bg.json not found for background id: ${id}`);
+    const bgJson = await idToBgJson(id);
+    if (!bgJson || !bgJson.public || !bgJson.public.name) {
+      logger.warn(`No name found in bg.json for id: ${id}`);
       return null;
     }
-    const raw = await fs.promises.readFile(bgJsonPath, "utf-8");
-    const bg: BgJson = JSON.parse(raw);
-    // Return name if it exists, else null
-    return bg?.public?.name ?? null;
+    return bgJson.public.name;
   } catch (e) {
-    logger.error(`Failed to get background volume for id ${id}:`, e);
-    return null;
-  }
-};
-/**
- * Gets the BgJson type (from bg.json) for an ID.
- * @param id
- * @returns BgJson typed object or null if not found.
- */
-export const idToBgJson = async (id: string): Promise<BgJson | null> => {
-  try {
-    if (id === "") {
-      id = getSetting("background") as string;
-    }
-    const bgJsonPath = await idToBgJsonPath(id);
-    if (!fs.existsSync(bgJsonPath)) {
-      logger.warn(`bg.json not found for background id: ${id}`);
-      return null;
-    }
-    const raw = await fs.promises.readFile(bgJsonPath, "utf-8");
-    const bg: BgJson = JSON.parse(raw);
-    // Return bj.json if it exists, else null
-    return bg;
-  } catch (e) {
-    logger.error(`Failed to get background volume for id ${id}:`, e);
+    logger.error(`Failed to get name for id ${id}:`, e);
     return null;
   }
 };
@@ -185,7 +184,7 @@ export const idToIconPath = async (id: string): Promise<string | null> => {
   try {
     const bgJson = await idToBgJson(id);
     if (!bgJson || !bgJson.public || !bgJson.public.icon) {
-      logger.warn(`No icon found in bg.json for id: ${id}`);
+      logger.warn(`No icon path found in bg.json for id: ${id}`);
       return null;
     }
     const iconPath = bgJson.public.icon;
@@ -226,12 +225,12 @@ export const idToLocalTags = async (id: string): Promise<string[] | null> => {
   try {
     const bgJson = await idToBgJson(id);
     if (!bgJson || !bgJson.local || !bgJson.local.tags) {
-      logger.warn(`No tags found in bg.json for id: ${id}`);
+      logger.warn(`No local tags found in bg.json for id: ${id}`);
       return null;
     }
     return bgJson.local.tags;
   } catch (e) {
-    logger.error(`Failed to get tags for id ${id}:`, e);
+    logger.error(`Failed to get local tags for id ${id}:`, e);
     return null;
   }
 };
