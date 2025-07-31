@@ -259,3 +259,21 @@ export const idToLocalTags = async (id: string): Promise<string[] | null> => {
     return null;
   }
 };
+/**
+ * Gets the local indexed time for an ID.
+ * @param id
+ * @returns Local indexed time or null if not found.
+ */
+export const idToIndexed = async (id: string): Promise<number | null> => {
+  try {
+    const bgJson = await idToBgJson(id);
+    if (!bgJson || !bgJson.local || !bgJson.local.indexed) {
+      logger.warn(`No local indexed time found in bg.json for id: ${id}`);
+      return null;
+    }
+    return bgJson.local.indexed;
+  } catch (e) {
+    logger.error(`Failed to get local indexed time for id ${id}:`, e);
+    return null;
+  }
+};

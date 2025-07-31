@@ -30,6 +30,7 @@ import {
   idToDescription,
   idToFolderPath,
   idToIconPath,
+  idToIndexed,
   idToLocalTags,
   idToTags,
 } from "./utils/idToInfo.js";
@@ -94,6 +95,8 @@ const infoHandlers = {
   localVolume: idToBackgroundVolume, // Sometimes referred to as local volume (same as volume).
   volume: idToBackgroundVolume,
   localTags: idToLocalTags,
+  localIndexed: idToIndexed,
+  indexed: idToIndexed,
 } as const;
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
