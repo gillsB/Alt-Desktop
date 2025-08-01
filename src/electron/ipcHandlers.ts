@@ -19,7 +19,10 @@ import {
   renameLocalTag,
   saveSettingsData,
 } from "./settings.js";
-import { bgPathToVideoMetadata } from "./utils/bgPathToInfo.js";
+import {
+  bgPathToResolution,
+  bgPathToVideoMetadata,
+} from "./utils/bgPathToInfo.js";
 import { generateIcon } from "./utils/generateIcon.js";
 import {
   idToBackgroundFileType,
@@ -98,6 +101,10 @@ const infoHandlers = {
   localTags: idToLocalTags,
   localIndexed: idToIndexed,
   indexed: idToIndexed,
+} as const;
+
+const bgPathToInfoHandlers = {
+  resolution: bgPathToResolution,
 } as const;
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
@@ -1815,13 +1822,16 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       bgPath: string,
       type: K
     ): Promise<PathInfo[K] | null> => {
-      try {
-        logger.info(`getInfoFromBgPath called with: ${bgPath}, ${type}`);
-        return "response";
-      } catch (error) {
-        logger.error(`Error getting info from background path: ${error}`);
-        return null;
+      bgPath = resolveShortcut(bgPath); // Ensure bgPath is not a shortcut (.lnk)
+      const handler =
+        bgPathToInfoHandlers[type as keyof typeof bgPathToInfoHandlers];
+
+      if (handler) {
+        return (await handler(bgPath)) as PathInfo[K];
       }
+      logger.warn(`No handler found for type: ${type}`);
+
+      return null;
     }
   );
 }

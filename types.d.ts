@@ -68,7 +68,7 @@ type InfoKey = keyof IDInfo;
 
 type PathInfo = {
   name?: string;
-  resolution?: string[2];
+  resolution?: [number, number] | null;
 };
 
 type PathKey = keyof PathInfo;

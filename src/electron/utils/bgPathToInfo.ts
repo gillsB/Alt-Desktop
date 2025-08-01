@@ -56,3 +56,30 @@ export const bgPathToVideoMetadata = async (
     throw error;
   }
 };
+
+export const bgPathToResolution = async (
+  path: string
+): Promise<[number | null, number | null] | null> => {
+  try {
+    const metadata = await bgPathToVideoMetadata(path);
+
+    if (metadata && metadata.streams.length > 0) {
+      const videoStream = metadata.streams.find(
+        (stream) => stream.codec_type === "video"
+      );
+
+      if (videoStream) {
+        const width =
+          typeof videoStream.width === "number" ? videoStream.width : null;
+        const height =
+          typeof videoStream.height === "number" ? videoStream.height : null;
+        return [width, height];
+      }
+    }
+
+    return null;
+  } catch (e) {
+    logger.error(`Error in bgPathToResolution for ${path}: ${e}`);
+    return null;
+  }
+};
