@@ -354,15 +354,13 @@ const EditBackground: React.FC = () => {
         );
         const type = await window.electron.getFileType(resolvedPath);
 
-        if (type.startsWith("video")) {
-          const [width, height] = await window.electron.getInfoFromBgPath(
-            resolvedPath,
-            "resolution"
-          );
-          logger.info(
-            `Video type detected and resolution = ${width} x ${height}`
-          );
-        }
+        const [width, height] = await window.electron.getInfoFromBgPath(
+          resolvedPath,
+          "resolution"
+        );
+        logger.info(
+          `${type} type detected and resolution = ${width} x ${height}`
+        );
 
         if (!cancelled) {
           setBgFileType(type);

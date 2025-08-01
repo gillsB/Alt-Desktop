@@ -1,5 +1,7 @@
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
+import mime from "mime-types";
+import sharp from "sharp";
 import { createLoggerForFile } from "../logging.js";
 
 const logger = createLoggerForFile("bgPathToInfo.ts");
@@ -61,23 +63,56 @@ export const bgPathToResolution = async (
   path: string
 ): Promise<[number | null, number | null] | null> => {
   try {
-    const metadata = await bgPathToVideoMetadata(path);
+    const mimeType = mime.lookup(path);
 
-    if (metadata && metadata.streams.length > 0) {
-      const videoStream = metadata.streams.find(
-        (stream) => stream.codec_type === "video"
-      );
-
-      if (videoStream) {
-        const width =
-          typeof videoStream.width === "number" ? videoStream.width : null;
-        const height =
-          typeof videoStream.height === "number" ? videoStream.height : null;
-        return [width, height];
-      }
+    if (!mimeType) {
+      logger.warn(`Could not determine MIME type for file: ${path}`);
+      return null;
     }
 
-    return null;
+    if (mimeType.startsWith("image/")) {
+      // Handle image resolution
+      try {
+        const image = sharp(path);
+        const metadata = await image.metadata();
+
+        const width =
+          typeof metadata.width === "number" ? metadata.width : null;
+        const height =
+          typeof metadata.height === "number" ? metadata.height : null;
+
+        return [width, height];
+      } catch (imageError) {
+        logger.error(
+          `Error reading image resolution for ${path}: ${imageError}`
+        );
+        return null;
+      }
+    } else if (mimeType.startsWith("video/")) {
+      // Handle video resolution
+      const metadata = await bgPathToVideoMetadata(path);
+
+      if (metadata && metadata.streams.length > 0) {
+        const videoStream = metadata.streams.find(
+          (stream) => stream.codec_type === "video"
+        );
+
+        if (videoStream) {
+          const width =
+            typeof videoStream.width === "number" ? videoStream.width : null;
+          const height =
+            typeof videoStream.height === "number" ? videoStream.height : null;
+          return [width, height];
+        }
+      }
+
+      return null;
+    } else {
+      logger.warn(
+        `Unsupported MIME type for resolution detection: ${mimeType}`
+      );
+      return null;
+    }
   } catch (e) {
     logger.error(`Error in bgPathToResolution for ${path}: ${e}`);
     return null;
