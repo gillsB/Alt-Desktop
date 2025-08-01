@@ -1850,4 +1850,19 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return null;
     }
   );
+  ipcMainHandle(
+    "getInfoFromBgPath",
+    async <K extends PathKey>(
+      bgPath: string,
+      type: K
+    ): Promise<PathInfo[K] | null> => {
+      try {
+        logger.info(`getInfoFromBgPath called with: ${bgPath}, ${type}`);
+        return "response";
+      } catch (error) {
+        logger.error(`Error getting info from background path: ${error}`);
+        return null;
+      }
+    }
+  );
 }

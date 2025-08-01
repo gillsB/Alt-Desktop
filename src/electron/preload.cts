@@ -147,6 +147,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getRendererStates: () => ipcInvoke("getRendererStates"),
   getInfoFromID: <K extends InfoKey>(id: string, type: K) =>
     ipcInvoke("getInfoFromID", id, type) as Promise<IDInfo[K] | null>,
+  getInfoFromBgPath: <K extends PathKey>(path: string, type: K) =>
+    ipcInvoke("getInfoFromBgPath", path, type) as Promise<PathInfo[K] | null>,
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

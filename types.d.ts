@@ -64,9 +64,14 @@ type IDInfo = {
   indexed?: number; // same as localIndexed
 };
 
-type IDInfoValue<K extends InfoKey> = IDInfo[K];
-
 type InfoKey = keyof IDInfo;
+
+type PathInfo = {
+  name?: string;
+  resolution?: string[2];
+};
+
+type PathKey = keyof PathInfo;
 
 interface BackgroundsData {
   backgrounds: Record<string, number>;
@@ -259,6 +264,7 @@ interface EventParamMapping {
   setRendererStates: [Partial<RendererStates>];
   getRendererStates: [];
   getInfoFromID: [string, InfoKey];
+  getInfoFromBgPath: [string, PathKey];
 }
 
 // The returns from the main process to the renderer
@@ -330,6 +336,7 @@ type EventPayloadMapping = {
   setRendererStates: boolean;
   getRendererStates: RendererStates;
   getInfoFromID: IDInfo[K] | null;
+  getInfoFromBgPath: PathInfo<K> | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -460,5 +467,9 @@ interface Window {
       id: string,
       type: K
     ) => Promise<IDInfo[K] | null>;
+    getInfoFromBgPath: <K extends PathKey>(
+      path: string,
+      key: K
+    ) => Promise<PathInfo<K> | null>;
   };
 }
