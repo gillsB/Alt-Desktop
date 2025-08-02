@@ -13,6 +13,14 @@ import { handleWindowState, registerWindowKeybinds } from "./windowState.js";
 
 const logger = createLoggerForFile("main.ts");
 
+process.on("uncaughtException", (error) => {
+  logger.error("Uncaught Exception:", error);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error("Unhandled Rejection:", { reason, promise });
+});
+
 // This disables the menu completely for all windows (including the sub windows).
 Menu.setApplicationMenu(null);
 

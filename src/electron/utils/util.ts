@@ -85,11 +85,36 @@ export function ipcMainHandle<
   ) => EventPayloadMapping[Key] | Promise<EventPayloadMapping[Key]>
 ) {
   ipcMain.handle(key, async (event, ...args: Args) => {
-    if (!event.senderFrame) {
-      throw new Error("Event sender frame is null");
+    try {
+      if (!event.senderFrame) {
+        throw new Error("Event sender frame is null");
+      }
+      validateEventFrame(event.senderFrame);
+
+      logger.info(`IPC Handler called: ${key}`, { args });
+      const result = await handler(...args);
+      logger.info(`IPC Handler completed: ${key}`);
+      return result;
+    } catch (error) {
+      // Log the error with full context
+      logger.error(
+        `IPC Handler Error [${key}]:`,
+        JSON.stringify({
+          error:
+            error instanceof Error
+              ? {
+                  message: error.message,
+                  stack: error.stack,
+                  name: error.name,
+                }
+              : error,
+          args,
+          channel: key,
+        })
+      );
+
+      throw error;
     }
-    validateEventFrame(event.senderFrame);
-    return handler(...args);
   });
 }
 
