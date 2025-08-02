@@ -53,6 +53,12 @@ export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
 }
 
+interface ErrorDetails {
+  name: string;
+  message: string;
+  stack?: string;
+}
+
 /**
  * Registers an IPC event handler for the specified key.
  *
@@ -67,6 +73,7 @@ export function getMainWindow(): BrowserWindow | null {
  * - The handler function that processes the event and returns a response.
  *
  * @throws {Error} If the event sender frame is null. Or from an unknown non-validated source.
+ * If the handler throws, the error is logged and displayed in a small window.
  *
  * @example
  * ```ts
@@ -91,27 +98,38 @@ export function ipcMainHandle<
       }
       validateEventFrame(event.senderFrame);
 
-      logger.info(`IPC Handler called: ${key}`, { args });
       const result = await handler(...args);
-      logger.info(`IPC Handler completed: ${key}`);
       return result;
     } catch (error) {
-      // Log the error with full context
-      logger.error(
+      // Format error details in a readable way
+      const errorDetails: ErrorDetails =
+        error instanceof Error
+          ? {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+            }
+          : {
+              name: "UnknownError",
+              message: String(error),
+              stack: undefined,
+            };
+
+      const formattedError = [
         `IPC Handler Error [${key}]:`,
-        JSON.stringify({
-          error:
-            error instanceof Error
-              ? {
-                  message: error.message,
-                  stack: error.stack,
-                  name: error.name,
-                }
-              : error,
-          args,
-          channel: key,
-        })
-      );
+        `  Channel: ${key}`,
+        `  Arguments: ${JSON.stringify(args, null, 2)}`,
+        `  Error Name: ${errorDetails.name}`,
+        `  Error Message: ${errorDetails.message}`,
+        errorDetails.stack ? `  Stack Trace:\n${errorDetails.stack}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      // Log the formatted error
+      logger.error(formattedError);
+
+      openSmallWindow("IPC Handler Error", formattedError, ["OK"]);
 
       throw error;
     }
