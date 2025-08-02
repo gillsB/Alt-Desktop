@@ -344,6 +344,29 @@ const EditBackground: React.FC = () => {
     })();
   }, []);
 
+  const updateResolutionTag = (width: number, height: number) => {
+    const smallerAxis = Math.min(width, height);
+
+    let resolutionTag = null;
+
+    if (width > 3800 || height > 3800) {
+      resolutionTag = "4K+";
+    } else if (smallerAxis >= 1440) {
+      resolutionTag = "1440";
+    } else if (smallerAxis >= 1080) {
+      resolutionTag = "1080";
+    }
+
+    // Remove any previous resolution tags
+    setSummary((prev) => {
+      const newTags = (prev.tags || []).filter(
+        (tag) => !["4K+", "1440", "1080"].includes(tag)
+      );
+      newTags.push(resolutionTag || "");
+      return { ...prev, tags: newTags };
+    });
+  };
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -364,6 +387,8 @@ const EditBackground: React.FC = () => {
 
         if (!cancelled) {
           setBgFileType(type);
+
+          updateResolutionTag(width, height);
         }
       } else {
         setBgFileType(null);
