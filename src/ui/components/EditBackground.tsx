@@ -371,6 +371,9 @@ const EditBackground: React.FC = () => {
       const newTags = (prev.tags || []).filter(
         (tag) => !["Video", "Image"].includes(tag)
       );
+      if (type === "image/gif") {
+        newTags.push("Image", "Animated");
+      }
       if (type.startsWith("image/")) {
         newTags.push("Image");
       } else if (type.startsWith("video/")) {
