@@ -390,13 +390,18 @@ const EditBackground: React.FC = () => {
         );
         const type = await window.electron.getFileType(resolvedPath);
 
-        const [width, height] = await window.electron.getInfoFromBgPath(
-          resolvedPath,
-          "resolution"
-        );
-        logger.info(
-          `${type} type detected and resolution = ${width} x ${height}`
-        );
+        let [width, height] = [0, 0];
+        logger.info(`File type for ${resolvedPath} is ${type}`);
+
+        if (type) {
+          [width, height] = await window.electron.getInfoFromBgPath(
+            resolvedPath,
+            "resolution"
+          );
+          logger.info(
+            `${type} type detected and resolution = ${width} x ${height}`
+          );
+        }
 
         if (!cancelled) {
           setBgFileType(type);
