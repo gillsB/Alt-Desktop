@@ -366,6 +366,19 @@ const EditBackground: React.FC = () => {
       return { ...prev, tags: newTags };
     });
   };
+  const updateTypeTag = (type: string) => {
+    setSummary((prev) => {
+      const newTags = (prev.tags || []).filter(
+        (tag) => !["Video", "Image"].includes(tag)
+      );
+      if (type.startsWith("image/")) {
+        newTags.push("Image");
+      } else if (type.startsWith("video/")) {
+        newTags.push("Video");
+      }
+      return { ...prev, tags: newTags };
+    });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -389,6 +402,7 @@ const EditBackground: React.FC = () => {
           setBgFileType(type);
 
           updateResolutionTag(width, height);
+          updateTypeTag(type);
         }
       } else {
         setBgFileType(null);
