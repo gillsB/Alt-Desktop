@@ -19,6 +19,7 @@ import { SubWindowHeader } from "./SubWindowHeader";
 const logger = createLogger("EditBackground.tsx");
 
 const EditBackground: React.FC = () => {
+  const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g; // Sanitize folder names
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const rawSummary = params.get("summary");
@@ -882,9 +883,14 @@ const EditBackground: React.FC = () => {
             <label>Name</label>
             <ClearableInput
               value={summary.name ?? ""}
-              onChange={(e) =>
-                setSummary((prev) => ({ ...prev, name: e.target.value }))
-              }
+              onChange={(e) => {
+                // Remove invalid characters as user types
+                const sanitized = e.target.value.replace(
+                  INVALID_FOLDER_CHARS,
+                  ""
+                );
+                setSummary((prev) => ({ ...prev, name: sanitized }));
+              }}
               placeholder="Enter background name"
             />
           </div>
