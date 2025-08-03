@@ -638,6 +638,10 @@ const BackgroundSelect: React.FC = () => {
     );
   };
 
+  const handleBackgroundOptionsClick = () => {
+    logger.info("background options button clicked");
+  };
+
   return (
     <div
       className="background-select-root"
@@ -845,6 +849,15 @@ const BackgroundSelect: React.FC = () => {
           ) : selectedBg ? (
             <div className="background-details-panel" key={selectedBg.id}>
               <div key={selectedBg.id}>
+                <div className="button-center">
+                  <button
+                    className="button"
+                    onClick={() => handleBackgroundOptionsClick()}
+                    title="Options to better view backgrounds"
+                  >
+                    Background options
+                  </button>
+                </div>
                 {selectedBg.iconPath && (
                   <div className="details-row">
                     <SafeImage
