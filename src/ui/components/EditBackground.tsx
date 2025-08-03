@@ -383,6 +383,35 @@ const EditBackground: React.FC = () => {
     });
   };
 
+  const updateAspectRatioTag = (width: number, height: number) => {
+    setSummary((prev) => {
+      // Remove any existing aspect ratio tags
+      const newTags = (prev.tags || []).filter(
+        (tag) => !["16:9", "21:9", "32:9", "Portrait", "Other"].includes(tag)
+      );
+      let aspectRatioTag = "Other";
+
+      if (width > height) {
+        // Landscape
+        const ratio = width / height;
+
+        if (ratio >= 3.55) {
+          aspectRatioTag = "32:9";
+        } else if (ratio >= 2.33) {
+          aspectRatioTag = "21:9";
+        } else if (ratio >= 1.77) {
+          aspectRatioTag = "16:9";
+        }
+      } else {
+        aspectRatioTag = "Portrait"; // Anything taller than wide
+      }
+
+      newTags.push(aspectRatioTag);
+
+      return { ...prev, tags: newTags };
+    });
+  };
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -408,9 +437,9 @@ const EditBackground: React.FC = () => {
 
         if (!cancelled) {
           setBgFileType(type);
-
-          updateResolutionTag(width, height);
           updateTypeTag(type);
+          updateAspectRatioTag(width, height);
+          updateResolutionTag(width, height);
         }
       } else {
         setBgFileType(null);
