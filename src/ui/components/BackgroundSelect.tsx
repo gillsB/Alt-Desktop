@@ -69,6 +69,9 @@ const BackgroundSelect: React.FC = () => {
   const currentVolumeRef = useRef(selectedBg?.localVolume ?? 0.5); // keep up to date volume
   const [showVideoControls, setShowVideoControls] = useState(false);
 
+  const [showOptionsDropdown, setShowOptionsDropdown] = useState(false);
+  const optionsDropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const updateRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
@@ -638,9 +641,24 @@ const BackgroundSelect: React.FC = () => {
     );
   };
 
-  const handleBackgroundOptionsClick = () => {
-    logger.info("background options button clicked");
-  };
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      // If dropdown is open and click is outside dropdown and button, close it
+      if (
+        showOptionsDropdown &&
+        optionsDropdownRef.current &&
+        !optionsDropdownRef.current.contains(e.target as Node)
+      ) {
+        const button = document.getElementById("background-options-btn");
+        if (button && button.contains(e.target as Node)) {
+          return;
+        }
+        setShowOptionsDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showOptionsDropdown]);
 
   return (
     <div
@@ -848,15 +866,50 @@ const BackgroundSelect: React.FC = () => {
             />
           ) : selectedBg ? (
             <div className="background-details-panel" key={selectedBg.id}>
-              <div key={selectedBg.id}>
-                <div className="button-center">
+              <div key={selectedBg.id} className="background-details">
+                <div className="button-center" style={{ position: "relative" }}>
                   <button
                     className="button"
-                    onClick={() => handleBackgroundOptionsClick()}
+                    onClick={() => setShowOptionsDropdown((prev) => !prev)}
                     title="Options to better view backgrounds"
+                    id="background-options-btn"
+                    style={{ position: "relative" }}
                   >
                     Background options
                   </button>
+                  {showOptionsDropdown && (
+                    <div
+                      className="background-options-dropdown"
+                      ref={optionsDropdownRef}
+                    >
+                      <label className="background-options-checkbox">
+                        Show icons
+                        <input
+                          type="checkbox"
+                          checked={true}
+                          onChange={() => logger.info("Icon names clicked")}
+                        />
+                      </label>
+                      <label className="background-options-checkbox">
+                        Show icon names
+                        <input
+                          type="checkbox"
+                          checked={true}
+                          onChange={() => logger.info("Icon names clicked")}
+                        />
+                      </label>
+                      <label className="background-options-checkbox">
+                        Show video controls
+                        <input
+                          type="checkbox"
+                          checked={showVideoControls}
+                          onChange={() => {
+                            setShowVideoControls((prev) => !prev);
+                          }}
+                        />
+                      </label>
+                    </div>
+                  )}
                 </div>
                 {selectedBg.iconPath && (
                   <div className="details-row">

@@ -187,11 +187,11 @@
 .background-details-panel label {
   font-weight: 600;
   color: #bdbdbd;
-  display: block;
+  display: flex;
 }
 
 .background-details-panel textarea,
-.background-details-panel input:not([type="range"]) {
+.background-details-panel input:not([type="range"]):not([type="checkbox"]) {
   width: 100%;
   background: #23233a;
   color: #fff;
@@ -450,4 +450,40 @@
 
 .background-details-panel input[type="range"].red-slider::-webkit-slider-thumb {
   background: #dc3545;
+}
+
+.button-center {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 12px 0;
+}
+
+.background-options-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  font-size: 15px;
+  background: #222;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px #0004;
+  z-index: 30;
+  min-width: 180px;
+  padding: 8px 0;
+}
+
+.background-options-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 6px 16px;
+  cursor: pointer;
+  user-select: none;
+  gap: 8px;
+}
+
+.background-options-checkbox input[type="checkbox"] {
+  margin-left: auto;
 }
