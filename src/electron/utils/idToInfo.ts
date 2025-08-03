@@ -131,8 +131,8 @@ export const idToBackgroundPath = async (
     let basePath = "";
     let truePath = "";
 
-    if (!bgJson || !bgJson.public || !bgJson.public.icon) {
-      logger.warn(`No icon path found in bg.json for id: ${id}`);
+    if (!bgJson || !bgJson.public || !bgJson.public.bgFile) {
+      logger.warn(`No bgFile found in bg.json for id: ${id}`);
       return null;
     }
     const backgroundFolder = await idToFolderPath(id);
