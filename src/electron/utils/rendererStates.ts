@@ -4,7 +4,8 @@ const logger = createLoggerForFile("rendererStates.ts");
 
 let rendererStates: RendererStates = {
   showVideoControls: false,
-  testValue: "default",
+  hideIcons: false,
+  hideIconNames: false,
 };
 
 export async function getRendererStates(): Promise<RendererStates> {

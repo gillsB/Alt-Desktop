@@ -1778,16 +1778,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     logger.warn("getBaseFilePaths, returning empty due to name = " + name);
     return "";
   });
-  ipcMainHandle("showVideoControls", async (show: boolean) => {
-    try {
-      logger.info(`Show controls set to: ${show}`);
-      mainWindow?.webContents.send("show-video-controls", show);
-      return;
-    } catch (error) {
-      logger.error("Error in showVideoControls:", error);
-      return;
-    }
-  });
   ipcMainHandle("setRendererStates", (updates: Partial<RendererStates>) => {
     setRendererStates(updates);
 

@@ -141,7 +141,6 @@ electron.contextBridge.exposeInMainWorld("electron", {
   changeBackgroundDirectory: (id: string, targetLocation: string) =>
     ipcInvoke("changeBackgroundDirectory", id, targetLocation),
   getBaseFilePaths: (name?: string) => ipcInvoke("getBaseFilePaths", name),
-  showVideoControls: (show: boolean) => ipcInvoke("showVideoControls", show),
   setRendererStates: (updates: Partial<RendererStates>) =>
     ipcInvoke("setRendererStates", updates),
   getRendererStates: () => ipcInvoke("getRendererStates"),

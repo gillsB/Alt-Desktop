@@ -193,7 +193,8 @@ interface CustomBrowserWindow extends Electron.BrowserWindow {
 
 type RendererStates = {
   showVideoControls?: boolean;
-  testValue?: string;
+  hideIcons?: boolean;
+  hideIconNames?: boolean;
 };
 
 // Items/objects being sent from the renderer to the main process
@@ -260,7 +261,6 @@ interface EventParamMapping {
   indexBackgrounds: [options?: { newExternalPathAdded?: boolean }];
   changeBackgroundDirectory: [string, string];
   getBaseFilePaths: [name?: string];
-  showVideoControls: [boolean];
   setRendererStates: [Partial<RendererStates>];
   getRendererStates: [];
   getInfoFromID: [string, InfoKey];
@@ -332,7 +332,6 @@ type EventPayloadMapping = {
   indexBackgrounds: [number, number];
   changeBackgroundDirectory: string | null;
   getBaseFilePaths: string;
-  showVideoControls: void;
   setRendererStates: boolean;
   getRendererStates: RendererStates;
   getInfoFromID: IDInfo[K] | null;
@@ -460,7 +459,6 @@ interface Window {
       targetLocation: string
     ) => Promise<string | null>;
     getBaseFilePaths: (name?: string) => Promise<string>;
-    showVideoControls: (show: boolean) => Promise<void>;
     setRendererStates: (updates: RendererStates) => Promise<boolean>;
     getRendererStates: () => Promise<RendererStates>;
     getInfoFromID: <K extends InfoKey>(

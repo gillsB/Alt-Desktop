@@ -178,21 +178,21 @@ const Background: React.FC<BackgroundProps> = ({
 
   useEffect(() => {
     const showControls = (...args: unknown[]) => {
-      logger.info("showVideoControls event received:", args[1]);
-      if (!args[1] as boolean) {
-        videoControlsPositionRef.current = { x: -100, y: -100 };
-        setVolumeFromDefault();
-        const video = videoRef.current;
-        video.play();
+      logger.info("renderer-state-updated event received:", args[1]);
+      const state = args[1] as Partial<RendererStates>;
+      if ("showVideoControls" in state) {
+        if (!state.showVideoControls) {
+          videoControlsPositionRef.current = { x: -100, y: -100 };
+          setVolumeFromDefault();
+          const video = videoRef.current;
+          video.play();
+        }
+        setShowVideoControls(!!state.showVideoControls);
       }
-      window.electron.setRendererStates({
-        showVideoControls: args[1] as boolean,
-      });
-      setShowVideoControls(args[1] as boolean);
     };
-    window.electron.on("show-video-controls", showControls);
+    window.electron.on("renderer-state-updated", showControls);
     return () => {
-      window.electron.off("show-video-controls", showControls);
+      window.electron.off("renderer-state-updated", showControls);
     };
   }, []);
 

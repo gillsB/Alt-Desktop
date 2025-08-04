@@ -72,6 +72,16 @@ const DesktopGrid: React.FC = () => {
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const updateRendererStates = async () => {
+      const rendererStates = await window.electron.getRendererStates();
+      setHideIcons(rendererStates.hideIcons || false);
+      setHideIconNames(rendererStates.hideIconNames || false);
+      setShowVideoControls(rendererStates.showVideoControls || false);
+    };
+    updateRendererStates();
+  }, []);
+
   const toggleIcons = () => {
     // Always show icon names when toggled (only shows when icons show). So restoring icons shows names.
     setHideIconNames(false);
@@ -418,7 +428,7 @@ const DesktopGrid: React.FC = () => {
       });
       logger.info(
         "Desktop right click at icon slot at row: " +
-          `${validRow}, col:${validCol}, type: ${hideIcons ? "desktop" : "hideIcons"}`
+          `${validRow}, col:${validCol}, type: ${hideIcons ? "hideIcons" : "desktop"}`
       );
     }
   };
@@ -794,7 +804,9 @@ const DesktopGrid: React.FC = () => {
   }, []);
 
   const handleShowVideoControls = async () => {
-    await window.electron.showVideoControls(!showVideoControls);
+    await window.electron.setRendererStates({
+      showVideoControls: !showVideoControls,
+    });
     setShowVideoControls(!showVideoControls);
   };
 

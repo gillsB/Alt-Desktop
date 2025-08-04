@@ -68,6 +68,8 @@ const BackgroundSelect: React.FC = () => {
   const pendingSaveRef = useRef(false);
   const currentVolumeRef = useRef(selectedBg?.localVolume ?? 0.5); // keep up to date volume
   const [showVideoControls, setShowVideoControls] = useState(false);
+  const [hideIcons, setHideIcons] = useState(false);
+  const [hideIconNames, setHideIconNames] = useState(false);
 
   const [showDisplayDropdown, setShowDisplayDropdown] = useState(false);
   const displayDropdownRef = useRef<HTMLDivElement>(null);
@@ -75,6 +77,8 @@ const BackgroundSelect: React.FC = () => {
   useEffect(() => {
     const updateRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
+      setHideIcons(rendererStates.hideIcons || false);
+      setHideIconNames(rendererStates.hideIconNames || false);
       setShowVideoControls(rendererStates.showVideoControls || false);
     };
     updateRendererStates();
@@ -661,7 +665,9 @@ const BackgroundSelect: React.FC = () => {
   }, [showDisplayDropdown]);
 
   const toggleShowControls = async () => {
-    await window.electron.showVideoControls(!showVideoControls);
+    await window.electron.setRendererStates({
+      showVideoControls: !showVideoControls,
+    });
     setShowVideoControls((prev) => !prev);
   };
 
@@ -885,18 +891,18 @@ const BackgroundSelect: React.FC = () => {
                   {showDisplayDropdown && (
                     <div className="display-dropdown" ref={displayDropdownRef}>
                       <label className="display-checkbox">
-                        Show icons
+                        Hide icons
                         <input
                           type="checkbox"
-                          checked={true}
+                          checked={hideIcons}
                           onChange={() => logger.info("Icon names clicked")}
                         />
                       </label>
                       <label className="display-checkbox">
-                        Show icon names
+                        Hide icon names
                         <input
                           type="checkbox"
-                          checked={true}
+                          checked={hideIconNames}
                           onChange={() => logger.info("Icon names clicked")}
                         />
                       </label>
