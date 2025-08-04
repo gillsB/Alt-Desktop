@@ -240,7 +240,7 @@ interface EventParamMapping {
   generateIcon: [number, number, string, string];
   selectIconFromList: [string, string[], number, number];
   resetAllIconsFontColor: [];
-  desktopSetShowIcons: [boolean];
+  desktopSetHideIcons: [boolean];
   openBackgroundSelect: [id?: string];
   getBackgroundIDs: [];
   getBackgroundSummaries: [GetBackgroundSummariesRequest?];
@@ -312,7 +312,7 @@ type EventPayloadMapping = {
   generateIcon: string[];
   selectIconFromList: string;
   resetAllIconsFontColor: boolean;
-  desktopSetShowIcons: boolean;
+  desktopSetHideIcons: boolean;
   openBackgroundSelect: boolean;
   getBackgroundIDs: string[];
   getBackgroundSummaries: GetBackgroundSummariesResponse;
@@ -432,7 +432,7 @@ interface Window {
       col: number
     ) => Promise<string>;
     resetAllIconsFontColor: () => Promise<boolean>;
-    desktopSetShowIcons: (showIcons: boolean) => Promise<boolean>;
+    desktopSetHideIcons: (hideIcons: boolean) => Promise<boolean>;
     getBackgroundIDs: () => Promise<string[]>;
     getBackgroundSummaries: (
       params?: GetBackgroundSummariesRequest

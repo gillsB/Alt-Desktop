@@ -29,7 +29,7 @@ const DesktopGrid: React.FC = () => {
   const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
-  const [showIcons, setShowIcons] = useState(true); // State to toggle icons visibility
+  const [hideIcons, setHideIcons] = useState(false); // State to toggle icons visibility
   const [showIconNames, setShowIconNames] = useState(true); // State to toggle icon names visibility
   const [showLaunchSubmenu, setShowLaunchSubmenu] = useState(false); // State for submenu visibility
   const [showOpenSubmenu, setShowOpenSubmenu] = useState(false); // State for submenu visibility
@@ -73,7 +73,7 @@ const DesktopGrid: React.FC = () => {
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const toggleIcons = () => {
-    setShowIcons((prev) => !prev);
+    setHideIcons((prev) => !prev);
     setContextMenu(null);
     hideHighlightBox();
   };
@@ -320,24 +320,24 @@ const DesktopGrid: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleDesktopSetShowIcon = (
+    const handleDesktopSetHideIcons = (
       _: Electron.IpcRendererEvent,
       showIcon: boolean
     ) => {
       logger.info("Received set-show-icons event:", showIcon);
-      setShowIcons(showIcon);
+      setHideIcons(showIcon);
       setShowIconNames(showIcon);
     };
 
     window.electron.on(
-      "set-show-icons",
-      handleDesktopSetShowIcon as (...args: unknown[]) => void
+      "set-hide-icons",
+      handleDesktopSetHideIcons as (...args: unknown[]) => void
     );
 
     return () => {
       window.electron.off(
-        "set-show-icons",
-        handleDesktopSetShowIcon as (...args: unknown[]) => void
+        "set-hide-icons",
+        handleDesktopSetHideIcons as (...args: unknown[]) => void
       );
     };
   }, []);
@@ -396,7 +396,7 @@ const DesktopGrid: React.FC = () => {
     // Check if an icon exists at the calculated row and column
     const existingIcon = getIcon(validRow, validCol);
 
-    if (existingIcon && showIcons) {
+    if (existingIcon && !hideIcons) {
       // If an icon exists, set the context menu to "icon" type
       setContextMenu({
         x,
@@ -411,12 +411,12 @@ const DesktopGrid: React.FC = () => {
       setContextMenu({
         x,
         y,
-        type: showIcons ? "desktop" : "hideIcons",
+        type: !hideIcons ? "desktop" : "hideIcons",
         icon: null,
       });
       logger.info(
         "Desktop right click at icon slot at row: " +
-          `${validRow}, col:${validCol}, type: ${showIcons ? "desktop" : "hideIcons"}`
+          `${validRow}, col:${validCol}, type: ${hideIcons ? "desktop" : "hideIcons"}`
       );
     }
   };
@@ -578,7 +578,7 @@ const DesktopGrid: React.FC = () => {
 
   const handleOpenSettings = async () => {
     try {
-      setShowIcons(true);
+      setHideIcons(false);
       setShowIconNames(true);
       await window.electron.openSettings();
     } catch (error) {
@@ -985,7 +985,7 @@ const DesktopGrid: React.FC = () => {
           })}
 
         {/* Render desktop icons */}
-        {showIcons &&
+        {!hideIcons &&
           Array.from(iconsMap.values()).map((icon) => {
             const iconKey = `${icon.row},${icon.col}`;
             const reloadTimestamp = reloadTimestamps[iconKey] || 0;
@@ -1157,10 +1157,10 @@ const DesktopGrid: React.FC = () => {
               </div>
               <div className="menu-separator" />
               <label className="menu-checkbox">
-                Show Icons
+                Hide Icons
                 <input
                   type="checkbox"
-                  checked={showIcons}
+                  checked={hideIcons}
                   onChange={toggleIcons}
                 />
               </label>
@@ -1219,10 +1219,10 @@ const DesktopGrid: React.FC = () => {
           {contextMenu.type === "hideIcons" && (
             <>
               <label className="menu-checkbox">
-                Show Icons
+                Hide Icons
                 <input
                   type="checkbox"
-                  checked={showIcons}
+                  checked={hideIcons}
                   onChange={toggleIcons}
                 />
               </label>

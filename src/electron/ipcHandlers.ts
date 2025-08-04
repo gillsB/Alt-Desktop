@@ -1338,13 +1338,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     return resetAllIconsFontColor();
   });
 
-  ipcMainHandle("desktopSetShowIcons", async (showIcons: boolean) => {
+  ipcMainHandle("desktopSetHideIcons", async (hideIcons: boolean) => {
     try {
-      logger.info(`Setting showIcons to: ${showIcons}`);
-      mainWindow?.webContents.send("set-show-icons", showIcons);
+      logger.info(`Setting hideIcons to: ${hideIcons}`);
+      mainWindow?.webContents.send("set-hide-icons", hideIcons);
       return true;
     } catch (error) {
-      logger.error("Error in desktopSetShowIcons:", error);
+      logger.error("Error in desktopSetHideIcons:", error);
       return false;
     }
   });

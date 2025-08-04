@@ -113,8 +113,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     col: number
   ) => ipcInvoke("selectIconFromList", title, images, row, col),
   resetAllIconsFontColor: () => ipcInvoke("resetAllIconsFontColor"),
-  desktopSetShowIcons: (showIcons: boolean) =>
-    ipcInvoke("desktopSetShowIcons", showIcons),
+  desktopSetHideIcons: (hideIcons: boolean) =>
+    ipcInvoke("desktopSetHideIcons", hideIcons),
   getBackgroundIDs: () => ipcInvoke("getBackgroundIDs"),
   getBackgroundSummaries: (params) =>
     ipcInvoke("getBackgroundSummaries", params),
