@@ -1337,17 +1337,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("resetAllIconsFontColor", async () => {
     return resetAllIconsFontColor();
   });
-
-  ipcMainHandle("desktopSetHideIcons", async (hideIcons: boolean) => {
-    try {
-      logger.info(`Setting hideIcons to: ${hideIcons}`);
-      mainWindow?.webContents.send("set-hide-icons", hideIcons);
-      return true;
-    } catch (error) {
-      logger.error("Error in desktopSetHideIcons:", error);
-      return false;
-    }
-  });
   ipcMainHandle("getBackgroundIDs", async () => {
     try {
       const backgroundsFile = getBackgroundsJsonFilePath();

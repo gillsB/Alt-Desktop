@@ -26,7 +26,7 @@ export function Header() {
     if (await window.electron.getSubWindowTitle()) {
       return;
     } else {
-      await window.electron.desktopSetHideIcons(false);
+      await window.electron.setRendererStates({ hideIcons: false });
       window.electron.openSettings();
     }
   };

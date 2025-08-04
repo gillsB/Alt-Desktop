@@ -177,7 +177,7 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   useEffect(() => {
-    const showControls = (...args: unknown[]) => {
+    const updateStates = (...args: unknown[]) => {
       logger.info("renderer-state-updated event received:", args[1]);
       const state = args[1] as Partial<RendererStates>;
       if ("showVideoControls" in state) {
@@ -190,9 +190,9 @@ const Background: React.FC<BackgroundProps> = ({
         setShowVideoControls(!!state.showVideoControls);
       }
     };
-    window.electron.on("renderer-state-updated", showControls);
+    window.electron.on("renderer-state-updated", updateStates);
     return () => {
-      window.electron.off("renderer-state-updated", showControls);
+      window.electron.off("renderer-state-updated", updateStates);
     };
   }, []);
 

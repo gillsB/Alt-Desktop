@@ -77,11 +77,32 @@ const BackgroundSelect: React.FC = () => {
   useEffect(() => {
     const updateRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
+      logger.info("Fetched renderer states:", rendererStates);
       setHideIcons(rendererStates.hideIcons || false);
       setHideIconNames(rendererStates.hideIconNames || false);
       setShowVideoControls(rendererStates.showVideoControls || false);
     };
     updateRendererStates();
+  }, []);
+
+  useEffect(() => {
+    const updateStates = (...args: unknown[]) => {
+      logger.info("renderer-state-updated event received:", args[1]);
+      const state = args[1] as Partial<RendererStates>;
+      if ("showVideoControls" in state) {
+        setShowVideoControls(!!state.showVideoControls);
+      }
+      if ("hideIcons" in state) {
+        setHideIcons(!!state.hideIcons);
+      }
+      if ("hideIconNames" in state) {
+        setHideIconNames(!!state.hideIconNames);
+      }
+    };
+    window.electron.on("renderer-state-updated", updateStates);
+    return () => {
+      window.electron.off("renderer-state-updated", updateStates);
+    };
   }, []);
 
   // Sets up allTags reference for all tags, public and local.
@@ -668,7 +689,16 @@ const BackgroundSelect: React.FC = () => {
     await window.electron.setRendererStates({
       showVideoControls: !showVideoControls,
     });
-    setShowVideoControls((prev) => !prev);
+  };
+  const toggleHideIcons = async () => {
+    await window.electron.setRendererStates({
+      hideIcons: !hideIcons,
+    });
+  };
+  const toggleHideIconNames = async () => {
+    await window.electron.setRendererStates({
+      hideIconNames: !hideIconNames,
+    });
   };
 
   return (
@@ -895,7 +925,7 @@ const BackgroundSelect: React.FC = () => {
                         <input
                           type="checkbox"
                           checked={hideIcons}
-                          onChange={() => logger.info("Icon names clicked")}
+                          onChange={() => toggleHideIcons()}
                         />
                       </label>
                       <label className="display-checkbox">
@@ -903,7 +933,7 @@ const BackgroundSelect: React.FC = () => {
                         <input
                           type="checkbox"
                           checked={hideIconNames}
-                          onChange={() => logger.info("Icon names clicked")}
+                          onChange={() => toggleHideIconNames()}
                         />
                       </label>
                       <label className="display-checkbox">

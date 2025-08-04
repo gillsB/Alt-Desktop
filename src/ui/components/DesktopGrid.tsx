@@ -82,6 +82,26 @@ const DesktopGrid: React.FC = () => {
     updateRendererStates();
   }, []);
 
+  useEffect(() => {
+    const updateStates = (...args: unknown[]) => {
+      logger.info("renderer-state-updated event received:", args[1]);
+      const state = args[1] as Partial<RendererStates>;
+      if ("showVideoControls" in state) {
+        setShowVideoControls(!!state.showVideoControls);
+      }
+      if ("hideIcons" in state) {
+        setHideIcons(!!state.hideIcons);
+      }
+      if ("hideIconNames" in state) {
+        setHideIconNames(!!state.hideIconNames);
+      }
+    };
+    window.electron.on("renderer-state-updated", updateStates);
+    return () => {
+      window.electron.off("renderer-state-updated", updateStates);
+    };
+  }, []);
+
   const toggleIcons = () => {
     // Always show icon names when toggled (only shows when icons show). So restoring icons shows names.
     setHideIconNames(false);
