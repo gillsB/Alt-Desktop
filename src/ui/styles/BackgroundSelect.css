@@ -190,8 +190,7 @@
   display: flex;
 }
 
-.background-details-panel textarea,
-.background-details-panel input:not([type="range"]):not([type="checkbox"]) {
+.background-details-panel textarea {
   width: 100%;
   background: #23233a;
   color: #fff;
@@ -460,7 +459,7 @@
   margin: 12px 0;
 }
 
-.background-options-dropdown {
+.display-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -475,7 +474,7 @@
   padding: 8px 0;
 }
 
-.background-options-checkbox {
+.display-checkbox {
   display: flex;
   align-items: center;
   padding: 6px 16px;
@@ -484,6 +483,6 @@
   gap: 8px;
 }
 
-.background-options-checkbox input[type="checkbox"] {
+.display-checkbox input[type="checkbox"] {
   margin-left: auto;
 }

@@ -69,8 +69,8 @@ const BackgroundSelect: React.FC = () => {
   const currentVolumeRef = useRef(selectedBg?.localVolume ?? 0.5); // keep up to date volume
   const [showVideoControls, setShowVideoControls] = useState(false);
 
-  const [showOptionsDropdown, setShowOptionsDropdown] = useState(false);
-  const optionsDropdownRef = useRef<HTMLDivElement>(null);
+  const [showDisplayDropdown, setShowDisplayDropdown] = useState(false);
+  const displayDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateRendererStates = async () => {
@@ -645,20 +645,20 @@ const BackgroundSelect: React.FC = () => {
     function handleClickOutside(e: MouseEvent) {
       // If dropdown is open and click is outside dropdown and button, close it
       if (
-        showOptionsDropdown &&
-        optionsDropdownRef.current &&
-        !optionsDropdownRef.current.contains(e.target as Node)
+        showDisplayDropdown &&
+        displayDropdownRef.current &&
+        !displayDropdownRef.current.contains(e.target as Node)
       ) {
-        const button = document.getElementById("background-options-btn");
+        const button = document.getElementById("display-btn");
         if (button && button.contains(e.target as Node)) {
           return;
         }
-        setShowOptionsDropdown(false);
+        setShowDisplayDropdown(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showOptionsDropdown]);
+  }, [showDisplayDropdown]);
 
   return (
     <div
@@ -870,19 +870,16 @@ const BackgroundSelect: React.FC = () => {
                 <div className="button-center" style={{ position: "relative" }}>
                   <button
                     className="button"
-                    onClick={() => setShowOptionsDropdown((prev) => !prev)}
+                    onClick={() => setShowDisplayDropdown((prev) => !prev)}
                     title="Options to better view backgrounds"
-                    id="background-options-btn"
+                    id="display-btn"
                     style={{ position: "relative" }}
                   >
-                    Background options
+                    Display
                   </button>
-                  {showOptionsDropdown && (
-                    <div
-                      className="background-options-dropdown"
-                      ref={optionsDropdownRef}
-                    >
-                      <label className="background-options-checkbox">
+                  {showDisplayDropdown && (
+                    <div className="display-dropdown" ref={displayDropdownRef}>
+                      <label className="display-checkbox">
                         Show icons
                         <input
                           type="checkbox"
@@ -890,7 +887,7 @@ const BackgroundSelect: React.FC = () => {
                           onChange={() => logger.info("Icon names clicked")}
                         />
                       </label>
-                      <label className="background-options-checkbox">
+                      <label className="display-checkbox">
                         Show icon names
                         <input
                           type="checkbox"
@@ -898,7 +895,7 @@ const BackgroundSelect: React.FC = () => {
                           onChange={() => logger.info("Icon names clicked")}
                         />
                       </label>
-                      <label className="background-options-checkbox">
+                      <label className="display-checkbox">
                         Show video controls
                         <input
                           type="checkbox"
