@@ -660,6 +660,11 @@ const BackgroundSelect: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showDisplayDropdown]);
 
+  const toggleShowControls = async () => {
+    await window.electron.showVideoControls(!showVideoControls);
+    setShowVideoControls((prev) => !prev);
+  };
+
   return (
     <div
       className="background-select-root"
@@ -901,7 +906,7 @@ const BackgroundSelect: React.FC = () => {
                           type="checkbox"
                           checked={showVideoControls}
                           onChange={() => {
-                            setShowVideoControls((prev) => !prev);
+                            toggleShowControls();
                           }}
                         />
                       </label>
