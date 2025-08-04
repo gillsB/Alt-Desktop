@@ -30,7 +30,7 @@ const DesktopGrid: React.FC = () => {
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
   const [hideIcons, setHideIcons] = useState(false); // State to toggle icons visibility
-  const [showIconNames, setShowIconNames] = useState(true); // State to toggle icon names visibility
+  const [hideIconNames, setHideIconNames] = useState(false); // State to toggle icon names visibility
   const [showLaunchSubmenu, setShowLaunchSubmenu] = useState(false); // State for submenu visibility
   const [showOpenSubmenu, setShowOpenSubmenu] = useState(false); // State for submenu visibility
   const [highlightBox, setHighlightBox] = useState<HighlightPosition>({
@@ -73,13 +73,15 @@ const DesktopGrid: React.FC = () => {
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const toggleIcons = () => {
+    // Always show icon names when toggled (only shows when icons show). So restoring icons shows names.
+    setHideIconNames(false);
     setHideIcons((prev) => !prev);
     setContextMenu(null);
     hideHighlightBox();
   };
 
   const toggleIconNames = () => {
-    setShowIconNames((prev) => !prev);
+    setHideIconNames((prev) => !prev);
     setContextMenu(null);
     hideHighlightBox();
   };
@@ -324,9 +326,9 @@ const DesktopGrid: React.FC = () => {
       _: Electron.IpcRendererEvent,
       showIcon: boolean
     ) => {
-      logger.info("Received set-show-icons event:", showIcon);
+      logger.info("Received set-hide-icons event:", showIcon);
       setHideIcons(showIcon);
-      setShowIconNames(showIcon);
+      setHideIconNames(showIcon);
     };
 
     window.electron.on(
@@ -411,7 +413,7 @@ const DesktopGrid: React.FC = () => {
       setContextMenu({
         x,
         y,
-        type: !hideIcons ? "desktop" : "hideIcons",
+        type: hideIcons ? "hideIcons" : "desktop",
         icon: null,
       });
       logger.info(
@@ -579,7 +581,7 @@ const DesktopGrid: React.FC = () => {
   const handleOpenSettings = async () => {
     try {
       setHideIcons(false);
-      setShowIconNames(true);
+      setHideIconNames(false);
       await window.electron.openSettings();
     } catch (error) {
       logger.error(`Failed to open settings`, error);
@@ -1023,7 +1025,7 @@ const DesktopGrid: React.FC = () => {
                   forceReload={reloadTimestamp}
                 />
                 {icon.fontSize !== 0 &&
-                  showIconNames &&
+                  !hideIconNames &&
                   (icon.fontSize || defaultFontSize) !== 0 && (
                     <div
                       className="desktop-icon-name"
@@ -1165,10 +1167,10 @@ const DesktopGrid: React.FC = () => {
                 />
               </label>
               <label className="menu-checkbox">
-                Show Icon Names
+                Hide Icon Names
                 <input
                   type="checkbox"
-                  checked={showIconNames}
+                  checked={hideIconNames}
                   onChange={toggleIconNames}
                 />
               </label>
