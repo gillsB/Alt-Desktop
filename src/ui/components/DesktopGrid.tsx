@@ -471,6 +471,7 @@ const DesktopGrid: React.FC = () => {
       // If row and col are provided, directly call editIcon
       window.electron.ensureDataFolder(row, col);
       window.electron.editIcon(row, col);
+      await window.electron.setRendererStates({ hideIconNames: false });
       setContextMenu(null);
       return;
     }
