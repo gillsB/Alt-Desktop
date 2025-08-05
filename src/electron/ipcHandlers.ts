@@ -254,10 +254,56 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
-  ipcMainHandle("ensureUniqueIconId", async (name: string): Promise<string> => {
-    logger.info("ensureUniqueIconId called with: ", name);
-    return name;
-  });
+  ipcMainHandle(
+    "ensureUniqueIconId",
+    async (name: string): Promise<string | null> => {
+      logger.info("ensureUniqueIconId called with: ", name);
+
+      const baseName = name;
+
+      const filePath = getDesktopIconsFilePath();
+      let icons: { id: string }[] = [];
+
+      try {
+        if (fs.existsSync(filePath)) {
+          const data = fs.readFileSync(filePath, "utf-8");
+          const parsed = JSON.parse(data);
+          icons = Array.isArray(parsed.icons) ? parsed.icons : [];
+        }
+      } catch (e) {
+        logger.error("Failed to read desktop icons file:", e);
+        return null;
+      }
+
+      // Collect all ids that match baseName or baseName_N
+      const takenIds = new Set(
+        icons
+          .map((icon) => icon.id)
+          .filter((id) => {
+            if (!id) return false;
+            // Match baseName or baseName_N (where N is a number)
+            return (
+              id === baseName ||
+              id.match(new RegExp(`^${escapeRegExp(baseName)}(_\\d+)?$`))
+            );
+          })
+      );
+
+      // If baseName is not taken, use it
+      if (!takenIds.has(baseName)) {
+        return baseName;
+      }
+
+      // Otherwise, find the next available baseName_N
+      let counter = 1;
+      let candidate = `${baseName}_${counter}`;
+      while (takenIds.has(candidate)) {
+        counter++;
+        candidate = `${baseName}_${counter}`;
+      }
+      return candidate;
+    }
+  );
 
   ipcMainHandle("setIconData", async (icon: DesktopIcon): Promise<boolean> => {
     try {

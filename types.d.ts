@@ -276,7 +276,7 @@ type EventPayloadMapping = {
   sendHeaderAction: HeaderAction;
   getDesktopIconData: DesktopIconData;
   ensureDataFolder: boolean;
-  ensureUniqueIconId: string;
+  ensureUniqueIconId: string | null;
   setIconData: boolean;
   sendSubWindowAction: { action: SubWindowAction; icon?: DesktopIcon };
   getDesktopIcon: DesktopIcon | null;
@@ -354,7 +354,7 @@ interface Window {
     getDesktopIconData: () => Promise<DesktopIconData>;
     getSafeFileUrl: (relativePath: string) => string;
     ensureDataFolder: (row: number, col: number) => Promise<boolean>;
-    ensureUniqueIconId: (name: string) => Promise<string>;
+    ensureUniqueIconId: (name: string) => Promise<string | null>;
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
     getDesktopIcon: (row: number, col: number) => Promise<DesktopIcon | null>;
