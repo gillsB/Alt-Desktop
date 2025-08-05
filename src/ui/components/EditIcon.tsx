@@ -148,6 +148,40 @@ const EditIcon: React.FC = () => {
     }
 
     try {
+      // Sanitize old id by removing trailing _# (e.g. _1, _2, _3)
+      const oldId = icon.id ? icon.id.replace(/_\d+$/, "") : "";
+      const iconName = icon.name?.trim() || "";
+
+      let newId: string | null;
+
+      if (!oldId || !iconName) {
+        // If either id or name is empty, use "unknownIcon"
+        logger.info("new icon and no name");
+        newId = await window.electron.ensureUniqueIconId(
+          iconName || "unknownIcon"
+        );
+      } else if (oldId !== iconName) {
+        logger.info("icon name changed, generating new id");
+        // If sanitized id does not match name, generate new id
+        newId = await window.electron.ensureUniqueIconId(iconName);
+      } else {
+        // Otherwise, keep the current id
+        logger.info("icon name not changed, not updating id");
+        newId = icon.id;
+      }
+
+      // Fail to read -> cancel save and warn user. (Avoid giving it an arbitrary id as it could corrupt files)
+      if (newId === null) {
+        await showSmallWindow(
+          "Failed to Read",
+          "Failed to read desktopIcons.json file. Cannot generate unique icon ID.",
+          ["Okay"]
+        );
+        return;
+      }
+
+      icon.id = newId;
+
       // Check if the image path looks like a full file path
       const fileType = await window.electron.getFileType(icon.image);
       const driveLetterRegex = /^[a-zA-Z]:[\\/]/;

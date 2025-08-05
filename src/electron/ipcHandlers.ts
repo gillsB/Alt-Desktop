@@ -265,11 +265,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       let icons: { id: string }[] = [];
 
       try {
-        if (fs.existsSync(filePath)) {
-          const data = fs.readFileSync(filePath, "utf-8");
-          const parsed = JSON.parse(data);
-          icons = Array.isArray(parsed.icons) ? parsed.icons : [];
+        if (!fs.existsSync(filePath)) {
+          logger.error("desktopIcons.json does not exist.");
+          return null;
         }
+        const data = fs.readFileSync(filePath, "utf-8");
+        const parsed = JSON.parse(data);
+        icons = Array.isArray(parsed.icons) ? parsed.icons : [];
       } catch (e) {
         logger.error("Failed to read desktop icons file:", e);
         return null;
