@@ -1,5 +1,6 @@
 // Default values for a DesktopIcon
 export const DEFAULT_DESKTOP_ICON: DesktopIcon = {
+  id: "",
   row: -1,
   col: -1,
   name: "",

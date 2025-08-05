@@ -143,6 +143,7 @@ type GetBackgroundPageForIdResponse = {
 };
 
 type DesktopIcon = {
+  id: string;
   row: number;
   col: number;
   name: string;
@@ -205,6 +206,7 @@ interface EventParamMapping {
   sendHeaderAction: [HeaderAction];
   getDesktopIconData: [];
   ensureDataFolder: [number, number];
+  ensureUniqueIconId: [string];
   setIconData: [DesktopIcon];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
   getDesktopIcon: [number, number];
@@ -274,6 +276,7 @@ type EventPayloadMapping = {
   sendHeaderAction: HeaderAction;
   getDesktopIconData: DesktopIconData;
   ensureDataFolder: boolean;
+  ensureUniqueIconId: string;
   setIconData: boolean;
   sendSubWindowAction: { action: SubWindowAction; icon?: DesktopIcon };
   getDesktopIcon: DesktopIcon | null;
@@ -351,6 +354,7 @@ interface Window {
     getDesktopIconData: () => Promise<DesktopIconData>;
     getSafeFileUrl: (relativePath: string) => string;
     ensureDataFolder: (row: number, col: number) => Promise<boolean>;
+    ensureUniqueIconId: (name: string) => Promise<string>;
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
     getDesktopIcon: (row: number, col: number) => Promise<DesktopIcon | null>;

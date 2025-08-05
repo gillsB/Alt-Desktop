@@ -254,6 +254,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
+  ipcMainHandle("ensureUniqueIconId", async (name: string): Promise<string> => {
+    logger.info("ensureUniqueIconId called with: ", name);
+    return name;
+  });
+
   ipcMainHandle("setIconData", async (icon: DesktopIcon): Promise<boolean> => {
     try {
       const { row, col } = icon; // Extract row and col from the icon object

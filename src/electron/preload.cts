@@ -33,6 +33,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getSafeFileUrl: (relativePath: string) => getSafeFileUrl(relativePath),
   ensureDataFolder: (row: number, col: number) =>
     ipcInvoke("ensureDataFolder", row, col),
+  ensureUniqueIconId: (name) => ipcInvoke("ensureUniqueIconId", name),
   setIconData: (icon) => ipcInvoke("setIconData", icon),
   sendSubWindowAction: (action, icon) =>
     ipcSend("sendSubWindowAction", { action, icon }),

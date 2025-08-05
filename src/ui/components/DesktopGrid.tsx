@@ -760,6 +760,7 @@ const DesktopGrid: React.FC = () => {
       } else {
         // Create a new temporary icon for preview
         const tempIcon: DesktopIcon = {
+          id: "",
           row,
           col,
           name: updates.name || "",
