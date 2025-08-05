@@ -75,14 +75,14 @@ const BackgroundSelect: React.FC = () => {
   const displayDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const updateRendererStates = async () => {
+    const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
       logger.info("Fetched renderer states:", rendererStates);
       setHideIcons(rendererStates.hideIcons || false);
       setHideIconNames(rendererStates.hideIconNames || false);
       setShowVideoControls(rendererStates.showVideoControls || false);
     };
-    updateRendererStates();
+    fetchRendererStates();
   }, []);
 
   useEffect(() => {

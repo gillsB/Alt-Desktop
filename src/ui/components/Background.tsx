@@ -65,6 +65,34 @@ const Background: React.FC<BackgroundProps> = ({
   const previousVolumeRef = useRef<number>(1);
 
   useEffect(() => {
+    const fetchRendererStates = async () => {
+      const rendererStates = await window.electron.getRendererStates();
+      setShowVideoControls(rendererStates.showVideoControls || false);
+    };
+    fetchRendererStates();
+  }, []);
+
+  useEffect(() => {
+    const updateStates = (...args: unknown[]) => {
+      logger.info("renderer-state-updated event received:", args[1]);
+      const state = args[1] as Partial<RendererStates>;
+      if ("showVideoControls" in state) {
+        if (!state.showVideoControls) {
+          videoControlsPositionRef.current = { x: -100, y: -100 };
+          setVolumeFromDefault();
+          const video = videoRef.current;
+          video.play();
+        }
+        setShowVideoControls(!!state.showVideoControls);
+      }
+    };
+    window.electron.on("renderer-state-updated", updateStates);
+    return () => {
+      window.electron.off("renderer-state-updated", updateStates);
+    };
+  }, []);
+
+  useEffect(() => {
     showVideoControlsRef.current = showVideoControls;
   }, [showVideoControls]);
 
@@ -173,26 +201,6 @@ const Background: React.FC<BackgroundProps> = ({
     window.electron.on("window-visibility", handlePauseOnWindowState);
     return () => {
       window.electron.off("window-visibility", handlePauseOnWindowState);
-    };
-  }, []);
-
-  useEffect(() => {
-    const updateStates = (...args: unknown[]) => {
-      logger.info("renderer-state-updated event received:", args[1]);
-      const state = args[1] as Partial<RendererStates>;
-      if ("showVideoControls" in state) {
-        if (!state.showVideoControls) {
-          videoControlsPositionRef.current = { x: -100, y: -100 };
-          setVolumeFromDefault();
-          const video = videoRef.current;
-          video.play();
-        }
-        setShowVideoControls(!!state.showVideoControls);
-      }
-    };
-    window.electron.on("renderer-state-updated", updateStates);
-    return () => {
-      window.electron.off("renderer-state-updated", updateStates);
     };
   }, []);
 

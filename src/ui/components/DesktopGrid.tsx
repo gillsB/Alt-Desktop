@@ -73,13 +73,13 @@ const DesktopGrid: React.FC = () => {
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const updateRendererStates = async () => {
+    const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
       setHideIcons(rendererStates.hideIcons || false);
       setHideIconNames(rendererStates.hideIconNames || false);
       setShowVideoControls(rendererStates.showVideoControls || false);
     };
-    updateRendererStates();
+    fetchRendererStates();
   }, []);
 
   useEffect(() => {
