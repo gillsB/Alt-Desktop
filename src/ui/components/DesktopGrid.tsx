@@ -104,16 +104,26 @@ const DesktopGrid: React.FC = () => {
 
   const toggleIcons = () => {
     // Always show icon names when toggled (only shows when icons show). So restoring icons shows names.
-    setHideIconNames(false);
-    setHideIcons((prev) => !prev);
+    window.electron.setRendererStates({
+      hideIcons: !hideIcons,
+      hideIconNames: false,
+    });
     setContextMenu(null);
     hideHighlightBox();
   };
 
   const toggleIconNames = () => {
-    setHideIconNames((prev) => !prev);
+    window.electron.setRendererStates({
+      hideIconNames: !hideIconNames,
+    });
     setContextMenu(null);
     hideHighlightBox();
+  };
+
+  const handleShowVideoControls = async () => {
+    await window.electron.setRendererStates({
+      showVideoControls: !showVideoControls,
+    });
   };
 
   const toggleGrid = () => {
@@ -347,29 +357,6 @@ const DesktopGrid: React.FC = () => {
       window.electron.off(
         "update-icon-preview",
         handlePreviewUpdate as (...args: unknown[]) => void
-      );
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleDesktopSetHideIcons = (
-      _: Electron.IpcRendererEvent,
-      showIcon: boolean
-    ) => {
-      logger.info("Received set-hide-icons event:", showIcon);
-      setHideIcons(showIcon);
-      setHideIconNames(showIcon);
-    };
-
-    window.electron.on(
-      "set-hide-icons",
-      handleDesktopSetHideIcons as (...args: unknown[]) => void
-    );
-
-    return () => {
-      window.electron.off(
-        "set-hide-icons",
-        handleDesktopSetHideIcons as (...args: unknown[]) => void
       );
     };
   }, []);
@@ -610,8 +597,6 @@ const DesktopGrid: React.FC = () => {
 
   const handleOpenSettings = async () => {
     try {
-      setHideIcons(false);
-      setHideIconNames(false);
       await window.electron.openSettings();
     } catch (error) {
       logger.error(`Failed to open settings`, error);
@@ -822,13 +807,6 @@ const DesktopGrid: React.FC = () => {
       window.electron.off("reload-background", fetchBackgroundType);
     };
   }, []);
-
-  const handleShowVideoControls = async () => {
-    await window.electron.setRendererStates({
-      showVideoControls: !showVideoControls,
-    });
-    setShowVideoControls(!showVideoControls);
-  };
 
   return (
     <>
