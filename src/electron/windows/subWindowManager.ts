@@ -235,6 +235,7 @@ export function openSmallWindow(
 export function openSelectIconWindow(
   title: string,
   images: string[],
+  id: string,
   row: number,
   col: number
 ): Promise<string> {
@@ -276,17 +277,18 @@ export function openSelectIconWindow(
 
       // Encode the images array and windowId as query parameters
       const encodedImages = encodeURIComponent(JSON.stringify(images));
+      const encodedId = encodeURIComponent(id);
       const windowId = selectWindow.id;
 
       let selectWindowUrl: string;
       if (isDev()) {
         selectWindowUrl = `http://localhost:5123/#/select-icon?title=${encodeURIComponent(
           title
-        )}&images=${encodedImages}&row=${row}&col=${col}&windowId=${windowId}`;
+        )}&images=${encodedImages}&id=${encodedId}&row=${row}&col=${col}&windowId=${windowId}`;
       } else {
         selectWindowUrl = `${pathToFileURL(getUIPath()).toString()}#/select-icon?title=${encodeURIComponent(
           title
-        )}&images=${encodedImages}&row=${row}&col=${col}&windowId=${windowId}`;
+        )}&images=${encodedImages}&id=${encodedId}&row=${row}&col=${col}&windowId=${windowId}`;
       }
 
       logger.info(`Loading select icon window URL: ${selectWindowUrl}`);

@@ -101,18 +101,15 @@ electron.contextBridge.exposeInMainWorld("electron", {
   reloadHeader: () => ipcInvoke("reloadHeader"),
   getVideoMetadata: (filePath: string): Promise<VideoMetadata> =>
     ipcInvoke("getVideoMetadata", filePath),
-  generateIcon: (
-    row: number,
-    col: number,
-    programLink: string,
-    webLink: string
-  ) => ipcInvoke("generateIcon", row, col, programLink, webLink),
+  generateIcon: (id: string, programLink: string, webLink: string) =>
+    ipcInvoke("generateIcon", id, programLink, webLink),
   selectIconFromList: (
     title: string,
     images: string[],
+    id: string,
     row: number,
     col: number
-  ) => ipcInvoke("selectIconFromList", title, images, row, col),
+  ) => ipcInvoke("selectIconFromList", title, images, id, row, col),
   resetAllIconsFontColor: () => ipcInvoke("resetAllIconsFontColor"),
   getBackgroundIDs: () => ipcInvoke("getBackgroundIDs"),
   getBackgroundSummaries: (params) =>
@@ -147,6 +144,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("getInfoFromID", id, type) as Promise<IDInfo[K] | null>,
   getInfoFromBgPath: <K extends PathKey>(path: string, type: K) =>
     ipcInvoke("getInfoFromBgPath", path, type) as Promise<PathInfo[K] | null>,
+  renameDataFolder: (oldFolder: string, newFolder: string) =>
+    ipcInvoke("renameDataFolder", oldFolder, newFolder),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

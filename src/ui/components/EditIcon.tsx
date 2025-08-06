@@ -71,11 +71,17 @@ const EditIcon: React.FC = () => {
             parseInt(row, 10),
             parseInt(col, 10)
           );
-          setIcon(defaultIcon);
-          originalIcon.current = { ...defaultIcon };
-          logger.warn(
-            `No icon found at row ${row}, column ${col}. Initialized with default values.`
-          );
+          const temp_id = await window.electron.ensureUniqueIconId("temp");
+          if (temp_id) {
+            defaultIcon.id = temp_id;
+            setIcon(defaultIcon);
+            originalIcon.current = { ...defaultIcon };
+            logger.warn(
+              `No icon found at row ${row}, column ${col}. Initialized with default values.`
+            );
+          } else {
+            showSmallWindow("Error", "Failed to get unique id", ["Okay"]);
+          }
         }
       } catch (err) {
         console.error("Error fetching icon:", err);
@@ -154,6 +160,7 @@ const EditIcon: React.FC = () => {
       const iconName = icon.name?.trim() || "";
 
       let newId: string | null;
+      let nameChanged: boolean = false;
 
       if (!oldId || !iconName) {
         // If either id or name is empty, use "unknownIcon"
@@ -161,16 +168,17 @@ const EditIcon: React.FC = () => {
         newId = await window.electron.ensureUniqueIconId(
           iconName || "unknownIcon"
         );
+        nameChanged = true;
       } else if (oldId !== iconName) {
         logger.info("icon name changed, generating new id");
         // If sanitized id does not match name, generate new id
         newId = await window.electron.ensureUniqueIconId(iconName);
+        nameChanged = true;
       } else {
         // Otherwise, keep the current id
         logger.info("icon name not changed, not updating id");
         newId = icon.id;
       }
-
       // Fail to read -> cancel save and warn user. (Avoid giving it an arbitrary id as it could corrupt files)
       if (newId === null) {
         await showSmallWindow(
@@ -179,6 +187,9 @@ const EditIcon: React.FC = () => {
           ["Okay"]
         );
         return;
+      }
+      if (nameChanged) {
+        await window.electron.renameDataFolder(oldId, newId);
       }
 
       icon.id = newId;
@@ -246,8 +257,7 @@ const EditIcon: React.FC = () => {
     if (!icon) return;
     try {
       let iconPaths = await window.electron.generateIcon(
-        icon.row,
-        icon.col,
+        icon.id,
         icon.programLink ?? "",
         icon.websiteLink ?? ""
       );
@@ -260,6 +270,7 @@ const EditIcon: React.FC = () => {
         selectedIcon = await window.electron.selectIconFromList(
           "Select an icon",
           iconPaths,
+          icon.id,
           icon.row,
           icon.col
         );

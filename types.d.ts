@@ -240,8 +240,8 @@ interface EventParamMapping {
   reloadGrid: [];
   reloadHeader: [];
   getVideoMetadata: [string];
-  generateIcon: [number, number, string, string];
-  selectIconFromList: [string, string[], number, number];
+  generateIcon: [string, string, string];
+  selectIconFromList: [string, string[], string, number, number];
   resetAllIconsFontColor: [];
   openBackgroundSelect: [id?: string];
   getBackgroundIDs: [];
@@ -266,6 +266,7 @@ interface EventParamMapping {
   getRendererStates: [];
   getInfoFromID: [string, InfoKey];
   getInfoFromBgPath: [string, PathKey];
+  renameDataFolder: [string, string];
 }
 
 // The returns from the main process to the renderer
@@ -337,6 +338,7 @@ type EventPayloadMapping = {
   getRendererStates: RendererStates;
   getInfoFromID: IDInfo[K] | null;
   getInfoFromBgPath: PathInfo<K> | null;
+  renameDataFolder: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -417,14 +419,14 @@ interface Window {
     reloadHeader: () => Promise<boolean>;
     getVideoMetadata: (filePath: string) => Promise<VideoMetadata>;
     generateIcon: (
-      row: number,
-      col: number,
+      id: string,
       programLink: string,
       webLink: string
     ) => Promise<string[]>;
     selectIconFromList: (
       title: string,
       images: string[],
+      id: string,
       row: number,
       col: number
     ) => Promise<string>;
@@ -466,5 +468,9 @@ interface Window {
       path: string,
       key: K
     ) => Promise<PathInfo<K> | null>;
+    renameDataFolder: (
+      oldFolder: string,
+      newFolder: string
+    ) => Promise<boolean>;
   };
 }

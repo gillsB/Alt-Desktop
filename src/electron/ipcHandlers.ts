@@ -1358,12 +1358,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "generateIcon",
     async (
-      row: number,
-      col: number,
+      id: string,
       filePath: string,
       webLink: string
     ): Promise<string[]> => {
-      const savePath = path.join(getDataFolderPath(), `[${row},${col}]`);
+      const savePath = path.join(getDataFolderPath(), `${id}`);
       logger.info("savePath= ", savePath);
       return generateIcon(savePath, filePath, webLink);
     }
@@ -1374,10 +1373,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     async (
       title: string,
       images: string[],
+      id: string,
       row: number,
       col: number
     ): Promise<string> => {
-      const ret = await openSelectIconWindow(title, images, row, col);
+      const ret = await openSelectIconWindow(title, images, id, row, col);
       if (ret === "Close") {
         //Closes without selecting an icon return empty string.
         return "";
@@ -1864,6 +1864,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       logger.warn(`No handler found for type: ${type}`);
 
       return null;
+    }
+  );
+  ipcMainHandle(
+    "renameDataFolder",
+    async (oldFolder: string, newFolder: string): Promise<boolean> => {
+      try {
+        const dataFolder = getDataFolderPath();
+        const oldPath = path.join(dataFolder, oldFolder);
+        const newPath = path.join(dataFolder, newFolder);
+
+        if (!fs.existsSync(oldPath)) {
+          logger.error(
+            `renameDataFolder: Old folder does not exist: ${oldPath}`
+          );
+          return false;
+        }
+        if (fs.existsSync(newPath)) {
+          logger.error(
+            `renameDataFolder: New folder already exists: ${newPath}`
+          );
+          return false;
+        }
+
+        fs.renameSync(oldPath, newPath);
+        logger.info(`Renamed data folder: ${oldPath} -> ${newPath}`);
+        return true;
+      } catch (error) {
+        logger.error(`Failed to rename data folder: ${error}`);
+        return false;
+      }
     }
   );
 }
