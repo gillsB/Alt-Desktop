@@ -1028,6 +1028,7 @@ const DesktopGrid: React.FC = () => {
                 }}
               >
                 <SafeImage
+                  id={icon.id}
                   row={icon.row}
                   col={icon.col}
                   imagePath={icon.image}

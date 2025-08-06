@@ -13,12 +13,7 @@ const logger = createLogger("safeImage.tsx");
  * @param timestamp - Optional timestamp for cache busting
  * @returns A safe file URL or fallback image path
  */
-const getImagePath = (
-  imagePath: string,
-  row?: number,
-  col?: number,
-  timestamp?: number
-) => {
+const getImagePath = (imagePath: string, id?: string, timestamp?: number) => {
   if (imagePath === " " || imagePath.toLowerCase() === "none") {
     return ""; // Return empty string for special cases
   }
@@ -35,11 +30,11 @@ const getImagePath = (
     return imagePath;
   }
 
-  // If row and col are provided, use the old logic for folderPath
-  if (typeof row === "number" && typeof col === "number") {
-    // If imagePath is a local path, append the /data/[row,col]
+  // If id provided
+  if (typeof id === "string") {
+    // If imagePath is a local path, append the /data/id
     if (!/^[a-zA-Z]:[\\/]/.test(imagePath)) {
-      const folderPath = `/data/[${row},${col}]`;
+      const folderPath = `/data/${id}`;
       const encodedImagePath = encodeURIComponent(imagePath).replace(
         /[()]/g,
         (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
@@ -54,6 +49,7 @@ const getImagePath = (
       if (!isImageExtension) {
         return getUnknownAssetPath(timestamp);
       }
+      logger.info("returning safeFilePath = ", safeFilePath);
       return safeFilePath;
     }
   }
@@ -108,6 +104,7 @@ const getUnknownAssetPath = (timestamp?: number) => {
  */
 const SafeImageComponent: React.FC<{
   imagePath: string;
+  id?: string;
   row?: number;
   col?: number;
   width?: number;
@@ -117,6 +114,7 @@ const SafeImageComponent: React.FC<{
   forceReload?: number;
 }> = ({
   imagePath,
+  id,
   row,
   col,
   width,
@@ -143,18 +141,14 @@ const SafeImageComponent: React.FC<{
 
     if (isSpecialCase(imagePath)) {
       logger.info(
-        `Icon${row !== undefined && col !== undefined ? ` ${row},${col}` : ""} is a special case, user wants empty image`
+        `Icon${id != undefined && row !== undefined && col !== undefined ? ` ${id} at: ${row},${col}` : ""} is a special case, user wants empty image`
       );
       setImageSrc(""); // discard cached image
       return;
     }
 
-    const newImageSrc = getImagePath(
-      imagePath,
-      row,
-      col,
-      forceReload || undefined
-    );
+    const newImageSrc = getImagePath(imagePath, id, forceReload || undefined);
+    logger.info("newImageSrc = ", newImageSrc);
 
     if (newImageSrc !== imageSrc) {
       setImageSrc(newImageSrc);
