@@ -16,6 +16,7 @@ import { SubWindowHeader } from "./SubWindowHeader";
 const logger = createLogger("EditIcon.tsx");
 
 const EditIcon: React.FC = () => {
+  const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g; // Sanitize folder names
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const row = queryParams.get("row");
@@ -440,7 +441,11 @@ const EditIcon: React.FC = () => {
                 flex={true}
                 value={icon.name}
                 onChange={(e) => {
-                  const updatedValue = e.target.value;
+                  const sanitized = e.target.value.replace(
+                    INVALID_FOLDER_CHARS,
+                    ""
+                  );
+                  const updatedValue = sanitized;
                   setIcon({ ...icon, name: updatedValue });
                   sendPreviewUpdate({ name: updatedValue });
                 }}
