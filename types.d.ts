@@ -217,7 +217,7 @@ interface EventParamMapping {
   logMessage: [string, string, string];
   logVideoMessage: [string, string, string];
   openFileDialog: [string, string?];
-  saveIconImage: [string, number, number];
+  saveIconImage: [string, string];
   saveToBackgroundIDFile: [string, string, boolean];
   launchProgram: [number, number];
   launchWebsite: [number, number];
@@ -373,11 +373,7 @@ interface Window {
       type: string,
       appDataFilePath?: string
     ) => Promise<string | null>;
-    saveIconImage: (
-      sourcePath: string,
-      row: number,
-      col: number
-    ) => Promise<string>;
+    saveIconImage: (sourcePath: string, id: string) => Promise<string>;
     saveToBackgroundIDFile: (
       id: string,
       sourcePath: string,

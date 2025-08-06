@@ -535,8 +535,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "saveIconImage",
-    async (sourcePath: string, row: number, col: number): Promise<string> => {
-      const targetDir = path.join(getDataFolderPath(), `[${row},${col}]`);
+    async (sourcePath: string, id: string): Promise<string> => {
+      const targetDir = path.join(getDataFolderPath(), `${id}`);
 
       const ext = path.extname(sourcePath);
       const baseName = path.basename(sourcePath, ext);

@@ -193,8 +193,7 @@ const EditIcon: React.FC = () => {
           try {
             const savedFilePath = await window.electron.saveIconImage(
               icon.image,
-              icon.row,
-              icon.col
+              icon.id
             );
 
             // Update the icon's image path with the resolved file path
