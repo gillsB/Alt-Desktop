@@ -183,42 +183,44 @@ const EditIcon: React.FC = () => {
 
       icon.id = newId;
 
-      // Check if the image path looks like a full file path
-      const fileType = await window.electron.getFileType(icon.image);
+      // Check if the image path looks like a full file path and save if it is.
+      // Otherwise it is a local file path and should already be saved.
       const driveLetterRegex = /^[a-zA-Z]:[\\/]/;
-
-      if (fileType.startsWith("image/") && driveLetterRegex.test(icon.image)) {
-        logger.info(`Resolving full file path for image: ${icon.image}`);
-        try {
-          const savedFilePath = await window.electron.saveIconImage(
-            icon.image,
-            icon.row,
-            icon.col
-          );
-
-          // Update the icon's image path with the resolved file path
-          icon.image = savedFilePath;
-          logger.info(`Image resolved and saved to: ${savedFilePath}`);
-        } catch (error) {
-          if (
-            error instanceof Error &&
-            error.message.includes("Source file does not exist:")
-          ) {
-            logger.error("Failed to resolve and save image path:", error);
-            showSmallWindow(
-              "Bad Image Path",
-              `Image path: ${icon.image} \nis invalid or does not exist.`,
-              ["Okay"]
+      if (driveLetterRegex.test(icon.image)) {
+        const fileType = await window.electron.getFileType(icon.image);
+        if (fileType.startsWith("image/")) {
+          logger.info(`Resolving full file path for image: ${icon.image}`);
+          try {
+            const savedFilePath = await window.electron.saveIconImage(
+              icon.image,
+              icon.row,
+              icon.col
             );
-          } else {
-            logger.error("Unexpected error during save operation:", error);
+
+            // Update the icon's image path with the resolved file path
+            icon.image = savedFilePath;
+            logger.info(`Image resolved and saved to: ${savedFilePath}`);
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message.includes("Source file does not exist:")
+            ) {
+              logger.error("Failed to resolve and save image path:", error);
+              showSmallWindow(
+                "Bad Image Path",
+                `Image path: ${icon.image} \nis invalid or does not exist.`,
+                ["Okay"]
+              );
+            } else {
+              logger.error("Unexpected error during save operation:", error);
+            }
+            return; // Stop saving if the image resolution fails
           }
-          return; // Stop saving if the image resolution fails
+        } else {
+          logger.warn(
+            `SaveIconImage failed with ${icon.image}, external drive detected but fileType not image ${fileType}`
+          );
         }
-      } else if (driveLetterRegex.test(icon.image)) {
-        logger.warn(
-          `SaveIconImage failed with ${icon.image}, external drive detected but fileType not image ${fileType}`
-        );
       }
 
       // Save the icon data

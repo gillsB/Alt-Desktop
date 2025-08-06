@@ -315,7 +315,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       logger.info(`Updating icon at [${row},${col}] in ${filePath}`);
       let desktopData: DesktopIconData = { icons: [] };
 
-      // Ensure file exists
+      // If file exists load data from it
       if (fs.existsSync(filePath)) {
         const data = fs.readFileSync(filePath, "utf-8");
         desktopData = JSON.parse(data);
@@ -337,7 +337,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       // Write back updated JSON
       fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
 
-      logger.info(`Successfully updated icon at [${row},${col}]`);
+      logger.info(`Successfully updated icon: ${icon.id} at [${row},${col}]`);
       return true;
     } catch (error) {
       logger.error(
@@ -543,7 +543,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       // Verify that the source file exists
       if (!fs.existsSync(sourcePath)) {
-        logger.error(`Source file does not exist: ${sourcePath}`);
+        logger.error(`SaveIconImage Source file does not exist: ${sourcePath}`);
         throw new Error(`Source file does not exist: ${sourcePath}`);
       }
 
@@ -630,7 +630,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       // Verify that the source file exists
       if (!fs.existsSync(sourcePath)) {
-        logger.error(`Source file does not exist: ${sourcePath}`);
+        logger.error(`SaveToBgIDFileSource file does not exist: ${sourcePath}`);
         throw new Error(`Source file does not exist: ${sourcePath}`);
       }
 
@@ -941,7 +941,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getFileType", async (filePath: string): Promise<string> => {
     try {
       if (!fs.existsSync(filePath)) {
-        logger.warn(`File does not exist: ${filePath}`);
+        logger.warn(`getFileType: File does not exist: ${filePath}`);
         return "";
       }
 
@@ -1037,7 +1037,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         }
 
         if (!fs.existsSync(resolvedPath)) {
-          logger.warn(`File does not exist: ${resolvedPath}`);
+          logger.warn(`OpenInExplorer File does not exist: ${resolvedPath}`);
 
           // Attempt to resolve the parent folder
           const parentFolder = path.dirname(resolvedPath);
@@ -1577,7 +1577,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       try {
         // Check if the file exists
         if (!fs.existsSync(filePath)) {
-          logger.warn(`File does not exist: ${filePath}`);
+          logger.warn(`resolveShortcut: File does not exist: ${filePath}`);
           return "";
         }
         filePath = resolveShortcut(filePath);
