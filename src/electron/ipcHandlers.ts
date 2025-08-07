@@ -885,53 +885,48 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
-  ipcMainHandle(
-    "launchWebsite",
-    async (row: number, col: number): Promise<boolean> => {
-      const filePath = getDesktopIconsFilePath();
+  ipcMainHandle("launchWebsite", async (id: string): Promise<boolean> => {
+    const filePath = getDesktopIconsFilePath();
 
-      try {
-        const data = fs.readFileSync(filePath, "utf-8");
-        const parsedData: DesktopIconData = JSON.parse(data);
+    try {
+      const data = fs.readFileSync(filePath, "utf-8");
+      const parsedData: DesktopIconData = JSON.parse(data);
 
-        const icon = parsedData.icons.find(
-          (icon) => icon.row === row && icon.col === col
-        );
+      const icon = parsedData.icons.find((icon) => icon.id === id);
 
-        if (!icon) {
-          logger.error(`No icon found at [${row}, ${col}]`);
-          return false;
-        }
-
-        if (!icon.websiteLink) {
-          logger.warn(`No websiteLink found for icon at [${row}, ${col}]`);
-          openSmallWindow(
-            "No website",
-            `No website link set for icon: ${icon.name}`,
-            ["Ok"]
-          );
-          return false;
-        }
-
-        let websiteLink = icon.websiteLink.trim();
-
-        // Ensure the link starts with a valid protocol
-        if (!/^https?:\/\//i.test(websiteLink)) {
-          websiteLink = `https://${websiteLink}`;
-          logger.info(`Formatted website link to: ${websiteLink}`);
-        }
-
-        // Open the website link in the default web browser
-        logger.info(`Opening website: ${websiteLink}`);
-        await shell.openExternal(websiteLink);
-
-        return true;
-      } catch (error) {
-        logger.error(`Error in launchWebsite: ${error}`);
+      if (!icon) {
+        logger.error(`No icon found: ${id}`);
         return false;
       }
+
+      if (!icon.websiteLink) {
+        logger.warn(`No websiteLink found for icon: ${icon.id}`);
+        openSmallWindow(
+          "No website",
+          `No website link set for icon: ${icon.name}`,
+          ["Ok"]
+        );
+        return false;
+      }
+
+      let websiteLink = icon.websiteLink.trim();
+
+      // Ensure the link starts with a valid protocol
+      if (!/^https?:\/\//i.test(websiteLink)) {
+        websiteLink = `https://${websiteLink}`;
+        logger.info(`Formatted website link to: ${websiteLink}`);
+      }
+
+      // Open the website link in the default web browser
+      logger.info(`Opening website: ${websiteLink}`);
+      await shell.openExternal(websiteLink);
+
+      return true;
+    } catch (error) {
+      logger.error(`Error in launchWebsite: ${error}`);
+      return false;
     }
-  );
+  });
 
   ipcMainHandle("getFileType", async (filePath: string): Promise<string> => {
     try {

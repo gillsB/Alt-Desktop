@@ -220,7 +220,7 @@ interface EventParamMapping {
   saveIconImage: [string, string];
   saveToBackgroundIDFile: [string, string, boolean];
   launchProgram: [string];
-  launchWebsite: [number, number];
+  launchWebsite: [string];
   getFilePath: [File];
   getFileType: [string];
   deleteIcon: [string];
@@ -382,7 +382,7 @@ interface Window {
       saveFile: boolean
     ) => Promise<string>;
     launchProgram: (id: string) => Promise<boolean>;
-    launchWebsite: (row: number, col: number) => Promise<boolean>;
+    launchWebsite: (id: string) => Promise<boolean>;
     getFilePath: (file: File) => string;
     getFileType: (filepath: string) => Promise<string>;
     deleteIcon: (id: string) => Promise<boolean>;

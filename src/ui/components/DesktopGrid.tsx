@@ -174,13 +174,13 @@ const DesktopGrid: React.FC = () => {
     return iconsMap.get(`${row},${col}`);
   };
   /**
-   * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
+   * Retrieves a `Id` from the `iconsMap` at the specified position.
    *
    * @param {number} row - The row position of the icon in the grid.
    * @param {number} col - The column position of the icon in the grid.
-   * @returns {DesktopIcon | undefined} The `DesktopIcon` object at the specified position, or `undefined` if the icon doesn't exist.
+   * @returns {string | undefined} The ID of the icon
    */
-  const getIconID = (row: number, col: number): string | undefined => {
+  const getIconId = (row: number, col: number): string | undefined => {
     const icon = iconsMap.get(`${row},${col}`);
     return icon?.id || undefined;
   };
@@ -380,14 +380,19 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleIconDoubleClick = async (row: number, col: number) => {
-    if (iconsMap.get(`${row},${col}`)?.launchDefault === "website") {
-      await window.electron.launchWebsite(row, col);
-    } else {
-      const id = getIconID(row, col);
+    if (iconsMap.get(`${row},${col}`)?.launchDefault === "program") {
+      const id = getIconId(row, col);
       if (!id) {
         logger.error(`Failed to get id for ${row},${col}`);
       } else {
         await window.electron.launchProgram(id);
+      }
+    } else {
+      const id = getIconId(row, col);
+      if (!id) {
+        logger.error(`Failed to get id for ${row},${col}`);
+      } else {
+        await window.electron.launchWebsite(id);
       }
     }
   };
@@ -639,7 +644,7 @@ const DesktopGrid: React.FC = () => {
       switch (option) {
         case "Program": {
           logger.info(`Running program for icon: ${name}`);
-          const id = getIconID(row, col);
+          const id = getIconId(row, col);
           if (!id) {
             logger.error(`Failed to get id for ${row},${col}`);
           } else {
@@ -647,10 +652,16 @@ const DesktopGrid: React.FC = () => {
           }
           break;
         }
-        case "Website":
+        case "Website": {
           logger.info(`Opening website for icon: ${name}`);
-          await window.electron.launchWebsite(row, col);
+          const id = getIconId(row, col);
+          if (!id) {
+            logger.error(`Failed to get id for ${row},${col}`);
+          } else {
+            await window.electron.launchWebsite(id);
+          }
           break;
+        }
         default:
           logger.warn(`Unknown submenu option: ${option}`);
       }
