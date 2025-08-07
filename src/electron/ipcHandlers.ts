@@ -1100,6 +1100,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "previewIconUpdate",
     async (
+      id: string,
       row: number,
       col: number,
       updates: Partial<DesktopIcon>
@@ -1114,6 +1115,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         // Notify the renderer process to update the preview
         if (mainWindow) {
           mainWindow.webContents.send("update-icon-preview", {
+            id,
             row,
             col,
             updates, // Ensure this is the correct object
@@ -1123,7 +1125,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return true;
       } catch (error) {
         logger.error(
-          `Error handling previewIconUpdate for [${row}, ${col}]: ${error}`
+          `Error handling previewIconUpdate for icon ${id}: [${row}, ${col}]: ${error}`
         );
         return false;
       }

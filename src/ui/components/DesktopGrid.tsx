@@ -729,15 +729,16 @@ const DesktopGrid: React.FC = () => {
   const handlePreviewUpdate = (
     _: Electron.IpcRendererEvent,
     {
+      id,
       row,
       col,
       updates,
-    }: { row: number; col: number; updates: Partial<DesktopIcon> }
+    }: { id: string; row: number; col: number; updates: Partial<DesktopIcon> }
   ) => {
     // Font color changes can be extremely frequent, so ignore them for logging.
     if (!updates["fontColor"]) {
       logger.info(
-        `Received preview update for icon [${row}, ${col}], updates: ${JSON.stringify(updates)}`
+        `Received preview update for icon ${id}: [${row}, ${col}], updates: ${JSON.stringify(updates)}`
       );
     }
 
@@ -760,7 +761,7 @@ const DesktopGrid: React.FC = () => {
       } else {
         // Create a new temporary icon for preview
         const tempIcon: DesktopIcon = {
-          id: "",
+          id,
           row,
           col,
           name: updates.name || "",
@@ -773,6 +774,8 @@ const DesktopGrid: React.FC = () => {
           ...updates,
         };
         newMap.set(key, tempIcon);
+
+        logger.info("tempID = ", tempIcon.id);
 
         if (updates.image) {
           setReloadTimestamps((prev) => ({

@@ -78,10 +78,11 @@ electron.contextBridge.exposeInMainWorld("electron", {
     buttonText: string | null;
   }) => ipcSend("buttonResponse", payload),
   previewIconUpdate: (
+    id: string,
     row: number,
     col: number,
     updates: Partial<DesktopIcon>
-  ) => ipcInvoke("previewIconUpdate", row, col, updates),
+  ) => ipcInvoke("previewIconUpdate", id, row, col, updates),
   previewBackgroundUpdate: (updates: Partial<PreviewBackgroundUpdate>) =>
     ipcInvoke("previewBackgroundUpdate", updates),
   previewGridUpdate: (updates: Partial<SettingsData>) =>

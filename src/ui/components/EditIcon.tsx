@@ -398,6 +398,7 @@ const EditIcon: React.FC = () => {
     if (!icon) return;
     try {
       await window.electron.previewIconUpdate(
+        icon.id,
         icon.row,
         icon.col,
         updatedFields

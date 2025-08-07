@@ -30,6 +30,8 @@ const getImagePath = (imagePath: string, id?: string, timestamp?: number) => {
     return imagePath;
   }
 
+  logger.info("getImagePath called with id = ", id);
+
   // If id provided
   if (typeof id === "string") {
     // If imagePath is a local path, append the /data/id
