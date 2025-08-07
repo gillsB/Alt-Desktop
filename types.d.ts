@@ -209,10 +209,10 @@ interface EventParamMapping {
   ensureUniqueIconId: [string];
   setIconData: [DesktopIcon];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
-  getDesktopIcon: [number, number];
+  getDesktopIcon: [string];
   reloadIcon: [number, number];
   openSettings: [];
-  editIcon: [number, number];
+  editIcon: [string, number, number];
   reloadWindow: [];
   logMessage: [string, string, string];
   logVideoMessage: [string, string, string];
@@ -359,12 +359,12 @@ interface Window {
     ensureUniqueIconId: (name: string) => Promise<string | null>;
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
-    getDesktopIcon: (row: number, col: number) => Promise<DesktopIcon | null>;
+    getDesktopIcon: (id: string) => Promise<DesktopIcon | null>;
     getSubWindowTitle: () => Promise<string>;
     reloadIcon: (row: number, col: number) => Promise<boolean>;
     openSettings: () => Promise<boolean>;
     openBackgroundSelect: (id?: string) => Promise<boolean>;
-    editIcon: (row: number, col: number) => Promise<boolean>;
+    editIcon: (id: string, row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;
     subWindowFocus: () => Promise<boolean>;

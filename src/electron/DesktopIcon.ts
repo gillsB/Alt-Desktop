@@ -10,9 +10,14 @@ export const DEFAULT_DESKTOP_ICON: DesktopIcon = {
 };
 
 // Utility function to get a default DesktopIcon with specific row and col
-export function getDefaultDesktopIcon(row: number, col: number): DesktopIcon {
+export function getDefaultDesktopIcon(
+  id: string,
+  row: number,
+  col: number
+): DesktopIcon {
   return {
     ...DEFAULT_DESKTOP_ICON,
+    id,
     row,
     col,
   };

@@ -490,7 +490,7 @@ const DesktopGrid: React.FC = () => {
       const id = getIconId(row, col);
       if (id) {
         window.electron.ensureDataFolder(id);
-        window.electron.editIcon(row, col);
+        window.electron.editIcon(id, row, col);
         await window.electron.setRendererStates({ hideIconNames: false });
         setContextMenu(null);
       } else {
@@ -513,14 +513,21 @@ const DesktopGrid: React.FC = () => {
       const id = getIconId(validRow, validCol);
       if (id) {
         window.electron.ensureDataFolder(id);
-        window.electron.editIcon(validRow, validCol);
+        window.electron.editIcon(id, validRow, validCol);
         setContextMenu(null);
       } else {
-        showSmallWindow(
-          "Error getting id",
-          `Error after fallback from contextMenu getting id for [${validRow},${validCol}]`,
-          ["Okay"]
-        );
+        const temp_id = await window.electron.ensureUniqueIconId("temp");
+        if (temp_id) {
+          window.electron.ensureDataFolder(temp_id);
+          window.electron.editIcon(temp_id, validRow, validCol);
+          setContextMenu(null);
+        } else {
+          showSmallWindow(
+            "Error getting id",
+            `Error after fallback from contextMenu getting unique id for [${validRow},${validCol}]`,
+            ["Okay"]
+          );
+        }
       }
     } else {
       logger.error("Tried to edit an icon, but contextMenu was null.");

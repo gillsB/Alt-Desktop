@@ -1,12 +1,12 @@
 import { openSubWindow } from "./subWindowManager.js";
 
-export function openEditIconWindow(row: number, col: number) {
+export function openEditIconWindow(id: string, row: number, col: number) {
   const options = {
     width: 500,
     height: 660,
     frame: false,
   };
 
-  const subWindowHash = `edit-icon?row=${row}&col=${col}`;
+  const subWindowHash = `edit-icon?id=${id}&row=${row}&col=${col}`;
   return openSubWindow(options, subWindowHash, "Edit Icon");
 }

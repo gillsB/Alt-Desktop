@@ -36,12 +36,13 @@ electron.contextBridge.exposeInMainWorld("electron", {
   setIconData: (icon) => ipcInvoke("setIconData", icon),
   sendSubWindowAction: (action, icon) =>
     ipcSend("sendSubWindowAction", { action, icon }),
-  getDesktopIcon: (row, col) => ipcInvoke("getDesktopIcon", row, col),
+  getDesktopIcon: (id: string) => ipcInvoke("getDesktopIcon", id),
   getSubWindowTitle: () => ipcInvoke("getSubWindowTitle"),
   reloadIcon: (row, col) => ipcInvoke("reloadIcon", row, col),
   openSettings: () => ipcInvoke("openSettings"),
   openBackgroundSelect: (id?: string) => ipcInvoke("openBackgroundSelect", id),
-  editIcon: (row, col) => ipcInvoke("editIcon", row, col),
+  editIcon: (id: string, row: number, col: number) =>
+    ipcInvoke("editIcon", id, row, col),
   on: (channel: string, callback: (...args: unknown[]) => void) => {
     electron.ipcRenderer.on(channel, callback);
   },

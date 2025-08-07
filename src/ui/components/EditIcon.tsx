@@ -19,6 +19,7 @@ const EditIcon: React.FC = () => {
   const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g; // Sanitize folder names
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
+  const id = queryParams.get("id");
   const row = queryParams.get("row");
   const col = queryParams.get("col");
 
@@ -49,17 +50,14 @@ const EditIcon: React.FC = () => {
 
   useEffect(() => {
     const fetchIcon = async () => {
-      if (!row || !col) {
-        setError("Row and column parameters are missing.");
+      if (!id || !row || !col) {
+        setError(`Parameters are missing: id={$id}, row= {$row}, col=${col}`);
         setLoading(false);
         return;
       }
 
       try {
-        const iconData = await window.electron.getDesktopIcon(
-          parseInt(row, 10),
-          parseInt(col, 10)
-        );
+        const iconData = await window.electron.getDesktopIcon(id);
 
         if (iconData) {
           setIcon(iconData);
@@ -68,20 +66,13 @@ const EditIcon: React.FC = () => {
         } else {
           // Use the default DesktopIcon values
           const defaultIcon = getDefaultDesktopIcon(
+            id,
             parseInt(row, 10),
             parseInt(col, 10)
           );
-          const temp_id = await window.electron.ensureUniqueIconId("temp");
-          if (temp_id) {
-            defaultIcon.id = temp_id;
-            setIcon(defaultIcon);
-            originalIcon.current = { ...defaultIcon };
-            logger.warn(
-              `No icon found at row ${row}, column ${col}. Initialized with default values.`
-            );
-          } else {
-            showSmallWindow("Error", "Failed to get unique id", ["Okay"]);
-          }
+          setIcon(defaultIcon);
+          originalIcon.current = { ...defaultIcon };
+          logger.warn(`No icon found ${id}. Initialized with default values.`);
         }
       } catch (err) {
         console.error("Error fetching icon:", err);
@@ -93,7 +84,7 @@ const EditIcon: React.FC = () => {
     };
 
     fetchIcon();
-  }, [row, col]);
+  }, [id]);
 
   const getChanges = (): boolean => {
     if (!icon || !originalIcon.current) {
@@ -114,7 +105,7 @@ const EditIcon: React.FC = () => {
   };
 
   const handleClose = async () => {
-    logger.info(`User attempting to close EditIcon[${row},${col}]`);
+    logger.info(`User attempting to close EditIcon[${id}]`);
     if (getChanges()) {
       try {
         const ret = await showSmallWindow(
@@ -410,7 +401,7 @@ const EditIcon: React.FC = () => {
 
   const handleImageMagnifyClick = async () => {
     if (icon) {
-      const filePath = `data/[${row},${col}]/`;
+      const filePath = `data/${id}/`;
 
       const success = await window.electron.openFileDialog("image", filePath);
       logger.info("Open file dialog result:", success);
@@ -439,7 +430,7 @@ const EditIcon: React.FC = () => {
       onDrop={handleFileDrop}
     >
       <SubWindowHeader
-        title={`Editing [${row},${col}]`}
+        title={`Editing [${id}], at [${row}, ${col}]`}
         onClose={handleClose}
       />
       <div className="subwindow-content">

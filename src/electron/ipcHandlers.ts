@@ -132,13 +132,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "getDesktopIcon",
-    async (row: number, col: number): Promise<DesktopIcon | null> => {
+    async (id: string): Promise<DesktopIcon | null> => {
       const filePath = getDesktopIconsFilePath();
 
       try {
-        logger.info(
-          `Received request for getDesktopIcon with row: ${row}, col: ${col}`
-        );
+        logger.info(`Received request for getDesktopIcon with row: ${id}`);
         logger.info(`DesktopIcons file path: ${filePath}`);
 
         // Read JSON file
@@ -148,17 +146,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         if (parsedData.icons) {
           // Find the icon with the specified row and col
-          const icon = parsedData.icons.find(
-            (icon) => icon.row === row && icon.col === col
-          );
+          const icon = parsedData.icons.find((icon) => icon.id === id);
 
           if (icon) {
-            logger.info(
-              `Found icon at [${row}, ${col}]: ${JSON.stringify(icon)}`
-            );
+            logger.info(`Found icon ${id}: ${JSON.stringify(icon)}`);
             return icon;
           } else {
-            logger.warn(`No icon found at [${row}, ${col}]`);
+            logger.warn(`No icon found ${id}`);
             return null; // Return null if no matching icon is found
           }
         }
@@ -440,10 +434,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "editIcon",
-    async (row: number, col: number): Promise<boolean> => {
+    async (id: string, row: number, col: number): Promise<boolean> => {
       try {
-        logger.info(`ipcMainHandle editIcon called with ${row}, ${col}`);
-        openEditIconWindow(row, col);
+        logger.info(`ipcMainHandle editIcon called with ${id}`);
+        openEditIconWindow(id, row, col);
         return true;
       } catch (error) {
         logger.error(`Error opening edit icon window: ${error}`);
