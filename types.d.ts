@@ -223,7 +223,7 @@ interface EventParamMapping {
   launchWebsite: [number, number];
   getFilePath: [File];
   getFileType: [string];
-  deleteIcon: [number, number];
+  deleteIcon: [string];
   openInExplorer: ["image" | "programLink" | "background", string];
   showSmallWindow: [string, string, string[]];
   previewIconUpdate: [number, number, Partial<DesktopIcon>];
@@ -385,7 +385,7 @@ interface Window {
     launchWebsite: (row: number, col: number) => Promise<boolean>;
     getFilePath: (file: File) => string;
     getFileType: (filepath: string) => Promise<string>;
-    deleteIcon: (row: number, col: number) => Promise<boolean>;
+    deleteIcon: (id: string) => Promise<boolean>;
     openInExplorer: (
       type: "image" | "programLink" | "background",
       filePath: string

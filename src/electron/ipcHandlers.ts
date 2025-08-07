@@ -962,59 +962,54 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return "";
     }
   });
-  ipcMainHandle(
-    "deleteIcon",
-    async (row: number, col: number): Promise<boolean> => {
-      const filePath = getDesktopIconsFilePath();
-      const iconFolderPath = path.join(getDataFolderPath(), `[${row},${col}]`);
+  ipcMainHandle("deleteIcon", async (id: string): Promise<boolean> => {
+    const filePath = getDesktopIconsFilePath();
+    const iconFolderPath = path.join(getDataFolderPath(), `${id}`);
 
-      try {
-        logger.info(`Deleting icon at [${row}, ${col}] from ${filePath}`);
+    try {
+      logger.info(`Deleting icon ${id} from ${filePath}`);
 
-        // Ensure the file exists
-        if (!fs.existsSync(filePath)) {
-          logger.warn(`File not found: ${filePath}`);
-          return false;
-        }
-
-        // Read the JSON file
-        const data = fs.readFileSync(filePath, "utf-8");
-        const desktopData: DesktopIconData = JSON.parse(data);
-
-        // Filter out the icon with the matching row and col
-        const updatedIcons = desktopData.icons.filter(
-          (icon) => icon.row !== row || icon.col !== col
-        );
-
-        if (updatedIcons.length === desktopData.icons.length) {
-          logger.warn(`No icon found at [${row}, ${col}] to delete.`);
-          return false; // No icon was deleted
-        }
-
-        // Update the JSON data
-        desktopData.icons = updatedIcons;
-
-        // Write the updated JSON back to the file
-        fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
-        logger.info(`Successfully deleted icon at [${row}, ${col}]`);
-
-        // Move the icon folder to the recycle bin
-        if (fs.existsSync(iconFolderPath)) {
-          await shell.trashItem(iconFolderPath);
-          logger.info(
-            `Successfully moved folder to recycle bin: ${iconFolderPath}`
-          );
-        } else {
-          logger.warn(`Folder not found: ${iconFolderPath}`);
-        }
-
-        return true;
-      } catch (error) {
-        logger.error(`Error deleting icon at [${row}, ${col}]: ${error}`);
+      // Ensure the file exists
+      if (!fs.existsSync(filePath)) {
+        logger.warn(`File not found: ${filePath}`);
         return false;
       }
+
+      // Read the JSON file
+      const data = fs.readFileSync(filePath, "utf-8");
+      const desktopData: DesktopIconData = JSON.parse(data);
+
+      // Filter out the icon with the matching row and col
+      const updatedIcons = desktopData.icons.filter((icon) => icon.id !== id);
+
+      if (updatedIcons.length === desktopData.icons.length) {
+        logger.warn(`No icon found to delete.`);
+        return false; // No icon was deleted
+      }
+
+      // Update the JSON data
+      desktopData.icons = updatedIcons;
+
+      // Write the updated JSON back to the file
+      fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+      logger.info(`Successfully deleted icon at ${id}`);
+
+      // Move the icon folder to the recycle bin
+      if (fs.existsSync(iconFolderPath)) {
+        await shell.trashItem(iconFolderPath);
+        logger.info(
+          `Successfully moved folder to recycle bin: ${iconFolderPath}`
+        );
+      } else {
+        logger.warn(`Folder not found: ${iconFolderPath}`);
+      }
+
+      return true;
+    } catch (error) {
+      logger.error(`Error deleting icon ${id}: ${error}`);
+      return false;
     }
-  );
+  });
   ipcMainHandle(
     "openInExplorer",
     async (

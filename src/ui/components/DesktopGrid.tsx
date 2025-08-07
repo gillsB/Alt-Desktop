@@ -457,7 +457,7 @@ const DesktopGrid: React.FC = () => {
     showHighlightAt(row, col, true);
 
     logger.info(
-      `Icon right click at row: ${row}, col: ${col} with icon name: ${iconsMap.get(`${row},${col}`)?.name}`
+      `Icon right click ${iconsMap.get(`${row},${col}`)?.id} at row: ${row}, col: ${col} with icon name: ${iconsMap.get(`${row},${col}`)?.name}`
     );
   };
 
@@ -529,7 +529,7 @@ const DesktopGrid: React.FC = () => {
         );
         // Call the Electron API to delete the icon
         if (ret === "Yes") {
-          await window.electron.deleteIcon(row, col);
+          await window.electron.deleteIcon(contextMenu.icon.id);
           logger.info(`Deleted icon at [${row}, ${col}]`);
         } else {
           logger.info(
