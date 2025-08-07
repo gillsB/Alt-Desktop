@@ -173,6 +173,17 @@ const DesktopGrid: React.FC = () => {
   const getIcon = (row: number, col: number): DesktopIcon | undefined => {
     return iconsMap.get(`${row},${col}`);
   };
+  /**
+   * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
+   *
+   * @param {number} row - The row position of the icon in the grid.
+   * @param {number} col - The column position of the icon in the grid.
+   * @returns {DesktopIcon | undefined} The `DesktopIcon` object at the specified position, or `undefined` if the icon doesn't exist.
+   */
+  const getIconID = (row: number, col: number): string | undefined => {
+    const icon = iconsMap.get(`${row},${col}`);
+    return icon?.id || undefined;
+  };
 
   /**
    * Handles the "reload-icon" IPC event from the Electron main process.
@@ -372,7 +383,12 @@ const DesktopGrid: React.FC = () => {
     if (iconsMap.get(`${row},${col}`)?.launchDefault === "website") {
       await window.electron.launchWebsite(row, col);
     } else {
-      await window.electron.launchProgram(row, col);
+      const id = getIconID(row, col);
+      if (!id) {
+        logger.error(`Failed to get id for ${row},${col}`);
+      } else {
+        await window.electron.launchProgram(id);
+      }
     }
   };
 
@@ -621,10 +637,16 @@ const DesktopGrid: React.FC = () => {
       const { name } = contextMenu.icon;
       const { row, col } = contextMenu.icon;
       switch (option) {
-        case "Program":
+        case "Program": {
           logger.info(`Running program for icon: ${name}`);
-          await window.electron.launchProgram(row, col);
+          const id = getIconID(row, col);
+          if (!id) {
+            logger.error(`Failed to get id for ${row},${col}`);
+          } else {
+            await window.electron.launchProgram(id);
+          }
           break;
+        }
         case "Website":
           logger.info(`Opening website for icon: ${name}`);
           await window.electron.launchWebsite(row, col);

@@ -219,7 +219,7 @@ interface EventParamMapping {
   openFileDialog: [string, string?];
   saveIconImage: [string, string];
   saveToBackgroundIDFile: [string, string, boolean];
-  launchProgram: [number, number];
+  launchProgram: [string];
   launchWebsite: [number, number];
   getFilePath: [File];
   getFileType: [string];
@@ -381,7 +381,7 @@ interface Window {
       sourcePath: string,
       saveFile: boolean
     ) => Promise<string>;
-    launchProgram: (row: number, col: number) => Promise<boolean>;
+    launchProgram: (id: string) => Promise<boolean>;
     launchWebsite: (row: number, col: number) => Promise<boolean>;
     getFilePath: (file: File) => string;
     getFileType: (filepath: string) => Promise<string>;

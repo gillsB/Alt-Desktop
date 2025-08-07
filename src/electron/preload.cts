@@ -60,8 +60,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("saveIconImage", sourcePath, id),
   saveToBackgroundIDFile: (id: string, sourcePath: string, saveFile: boolean) =>
     ipcInvoke("saveToBackgroundIDFile", id, sourcePath, saveFile),
-  launchProgram: (row: number, col: number) =>
-    ipcInvoke("launchProgram", row, col),
+  launchProgram: (id: string) =>
+    ipcInvoke("launchProgram", id),
   launchWebsite: (row: number, col: number) =>
     ipcInvoke("launchWebsite", row, col),
   getFilePath: (file: File) => webUtils.getPathForFile(file),

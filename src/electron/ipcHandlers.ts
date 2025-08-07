@@ -841,55 +841,50 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     return true;
   });
 
-  ipcMainHandle(
-    "launchProgram",
-    async (row: number, col: number): Promise<boolean> => {
-      const filePath = getDesktopIconsFilePath();
+  ipcMainHandle("launchProgram", async (id: string): Promise<boolean> => {
+    const filePath = getDesktopIconsFilePath();
 
-      try {
-        const data = fs.readFileSync(filePath, "utf-8");
-        const parsedData: DesktopIconData = JSON.parse(data);
+    try {
+      const data = fs.readFileSync(filePath, "utf-8");
+      const parsedData: DesktopIconData = JSON.parse(data);
 
-        const icon = parsedData.icons.find(
-          (icon) => icon.row === row && icon.col === col
-        );
+      const icon = parsedData.icons.find((icon) => icon.id === id);
 
-        if (!icon) {
-          logger.warn(`No icon found at [${row}, ${col}]`);
-          return false;
-        }
-
-        if (!icon.programLink) {
-          logger.warn(`No programLink found for icon at [${row}, ${col}]`);
-          openSmallWindow(
-            "No program",
-            `No program path set for icon: ${icon.name}`,
-            ["OK"]
-          );
-          return false;
-        }
-
-        const launchPath = icon.programLink;
-
-        if (!fs.existsSync(launchPath)) {
-          logger.warn(`Launch path does not exist: ${launchPath}`);
-          openSmallWindow(
-            "File not exist",
-            `failed to launch ${launchPath} as it does not exist`,
-            ["OK"]
-          );
-          return false;
-        }
-
-        logger.info(`Launching program: ${launchPath}`);
-
-        return safeSpawn(icon.programLink, icon.args || []);
-      } catch (error) {
-        logger.error(`Error in launchIcon: ${error}`);
+      if (!icon) {
+        logger.warn(`No icon found: ${id}`);
         return false;
       }
+
+      if (!icon.programLink) {
+        logger.warn(`No programLink found for icon: ${id}`);
+        openSmallWindow(
+          "No program",
+          `No program path set for icon: ${id} name: ${icon.name}`,
+          ["OK"]
+        );
+        return false;
+      }
+
+      const launchPath = icon.programLink;
+
+      if (!fs.existsSync(launchPath)) {
+        logger.warn(`Launch path does not exist: ${launchPath}`);
+        openSmallWindow(
+          "File not exist",
+          `failed to launch ${launchPath} as it does not exist`,
+          ["OK"]
+        );
+        return false;
+      }
+
+      logger.info(`Launching program: ${launchPath}`);
+
+      return safeSpawn(icon.programLink, icon.args || []);
+    } catch (error) {
+      logger.error(`Error in launchIcon: ${error}`);
+      return false;
     }
-  );
+  });
   ipcMainHandle(
     "launchWebsite",
     async (row: number, col: number): Promise<boolean> => {
