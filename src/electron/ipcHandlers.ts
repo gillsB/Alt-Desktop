@@ -231,28 +231,23 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
-  ipcMainHandle(
-    "ensureDataFolder",
-    async (row: number, col: number): Promise<boolean> => {
-      try {
-        const fullPath = path.join(getDataFolderPath(), `[${row},${col}]`);
+  ipcMainHandle("ensureDataFolder", async (id: string): Promise<boolean> => {
+    try {
+      const fullPath = path.join(getDataFolderPath(), id);
 
-        if (!fs.existsSync(fullPath)) {
-          logger.info(
-            `Data folder [${row},${col}] does not exist, creating: ${fullPath}`
-          );
-          fs.mkdirSync(fullPath, { recursive: true });
-          logger.info(`Data folder [${row},${col}] created successfully.`);
-        }
-
-        // Ensure Data file exists
-        return ensureFileExists(fullPath, { icons: [] });
-      } catch (error) {
-        logger.error(`Error ensuring Data folder [${row},${col}]: ${error}`);
-        return false;
+      if (!fs.existsSync(fullPath)) {
+        logger.info(`Data folder ${id} does not exist, creating: ${fullPath}`);
+        fs.mkdirSync(fullPath, { recursive: true });
+        logger.info(`Data folder ${id} created successfully.`);
       }
+
+      // Ensure Data file exists
+      return ensureFileExists(fullPath, { icons: [] });
+    } catch (error) {
+      logger.error(`Error ensuring Data folder ${id}: ${error}`);
+      return false;
     }
-  );
+  });
 
   ipcMainHandle(
     "ensureUniqueIconId",

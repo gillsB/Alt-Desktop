@@ -284,10 +284,7 @@ const DesktopGrid: React.FC = () => {
       // Create an array of promises for ensuring folders
       const folderPromises = data.icons.map(async (icon: DesktopIcon) => {
         // Ensure data folder exists for each icon
-        const success = await window.electron.ensureDataFolder(
-          icon.row,
-          icon.col
-        );
+        const success = await window.electron.ensureDataFolder(icon.id);
         if (!success) {
           logger.warn(
             `Failed to create data folder for icon at [${icon.row}, ${icon.col}]`
@@ -490,10 +487,20 @@ const DesktopGrid: React.FC = () => {
     }
     if (row !== undefined && col !== undefined) {
       // If row and col are provided, directly call editIcon
-      window.electron.ensureDataFolder(row, col);
-      window.electron.editIcon(row, col);
-      await window.electron.setRendererStates({ hideIconNames: false });
-      setContextMenu(null);
+      const id = getIconId(row, col);
+      if (id) {
+        window.electron.ensureDataFolder(id);
+        window.electron.editIcon(row, col);
+        await window.electron.setRendererStates({ hideIconNames: false });
+        setContextMenu(null);
+      } else {
+        showSmallWindow(
+          "Error getting id",
+          `Error getting id for [${row},${col}]`,
+          ["Okay"]
+        );
+      }
+
       return;
     }
 
@@ -503,9 +510,18 @@ const DesktopGrid: React.FC = () => {
       // contextMenu returns local coordinates. Which getRowColFromXY expects.
       const [validRow, validCol] = getRowColFromXY(x, y);
 
-      window.electron.ensureDataFolder(validRow, validCol);
-      window.electron.editIcon(validRow, validCol);
-      setContextMenu(null);
+      const id = getIconId(validRow, validCol);
+      if (id) {
+        window.electron.ensureDataFolder(id);
+        window.electron.editIcon(validRow, validCol);
+        setContextMenu(null);
+      } else {
+        showSmallWindow(
+          "Error getting id",
+          `Error after fallback from contextMenu getting id for [${validRow},${validCol}]`,
+          ["Okay"]
+        );
+      }
     } else {
       logger.error("Tried to edit an icon, but contextMenu was null.");
       setContextMenu(null);

@@ -205,7 +205,7 @@ interface EventParamMapping {
   changeView: [];
   sendHeaderAction: [HeaderAction];
   getDesktopIconData: [];
-  ensureDataFolder: [number, number];
+  ensureDataFolder: [string];
   ensureUniqueIconId: [string];
   setIconData: [DesktopIcon];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
@@ -355,7 +355,7 @@ interface Window {
     sendHeaderAction: (payload: HeaderAction) => void;
     getDesktopIconData: () => Promise<DesktopIconData>;
     getSafeFileUrl: (relativePath: string) => string;
-    ensureDataFolder: (row: number, col: number) => Promise<boolean>;
+    ensureDataFolder: (id: string) => Promise<boolean>;
     ensureUniqueIconId: (name: string) => Promise<string | null>;
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
