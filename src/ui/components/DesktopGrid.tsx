@@ -173,17 +173,6 @@ const DesktopGrid: React.FC = () => {
   const getIcon = (row: number, col: number): DesktopIcon | undefined => {
     return iconsMap.get(`${row},${col}`);
   };
-  /**
-   * Retrieves a `Id` from the `iconsMap` at the specified position.
-   *
-   * @param {number} row - The row position of the icon in the grid.
-   * @param {number} col - The column position of the icon in the grid.
-   * @returns {string | undefined} The ID of the icon
-   */
-  const getIconId = (row: number, col: number): string | undefined => {
-    const icon = iconsMap.get(`${row},${col}`);
-    return icon?.id || undefined;
-  };
 
   /**
    * Handles the "reload-icon" IPC event from the Electron main process.
@@ -369,28 +358,11 @@ const DesktopGrid: React.FC = () => {
     };
   }, []);
 
-  const handleIconClick = (row: number, col: number) => {
-    const icon = getIcon(row, col);
-    if (!icon) {
-      logger.info("Somehow clicked on an icon but also not on an icon...");
-    }
-  };
-
-  const handleIconDoubleClick = async (row: number, col: number) => {
-    if (iconsMap.get(`${row},${col}`)?.launchDefault === "program") {
-      const id = getIconId(row, col);
-      if (!id) {
-        logger.error(`Failed to get id for ${row},${col}`);
-      } else {
-        await window.electron.launchProgram(id);
-      }
+  const handleIconDoubleClick = async (icon: DesktopIcon) => {
+    if (icon.launchDefault === "program") {
+      await window.electron.launchProgram(icon.id);
     } else {
-      const id = getIconId(row, col);
-      if (!id) {
-        logger.error(`Failed to get id for ${row},${col}`);
-      } else {
-        await window.electron.launchWebsite(id);
-      }
+      await window.electron.launchWebsite(icon.id);
     }
   };
 
@@ -487,16 +459,16 @@ const DesktopGrid: React.FC = () => {
     }
     if (row !== undefined && col !== undefined) {
       // If row and col are provided, directly call editIcon
-      const id = getIconId(row, col);
-      if (id) {
-        window.electron.ensureDataFolder(id);
-        window.electron.editIcon(id, row, col);
+      const icon = getIcon(row, col);
+      if (icon) {
+        window.electron.ensureDataFolder(icon.id);
+        window.electron.editIcon(icon.id, row, col);
         await window.electron.setRendererStates({ hideIconNames: false });
         setContextMenu(null);
       } else {
         showSmallWindow(
-          "Error getting id",
-          `Error getting id for [${row},${col}]`,
+          "Error getting icon",
+          `Error getting icon for [${row},${col}]`,
           ["Okay"]
         );
       }
@@ -510,10 +482,10 @@ const DesktopGrid: React.FC = () => {
       // contextMenu returns local coordinates. Which getRowColFromXY expects.
       const [validRow, validCol] = getRowColFromXY(x, y);
 
-      const id = getIconId(validRow, validCol);
-      if (id) {
-        window.electron.ensureDataFolder(id);
-        window.electron.editIcon(id, validRow, validCol);
+      const icon = getIcon(validRow, validCol);
+      if (icon) {
+        window.electron.ensureDataFolder(icon.id);
+        window.electron.editIcon(icon.id, validRow, validCol);
         setContextMenu(null);
       } else {
         const temp_id = await window.electron.ensureUniqueIconId("temp");
@@ -523,8 +495,8 @@ const DesktopGrid: React.FC = () => {
           setContextMenu(null);
         } else {
           showSmallWindow(
-            "Error getting id",
-            `Error after fallback from contextMenu getting unique id for [${validRow},${validCol}]`,
+            "Error getting temp_id",
+            `Error after fallback temp id from contextMenu for [${validRow},${validCol}]`,
             ["Okay"]
           );
         }
@@ -664,25 +636,20 @@ const DesktopGrid: React.FC = () => {
     if (contextMenu && contextMenu?.icon) {
       const { name } = contextMenu.icon;
       const { row, col } = contextMenu.icon;
+      const icon = getIcon(row, col);
+      if (!icon) {
+        logger.error(`LaunchSubmenuClick: No icon at [${row},${col}]`);
+        return;
+      }
       switch (option) {
         case "Program": {
           logger.info(`Running program for icon: ${name}`);
-          const id = getIconId(row, col);
-          if (!id) {
-            logger.error(`Failed to get id for ${row},${col}`);
-          } else {
-            await window.electron.launchProgram(id);
-          }
+          await window.electron.launchProgram(icon.id);
           break;
         }
         case "Website": {
           logger.info(`Opening website for icon: ${name}`);
-          const id = getIconId(row, col);
-          if (!id) {
-            logger.error(`Failed to get id for ${row},${col}`);
-          } else {
-            await window.electron.launchWebsite(id);
-          }
+          await window.electron.launchWebsite(icon.id);
           break;
         }
         default:
@@ -1079,8 +1046,7 @@ const DesktopGrid: React.FC = () => {
                   width: icon.width || defaultIconSize,
                   height: icon.height || defaultIconSize,
                 }}
-                onClick={() => handleIconClick(icon.row, icon.col)}
-                onDoubleClick={() => handleIconDoubleClick(icon.row, icon.col)}
+                onDoubleClick={() => handleIconDoubleClick(icon)}
                 onContextMenu={(e) => {
                   e.stopPropagation();
                   handleIconRightClick(e, icon.row, icon.col);
