@@ -662,7 +662,12 @@ const DesktopGrid: React.FC = () => {
   const handleOpenSubmenuClick = async (option: string) => {
     if (contextMenu?.icon) {
       const { row, col, name, programLink } = contextMenu.icon;
+      const icon = getIcon(row, col);
       let { image } = contextMenu.icon;
+      if (!icon) {
+        logger.error(`OpenSubMenuClick failed to get icon from: ${row},${col}`);
+        return;
+      }
 
       switch (option) {
         case "Image folder": {
@@ -670,7 +675,7 @@ const DesktopGrid: React.FC = () => {
           if (image === "") {
             image = "default.png";
           }
-          const filePath = `data/[${row},${col}]/${image}`;
+          const filePath = `data/${icon.id}/${image}`;
           logger.info(
             `Opening image folder for icon: ${name}, path: ${filePath}`
           );
