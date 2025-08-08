@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { createLoggerForFile } from "./logging.js";
 import { defaultSettings, ensureDefaultSettings } from "./settings.js";
 import {
@@ -6,12 +7,36 @@ import {
   getBackgroundFilePath,
   getBackgroundsJsonFilePath,
   getDataFolderPath,
+  getDefaultProfilePath,
   getDesktopIconsFilePath,
   getLogsFolderPath,
+  getProfilesPath,
   getSettingsFilePath,
 } from "./utils/util.js";
 
 const logger = createLoggerForFile("appDataSetup.ts");
+
+const getDefaultProfile = (): DesktopIconData => {
+  const filePath = getDesktopIconsFilePath();
+
+  try {
+    // Read JSON file
+    const data = fs.readFileSync(filePath, "utf-8");
+    logger.info(`Read file contents from ${filePath}`);
+    const parsedData: DesktopIconData = JSON.parse(data);
+
+    if (parsedData.icons) {
+      parsedData.icons = parsedData.icons.map((icon) => {
+        return icon;
+      });
+    }
+
+    return parsedData;
+  } catch (error) {
+    logger.error(`Error reading or creating JSON file. ${error}`);
+    return { icons: [] }; // Return default if error
+  }
+};
 
 /**
  * Ensures that necessary AppData directories and files exist in .../AppData/Roaming/AltDesktop/
@@ -31,6 +56,9 @@ export const ensureAppDataFiles = () => {
     const settingsFilePath = getSettingsFilePath();
     const backgroundFilePath = getBackgroundFilePath();
     const backgroundsFilePath = getBackgroundsJsonFilePath();
+    const profilesPath = getProfilesPath();
+    const profilesDefaultFolder = path.join(profilesPath, "default");
+    const defaultProfileJson = getDefaultProfilePath();
 
     // Ensure directories exist
     if (!fs.existsSync(logsFolderPath)) {
@@ -57,6 +85,16 @@ export const ensureAppDataFiles = () => {
     } else {
       logger.info("Background folder already exists:", backgroundFilePath);
     }
+    if (!fs.existsSync(profilesDefaultFolder)) {
+      logger.info(
+        "profiles folder does not exist, creating:",
+        profilesDefaultFolder
+      );
+      fs.mkdirSync(profilesDefaultFolder, { recursive: true });
+      logger.info("profiles folder created successfully.");
+    } else {
+      logger.info("profiles folder already exists:", profilesDefaultFolder);
+    }
 
     // Ensure desktopIcons.json exists
     ensureFileExists(desktopIconsFilePath, { icons: [] });
@@ -64,6 +102,7 @@ export const ensureAppDataFiles = () => {
       backgrounds: {},
     });
     ensureFileExists(settingsFilePath, defaultSettings);
+    ensureFileExists(defaultProfileJson, getDefaultProfile());
     ensureDefaultSettings();
   } catch (error) {
     logger.error("Error ensuring AppData files:", error);

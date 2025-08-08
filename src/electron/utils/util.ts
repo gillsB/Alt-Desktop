@@ -917,6 +917,14 @@ export const getBackgroundsJsonFilePath = (): string => {
   return path.join(getBasePath(), "backgrounds.json");
 };
 
+export const getProfilesPath = (): string => {
+  return path.join(getBasePath(), "profiles");
+};
+export const getDefaultProfilePath = (): string => {
+  const defaultFolder = path.join(getProfilesPath(), "default");
+  return path.join(defaultFolder, "profile.json");
+};
+
 // Helper: concurrency-limited promise pool
 export async function promisePool<T>(
   items: T[],
