@@ -267,7 +267,7 @@ export function resolveShortcut(filePath: string): string {
  */
 export function resetAllIconsFontColor(): boolean {
   try {
-    const filePath = getDesktopIconsFilePath();
+    const filePath = getDefaultProfileJsonPath();
     if (!fs.existsSync(filePath)) {
       logger.warn(`desktopIcons.json does not exist at: ${filePath}`);
       return false;
@@ -920,7 +920,7 @@ export const getBackgroundsJsonFilePath = (): string => {
 export const getProfilesPath = (): string => {
   return path.join(getBasePath(), "profiles");
 };
-export const getDefaultProfilePath = (): string => {
+export const getDefaultProfileJsonPath = (): string => {
   const defaultFolder = path.join(getProfilesPath(), "default");
   return path.join(defaultFolder, "profile.json");
 };

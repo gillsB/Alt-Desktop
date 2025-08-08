@@ -7,7 +7,7 @@ import {
   getBackgroundFilePath,
   getBackgroundsJsonFilePath,
   getDataFolderPath,
-  getDefaultProfilePath,
+  getDefaultProfileJsonPath,
   getDesktopIconsFilePath,
   getLogsFolderPath,
   getProfilesPath,
@@ -58,7 +58,7 @@ export const ensureAppDataFiles = () => {
     const backgroundsFilePath = getBackgroundsJsonFilePath();
     const profilesPath = getProfilesPath();
     const profilesDefaultFolder = path.join(profilesPath, "default");
-    const defaultProfileJson = getDefaultProfilePath();
+    const defaultProfileJson = getDefaultProfileJsonPath();
 
     // Ensure directories exist
     if (!fs.existsSync(logsFolderPath)) {
