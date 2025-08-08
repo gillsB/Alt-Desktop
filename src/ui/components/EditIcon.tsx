@@ -146,8 +146,7 @@ const EditIcon: React.FC = () => {
     }
 
     try {
-      // Sanitize old id by removing trailing _# (e.g. _1, _2, _3)
-      const oldId = icon.id ? icon.id.replace(/_\d+$/, "") : "";
+      const oldId = icon.id;
       const iconName = icon.name?.trim() || "";
 
       let newId: string | null;
@@ -180,6 +179,7 @@ const EditIcon: React.FC = () => {
         return;
       }
       if (nameChanged) {
+        logger.info("Renaming folder : " + oldId + " To: " + newId);
         await window.electron.renameDataFolder(oldId, newId);
       }
 

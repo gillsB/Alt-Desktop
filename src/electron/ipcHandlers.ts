@@ -249,35 +249,33 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       logger.info("ensureUniqueIconId called with: ", name);
 
       const baseName = name;
+      const dataFolder = getDataFolderPath();
 
-      const filePath = getDesktopIconsFilePath();
-      let icons: { id: string }[] = [];
-
+      let folderNames: string[] = [];
       try {
-        if (!fs.existsSync(filePath)) {
-          logger.error("desktopIcons.json does not exist.");
+        if (!fs.existsSync(dataFolder)) {
+          logger.error("Data folder does not exist: " + dataFolder);
           return null;
         }
-        const data = fs.readFileSync(filePath, "utf-8");
-        const parsed = JSON.parse(data);
-        icons = Array.isArray(parsed.icons) ? parsed.icons : [];
+        folderNames = fs
+          .readdirSync(dataFolder, { withFileTypes: true })
+          .filter((dirent) => dirent.isDirectory())
+          .map((dirent) => dirent.name);
       } catch (e) {
-        logger.error("Failed to read desktop icons file:", e);
+        logger.error("Failed to read data folder:", e);
         return null;
       }
 
-      // Collect all ids that match baseName or baseName_N
+      // Collect all folder names that match baseName or baseName_N
       const takenIds = new Set(
-        icons
-          .map((icon) => icon.id)
-          .filter((id) => {
-            if (!id) return false;
-            // Match baseName or baseName_N (where N is a number)
-            return (
-              id === baseName ||
-              id.match(new RegExp(`^${escapeRegExp(baseName)}(_\\d+)?$`))
-            );
-          })
+        folderNames.filter((id) => {
+          if (!id) return false;
+          // Match baseName or baseName_N (where N is a number)
+          return (
+            id === baseName ||
+            id.match(new RegExp(`^${escapeRegExp(baseName)}(_\\d+)?$`))
+          );
+        })
       );
 
       // If baseName is not taken, use it
