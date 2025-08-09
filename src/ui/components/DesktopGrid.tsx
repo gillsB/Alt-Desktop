@@ -232,37 +232,37 @@ const DesktopGrid: React.FC = () => {
     });
   };
 
-  const handleIpcReloadIcon = (
-    row: number,
-    col: number,
-    updatedIcon: DesktopIcon | null
-  ) => {
+  const handleIpcReloadIcon = (id: string, updatedIcon: DesktopIcon | null) => {
     // Force image reload with new timestamp (keyed by id if available)
     if (updatedIcon && updatedIcon.id) {
-      setReloadTimestamps((prev) => ({
-        ...prev,
-        [updatedIcon.id]: Date.now(),
-      }));
-    } else {
-      // If we don't have an id, try to use pos to find id
-      const id = posIndex.get(posKey(row, col));
-      if (id) setReloadTimestamps((prev) => ({ ...prev, [id]: Date.now() }));
-    }
-
-    // If an updated icon was provided, update the state
-    if (updatedIcon) {
-      // Update primary map + placement mapping
+      // ensure the id matches
+      const iconId = updatedIcon.id;
       setIconAndPlacement(updatedIcon);
-    } else {
-      // No updated icon -> remove placement at that position but keep icon data
+
+      // force image reload for this id
+      setReloadTimestamps((prev) => ({ ...prev, [iconId]: Date.now() }));
+
+      logger.info(
+        `IPC reload: updated icon id=${iconId} placed at [${updatedIcon.row}, ${updatedIcon.col}]`
+      );
+      return;
+    }
+    // No updated icon -> remove placement at that position but keep icon data
+    if (id) {
       setPosIndex((prev) => {
         const newPos = new Map(prev);
-        newPos.delete(posKey(row, col));
+        for (const [k, v] of prev) {
+          if (v === id) newPos.delete(k);
+        }
         return newPos;
       });
-    }
 
-    logger.info(`Updated icon UI at [${row}, ${col}]`);
+      logger.warn(
+        `IPC reload: no icon data for id=${id}. Cleared placement entries referencing this id.`
+      );
+    } else {
+      logger.warn("IPC reload: received null id or no id in payload.");
+    }
   };
 
   // Render the desktop grid on launch
@@ -370,25 +370,11 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     const handleReloadIcon = (
       _: Electron.IpcRendererEvent,
-      { row, col, icon }: { row: number; col: number; icon: DesktopIcon | null }
+      payload: { id: string; icon: DesktopIcon | null }
     ) => {
-      // use refs where you need latest maps
-      if (icon) {
-        // safe to call your helper that sets state
-        handleIpcReloadIcon(row, col, icon);
-      } else {
-        // when icon is null, we need posIndex to find id
-        const id = posIndexRef.current.get(`${row},${col}`);
-        if (id) {
-          setReloadTimestamps((prev) => ({ ...prev, [id]: Date.now() }));
-        }
-        // remove only the placement
-        setPosIndex((prev) => {
-          const newMap = new Map(prev);
-          newMap.delete(`${row},${col}`);
-          return newMap;
-        });
-      }
+      const { id, icon } = payload;
+      // Delegate to shared helper that updates React state
+      handleIpcReloadIcon(id, icon);
     };
 
     const handleHideHighlightBox = () => {
@@ -573,30 +559,41 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleReloadIcon = async () => {
-    if (contextMenu?.icon) {
-      const { row, col } = contextMenu.icon;
+    if (!contextMenu?.icon) return;
 
-      try {
-        // Call the Electron API to reload the icon
-        const ret = await window.electron.reloadIcon(row, col);
-        if (!ret) {
-          logger.info(
-            `Icon not found at [${row}, ${col}], removing placement map only`
-          );
-          // Only placement map as it is assumed it has moved, thus don't delete the newer reference.
-          setPosIndex((prevMap) => {
-            const newMap = new Map(prevMap);
-            newMap.delete(`${row},${col}`);
-            return newMap;
-          });
-        }
-      } catch (error) {
-        logger.error(`Failed to reload icon at [${row}, ${col}]:`, error);
+    const { id, row, col } = contextMenu.icon;
+
+    try {
+      // Call the Electron API to reload the icon by id
+      const ret: boolean = await window.electron.reloadIcon(id);
+
+      if (!ret) {
+        logger.info(
+          `Icon reload returned false for id=${id} (previously at [${row}, ${col}]). ` +
+            `Removing any placement mappings that reference this id.`
+        );
+
+        // Remove any posIndex entries that reference this id (keep icon data)
+        setPosIndex((prevMap) => {
+          const newMap = new Map(prevMap);
+          for (const [k, v] of prevMap) {
+            if (v === id) newMap.delete(k);
+          }
+          return newMap;
+        });
+      } else {
+        // Successful reload — update reload timestamp for UI image refresh
+        setReloadTimestamps((prev) => ({ ...prev, [id]: Date.now() }));
       }
-
-      setContextMenu(null);
-      hideHighlightBox();
+    } catch (error) {
+      logger.error(
+        `Failed to reload icon id=${id} at [${row}, ${col}]:`,
+        error
+      );
     }
+
+    setContextMenu(null);
+    hideHighlightBox();
   };
 
   const handleDeleteIcon = async () => {

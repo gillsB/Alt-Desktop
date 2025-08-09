@@ -359,47 +359,38 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     return title; // Return the title, or ""
   });
 
-  ipcMainHandle(
-    "reloadIcon",
-    async (row: number, col: number): Promise<boolean> => {
-      const filePath = getDefaultProfileJsonPath();
+  ipcMainHandle("reloadIcon", async (id: string): Promise<boolean> => {
+    const filePath = getDefaultProfileJsonPath();
 
-      try {
-        // Read JSON file
-        const data = fs.readFileSync(filePath, "utf-8");
-        const parsedData: DesktopIconData = JSON.parse(data);
+    try {
+      // Read JSON file
+      const data = fs.readFileSync(filePath, "utf-8");
+      const parsedData: DesktopIconData = JSON.parse(data);
 
-        // Find the icon with the specified row and col
-        const icon = parsedData.icons.find(
-          (icon) => icon.row === row && icon.col === col
-        );
+      // Find the icon with the specified row and col
+      const icon = parsedData.icons.find((icon) => icon.id === id);
 
-        // Notify the renderer process to reload the icon
-        if (mainWindow) {
-          logger.info(
-            `Sending reload request to renderer for icon at [${row}, ${col}]`
-          );
-          mainWindow.webContents.send("reload-icon", { row, col, icon });
-        }
-
-        if (icon) {
-          logger.info(
-            `Reloaded icon at [${row}, ${col}]: ${JSON.stringify(icon)}`
-          );
-
-          return true;
-        } else {
-          logger.warn(
-            `No icon found at [${row}, ${col}] to reload. (sent null response)`
-          );
-          return false; // Icon not found
-        }
-      } catch (error) {
-        logger.error(`Error reloading icon at [${row}, ${col}]: ${error}`);
-        return false; // Error occurred
+      // Notify the renderer process to reload the icon
+      if (mainWindow) {
+        logger.info(`Sending reload request to renderer for icon ${id}`);
+        mainWindow.webContents.send("reload-icon", { id, icon });
       }
+
+      if (icon) {
+        logger.info(`Reloaded icon: ${id}: ${JSON.stringify(icon)}`);
+
+        return true;
+      } else {
+        logger.warn(
+          `No icon found with id: ${id} to reload. (sent null response)`
+        );
+        return false; // Icon not found
+      }
+    } catch (error) {
+      logger.error(`Error reloading icon: ${id} : ${error}`);
+      return false; // Error occurred
     }
-  );
+  });
 
   ipcMainHandle("openSettings", async (): Promise<boolean> => {
     try {
