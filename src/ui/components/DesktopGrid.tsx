@@ -665,6 +665,11 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleOpenSettings = async () => {
+    const title = await window.electron.getSubWindowTitle();
+    if (title) {
+      logger.info(`Not opening settings as subWindow: ${title} already open.`);
+      return;
+    }
     try {
       await window.electron.openSettings();
     } catch (error) {
@@ -674,7 +679,11 @@ const DesktopGrid: React.FC = () => {
     hideHighlightBox();
   };
   const handleOpenBackgroundSelect = async () => {
-    logger.info("clicked background context menu item");
+    const title = await window.electron.getSubWindowTitle();
+    if (title) {
+      logger.info(`Not opening settings as subWindow: ${title} already open.`);
+      return;
+    }
     try {
       await window.electron.openBackgroundSelect();
     } catch (error) {
