@@ -439,12 +439,6 @@ const DesktopGrid: React.FC = () => {
 
   const handleDesktopRightClick = async (e: React.MouseEvent) => {
     // If a subwindow is active, do not show the context menu
-    if (await window.electron.getSubWindowTitle()) {
-      logger.info(
-        "Subwindow is open, nulled request for contextMenu (desktop click)."
-      );
-      return;
-    }
     e.preventDefault();
     const { clientX: x, clientY: y } = e;
     // React.MouseEvent returns global coordinates, so we need to adjust them to local coordinates
@@ -487,12 +481,6 @@ const DesktopGrid: React.FC = () => {
     col: number
   ) => {
     // If a subwindow is active, do not show the context menu
-    if (await window.electron.getSubWindowTitle()) {
-      logger.info(
-        "Subwindow is open, nulled request for contextMenu(Icon click)."
-      );
-      return;
-    }
     e.stopPropagation();
     handleRightClick(e, "icon", row, col);
     showHighlightAt(row, col, true);
