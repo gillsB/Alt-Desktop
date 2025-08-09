@@ -22,11 +22,29 @@ interface HighlightPosition {
 }
 
 interface IconReloadTimestamps {
-  [key: string]: number;
+  [key: string]: number; // now keyed by icon id
 }
 
 const DesktopGrid: React.FC = () => {
-  const [iconsMap, setIconsMap] = useState<Map<string, DesktopIcon>>(new Map());
+  // Primary map: keyed by icon id
+  const [iconsById, setIconsById] = useState<Map<string, DesktopIcon>>(
+    new Map()
+  );
+  // Secondary index: keyed by "row,col" -> icon id (placement map)
+  const [posIndex, setPosIndex] = useState<Map<string, string>>(new Map());
+
+  const posKey = (row: number, col: number) => `${row},${col}`;
+
+  const posIndexRef = useRef(posIndex);
+  useEffect(() => {
+    posIndexRef.current = posIndex;
+  }, [posIndex]);
+
+  const iconsByIdRef = useRef(iconsById);
+  useEffect(() => {
+    iconsByIdRef.current = iconsById;
+  }, [iconsById]);
+
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [showGrid, setShowGrid] = useState(false); // State to toggle grid visibility
   const [hideIcons, setHideIcons] = useState(false); // State to toggle icons visibility
@@ -163,54 +181,84 @@ const DesktopGrid: React.FC = () => {
     }));
   };
 
-  /**
-   * Retrieves a `DesktopIcon` from the `iconsMap` at the specified position.
-   *
-   * @param {number} row - The row position of the icon in the grid.
-   * @param {number} col - The column position of the icon in the grid.
-   * @returns {DesktopIcon | undefined} The `DesktopIcon` object at the specified position, or `undefined` if the icon doesn't exist.
-   */
   const getIcon = (row: number, col: number): DesktopIcon | undefined => {
-    return iconsMap.get(`${row},${col}`);
+    const id = posIndex.get(posKey(row, col));
+    return id ? iconsById.get(id) : undefined;
   };
 
-  /**
-   * Handles the "reload-icon" IPC event from the Electron main process.
-   * This function updates the `iconsMap` state with the new icon data received via IPC.
-   *
-   * **Note:** This function is intended to be used exclusively as a callback for the
-   * "reloadIcon" IPC event and should not be called directly.
-   *
-   * @param {number} row - The row position of the icon in the grid.
-   * @param {number} col - The column position of the icon in the grid.
-   * @param {DesktopIcon} updatedIcon - The updated `DesktopIcon` object received from the IPC event.
-   */
+  // Helper to set/update an icon and its placement while keeping both maps in sync
+  const setIconAndPlacement = (icon: DesktopIcon) => {
+    const id = icon.id;
+    const key = posKey(icon.row, icon.col);
+
+    // Update iconsById and posIndex together
+    setIconsById((prevIcons) => {
+      const newIcons = new Map(prevIcons);
+      // Ensure icon stored has the authoritative row/col
+      newIcons.set(id, { ...newIcons.get(id), ...icon });
+
+      // Update posIndex inside the same update cycle to keep them in sync
+      setPosIndex((prevPos) => {
+        const newPos = new Map(prevPos);
+        // remove any previous mapping for this id
+        for (const [k, v] of prevPos) {
+          if (v === id && k !== key) {
+            newPos.delete(k);
+          }
+        }
+        // Set the new position -> id mapping
+        newPos.set(key, id);
+        return newPos;
+      });
+
+      return newIcons;
+    });
+  };
+
+  // Helper to fully remove an icon (used when user chooses Delete)
+  const removeIconCompletely = (id: string) => {
+    setIconsById((prev) => {
+      const newIcons = new Map(prev);
+      newIcons.delete(id);
+      // remove pos entries pointing to this id
+      setPosIndex((prevPos) => {
+        const newPos = new Map(prevPos);
+        for (const [k, v] of prevPos) {
+          if (v === id) newPos.delete(k);
+        }
+        return newPos;
+      });
+      return newIcons;
+    });
+  };
+
   const handleIpcReloadIcon = (
     row: number,
     col: number,
-    updatedIcon: DesktopIcon
+    updatedIcon: DesktopIcon | null
   ) => {
-    const iconKey = `${row},${col}`;
-
-    // Force image reload with new timestamp
-    setReloadTimestamps((prev) => ({
-      ...prev,
-      [iconKey]: Date.now(),
-    }));
+    // Force image reload with new timestamp (keyed by id if available)
+    if (updatedIcon && updatedIcon.id) {
+      setReloadTimestamps((prev) => ({
+        ...prev,
+        [updatedIcon.id]: Date.now(),
+      }));
+    } else {
+      // If we don't have an id, try to use pos to find id
+      const id = posIndex.get(posKey(row, col));
+      if (id) setReloadTimestamps((prev) => ({ ...prev, [id]: Date.now() }));
+    }
 
     // If an updated icon was provided, update the state
     if (updatedIcon) {
-      setIconsMap((prevMap) => {
-        const newMap = new Map(prevMap);
-        newMap.set(iconKey, updatedIcon);
-        return newMap;
-      });
+      // Update primary map + placement mapping
+      setIconAndPlacement(updatedIcon);
     } else {
-      // remove icon from map
-      setIconsMap((prevMap) => {
-        const newMap = new Map(prevMap);
-        newMap.delete(iconKey);
-        return newMap;
+      // No updated icon -> remove placement at that position but keep icon data
+      setPosIndex((prev) => {
+        const newPos = new Map(prev);
+        newPos.delete(posKey(row, col));
+        return newPos;
       });
     }
 
@@ -275,9 +323,7 @@ const DesktopGrid: React.FC = () => {
         // Ensure data folder exists for each icon
         const success = await window.electron.ensureDataFolder(icon.id);
         if (!success) {
-          logger.warn(
-            `Failed to create data folder for icon at [${icon.row}, ${icon.col}]`
-          );
+          logger.warn(`Failed to create data folder for icon id=${icon.id}`);
         }
         return icon;
       });
@@ -285,12 +331,16 @@ const DesktopGrid: React.FC = () => {
       // Wait for all folder creation promises to resolve
       const processedIcons = await Promise.all(folderPromises);
 
-      const newMap = new Map<string, DesktopIcon>();
+      const idMap = new Map<string, DesktopIcon>();
+      const posMap = new Map<string, string>();
+
       processedIcons.forEach((icon: DesktopIcon) => {
-        newMap.set(`${icon.row},${icon.col}`, icon);
+        idMap.set(icon.id, icon);
+        posMap.set(posKey(icon.row, icon.col), icon.id);
       });
 
-      setIconsMap(newMap);
+      setIconsById(idMap);
+      setPosIndex(posMap);
     } catch (error) {
       logger.error("Error loading icons:", error);
     }
@@ -320,20 +370,35 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     const handleReloadIcon = (
       _: Electron.IpcRendererEvent,
-      { row, col, icon }: { row: number; col: number; icon: DesktopIcon }
+      { row, col, icon }: { row: number; col: number; icon: DesktopIcon | null }
     ) => {
-      handleIpcReloadIcon(row, col, icon);
+      // use refs where you need latest maps
+      if (icon) {
+        // safe to call your helper that sets state
+        handleIpcReloadIcon(row, col, icon);
+      } else {
+        // when icon is null, we need posIndex to find id
+        const id = posIndexRef.current.get(`${row},${col}`);
+        if (id) {
+          setReloadTimestamps((prev) => ({ ...prev, [id]: Date.now() }));
+        }
+        // remove only the placement
+        setPosIndex((prev) => {
+          const newMap = new Map(prev);
+          newMap.delete(`${row},${col}`);
+          return newMap;
+        });
+      }
     };
 
     const handleHideHighlightBox = () => {
-      console.log("Received 'hide-highlight' event from main process.");
       hideHighlightBox();
     };
 
     // Listen for the 'reload-icon' event
     window.electron.on(
       "reload-icon",
-      handleReloadIcon as (...args: unknown[]) => void
+      handleReloadIcon as (...a: unknown[]) => void
     );
 
     // Listen for the 'hide-highlight' event
@@ -341,19 +406,19 @@ const DesktopGrid: React.FC = () => {
 
     window.electron.on(
       "update-icon-preview",
-      handlePreviewUpdate as (...args: unknown[]) => void
+      handlePreviewUpdate as (...a: unknown[]) => void
     );
 
     // Cleanup the event listeners on unmount
     return () => {
       window.electron.off(
         "reload-icon",
-        handleReloadIcon as (...args: unknown[]) => void
+        handleReloadIcon as (...a: unknown[]) => void
       );
       window.electron.off("hide-highlight", handleHideHighlightBox);
       window.electron.off(
         "update-icon-preview",
-        handlePreviewUpdate as (...args: unknown[]) => void
+        handlePreviewUpdate as (...a: unknown[]) => void
       );
     };
   }, []);
@@ -447,7 +512,7 @@ const DesktopGrid: React.FC = () => {
     showHighlightAt(row, col, true);
 
     logger.info(
-      `Icon right click ${iconsMap.get(`${row},${col}`)?.id} at row: ${row}, col: ${col} with icon name: ${iconsMap.get(`${row},${col}`)?.name}`
+      `Icon right click: ${getIcon(row, col)?.id} at row: ${row}, col: ${col} with icon name: ${getIcon(row, col)?.name}`
     );
   };
 
@@ -516,9 +581,10 @@ const DesktopGrid: React.FC = () => {
         const ret = await window.electron.reloadIcon(row, col);
         if (!ret) {
           logger.info(
-            `Icon not found at [${row}, ${col}], removing it from map`
+            `Icon not found at [${row}, ${col}], removing placement map only`
           );
-          setIconsMap((prevMap) => {
+          // Only placement map as it is assumed it has moved, thus don't delete the newer reference.
+          setPosIndex((prevMap) => {
             const newMap = new Map(prevMap);
             newMap.delete(`${row},${col}`);
             return newMap;
@@ -535,7 +601,7 @@ const DesktopGrid: React.FC = () => {
 
   const handleDeleteIcon = async () => {
     if (contextMenu?.icon) {
-      const { name, row, col } = contextMenu.icon;
+      const { name, row, col, id } = contextMenu.icon;
 
       try {
         const ret = await showSmallWindow(
@@ -545,8 +611,10 @@ const DesktopGrid: React.FC = () => {
         );
         // Call the Electron API to delete the icon
         if (ret === "Yes") {
-          await window.electron.deleteIcon(contextMenu.icon.id);
-          logger.info(`Deleted icon at [${row}, ${col}]`);
+          await window.electron.deleteIcon(id);
+          // remove fully from both maps
+          removeIconCompletely(id);
+          logger.info(`Deleted icon id=${id} at [${row}, ${col}]`);
         } else {
           logger.info(
             `Icon deletion cancelled at [${row}, ${col}] ret = ${ret}`
@@ -558,7 +626,6 @@ const DesktopGrid: React.FC = () => {
 
       setContextMenu(null);
       hideHighlightBox();
-      handleReloadIcon();
     }
   };
 
@@ -671,7 +738,7 @@ const DesktopGrid: React.FC = () => {
 
       switch (option) {
         case "Image folder": {
-          // Set image to default so it opens [row,col] folder instead of the data folder.
+          // Set image to default so it opens data/id folder instead of just the data folder.
           if (image === "") {
             image = "default.png";
           }
@@ -766,25 +833,41 @@ const DesktopGrid: React.FC = () => {
     // Font color changes can be extremely frequent, so ignore them for logging.
     if (!updates["fontColor"]) {
       logger.info(
-        `Received preview update for icon ${id}: [${row}, ${col}], updates: ${JSON.stringify(updates)}`
+        `Received preview update for icon ${id}: [${row}, ${col}], updates: ${JSON.stringify(
+          updates
+        )}`
       );
     }
 
-    setIconsMap((prevMap) => {
+    setIconsById((prevMap) => {
       const newMap = new Map(prevMap);
-      const key = `${row},${col}`;
-      const currentIcon = prevMap.get(key);
+      const currentIcon = prevMap.get(id);
 
       if (currentIcon) {
-        // Merge updates into existing icon
-        const updatedIcon = { ...currentIcon, ...updates };
-        newMap.set(key, updatedIcon);
+        const updatedIcon = { ...currentIcon, ...updates } as DesktopIcon;
+        // Ensure row/col on the icon match the placement provided by the update
+        if (typeof row === "number" && typeof col === "number") {
+          updatedIcon.row = row;
+          updatedIcon.col = col;
+        }
+        newMap.set(id, updatedIcon);
+
+        // Keep placement mapping in sync
+        setPosIndex((prevPos) => {
+          const newPos = new Map(prevPos);
+          // remove old placements for this id
+          for (const [k, v] of prevPos) {
+            if (v === id && k !== posKey(updatedIcon.row, updatedIcon.col)) {
+              newPos.delete(k);
+            }
+          }
+          // set new placement
+          newPos.set(posKey(updatedIcon.row, updatedIcon.col), id);
+          return newPos;
+        });
 
         if (updates.image) {
-          setReloadTimestamps((prev) => ({
-            ...prev,
-            [key]: Date.now(),
-          }));
+          setReloadTimestamps((prev) => ({ ...prev, [id]: Date.now() }));
         }
       } else {
         // Create a new temporary icon for preview
@@ -792,25 +875,34 @@ const DesktopGrid: React.FC = () => {
           id,
           row,
           col,
-          name: updates.name || "",
-          image: updates.image || "",
-          fontColor: updates.fontColor || defaultFontColor,
-          fontSize: updates.fontSize || 16,
-          width: updates.width || defaultIconSize,
-          height: updates.height || defaultIconSize,
+          name: (updates.name as string) || "",
+          image: (updates.image as string) || "",
+          fontColor: (updates.fontColor as string) || defaultFontColor,
+          fontSize: (updates.fontSize as number) || 16,
+          width: (updates.width as number) || defaultIconSize,
+          height: (updates.height as number) || defaultIconSize,
           launchDefault: updates.launchDefault ?? "program",
           ...updates,
         };
-        newMap.set(key, tempIcon);
 
-        logger.info("tempID = ", tempIcon.id);
+        newMap.set(id, tempIcon);
+
+        // Sync placement mapping
+        setPosIndex((prevPos) => {
+          const newPos = new Map(prevPos);
+          // clear any previous mapping for this id (very unlikely)
+          for (const [k, v] of prevPos) {
+            if (v === id) newPos.delete(k);
+          }
+          newPos.set(posKey(row, col), id);
+          return newPos;
+        });
 
         if (updates.image) {
-          setReloadTimestamps((prev) => ({
-            ...prev,
-            [key]: Date.now(),
-          }));
+          setReloadTimestamps((prev) => ({ ...prev, [id]: Date.now() }));
         }
+
+        logger.info("tempID = ", tempIcon.id);
       }
 
       return newMap;
@@ -900,7 +992,7 @@ const DesktopGrid: React.FC = () => {
 
         {/* Render all icons as highlighted if enabled */}
         {showAllHighlights &&
-          Array.from(iconsMap.values()).map((icon) => {
+          Array.from(iconsById.values()).map((icon) => {
             // Calculate Icon home position
             const homeLeft =
               icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
@@ -956,7 +1048,9 @@ const DesktopGrid: React.FC = () => {
             const iconHeight = icon.height || defaultIconSize;
 
             return (
-              <React.Fragment key={`multi-highlight-${icon.row}-${icon.col}`}>
+              <React.Fragment
+                key={`multi-highlight-${icon.id}-${icon.row}-${icon.col}`}
+              >
                 {showHighlight && (
                   <>
                     {/* Home box */}
@@ -1029,23 +1123,28 @@ const DesktopGrid: React.FC = () => {
             );
           })}
 
-        {/* Render desktop icons */}
+        {/* Render icons by reading the placement map (posIndex) */}
         {!hideIcons &&
-          Array.from(iconsMap.values()).map((icon) => {
-            const iconKey = `${icon.row},${icon.col}`;
-            const reloadTimestamp = reloadTimestamps[iconKey] || 0;
+          Array.from(posIndex.entries()).map(([pos, id]) => {
+            const parts = pos.split(",");
+            const row = Number(parts[0]);
+            const col = Number(parts[1]);
+            const icon = iconsById.get(id);
+            if (!icon) return null;
+
+            const reloadTimestamp = reloadTimestamps[icon.id] || 0;
 
             return (
               <div
-                key={`${icon.row}-${icon.col}`}
+                key={`icon-${icon.id}-${row}-${col}`}
                 className="desktop-icon"
                 style={{
                   left:
-                    icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+                    col * (iconBox + ICON_HORIZONTAL_PADDING) +
                     (icon.offsetX || 0) +
                     ICON_ROOT_OFFSET_LEFT,
                   top:
-                    icon.row * (iconBox + ICON_VERTICAL_PADDING) +
+                    row * (iconBox + ICON_VERTICAL_PADDING) +
                     (icon.offsetY || 0) +
                     ICON_ROOT_OFFSET_TOP,
                   width: icon.width || defaultIconSize,
@@ -1054,17 +1153,17 @@ const DesktopGrid: React.FC = () => {
                 onDoubleClick={() => handleIconDoubleClick(icon)}
                 onContextMenu={(e) => {
                   e.stopPropagation();
-                  handleIconRightClick(e, icon.row, icon.col);
+                  handleIconRightClick(e, row, col);
                 }}
               >
                 <SafeImage
                   id={icon.id}
-                  row={icon.row}
-                  col={icon.col}
+                  row={row}
+                  col={col}
                   imagePath={icon.image}
                   width={icon.width || defaultIconSize}
                   height={icon.height || defaultIconSize}
-                  highlighted={isIconHighlighted(icon.row, icon.col)}
+                  highlighted={isIconHighlighted(row, col)}
                   forceReload={reloadTimestamp}
                 />
                 {icon.fontSize !== 0 &&
