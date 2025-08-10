@@ -47,3 +47,4 @@ back*.mp4
 /src/scripts/bin/file_to_image.dist
 /src/scripts/bin/file_to_image.onefile-build
 /src/scripts/file_to_image/target
+/.venv

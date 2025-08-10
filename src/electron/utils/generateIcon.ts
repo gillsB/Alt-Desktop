@@ -70,17 +70,28 @@ export const generateIcon = async (
 
     // Get Icon from python script.
     logger.info(`Falling back to Python executable for: ${programLink}`);
-    const executablePath = path.join(getScriptsPath(), "file_to_image.exe");
 
     return await new Promise<string[]>((resolve) => {
-      logger.info(
-        `Args for exec: ${fileType}, ${programLink}, ${outputPath}, ${iconSize.toString()}`
-      );
-      const process = spawn(executablePath, [
-        programLink,
-        outputPath,
-        iconSize.toString(),
-      ]);
+      let process;
+      if (fileType === "exe") {
+        logger.info(
+          `running python for exe: ${fileType}, ${programLink}, ${outputPath}, ${iconSize.toString()}`
+        );
+        process = spawn(path.join(getScriptsPath(), "exe_to_image.exe"), [
+          programLink,
+          outputPath,
+          iconSize.toString(),
+        ]);
+      } else {
+        logger.info(
+          `running rust for default: ${fileType}, ${programLink}, ${outputPath}, ${iconSize.toString()}`
+        );
+        process = spawn(path.join(getScriptsPath(), "file_to_image.exe"), [
+          programLink,
+          outputPath,
+          iconSize.toString(),
+        ]);
+      }
 
       process.stdout.on("data", (data) => {
         logger.info(`Executable stdout: ${data.toString().trim()}`);
@@ -164,7 +175,7 @@ async function browserIconToImage(
   const iconFileName = `browser_icon.png`;
   const outputPath = path.join(targetDir, iconFileName);
 
-  const executablePath = path.join(getScriptsPath(), "file_to_image.exe");
+  const executablePath = path.join(getScriptsPath(), "exe_to_image.exe");
   return await new Promise<string | null>((resolve) => {
     const process = spawn(executablePath, [
       browserPath,

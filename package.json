@@ -18,6 +18,7 @@
     "test:e2e": "npm run transpile:electron && playwright test",
     "test:unit": "vitest src",
     "py": "nuitka --standalone --onefile --output-dir=src/scripts/bin src/scripts/file_to_image.py",
+    "pyInstaller": "pyinstaller --clean --noupx --onefile --distpath src/scripts/bin src/scripts/exe_to_image.py",
     "postinstall": "echo 'The Python executable is already included. Run npm run py only if you modify the Python script. (Must have python installed with requirements.txt)'"
   },
   "dependencies": {
