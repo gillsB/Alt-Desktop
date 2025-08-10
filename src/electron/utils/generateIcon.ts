@@ -77,7 +77,6 @@ export const generateIcon = async (
         `Args for exec: ${fileType}, ${programLink}, ${outputPath}, ${iconSize.toString()}`
       );
       const process = spawn(executablePath, [
-        fileType,
         programLink,
         outputPath,
         iconSize.toString(),
@@ -168,7 +167,6 @@ async function browserIconToImage(
   const executablePath = path.join(getScriptsPath(), "file_to_image.exe");
   return await new Promise<string | null>((resolve) => {
     const process = spawn(executablePath, [
-      "exe",
       browserPath,
       outputPath,
       iconSize.toString(),
