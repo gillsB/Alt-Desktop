@@ -226,7 +226,7 @@ interface EventParamMapping {
   deleteIcon: [string];
   openInExplorer: ["image" | "programLink" | "background", string];
   showSmallWindow: [string, string, string[]];
-  previewIconUpdate: [string, number, number, Partial<DesktopIcon>];
+  previewIconUpdate: [string, Partial<DesktopIcon>];
   previewBackgroundUpdate: [Partial<PreviewBackgroundUpdate>];
   previewGridUpdate: [Partial<SettingsData>];
   previewHeaderUpdate: [Partial<SettingsData>];
@@ -401,8 +401,6 @@ interface Window {
     }) => void;
     previewIconUpdate: (
       id: string,
-      row: number,
-      col: number,
       updates: Partial<DesktopIcon>
     ) => Promise<boolean>;
     previewBackgroundUpdate: (
