@@ -18,8 +18,13 @@ const SelectIconWindow: React.FC = () => {
 
   const [selected, setSelected] = useState<number | null>(null);
 
-  const handleSelect = (index: number) => {
+  const handleSelect = async (index: number) => {
     setSelected(index);
+    await window.electron.previewIconUpdate(id, {
+      row: row,
+      col: col,
+      image: images[index],
+    });
   };
 
   const handleButtonClick = (buttonValue: string) => {

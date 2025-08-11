@@ -47,7 +47,7 @@ export const generateIcon = async (
     let fileType: FileType;
     const fileExtension = path.extname(programLink).toLowerCase();
 
-    if (fileExtension === ".exe") {
+    if (fileExtension === ".exe" || fileExtension === ".url") {
       fileType = "exe";
     } else {
       fileType = "default";
@@ -69,13 +69,13 @@ export const generateIcon = async (
     const outputPath = path.join(targetDir, iconFileName);
 
     // Get Icon from python script.
-    logger.info(`Falling back to Python executable for: ${programLink}`);
+    logger.info(`Falling back to executables for: ${programLink}`);
 
     return await new Promise<string[]>((resolve) => {
       let process;
       if (fileType === "exe") {
         logger.info(
-          `running python for exe: ${fileType}, ${programLink}, ${outputPath}, ${iconSize.toString()}`
+          `running python for exe: ${programLink}, ${outputPath}, ${iconSize.toString()}`
         );
         process = spawn(path.join(getScriptsPath(), "exe_to_image.exe"), [
           programLink,
@@ -84,7 +84,7 @@ export const generateIcon = async (
         ]);
       } else {
         logger.info(
-          `running rust for default: ${fileType}, ${programLink}, ${outputPath}, ${iconSize.toString()}`
+          `running rust for default file: ${programLink}, ${outputPath}, ${iconSize.toString()}`
         );
         process = spawn(path.join(getScriptsPath(), "file_to_image.exe"), [
           programLink,
