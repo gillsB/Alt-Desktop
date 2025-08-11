@@ -195,7 +195,7 @@ const DesktopGrid: React.FC = () => {
     setIconsById((prevIcons) => {
       const newIcons = new Map(prevIcons);
       // Ensure icon stored has the authoritative row/col
-      newIcons.set(id, { ...newIcons.get(id), ...icon });
+      newIcons.set(id, { ...icon });
 
       // Update posIndex inside the same update cycle to keep them in sync
       setPosIndex((prevPos) => {
