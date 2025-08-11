@@ -388,7 +388,11 @@ const EditIcon: React.FC = () => {
   const sendPreviewUpdate = async (updatedFields: Partial<DesktopIcon>) => {
     if (!icon) return;
     try {
-      await window.electron.previewIconUpdate(icon.id, updatedFields);
+      await window.electron.previewIconUpdate(icon.id, {
+        ...updatedFields,
+        row: icon.row,
+        col: icon.col,
+      });
     } catch (error) {
       logger.error("Failed to send icon preview update:", error);
     }
