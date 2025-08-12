@@ -558,7 +558,7 @@ const DesktopGrid: React.FC = () => {
 
     try {
       // Call the Electron API to reload the icon by id
-      const ret: boolean = await window.electron.reloadIcon(id);
+      const ret: boolean = await window.electron.reloadIcon(id, profile);
 
       if (!ret) {
         logger.info(

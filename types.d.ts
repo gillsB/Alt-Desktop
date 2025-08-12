@@ -210,7 +210,7 @@ interface EventParamMapping {
   setIconData: [DesktopIcon];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
   getDesktopIcon: [string, profile?: string];
-  reloadIcon: [string];
+  reloadIcon: [string, profile?: string];
   openSettings: [];
   editIcon: [string, number, number, profile?: string];
   reloadWindow: [];
@@ -364,7 +364,7 @@ interface Window {
       profile?: string
     ) => Promise<DesktopIcon | null>;
     getSubWindowTitle: () => Promise<string>;
-    reloadIcon: (id: string) => Promise<boolean>;
+    reloadIcon: (id: string, profile?: string) => Promise<boolean>;
     openSettings: () => Promise<boolean>;
     openBackgroundSelect: (id?: string) => Promise<boolean>;
     editIcon: (
