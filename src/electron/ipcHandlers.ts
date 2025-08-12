@@ -58,6 +58,7 @@ import {
   getDesktopIconsFilePath,
   getExternalPath,
   getLogsFolderPath,
+  getProfilesPath,
   getSettingsFilePath,
   indexBackgrounds,
   ipcMainHandle,
@@ -109,27 +110,36 @@ const bgPathToInfoHandlers = {
 } as const;
 
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
-  ipcMainHandle("getDesktopIconData", async (): Promise<DesktopIconData> => {
-    const filePath = getDefaultProfileJsonPath();
-
-    try {
-      // Read JSON file
-      const data = fs.readFileSync(filePath, "utf-8");
-      logger.info(`Read file contents from ${filePath}`);
-      const parsedData: DesktopIconData = JSON.parse(data);
-
-      if (parsedData.icons) {
-        parsedData.icons = parsedData.icons.map((icon) => {
-          return icon;
-        });
+  ipcMainHandle(
+    "getDesktopIconData",
+    async (profile?: string): Promise<DesktopIconData> => {
+      let filePath = "";
+      if (profile) {
+        const folderPath = path.join(getProfilesPath(), profile);
+        filePath = path.join(folderPath, "profile.json");
+      } else {
+        filePath = getDefaultProfileJsonPath();
       }
 
-      return parsedData;
-    } catch (error) {
-      logger.error(`Error reading or creating JSON file. ${error}`);
-      return { icons: [] }; // Return default if error
+      try {
+        // Read JSON file
+        const data = fs.readFileSync(filePath, "utf-8");
+        logger.info(`Read file contents from ${filePath}`);
+        const parsedData: DesktopIconData = JSON.parse(data);
+
+        if (parsedData.icons) {
+          parsedData.icons = parsedData.icons.map((icon) => {
+            return icon;
+          });
+        }
+
+        return parsedData;
+      } catch (error) {
+        logger.error(`Error reading or creating JSON file. ${error}`);
+        return { icons: [] }; // Return default if error
+      }
     }
-  });
+  );
 
   ipcMainHandle(
     "getDesktopIcon",

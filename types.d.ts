@@ -204,7 +204,7 @@ interface EventParamMapping {
   getStaticData: [];
   changeView: [];
   sendHeaderAction: [HeaderAction];
-  getDesktopIconData: [];
+  getDesktopIconData: [profile?: string];
   ensureDataFolder: [string];
   ensureUniqueIconId: [string];
   setIconData: [DesktopIcon];
@@ -353,7 +353,7 @@ interface Window {
       callback: (view: View) => void
     ) => UnsubscribeFunction;
     sendHeaderAction: (payload: HeaderAction) => void;
-    getDesktopIconData: () => Promise<DesktopIconData>;
+    getDesktopIconData: (profile?: string) => Promise<DesktopIconData>;
     getSafeFileUrl: (relativePath: string) => string;
     ensureDataFolder: (id: string) => Promise<boolean>;
     ensureUniqueIconId: (name: string) => Promise<string | null>;

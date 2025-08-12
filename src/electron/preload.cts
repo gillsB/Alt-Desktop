@@ -29,7 +29,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     }),
   getStaticData: () => ipcInvoke("getStaticData"),
   sendHeaderAction: (payload) => ipcSend("sendHeaderAction", payload),
-  getDesktopIconData: () => ipcInvoke("getDesktopIconData"),
+  getDesktopIconData: (profile?: string) =>
+    ipcInvoke("getDesktopIconData", profile),
   getSafeFileUrl: (relativePath: string) => getSafeFileUrl(relativePath),
   ensureDataFolder: (id: string) => ipcInvoke("ensureDataFolder", id),
   ensureUniqueIconId: (name) => ipcInvoke("ensureUniqueIconId", name),
@@ -75,10 +76,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     windowId: number;
     buttonText: string | null;
   }) => ipcSend("buttonResponse", payload),
-  previewIconUpdate: (
-    id: string,
-    updates: Partial<DesktopIcon>
-  ) => ipcInvoke("previewIconUpdate", id, updates),
+  previewIconUpdate: (id: string, updates: Partial<DesktopIcon>) =>
+    ipcInvoke("previewIconUpdate", id, updates),
   previewBackgroundUpdate: (updates: Partial<PreviewBackgroundUpdate>) =>
     ipcInvoke("previewBackgroundUpdate", updates),
   previewGridUpdate: (updates: Partial<SettingsData>) =>

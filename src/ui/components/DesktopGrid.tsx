@@ -315,7 +315,8 @@ const DesktopGrid: React.FC = () => {
   };
   const fetchIcons = async () => {
     try {
-      const data = await window.electron.getDesktopIconData();
+      const data = await window.electron.getDesktopIconData(); // Edit this line to change profiles for testing
+      logger.info("profile fetched = " + JSON.stringify(data));
       logger.info("Fetched icons");
 
       // Create an array of promises for ensuring folders
