@@ -33,6 +33,9 @@ const DesktopGrid: React.FC = () => {
   // Secondary index: keyed by "row,col" -> icon id (placement map)
   const [posIndex, setPosIndex] = useState<Map<string, string>>(new Map());
 
+  const [profile, setProfile] = useState<string>("");
+  const profileRef = useRef(profile);
+
   const posKey = (row: number, col: number) => `${row},${col}`;
 
   const posIndexRef = useRef(posIndex);
@@ -314,8 +317,9 @@ const DesktopGrid: React.FC = () => {
     }
   };
   const fetchIcons = async () => {
+    logger.info("fetchIcons called with profile = " + profile);
     try {
-      const data = await window.electron.getDesktopIconData(); // Edit this line to change profiles for testing
+      const data = await window.electron.getDesktopIconData(profile); // Edit this line to change profiles for testing
       logger.info("profile fetched = " + JSON.stringify(data));
       logger.info("Fetched icons");
 
@@ -912,8 +916,19 @@ const DesktopGrid: React.FC = () => {
   }, [contextMenu]);
 
   useEffect(() => {
+    logger.info("profile changed to: " + profile);
+    profileRef.current = profile;
+    fetchIcons();
+  }, [profile]);
+
+  useEffect(() => {
     const fetchBackgroundType = async () => {
       const type = await window.electron.getInfoFromID("", "fileType");
+      setProfile((prev) => {
+        const next = prev === "profile2" ? "" : ""; // const next = prev === "profile2" ? "" : "profile2";
+        logger.info("setProfile called, prev:", prev, "next:", next);
+        return next;
+      });
       if (type) {
         setBackgroundType(type);
       } else {
