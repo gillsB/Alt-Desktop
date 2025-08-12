@@ -188,6 +188,7 @@ const EditIcon: React.FC = () => {
       if (nameChanged) {
         logger.info("Renaming folder : " + oldId + " To: " + newId);
         await window.electron.renameDataFolder(oldId, newId);
+        await window.electron.renameID(oldId, newId);
       }
 
       icon.id = newId;

@@ -208,6 +208,7 @@ interface EventParamMapping {
   ensureDataFolder: [string];
   ensureUniqueIconId: [string];
   setIconData: [DesktopIcon];
+  renameID: [string, string];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
   getDesktopIcon: [string, profile?: string];
   reloadIcon: [string, profile?: string];
@@ -279,6 +280,7 @@ type EventPayloadMapping = {
   ensureDataFolder: boolean;
   ensureUniqueIconId: string | null;
   setIconData: boolean;
+  renameID: boolean;
   sendSubWindowAction: { action: SubWindowAction; icon?: DesktopIcon };
   getDesktopIcon: DesktopIcon | null;
   reloadIcon: boolean;
@@ -358,6 +360,7 @@ interface Window {
     ensureDataFolder: (id: string) => Promise<boolean>;
     ensureUniqueIconId: (name: string) => Promise<string | null>;
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
+    renameID: (oldId: string, newId: string) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
     getDesktopIcon: (
       id: string,

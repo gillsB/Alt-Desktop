@@ -319,7 +319,7 @@ const DesktopGrid: React.FC = () => {
   const fetchIcons = async () => {
     logger.info("fetchIcons called with profile = " + profile);
     try {
-      const data = await window.electron.getDesktopIconData(profile); // Edit this line to change profiles for testing
+      const data = await window.electron.getDesktopIconData(profile);
       logger.info("profile fetched = " + JSON.stringify(data));
       logger.info("Fetched icons");
 
@@ -925,7 +925,7 @@ const DesktopGrid: React.FC = () => {
     const fetchBackgroundType = async () => {
       const type = await window.electron.getInfoFromID("", "fileType");
       setProfile(() => {
-        const next = profileRef.current === "profile2" ? "" : "profile2"; // const next = prev === "profile2" ? "" : "profile2";
+        const next = profileRef.current === "profile2" ? "" : ""; // const next = prev === "profile2" ? "" : "profile2";
         logger.info(
           "setProfile called, prev:",
           profileRef.current,
