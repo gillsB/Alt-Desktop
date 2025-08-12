@@ -924,9 +924,14 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     const fetchBackgroundType = async () => {
       const type = await window.electron.getInfoFromID("", "fileType");
-      setProfile((prev) => {
-        const next = prev === "profile2" ? "" : ""; // const next = prev === "profile2" ? "" : "profile2";
-        logger.info("setProfile called, prev:", prev, "next:", next);
+      setProfile(() => {
+        const next = profileRef.current === "profile2" ? "" : "profile2"; // const next = prev === "profile2" ? "" : "profile2";
+        logger.info(
+          "setProfile called, prev:",
+          profileRef.current,
+          "next:",
+          next
+        );
         return next;
       });
       if (type) {
