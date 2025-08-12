@@ -925,6 +925,11 @@ export const getDefaultProfileJsonPath = (): string => {
   return path.join(defaultFolder, "profile.json");
 };
 
+export const getProfileJsonPath = (profileName: string): string => {
+  const profileFolder = path.join(getProfilesPath(), profileName);
+  return path.join(profileFolder, "profile.json");
+};
+
 // Helper: concurrency-limited promise pool
 export async function promisePool<T>(
   items: T[],

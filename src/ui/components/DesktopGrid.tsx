@@ -506,7 +506,7 @@ const DesktopGrid: React.FC = () => {
       const icon = getIcon(row, col);
       if (icon) {
         window.electron.ensureDataFolder(icon.id);
-        window.electron.editIcon(icon.id, row, col);
+        window.electron.editIcon(icon.id, row, col, profile);
         await window.electron.setRendererStates({ hideIconNames: false });
         setContextMenu(null);
       } else {

@@ -58,6 +58,7 @@ import {
   getDesktopIconsFilePath,
   getExternalPath,
   getLogsFolderPath,
+  getProfileJsonPath,
   getProfilesPath,
   getSettingsFilePath,
   indexBackgrounds,
@@ -143,8 +144,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "getDesktopIcon",
-    async (id: string): Promise<DesktopIcon | null> => {
-      const filePath = getDefaultProfileJsonPath();
+    async (id: string, profile?: string): Promise<DesktopIcon | null> => {
+      let filePath = "";
+      if (profile) {
+        filePath = getProfileJsonPath(profile);
+      } else {
+        filePath = getDefaultProfileJsonPath();
+      }
 
       try {
         logger.info(`Received request for getDesktopIcon with row: ${id}`);
@@ -434,10 +440,20 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "editIcon",
-    async (id: string, row: number, col: number): Promise<boolean> => {
+    async (
+      id: string,
+      row: number,
+      col: number,
+      profile?: string
+    ): Promise<boolean> => {
       try {
         logger.info(`ipcMainHandle editIcon called with ${id}`);
-        openEditIconWindow(id, row, col);
+        if (profile) {
+          openEditIconWindow(id, row, col, profile);
+        } else {
+          openEditIconWindow(id, row, col);
+        }
+
         return true;
       } catch (error) {
         logger.error(`Error opening edit icon window: ${error}`);

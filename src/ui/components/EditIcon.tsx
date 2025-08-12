@@ -22,6 +22,7 @@ const EditIcon: React.FC = () => {
   const id = queryParams.get("id");
   const row = queryParams.get("row");
   const col = queryParams.get("col");
+  const profile = queryParams.get("profile") || undefined;
 
   const [icon, setIcon] = useState<DesktopIcon | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,7 +58,13 @@ const EditIcon: React.FC = () => {
       }
 
       try {
-        const iconData = await window.electron.getDesktopIcon(id);
+        let iconData: DesktopIcon | null = null;
+        if (profile) {
+          iconData = await window.electron.getDesktopIcon(id, profile);
+          logger.info("iconData = ", JSON.stringify(iconData));
+        } else {
+          iconData = await window.electron.getDesktopIcon(id);
+        }
 
         if (iconData) {
           setIcon(iconData);
