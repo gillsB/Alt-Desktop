@@ -33,7 +33,7 @@ const DesktopGrid: React.FC = () => {
   // Secondary index: keyed by "row,col" -> icon id (placement map)
   const [posIndex, setPosIndex] = useState<Map<string, string>>(new Map());
 
-  const [profile, setProfile] = useState<string>("");
+  const [profile, setProfile] = useState<string>("default");
   const profileRef = useRef(profile);
 
   const posKey = (row: number, col: number) => `${row},${col}`;
@@ -99,6 +99,7 @@ const DesktopGrid: React.FC = () => {
       setHideIcons(rendererStates.hideIcons || false);
       setHideIconNames(rendererStates.hideIconNames || false);
       setShowVideoControls(rendererStates.showVideoControls || false);
+      setProfile(rendererStates.profile || "");
     };
     fetchRendererStates();
   }, []);
@@ -115,6 +116,10 @@ const DesktopGrid: React.FC = () => {
       }
       if ("hideIconNames" in state) {
         setHideIconNames(!!state.hideIconNames);
+      }
+      if ("profile" in state) {
+        setProfile(state.profile || "default");
+        profileRef.current = state.profile || "default";
       }
     };
     window.electron.on("renderer-state-updated", updateStates);
@@ -317,9 +322,9 @@ const DesktopGrid: React.FC = () => {
     }
   };
   const fetchIcons = async () => {
-    logger.info("fetchIcons called with profile = " + profile);
+    logger.info("fetchIcons called with profile = " + profileRef.current);
     try {
-      const data = await window.electron.getDesktopIconData(profile);
+      const data = await window.electron.getDesktopIconData(profileRef.current);
       logger.info("profile fetched = " + JSON.stringify(data));
       logger.info("Fetched icons");
 
@@ -506,7 +511,7 @@ const DesktopGrid: React.FC = () => {
       const icon = getIcon(row, col);
       if (icon) {
         window.electron.ensureDataFolder(icon.id);
-        window.electron.editIcon(icon.id, row, col, profile);
+        window.electron.editIcon(icon.id, row, col);
         await window.electron.setRendererStates({ hideIconNames: false });
         setContextMenu(null);
       } else {
@@ -529,13 +534,13 @@ const DesktopGrid: React.FC = () => {
       const icon = getIcon(validRow, validCol);
       if (icon) {
         window.electron.ensureDataFolder(icon.id);
-        window.electron.editIcon(icon.id, validRow, validCol, profile);
+        window.electron.editIcon(icon.id, validRow, validCol);
         setContextMenu(null);
       } else {
         const temp_id = await window.electron.ensureUniqueIconId("temp");
         if (temp_id) {
           window.electron.ensureDataFolder(temp_id);
-          window.electron.editIcon(temp_id, validRow, validCol, profile);
+          window.electron.editIcon(temp_id, validRow, validCol);
           setContextMenu(null);
         } else {
           showSmallWindow(
@@ -924,15 +929,8 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     const fetchBackgroundType = async () => {
       const type = await window.electron.getInfoFromID("", "fileType");
-      setProfile(() => {
-        const next = profileRef.current === "profile2" ? "" : ""; // const next = prev === "profile2" ? "" : "profile2";
-        logger.info(
-          "setProfile called, prev:",
-          profileRef.current,
-          "next:",
-          next
-        );
-        return next;
+      await window.electron.setRendererStates({
+        profile: profileRef.current === "profile2" ? "default" : "default", // profile: profileRef.current === "profile2" ? "default" : "profile2"
       });
       if (type) {
         setBackgroundType(type);

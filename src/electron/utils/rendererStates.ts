@@ -6,6 +6,7 @@ let rendererStates: RendererStates = {
   showVideoControls: false,
   hideIcons: false,
   hideIconNames: false,
+  profile: "default",
 };
 
 export async function getRendererStates(): Promise<RendererStates> {

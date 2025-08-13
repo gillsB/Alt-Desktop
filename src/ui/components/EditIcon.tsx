@@ -22,7 +22,7 @@ const EditIcon: React.FC = () => {
   const id = queryParams.get("id");
   const row = queryParams.get("row");
   const col = queryParams.get("col");
-  const profile = queryParams.get("profile") || undefined;
+  const [profile, setProfile] = useState<string>("");
 
   const [icon, setIcon] = useState<DesktopIcon | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,6 +40,28 @@ const EditIcon: React.FC = () => {
   const [fontColorDefault, setFontColorDefault] = useState<string | undefined>(
     undefined
   );
+
+  useEffect(() => {
+    const fetchRendererStates = async () => {
+      const rendererStates = await window.electron.getRendererStates();
+      setProfile(rendererStates.profile || "");
+    };
+    fetchRendererStates();
+  }, []);
+
+  useEffect(() => {
+    const updateStates = (...args: unknown[]) => {
+      logger.info("renderer-state-updated event received:", args[1]);
+      const state = args[1] as Partial<RendererStates>;
+      if ("profile" in state) {
+        setProfile(state.profile || "");
+      }
+    };
+    window.electron.on("renderer-state-updated", updateStates);
+    return () => {
+      window.electron.off("renderer-state-updated", updateStates);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchFontColorDefault = async () => {
@@ -91,7 +113,7 @@ const EditIcon: React.FC = () => {
     };
 
     fetchIcon();
-  }, [id]);
+  }, [id, profile]);
 
   const getChanges = (): boolean => {
     if (!icon || !originalIcon.current) {
@@ -139,7 +161,7 @@ const EditIcon: React.FC = () => {
       logger.error("Icon data is missing. (closeWindow)");
       return;
     }
-    await window.electron.reloadIcon(icon.id);
+    await window.electron.reloadIcon(icon.id, profile);
     logger.info("reloaded icon before closing");
 
     // close subwindow

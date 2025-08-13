@@ -196,6 +196,7 @@ type RendererStates = {
   showVideoControls?: boolean;
   hideIcons?: boolean;
   hideIconNames?: boolean;
+  profile?: string;
 };
 
 // Items/objects being sent from the renderer to the main process
@@ -213,7 +214,7 @@ interface EventParamMapping {
   getDesktopIcon: [string, profile?: string];
   reloadIcon: [string, profile?: string];
   openSettings: [];
-  editIcon: [string, number, number, profile?: string];
+  editIcon: [string, number, number];
   reloadWindow: [];
   logMessage: [string, string, string];
   logVideoMessage: [string, string, string];
@@ -370,12 +371,7 @@ interface Window {
     reloadIcon: (id: string, profile?: string) => Promise<boolean>;
     openSettings: () => Promise<boolean>;
     openBackgroundSelect: (id?: string) => Promise<boolean>;
-    editIcon: (
-      id: string,
-      row: number,
-      col: number,
-      profile?: string
-    ) => Promise<boolean>;
+    editIcon: (id: string, row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;
     subWindowFocus: () => Promise<boolean>;

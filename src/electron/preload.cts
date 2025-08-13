@@ -49,8 +49,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("reloadIcon", id, profile),
   openSettings: () => ipcInvoke("openSettings"),
   openBackgroundSelect: (id?: string) => ipcInvoke("openBackgroundSelect", id),
-  editIcon: (id: string, row: number, col: number, profile?: string) =>
-    ipcInvoke("editIcon", id, row, col, profile),
+  editIcon: (id: string, row: number, col: number) =>
+    ipcInvoke("editIcon", id, row, col),
   on: (channel: string, callback: (...args: unknown[]) => void) => {
     electron.ipcRenderer.on(channel, callback);
   },

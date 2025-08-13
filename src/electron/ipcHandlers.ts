@@ -516,22 +516,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "editIcon",
-    async (
-      id: string,
-      row: number,
-      col: number,
-      profile?: string
-    ): Promise<boolean> => {
+    async (id: string, row: number, col: number): Promise<boolean> => {
       try {
-        logger.info(
-          `ipcMainHandle editIcon called with ${id}, profile: ${profile}`
-        );
-        if (profile) {
-          openEditIconWindow(id, row, col, profile);
-        } else {
-          openEditIconWindow(id, row, col);
-        }
-
+        logger.info(`ipcMainHandle editIcon called with ${id}`);
+        openEditIconWindow(id, row, col);
         return true;
       } catch (error) {
         logger.error(`Error opening edit icon window: ${error}`);
@@ -1885,6 +1873,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle("setRendererStates", (updates: Partial<RendererStates>) => {
     setRendererStates(updates);
+    logger.info("renderer states updated:", JSON.stringify(updates));
 
     // TODO broadcast updates to all windows
     for (const win of BrowserWindow.getAllWindows()) {
