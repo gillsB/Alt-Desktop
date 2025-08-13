@@ -1,6 +1,7 @@
 import electron, { webUtils } from "electron";
 
 interface DesktopIcon {
+  id: string;
   row: number;
   col: number;
   name: string;
@@ -14,6 +15,7 @@ interface DesktopIcon {
   websiteLink?: string;
   fontColor?: string;
   fontSize?: number;
+  launchDefault: "program" | "website";
 }
 
 // builds the bridge for communicating with ui
@@ -33,8 +35,9 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("getDesktopIconData", profile),
   getSafeFileUrl: (relativePath: string) => getSafeFileUrl(relativePath),
   ensureDataFolder: (id: string) => ipcInvoke("ensureDataFolder", id),
-  ensureUniqueIconId: (name) => ipcInvoke("ensureUniqueIconId", name),
-  setIconData: (icon) => ipcInvoke("setIconData", icon),
+  ensureUniqueIconId: (name: string) => ipcInvoke("ensureUniqueIconId", name),
+  setIconData: (icon: DesktopIcon, profile?: string) =>
+    ipcInvoke("setIconData", icon, profile),
   renameID: (oldId: string, newId: string) =>
     ipcInvoke("renameID", oldId, newId),
   sendSubWindowAction: (action, icon) =>

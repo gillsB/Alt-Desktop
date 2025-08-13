@@ -153,7 +153,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
 
       try {
-        logger.info(`Received request for getDesktopIcon with row: ${id}`);
+        logger.info(`Received request for getDesktopIcon with icon id: ${id}`);
         logger.info(`DesktopIcons file path: ${filePath}`);
 
         // Read JSON file
@@ -311,45 +311,53 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
-  ipcMainHandle("setIconData", async (icon: DesktopIcon): Promise<boolean> => {
-    try {
-      const { row, col } = icon; // Extract row and col from the icon object
-      const filePath = getDefaultProfileJsonPath();
-
-      logger.info(`Updating icon at [${row},${col}] in ${filePath}`);
-      let desktopData: DesktopIconData = { icons: [] };
-
-      // If file exists load data from it
-      if (fs.existsSync(filePath)) {
-        const data = fs.readFileSync(filePath, "utf-8");
-        desktopData = JSON.parse(data);
-      }
-
-      // Find existing icon or add new one
-      const existingIndex = desktopData.icons.findIndex(
-        (i) => i.row === row && i.col === col
-      );
-
-      if (existingIndex !== -1) {
-        // Update existing icon
-        desktopData.icons[existingIndex] = icon;
+  ipcMainHandle(
+    "setIconData",
+    async (icon: DesktopIcon, profile?: string): Promise<boolean> => {
+      let filePath: string;
+      if (profile) {
+        filePath = getProfileJsonPath(profile);
       } else {
-        // Add new icon
-        desktopData.icons.push(icon);
+        filePath = getDefaultProfileJsonPath();
       }
+      try {
+        const { row, col } = icon; // Extract row and col from the icon object
 
-      // Write back updated JSON
-      fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+        logger.info(`Updating icon at [${row},${col}] in ${filePath}`);
+        let desktopData: DesktopIconData = { icons: [] };
 
-      logger.info(`Successfully updated icon: ${icon.id} at [${row},${col}]`);
-      return true;
-    } catch (error) {
-      logger.error(
-        `Error updating icon at [${icon.row},${icon.col}]: ${error}`
-      );
-      return false;
+        // If file exists load data from it
+        if (fs.existsSync(filePath)) {
+          const data = fs.readFileSync(filePath, "utf-8");
+          desktopData = JSON.parse(data);
+        }
+
+        // Find existing icon or add new one
+        const existingIndex = desktopData.icons.findIndex(
+          (i) => i.row === row && i.col === col
+        );
+
+        if (existingIndex !== -1) {
+          // Update existing icon
+          desktopData.icons[existingIndex] = icon;
+        } else {
+          // Add new icon
+          desktopData.icons.push(icon);
+        }
+
+        // Write back updated JSON
+        fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+
+        logger.info(`Successfully updated icon: ${icon.id} at [${row},${col}]`);
+        return true;
+      } catch (error) {
+        logger.error(
+          `Error updating icon at [${icon.row},${icon.col}]: ${error}`
+        );
+        return false;
+      }
     }
-  });
+  );
 
   ipcMainHandle(
     "renameID",
@@ -515,7 +523,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       profile?: string
     ): Promise<boolean> => {
       try {
-        logger.info(`ipcMainHandle editIcon called with ${id}`);
+        logger.info(
+          `ipcMainHandle editIcon called with ${id}, profile: ${profile}`
+        );
         if (profile) {
           openEditIconWindow(id, row, col, profile);
         } else {

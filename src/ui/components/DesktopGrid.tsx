@@ -529,13 +529,13 @@ const DesktopGrid: React.FC = () => {
       const icon = getIcon(validRow, validCol);
       if (icon) {
         window.electron.ensureDataFolder(icon.id);
-        window.electron.editIcon(icon.id, validRow, validCol);
+        window.electron.editIcon(icon.id, validRow, validCol, profile);
         setContextMenu(null);
       } else {
         const temp_id = await window.electron.ensureUniqueIconId("temp");
         if (temp_id) {
           window.electron.ensureDataFolder(temp_id);
-          window.electron.editIcon(temp_id, validRow, validCol);
+          window.electron.editIcon(temp_id, validRow, validCol, profile);
           setContextMenu(null);
         } else {
           showSmallWindow(
