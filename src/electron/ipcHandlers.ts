@@ -1035,8 +1035,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
   ipcMainHandle("deleteIcon", async (id: string): Promise<boolean> => {
-    const filePath = getDefaultProfileJsonPath();
-    const iconFolderPath = path.join(getDataFolderPath(), `${id}`);
+    const profile = await getRendererState("profile");
+    if (!profile) {
+      openSmallWindow(
+        "Error in fetching icon data",
+        "Profile not found, cannot fetch icon data without a profile.",
+        ["OK"]
+      );
+      logger.info("Error in fetching icon data: Profile not found.");
+      return false;
+    }
+    const filePath = getProfileJsonPath(profile);
 
     try {
       logger.info(`Deleting icon ${id} from ${filePath}`);
@@ -1067,6 +1076,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       logger.info(`Successfully deleted icon at ${id}`);
 
       // Move the icon folder to the recycle bin
+      // TODO make this actually delete the folder if the icon is only visible in this profile.
+      // but do not make it delete the folder if it exists/is visible in other profiles.
+      /**
+      const iconFolderPath = path.join(getDataFolderPath(), `${id}`);
       if (fs.existsSync(iconFolderPath)) {
         await shell.trashItem(iconFolderPath);
         logger.info(
@@ -1074,7 +1087,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         );
       } else {
         logger.warn(`Folder not found: ${iconFolderPath}`);
-      }
+      }**/
 
       return true;
     } catch (error) {
