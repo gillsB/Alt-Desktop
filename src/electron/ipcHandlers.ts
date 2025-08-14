@@ -39,6 +39,7 @@ import {
   idToTags,
 } from "./utils/idToInfo.js";
 import {
+  getRendererState,
   getRendererStates,
   setRendererStates,
 } from "./utils/rendererStates.js";
@@ -145,19 +146,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "getDesktopIcon",
     async (id: string): Promise<DesktopIcon | null> => {
-      const rendererStates = await getRendererStates();
-      let filePath: string;
-      if (rendererStates.profile) {
-        filePath = getProfileJsonPath(rendererStates.profile);
-      } else {
+      const profile = await getRendererState("profile");
+      if (!profile) {
         openSmallWindow(
-          "Error in saving icon data",
-          "Profile not found, will not save icon data to avoid corruption.",
+          "Error in fetching icon data",
+          "Profile not found, cannot fetch icon data without a profile.",
           ["OK"]
         );
-        logger.info("Error in saving icon data: Profile not found.");
+        logger.info("Error in fetching icon data: Profile not found.");
         return null;
       }
+      const filePath = getProfileJsonPath(profile);
 
       try {
         logger.info(`Received request for getDesktopIcon with icon id: ${id}`);
@@ -319,11 +318,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
 
   ipcMainHandle("setIconData", async (icon: DesktopIcon): Promise<boolean> => {
-    const rendererStates = await getRendererStates();
-    let filePath: string;
-    if (rendererStates.profile) {
-      filePath = getProfileJsonPath(rendererStates.profile);
-    } else {
+    const profile = await getRendererState("profile");
+    if (!profile) {
       openSmallWindow(
         "Error in saving icon data",
         "Profile not found, will not save icon data to avoid corruption.",
@@ -332,6 +328,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       logger.info("Error in saving icon data: Profile not found.");
       return false;
     }
+    const filePath = getProfileJsonPath(profile);
+
     try {
       const { row, col } = icon; // Extract row and col from the icon object
 
@@ -452,55 +450,50 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     return title; // Return the title, or ""
   });
 
-  ipcMainHandle(
-    "reloadIcon",
-    async (id: string): Promise<boolean> => {
-      const rendererStates = await getRendererStates();
-      let filePath: string;
-      if (rendererStates.profile) {
-        filePath = getProfileJsonPath(rendererStates.profile);
-      } else {
-        openSmallWindow(
-          "Error in saving icon data",
-          "Profile not found, will not save icon data to avoid corruption.",
-          ["OK"]
-        );
-        logger.info("Error in saving icon data: Profile not found.");
-        return false;
-      }
-      logger.info("reloadIcon filePath = ", filePath);
-
-      try {
-        // Read JSON file
-        const data = fs.readFileSync(filePath, "utf-8");
-        logger.info("data = ", JSON.stringify(data));
-        const parsedData: DesktopIconData = JSON.parse(data);
-
-        // Find the icon with the specified row and col
-        const icon = parsedData.icons.find((icon) => icon.id === id);
-
-        // Notify the renderer process to reload the icon
-        if (mainWindow) {
-          logger.info(`Sending reload request to renderer for icon ${id}`);
-          mainWindow.webContents.send("reload-icon", { id, icon });
-        }
-
-        if (icon) {
-          logger.info(`Reloaded icon: ${id}: ${JSON.stringify(icon)}`);
-
-          return true;
-        } else {
-          logger.warn(
-            `No icon found with id: ${id} to reload. (sent null response)`
-          );
-          return false; // Icon not found
-        }
-      } catch (error) {
-        logger.error(`Error reloading icon: ${id} : ${error}`);
-        return false; // Error occurred
-      }
+  ipcMainHandle("reloadIcon", async (id: string): Promise<boolean> => {
+    const profile = await getRendererState("profile");
+    if (!profile) {
+      openSmallWindow(
+        "Error in reloading icon data",
+        "Profile not found, cannot reload icon data",
+        ["OK"]
+      );
+      logger.info("Error in reloading icon data: Profile not found.");
+      return false;
     }
-  );
+    const filePath = getProfileJsonPath(profile);
+    logger.info("reloadIcon filePath = ", filePath);
+
+    try {
+      // Read JSON file
+      const data = fs.readFileSync(filePath, "utf-8");
+      logger.info("data = ", JSON.stringify(data));
+      const parsedData: DesktopIconData = JSON.parse(data);
+
+      // Find the icon with the specified row and col
+      const icon = parsedData.icons.find((icon) => icon.id === id);
+
+      // Notify the renderer process to reload the icon
+      if (mainWindow) {
+        logger.info(`Sending reload request to renderer for icon ${id}`);
+        mainWindow.webContents.send("reload-icon", { id, icon });
+      }
+
+      if (icon) {
+        logger.info(`Reloaded icon: ${id}: ${JSON.stringify(icon)}`);
+
+        return true;
+      } else {
+        logger.warn(
+          `No icon found with id: ${id} to reload. (sent null response)`
+        );
+        return false; // Icon not found
+      }
+    } catch (error) {
+      logger.error(`Error reloading icon: ${id} : ${error}`);
+      return false; // Error occurred
+    }
+  });
 
   ipcMainHandle("openSettings", async (): Promise<boolean> => {
     try {
