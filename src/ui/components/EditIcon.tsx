@@ -81,12 +81,8 @@ const EditIcon: React.FC = () => {
 
       try {
         let iconData: DesktopIcon | null = null;
-        if (profile) {
-          iconData = await window.electron.getDesktopIcon(id, profile);
-          logger.info("iconData = ", JSON.stringify(iconData));
-        } else {
-          iconData = await window.electron.getDesktopIcon(id);
-        }
+        iconData = await window.electron.getDesktopIcon(id);
+        logger.info("fetchIcon iconData = ", JSON.stringify(iconData));
 
         if (iconData) {
           setIcon(iconData);

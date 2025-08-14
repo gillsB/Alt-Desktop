@@ -144,12 +144,19 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "getDesktopIcon",
-    async (id: string, profile?: string): Promise<DesktopIcon | null> => {
-      let filePath = "";
-      if (profile) {
-        filePath = getProfileJsonPath(profile);
+    async (id: string): Promise<DesktopIcon | null> => {
+      const rendererStates = await getRendererStates();
+      let filePath: string;
+      if (rendererStates.profile) {
+        filePath = getProfileJsonPath(rendererStates.profile);
       } else {
-        filePath = getDefaultProfileJsonPath();
+        openSmallWindow(
+          "Error in saving icon data",
+          "Profile not found, will not save icon data to avoid corruption.",
+          ["OK"]
+        );
+        logger.info("Error in saving icon data: Profile not found.");
+        return null;
       }
 
       try {
@@ -311,60 +318,57 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
-  ipcMainHandle(
-    "setIconData",
-    async (icon: DesktopIcon): Promise<boolean> => {
-      const rendererStates = await getRendererStates();
-      let filePath: string;
-      if (rendererStates.profile) {
-        filePath = getProfileJsonPath(rendererStates.profile);
-      } else {
-        openSmallWindow(
-          "Error in saving icon data",
-          "Profile not found, will not save icon data to avoid corruption.",
-          ["OK"]
-        );
-        logger.info("Error in saving icon data: Profile not found.");
-        return false;
-      }
-      try {
-        const { row, col } = icon; // Extract row and col from the icon object
-
-        logger.info(`Updating icon at [${row},${col}] in ${filePath}`);
-        let desktopData: DesktopIconData = { icons: [] };
-
-        // If file exists load data from it
-        if (fs.existsSync(filePath)) {
-          const data = fs.readFileSync(filePath, "utf-8");
-          desktopData = JSON.parse(data);
-        }
-
-        // Find existing icon or add new one
-        const existingIndex = desktopData.icons.findIndex(
-          (i) => i.row === row && i.col === col
-        );
-
-        if (existingIndex !== -1) {
-          // Update existing icon
-          desktopData.icons[existingIndex] = icon;
-        } else {
-          // Add new icon
-          desktopData.icons.push(icon);
-        }
-
-        // Write back updated JSON
-        fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
-
-        logger.info(`Successfully updated icon: ${icon.id} at [${row},${col}]`);
-        return true;
-      } catch (error) {
-        logger.error(
-          `Error updating icon at [${icon.row},${icon.col}]: ${error}`
-        );
-        return false;
-      }
+  ipcMainHandle("setIconData", async (icon: DesktopIcon): Promise<boolean> => {
+    const rendererStates = await getRendererStates();
+    let filePath: string;
+    if (rendererStates.profile) {
+      filePath = getProfileJsonPath(rendererStates.profile);
+    } else {
+      openSmallWindow(
+        "Error in saving icon data",
+        "Profile not found, will not save icon data to avoid corruption.",
+        ["OK"]
+      );
+      logger.info("Error in saving icon data: Profile not found.");
+      return false;
     }
-  );
+    try {
+      const { row, col } = icon; // Extract row and col from the icon object
+
+      logger.info(`Updating icon at [${row},${col}] in ${filePath}`);
+      let desktopData: DesktopIconData = { icons: [] };
+
+      // If file exists load data from it
+      if (fs.existsSync(filePath)) {
+        const data = fs.readFileSync(filePath, "utf-8");
+        desktopData = JSON.parse(data);
+      }
+
+      // Find existing icon or add new one
+      const existingIndex = desktopData.icons.findIndex(
+        (i) => i.row === row && i.col === col
+      );
+
+      if (existingIndex !== -1) {
+        // Update existing icon
+        desktopData.icons[existingIndex] = icon;
+      } else {
+        // Add new icon
+        desktopData.icons.push(icon);
+      }
+
+      // Write back updated JSON
+      fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+
+      logger.info(`Successfully updated icon: ${icon.id} at [${row},${col}]`);
+      return true;
+    } catch (error) {
+      logger.error(
+        `Error updating icon at [${icon.row},${icon.col}]: ${error}`
+      );
+      return false;
+    }
+  });
 
   ipcMainHandle(
     "renameID",

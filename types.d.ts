@@ -211,7 +211,7 @@ interface EventParamMapping {
   setIconData: [DesktopIcon];
   renameID: [string, string];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
-  getDesktopIcon: [string, profile?: string];
+  getDesktopIcon: [string];
   reloadIcon: [string, profile?: string];
   openSettings: [];
   editIcon: [string, number, number];
@@ -363,10 +363,7 @@ interface Window {
     setIconData: (icon: DesktopIcon) => Promise<boolean>;
     renameID: (oldId: string, newId: string) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
-    getDesktopIcon: (
-      id: string,
-      profile?: string
-    ) => Promise<DesktopIcon | null>;
+    getDesktopIcon: (id: string) => Promise<DesktopIcon | null>;
     getSubWindowTitle: () => Promise<string>;
     reloadIcon: (id: string, profile?: string) => Promise<boolean>;
     openSettings: () => Promise<boolean>;
