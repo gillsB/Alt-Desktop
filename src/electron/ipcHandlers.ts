@@ -454,14 +454,21 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "reloadIcon",
-    async (id: string, profile?: string): Promise<boolean> => {
-      let filePath = "";
-      if (profile) {
-        filePath = getProfileJsonPath(profile);
+    async (id: string): Promise<boolean> => {
+      const rendererStates = await getRendererStates();
+      let filePath: string;
+      if (rendererStates.profile) {
+        filePath = getProfileJsonPath(rendererStates.profile);
       } else {
-        filePath = getDefaultProfileJsonPath();
+        openSmallWindow(
+          "Error in saving icon data",
+          "Profile not found, will not save icon data to avoid corruption.",
+          ["OK"]
+        );
+        logger.info("Error in saving icon data: Profile not found.");
+        return false;
       }
-      logger.info("filePath = ", filePath);
+      logger.info("reloadIcon filePath = ", filePath);
 
       try {
         // Read JSON file
