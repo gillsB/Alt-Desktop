@@ -255,7 +255,7 @@ const EditIcon: React.FC = () => {
       }
 
       // Save the icon data
-      if (!(await window.electron.setIconData(icon, profile))) {
+      if (!(await window.electron.setIconData(icon))) {
         logger.error("Failed to reload icon.");
         const ret = await showSmallWindow(
           "Error",

@@ -313,12 +313,19 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "setIconData",
-    async (icon: DesktopIcon, profile?: string): Promise<boolean> => {
+    async (icon: DesktopIcon): Promise<boolean> => {
+      const rendererStates = await getRendererStates();
       let filePath: string;
-      if (profile) {
-        filePath = getProfileJsonPath(profile);
+      if (rendererStates.profile) {
+        filePath = getProfileJsonPath(rendererStates.profile);
       } else {
-        filePath = getDefaultProfileJsonPath();
+        openSmallWindow(
+          "Error in saving icon data",
+          "Profile not found, will not save icon data to avoid corruption.",
+          ["OK"]
+        );
+        logger.info("Error in saving icon data: Profile not found.");
+        return false;
       }
       try {
         const { row, col } = icon; // Extract row and col from the icon object

@@ -208,7 +208,7 @@ interface EventParamMapping {
   getDesktopIconData: [profile?: string];
   ensureDataFolder: [string];
   ensureUniqueIconId: [string];
-  setIconData: [DesktopIcon, profile?: string];
+  setIconData: [DesktopIcon];
   renameID: [string, string];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
   getDesktopIcon: [string, profile?: string];
@@ -360,7 +360,7 @@ interface Window {
     getSafeFileUrl: (relativePath: string) => string;
     ensureDataFolder: (id: string) => Promise<boolean>;
     ensureUniqueIconId: (name: string) => Promise<string | null>;
-    setIconData: (icon: DesktopIcon, profile?: string) => Promise<boolean>;
+    setIconData: (icon: DesktopIcon) => Promise<boolean>;
     renameID: (oldId: string, newId: string) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
     getDesktopIcon: (
