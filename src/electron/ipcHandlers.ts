@@ -924,7 +924,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
 
   ipcMainHandle("launchProgram", async (id: string): Promise<boolean> => {
-    const filePath = getDefaultProfileJsonPath();
+    const profile = await getRendererState("profile");
+    if (!profile) {
+      openSmallWindow(
+        "Error in launchProgram",
+        "Profile not found, cannot launch program for icon without a profile.",
+        ["OK"]
+      );
+      logger.info("Error in launching program: Profile not found.");
+      return false;
+    }
+    const filePath = getProfileJsonPath(profile);
 
     try {
       const data = fs.readFileSync(filePath, "utf-8");
@@ -963,7 +973,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       return safeSpawn(icon.programLink, icon.args || []);
     } catch (error) {
-      logger.error(`Error in launchIcon: ${error}`);
+      logger.error(`Error in launchProgram: ${error}`);
       return false;
     }
   });
@@ -1038,11 +1048,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     const profile = await getRendererState("profile");
     if (!profile) {
       openSmallWindow(
-        "Error in fetching icon data",
-        "Profile not found, cannot fetch icon data without a profile.",
+        "Error in deleting icon",
+        "Profile not found, cannot delete icon data without a profile.",
         ["OK"]
       );
-      logger.info("Error in fetching icon data: Profile not found.");
+      logger.info("Error in deleting icon: Profile not found.");
       return false;
     }
     const filePath = getProfileJsonPath(profile);
