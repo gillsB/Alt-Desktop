@@ -324,7 +324,7 @@ const DesktopGrid: React.FC = () => {
   const fetchIcons = async () => {
     logger.info("fetchIcons called with profile = " + profileRef.current);
     try {
-      const data = await window.electron.getDesktopIconData(profileRef.current);
+      const data = await window.electron.getDesktopIconData();
       logger.info("profile fetched = " + JSON.stringify(data));
       logger.info("Fetched icons");
 

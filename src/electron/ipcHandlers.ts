@@ -55,7 +55,6 @@ import {
   getBasePath,
   getBgJsonFile,
   getDataFolderPath,
-  getDefaultProfileJsonPath,
   getDesktopIconsFilePath,
   getExternalPath,
   getLogsFolderPath,
@@ -116,11 +115,24 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "getDesktopIconData",
     async (profile?: string): Promise<DesktopIconData> => {
       let filePath = "";
+      // If specifically called with profile, return profile iconData
       if (profile) {
-        const folderPath = path.join(getProfilesPath(), profile);
-        filePath = path.join(folderPath, "profile.json");
+        filePath = getProfileJsonPath(profile);
       } else {
-        filePath = getDefaultProfileJsonPath();
+        // Fetch current rendererState profile
+        const rendererProfile = await getRendererState("profile");
+        if (!rendererProfile) {
+          openSmallWindow(
+            "Error in fetching icon data",
+            "Profile not found, cannot fetch icon data without a profile.",
+            ["OK"]
+          );
+          logger.info("Error in fetching icon data: Profile not found.");
+          // No rendererState profile then return empty DesktopIconData
+          return { icons: [] };
+        } else {
+          filePath = getProfileJsonPath(rendererProfile);
+        }
       }
 
       try {
