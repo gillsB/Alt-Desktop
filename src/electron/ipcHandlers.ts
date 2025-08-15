@@ -978,7 +978,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
   ipcMainHandle("launchWebsite", async (id: string): Promise<boolean> => {
-    const filePath = getDefaultProfileJsonPath();
+    const profile = await getRendererState("profile");
+    if (!profile) {
+      openSmallWindow(
+        "Error in launchWebsite",
+        "Profile not found, cannot launch website for icon without a profile.",
+        ["OK"]
+      );
+      logger.info("Error in launching website: Profile not found.");
+      return false;
+    }
+    const filePath = getProfileJsonPath(profile);
 
     try {
       const data = fs.readFileSync(filePath, "utf-8");
