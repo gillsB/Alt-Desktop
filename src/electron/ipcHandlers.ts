@@ -1586,6 +1586,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             tags: (bg.public?.tags ?? []).filter((t: string) =>
               PUBLIC_TAGS_FLAT.includes(t)
             ),
+            localProfile: bg.local?.profile,
             localTags: (bg.local?.tags ?? []).filter((t: string) =>
               (getSetting("localTags") as LocalTag[]).some(
                 (tag) => tag.name === t
