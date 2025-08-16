@@ -1089,7 +1089,7 @@ const EditBackground: React.FC = () => {
             <div className="input-row"></div>
             <input
               type="text"
-              value={summary.localProfile ?? ""}
+              value={summary.localProfile ?? "default"}
               placeholder="(For now) type name of profile"
               onChange={async (e) => {
                 const newValue = e.target.value;
