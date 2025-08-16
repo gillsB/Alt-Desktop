@@ -1085,7 +1085,18 @@ const EditBackground: React.FC = () => {
               </div>
             </div>
           )}
+          <div className="edit-bg-field">
+            <label>Profile</label>
+            <div className="input-row"></div>
+            <input
+              type="text"
+              value={summary.localProfile ?? ""}
+              placeholder="(For now) type name of profile"
+              onChange={(e) => handleInputChange(e, "iconPath")}
+            />
+          </div>
         </div>
+
         {/* Right: Tag management */}
         <div className="edit-background-tags-panel">
           <div className="search-header">
