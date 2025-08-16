@@ -136,12 +136,16 @@ const Background: React.FC<BackgroundProps> = ({
           if (resolved) filePath = resolved;
         }
       }
-      setBgJson(await window.electron.getBgJson(id));
+      const loadedBgJson = await window.electron.getBgJson(id);
+      setBgJson(loadedBgJson);
       setBackgroundPath(filePath || "");
       logger.info("Background reloaded with path:", filePath);
       if (!showVideoControlsRef.current) {
         setVolumeFromDefault(id);
       }
+      await window.electron.setRendererStates({
+        profile: loadedBgJson?.local?.profile,
+      });
     };
     fetchFromSettings();
 
