@@ -325,13 +325,11 @@ const EditBackground: React.FC = () => {
 
   // Preview background update when bgFile changes
   useEffect(() => {
-    if (summary.bgFile) {
-      window.electron.previewBackgroundUpdate({
-        id: summary.bgFile,
-        volume: summary.localVolume,
-        profile: summary.localProfile,
-      });
-    }
+    window.electron.previewBackgroundUpdate({
+      id: summary.bgFile,
+      volume: summary.localVolume,
+      profile: summary.localProfile,
+    });
   }, [summary.bgFile, summary.localVolume, summary.localProfile]);
 
   useEffect(() => {
