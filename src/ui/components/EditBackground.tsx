@@ -23,8 +23,23 @@ const EditBackground: React.FC = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const rawSummary = params.get("summary");
-  const initialSummary: BackgroundSummary = rawSummary
-    ? JSON.parse(rawSummary)
+  let parsedSummary: Partial<BackgroundSummary> | null = null;
+
+  try {
+    parsedSummary = rawSummary ? JSON.parse(rawSummary) : null;
+  } catch (e) {
+    logger.error("Failed to read summary from rawSummary:", e);
+    parsedSummary = null;
+  }
+
+  const isNonEmptyObject =
+    parsedSummary &&
+    typeof parsedSummary === "object" &&
+    !Array.isArray(parsedSummary) &&
+    Object.keys(parsedSummary).length > 0;
+
+  const initialSummary: BackgroundSummary = isNonEmptyObject
+    ? (parsedSummary as BackgroundSummary)
     : {
         id: "",
         name: "",
@@ -32,9 +47,11 @@ const EditBackground: React.FC = () => {
         iconPath: "",
         bgFile: "",
         tags: [],
-        localTags: [],
+        localProfile: "default",
         localVolume: 0.5,
+        localTags: [],
       };
+  logger.info("initial summary = ", initialSummary);
 
   const [summary, setSummary] = useState<BackgroundSummary>(initialSummary);
   const [bgFileType, setBgFileType] = useState<string | null>(null);

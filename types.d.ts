@@ -36,6 +36,7 @@ type BgJson = {
     tags?: string[];
   };
   local?: {
+    profile?: string;
     volume?: number;
     tags?: string[];
     indexed?: number;
@@ -111,9 +112,10 @@ type BackgroundSummary = {
   iconPath?: string;
   bgFile?: string;
   tags?: string[];
+  localProfile?: string;
+  localVolume?: number;
   localTags?: string[];
   localIndexed?: number;
-  localVolume?: number;
 };
 
 type GetBackgroundSummariesRequest = {

@@ -715,6 +715,7 @@ export async function saveBgJsonFile(
 ): Promise<boolean> {
   try {
     if (!summary.id) throw new Error("Missing background id");
+    logger.info("bgsummary = ", JSON.stringify(summary));
     const bgJsonPath = await idToBgJsonPath(summary.id);
 
     // Ensure the directory exists
@@ -752,8 +753,9 @@ export async function saveBgJsonFile(
       Math.floor(Date.now() / 1000);
 
     const localData = {
-      tags: summary.localTags ?? oldBg.local?.tags ?? [],
+      profile: summary.localProfile ?? oldBg.local?.profile ?? "default",
       volume: summary.localVolume ?? oldBg.local?.volume ?? 0.5,
+      tags: summary.localTags ?? oldBg.local?.tags ?? [],
       indexed,
     };
 
