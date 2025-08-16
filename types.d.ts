@@ -46,6 +46,7 @@ type BgJson = {
 type PreviewBackgroundUpdate = {
   id?: string;
   volume?: number;
+  profile?: string;
 };
 
 type IDInfo = {

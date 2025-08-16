@@ -329,9 +329,10 @@ const EditBackground: React.FC = () => {
       window.electron.previewBackgroundUpdate({
         id: summary.bgFile,
         volume: summary.localVolume,
+        profile: summary.localProfile,
       });
     }
-  }, [summary.bgFile, summary.localVolume]);
+  }, [summary.bgFile, summary.localVolume, summary.localProfile]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1092,7 +1093,10 @@ const EditBackground: React.FC = () => {
               type="text"
               value={summary.localProfile ?? ""}
               placeholder="(For now) type name of profile"
-              onChange={(e) => handleInputChange(e, "iconPath")}
+              onChange={async (e) => {
+                const newValue = e.target.value;
+                setSummary((prev) => ({ ...prev, localProfile: newValue }));
+              }}
             />
           </div>
         </div>

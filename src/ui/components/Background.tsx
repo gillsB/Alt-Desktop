@@ -211,6 +211,10 @@ const Background: React.FC<BackgroundProps> = ({
   useEffect(() => {
     const handlePreview = async (...args: unknown[]) => {
       const updates = args[1] as Partial<PreviewBackgroundUpdate>;
+      logger.info(
+        "received preview-background-update with: ",
+        JSON.stringify(updates)
+      );
       if (typeof updates.id === "string" && updates.id !== backgroundPath) {
         logger.info("Updating background to:", updates.id);
         backgroundId.current = updates.id || "";
@@ -243,6 +247,11 @@ const Background: React.FC<BackgroundProps> = ({
         } else {
           setVolumeFromDefault(updates.id || "");
         }
+      }
+      if (updates.profile) {
+        await window.electron.setRendererStates({
+          profile: updates.profile,
+        });
       }
     };
     window.electron.on("preview-background-update", handlePreview);
