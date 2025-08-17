@@ -361,6 +361,7 @@ const BackgroundSelect: React.FC = () => {
           const newBg = summaries.find((bg) => bg.id === next[0]);
           window.electron.previewBackgroundUpdate({
             id: newBg?.id ?? "fallback",
+            profile: newBg?.localProfile,
           });
           setSelectedBg(newBg ?? null);
         }
@@ -389,7 +390,10 @@ const BackgroundSelect: React.FC = () => {
       else setSelectedBg(null);
     }
     if (id) {
-      await window.electron.previewBackgroundUpdate({ id: id });
+      await window.electron.previewBackgroundUpdate({
+        id: id,
+        profile: bg?.localProfile,
+      });
     }
   };
 
