@@ -36,6 +36,7 @@ import {
   idToIconPath,
   idToIndexed,
   idToLocalTags,
+  idToProfile,
   idToTags,
 } from "./utils/idToInfo.js";
 import {
@@ -104,6 +105,7 @@ const infoHandlers = {
   localTags: idToLocalTags,
   localIndexed: idToIndexed,
   indexed: idToIndexed,
+  profile: idToProfile,
 } as const;
 
 const bgPathToInfoHandlers = {

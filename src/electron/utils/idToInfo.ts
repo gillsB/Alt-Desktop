@@ -277,3 +277,22 @@ export const idToIndexed = async (id: string): Promise<number | null> => {
     return null;
   }
 };
+
+/**
+ * Gets the local profile for an ID.
+ * @param id
+ * @returns Local profile or null if not found.
+ */
+export const idToProfile = async (id: string): Promise<string | null> => {
+  try {
+    const bgJson = await idToBgJson(id);
+    if (!bgJson || !bgJson.local || !bgJson.local.profile) {
+      logger.warn(`No local profile found in bg.json for id: ${id}`);
+      return null;
+    }
+    return bgJson.local.profile;
+  } catch (e) {
+    logger.error(`Failed to get local profile for id ${id}:`, e);
+    return null;
+  }
+};
