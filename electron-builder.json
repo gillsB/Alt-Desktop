@@ -6,7 +6,8 @@
     "dist-electron/preload.cjs",
     "src/assets/**",
     "src/scripts/bin/file_to_image.exe",
-    "src/scripts/bin/create_shortcut.exe"
+    "src/scripts/bin/create_shortcut.exe",
+    "src/scripts/bin/exe_to_image.exe"
   ],
   "mac": {
     "target": "dmg"
