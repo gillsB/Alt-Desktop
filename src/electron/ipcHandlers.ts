@@ -1495,7 +1495,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
 
   ipcMainHandle("resetAllIconsFontColor", async () => {
-    return resetAllIconsFontColor();
+    const profile = await getRendererState("profile");
+    if (!profile) {
+      openSmallWindow(
+        "Error in fetching icon data",
+        "Profile not found, cannot fetch icon data without a profile.",
+        ["OK"]
+      );
+      logger.info("Error in fetching icon data: Profile not found.");
+      return false;
+    }
+    return resetAllIconsFontColor(profile);
   });
   ipcMainHandle("getBackgroundIDs", async () => {
     try {

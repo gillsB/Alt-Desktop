@@ -265,9 +265,9 @@ export function resolveShortcut(filePath: string): string {
  * Resets the fontColor of all icons in desktopIcons.json to an empty string.
  * Returns true if successful, false otherwise.
  */
-export function resetAllIconsFontColor(): boolean {
+export function resetAllIconsFontColor(profile: string): boolean {
   try {
-    const filePath = getDefaultProfileJsonPath();
+    const filePath = getProfileJsonPath(profile);
     if (!fs.existsSync(filePath)) {
       logger.warn(`desktopIcons.json does not exist at: ${filePath}`);
       return false;
