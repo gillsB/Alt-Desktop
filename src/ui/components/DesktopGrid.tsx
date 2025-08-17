@@ -929,9 +929,6 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     const fetchBackgroundType = async () => {
       const type = await window.electron.getInfoFromID("", "fileType");
-      await window.electron.setRendererStates({
-        profile: profileRef.current === "profile2" ? "default" : "default", // profile: profileRef.current === "profile2" ? "default" : "profile2"
-      });
       if (type) {
         setBackgroundType(type);
       } else {
