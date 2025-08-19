@@ -263,6 +263,43 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
+  ipcMainHandle(
+    "ensureProfileFolder",
+    async (profile: string): Promise<boolean> => {
+      try {
+        const profilesBase = getProfilesPath();
+        const profileFolder = path.join(profilesBase, profile);
+
+        // Ensure profile folder exists
+        if (!fs.existsSync(profileFolder)) {
+          logger.info(
+            `Profile folder ${profile} does not exist, creating: ${profileFolder}`
+          );
+          fs.mkdirSync(profileFolder, { recursive: true });
+          logger.info(`Profile folder ${profile} created successfully.`);
+        }
+
+        // Ensure profile.json exists in the profile folder
+        const profileJsonPath = path.join(profileFolder, "profile.json");
+        if (!fs.existsSync(profileJsonPath)) {
+          logger.info(
+            `profile.json not found in ${profileFolder}, creating default.`
+          );
+          fs.writeFileSync(
+            profileJsonPath,
+            JSON.stringify({ icons: [] }, null, 2),
+            "utf-8"
+          );
+        }
+
+        return true;
+      } catch (error) {
+        logger.error(`Error ensuring profile folder ${profile}: ${error}`);
+        return false;
+      }
+    }
+  );
+
   ipcMainHandle("ensureDataFolder", async (id: string): Promise<boolean> => {
     try {
       const fullPath = path.join(getDataFolderPath(), id);

@@ -34,6 +34,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getDesktopIconData: (profile?: string) =>
     ipcInvoke("getDesktopIconData", profile),
   getSafeFileUrl: (relativePath: string) => getSafeFileUrl(relativePath),
+  ensureProfileFolder: (profile: string) =>
+    ipcInvoke("ensureProfileFolder", profile),
   ensureDataFolder: (id: string) => ipcInvoke("ensureDataFolder", id),
   ensureUniqueIconId: (name: string) => ipcInvoke("ensureUniqueIconId", name),
   setIconData: (icon: DesktopIcon) => ipcInvoke("setIconData", icon),
