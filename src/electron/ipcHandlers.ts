@@ -126,12 +126,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         if (!rendererProfile) {
           openSmallWindow(
             "Error in fetching icon data",
-            "Profile not found, cannot fetch icon data without a profile.",
+            "Saved profile not found, swapping to default profile.",
             ["OK"]
           );
           logger.info("Error in fetching icon data: Profile not found.");
           // No rendererState profile then return empty DesktopIconData
-          return { icons: [] };
+          setRendererStates({ profile: "default" });
+          filePath = getProfileJsonPath("default");
         } else {
           filePath = getProfileJsonPath(rendererProfile);
         }
