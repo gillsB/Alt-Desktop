@@ -277,7 +277,7 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     fetchIconSize();
     fetchFontSize();
-    fetchIcons();
+    fetchIcons(true);
     fetchFontColor();
   }, []);
 
@@ -321,9 +321,21 @@ const DesktopGrid: React.FC = () => {
       logger.error("Error fetching default font color:", error);
     }
   };
-  const fetchIcons = async () => {
+  const fetchIcons = async (ensureProfile: boolean = false) => {
     logger.info("fetchIcons called with profile = " + profileRef.current);
     try {
+      // Only ensure the profile folder on mount/reload
+      if (ensureProfile) {
+        const success = await window.electron.ensureProfileFolder(
+          profileRef.current
+        );
+        if (!success) {
+          logger.error(
+            `Failed to create profile folder for ${profileRef.current}`
+          );
+          return;
+        }
+      }
       const data = await window.electron.getDesktopIconData();
       logger.info("profile fetched = " + JSON.stringify(data));
       logger.info("Fetched icons");
@@ -653,7 +665,7 @@ const DesktopGrid: React.FC = () => {
       // Re-fetch settings and icon data
       fetchFontSize();
       fetchIconSize();
-      fetchIcons();
+      fetchIcons(true);
       fetchFontColor();
     };
 
