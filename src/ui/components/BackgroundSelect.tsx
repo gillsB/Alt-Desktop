@@ -87,7 +87,6 @@ const BackgroundSelect: React.FC = () => {
 
   useEffect(() => {
     const updateStates = (...args: unknown[]) => {
-      logger.info("renderer-state-updated event received:", args[1]);
       const state = args[1] as Partial<RendererStates>;
       if ("showVideoControls" in state) {
         setShowVideoControls(!!state.showVideoControls);

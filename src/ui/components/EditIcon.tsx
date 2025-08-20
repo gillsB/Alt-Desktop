@@ -51,7 +51,6 @@ const EditIcon: React.FC = () => {
 
   useEffect(() => {
     const updateStates = (...args: unknown[]) => {
-      logger.info("renderer-state-updated event received:", args[1]);
       const state = args[1] as Partial<RendererStates>;
       if ("profile" in state) {
         setProfile(state.profile || "");
