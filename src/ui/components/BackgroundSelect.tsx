@@ -227,11 +227,15 @@ const BackgroundSelect: React.FC = () => {
       if (initialId) {
         logger.info("Passed with id to scrollTo on launch:", initialId);
 
-        const { page: bgPage } = await getBackgroundPage(initialId);
+        const { page: bgPage, summary } = await getBackgroundPage(initialId);
 
         if (bgPage !== -1) {
           setScrollToId(initialId);
           setPage(bgPage);
+          setSelectedIds([initialId]);
+          if (summary) {
+            setSelectedBg(summary);
+          }
           return;
         } else {
           logger.info("Initial ID not found in backgrounds list");
@@ -241,11 +245,15 @@ const BackgroundSelect: React.FC = () => {
       // Fall back to saved background if no initialId
       const savedBackground = await window.electron.getSetting("background");
       if (savedBackground) {
-        const { page: bgPage } = await getBackgroundPage(savedBackground);
+        const { page: bgPage, summary } =
+          await getBackgroundPage(savedBackground);
         if (bgPage !== -1) {
           setScrollToId(savedBackground);
           setPage(bgPage);
           setSelectedIds([savedBackground]);
+          if (summary) {
+            setSelectedBg(summary);
+          }
           return;
         } else {
           logger.info("Saved background not found in backgrounds list");
@@ -316,17 +324,6 @@ const BackgroundSelect: React.FC = () => {
     await window.electron.reloadBackground();
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
-
-  useEffect(() => {
-    (async () => {
-      const savedBackground = await window.electron.getSetting("background");
-      if (savedBackground) {
-        handleSelect(savedBackground);
-      } else {
-        logger.info("No saved background found");
-      }
-    })();
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = () => {
