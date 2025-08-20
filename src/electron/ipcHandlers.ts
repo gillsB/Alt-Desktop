@@ -124,12 +124,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         // Fetch current rendererState profile
         const rendererProfile = await getRendererState("profile");
         if (!rendererProfile) {
-          openSmallWindow(
-            "Error in fetching icon data",
-            "Saved profile not found, swapping to default profile.",
-            ["OK"]
+          logger.warn(
+            "Profile not found, either no bg selected or no profile set."
           );
-          logger.info("Error in fetching icon data: Profile not found.");
           // No rendererState profile then return empty DesktopIconData
           setRendererStates({ profile: "default" });
           filePath = getProfileJsonPath("default");
@@ -977,16 +974,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle("launchProgram", async (id: string): Promise<boolean> => {
     const profile = await getRendererState("profile");
+    let filePath = "";
     if (!profile) {
-      openSmallWindow(
-        "Error in launchProgram",
-        "Profile not found, cannot launch program for icon without a profile.",
-        ["OK"]
-      );
-      logger.info("Error in launching program: Profile not found.");
-      return false;
+      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
+    } else {
+      filePath = getProfileJsonPath(profile);
     }
-    const filePath = getProfileJsonPath(profile);
 
     try {
       const data = fs.readFileSync(filePath, "utf-8");
