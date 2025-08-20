@@ -159,16 +159,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "getDesktopIcon",
     async (id: string): Promise<DesktopIcon | null> => {
       const profile = await getRendererState("profile");
+      let filePath = "";
       if (!profile) {
-        openSmallWindow(
-          "Error in fetching icon data",
-          "Profile not found, cannot fetch icon data without a profile.",
-          ["OK"]
-        );
-        logger.info("Error in fetching icon data: Profile not found.");
-        return null;
+        filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
+      } else {
+        filePath = getProfileJsonPath(profile);
       }
-      const filePath = getProfileJsonPath(profile);
 
       try {
         logger.info(`Received request for getDesktopIcon with icon id: ${id}`);
@@ -368,16 +364,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle("setIconData", async (icon: DesktopIcon): Promise<boolean> => {
     const profile = await getRendererState("profile");
+    let filePath = "";
     if (!profile) {
-      openSmallWindow(
-        "Error in saving icon data",
-        "Profile not found, will not save icon data to avoid corruption.",
-        ["OK"]
-      );
-      logger.info("Error in saving icon data: Profile not found.");
-      return false;
+      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
+    } else {
+      filePath = getProfileJsonPath(profile);
     }
-    const filePath = getProfileJsonPath(profile);
 
     try {
       const { row, col } = icon; // Extract row and col from the icon object
@@ -501,22 +493,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle("reloadIcon", async (id: string): Promise<boolean> => {
     const profile = await getRendererState("profile");
+    let filePath = "";
     if (!profile) {
-      openSmallWindow(
-        "Error in reloading icon data",
-        "Profile not found, cannot reload icon data",
-        ["OK"]
-      );
-      logger.info("Error in reloading icon data: Profile not found.");
-      return false;
+      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
+    } else {
+      filePath = getProfileJsonPath(profile);
     }
-    const filePath = getProfileJsonPath(profile);
     logger.info("reloadIcon filePath = ", filePath);
 
     try {
       // Read JSON file
       const data = fs.readFileSync(filePath, "utf-8");
-      logger.info("data = ", JSON.stringify(data));
       const parsedData: DesktopIconData = JSON.parse(data);
 
       // Find the icon with the specified row and col
@@ -1024,16 +1011,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle("launchWebsite", async (id: string): Promise<boolean> => {
     const profile = await getRendererState("profile");
+    let filePath = "";
     if (!profile) {
-      openSmallWindow(
-        "Error in launchWebsite",
-        "Profile not found, cannot launch website for icon without a profile.",
-        ["OK"]
-      );
-      logger.info("Error in launching website: Profile not found.");
-      return false;
+      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
+    } else {
+      filePath = getProfileJsonPath(profile);
     }
-    const filePath = getProfileJsonPath(profile);
 
     try {
       const data = fs.readFileSync(filePath, "utf-8");
@@ -1101,16 +1084,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle("deleteIcon", async (id: string): Promise<boolean> => {
     const profile = await getRendererState("profile");
+    let filePath = "";
     if (!profile) {
-      openSmallWindow(
-        "Error in deleting icon",
-        "Profile not found, cannot delete icon data without a profile.",
-        ["OK"]
-      );
-      logger.info("Error in deleting icon: Profile not found.");
-      return false;
+      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
+    } else {
+      filePath = getProfileJsonPath(profile);
     }
-    const filePath = getProfileJsonPath(profile);
 
     try {
       logger.info(`Deleting icon ${id} from ${filePath}`);
@@ -1530,13 +1509,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("resetAllIconsFontColor", async () => {
     const profile = await getRendererState("profile");
     if (!profile) {
-      openSmallWindow(
-        "Error in fetching icon data",
-        "Profile not found, cannot fetch icon data without a profile.",
-        ["OK"]
-      );
-      logger.info("Error in fetching icon data: Profile not found.");
-      return false;
+      return resetAllIconsFontColor("default");
     }
     return resetAllIconsFontColor(profile);
   });
