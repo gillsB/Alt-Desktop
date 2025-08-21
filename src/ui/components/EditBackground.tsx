@@ -488,7 +488,8 @@ const EditBackground: React.FC = () => {
 
   const handleClose = () => {
     logger.info("Closing EditBackground");
-    window.electron.openBackgroundSelect(summary.id);
+    window.electron.reloadBackground();
+    window.electron.openBackgroundSelect();
   };
 
   // Save handler

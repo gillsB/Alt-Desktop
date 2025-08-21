@@ -359,6 +359,7 @@ const BackgroundSelect: React.FC = () => {
     // DO NOT APPLY FILTER to fetch, or you break the background on closing.
     const bg = summaries.find((bg) => bg.id === id);
     logger.info("Selected background:", bg);
+    await window.electron.saveSettingsData({ background: id });
     setSelectedIds([id]);
     if (bg) {
       setSelectedBg(bg);
