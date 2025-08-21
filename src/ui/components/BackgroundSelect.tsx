@@ -69,6 +69,11 @@ const BackgroundSelect: React.FC = () => {
   const [showDisplayDropdown, setShowDisplayDropdown] = useState(false);
   const displayDropdownRef = useRef<HTMLDivElement>(null);
 
+  const [scrollTarget, setScrollTarget] = useState<{
+    backgroundId: string;
+    shouldScroll: boolean;
+  } | null>(null);
+
   useEffect(() => {
     const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
@@ -197,7 +202,6 @@ const BackgroundSelect: React.FC = () => {
 
       let targetId: string | null = null;
       let targetPage = 0;
-      let targetBackground: BackgroundSummary | null = null;
 
       // Determine what background to load
       if (initialId) {
@@ -232,8 +236,12 @@ const BackgroundSelect: React.FC = () => {
 
           if (bgPage !== -1 && summary) {
             targetPage = bgPage;
-            targetBackground = summary;
             logger.info(`Found target background on page ${bgPage}`);
+            // Set the target for selection after summaries load
+            setScrollTarget({
+              backgroundId: summary.id,
+              shouldScroll: true,
+            });
           } else {
             logger.warn(
               `Target background ${targetId} not found, defaulting to page 0`
@@ -244,48 +252,46 @@ const BackgroundSelect: React.FC = () => {
         }
       }
 
-      // Set the page and load summaries
+      // Set the page - this will trigger fetchPage
       setPage(targetPage);
-
-      // Set selection after a brief delay to ensure summaries are loaded
-      if (targetBackground) {
-        setTimeout(() => {
-          setSelectedIds([targetBackground.id]);
-          setSelectedBg(targetBackground);
-
-          // Scroll to the background
-          setTimeout(() => {
-            const selectedElement = gridItemRefs.current[targetBackground.id];
-            if (selectedElement) {
-              selectedElement.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-            }
-          }, 100);
-        }, 50);
-      }
     };
 
     initializeBackgrounds();
   }, []);
 
+  // Handle selection after summaries are loaded
+  useEffect(() => {
+    if (!scrollTarget || !summaries.length) return;
+
+    const targetSummary = summaries.find(
+      (bg) => bg.id === scrollTarget.backgroundId
+    );
+    if (targetSummary) {
+      setSelectedIds([targetSummary.id]);
+      setSelectedBg(targetSummary);
+
+      if (scrollTarget.shouldScroll) {
+        // Use requestAnimationFrame to ensure DOM is updated
+        requestAnimationFrame(() => {
+          const selectedElement = gridItemRefs.current[targetSummary.id];
+          if (selectedElement) {
+            selectedElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        });
+      }
+
+      // Clear the initialization target
+      setScrollTarget(null);
+    }
+  }, [summaries, scrollTarget]);
+
   useEffect(() => {
     if (page === -1) return; // prevent initial call
     fetchPage();
   }, [page, search]);
-
-  const scrollToBackground = (backgroundId: string) => {
-    setTimeout(() => {
-      const selectedElement = gridItemRefs.current[backgroundId];
-      if (selectedElement) {
-        selectedElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }
-    }, 100);
-  };
 
   useEffect(() => {
     window.electron.on("backgrounds-updated", fetchPage);
@@ -308,7 +314,6 @@ const BackgroundSelect: React.FC = () => {
 
   const handleClose = async () => {
     logger.info("BackgroundSelect window closed");
-    await window.electron.saveSettingsData({ background: selectedIds[0] });
     await window.electron.reloadBackground();
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
@@ -568,13 +573,15 @@ const BackgroundSelect: React.FC = () => {
 
   const handleJumpToClick = async () => {
     if (!selectedBg) return;
-    // Get the page and position for the currently selected background
 
     const { page: bgPage } = await getBackgroundPage(selectedBg.id);
     if (bgPage !== -1) {
+      // Set target for selection after page loads
+      setScrollTarget({
+        backgroundId: selectedBg.id,
+        shouldScroll: true,
+      });
       setPage(bgPage);
-      // After page loads, scroll will happen automatically via the fetchPage effect
-      setTimeout(() => scrollToBackground(selectedBg.id), 100);
     } else {
       logger.info("Selected background not found in current filter");
     }
