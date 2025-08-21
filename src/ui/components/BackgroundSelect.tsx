@@ -32,12 +32,10 @@ const BackgroundSelect: React.FC = () => {
     y: number;
     backgroundId: string;
   } | null>(null);
-  const [pendingJump, setPendingJump] = useState(false);
   const fetching = useRef(false);
 
   const [isDragging, setIsDragging] = useState(false);
   const [page, setPage] = useState(-1);
-  const [reloadKey, setReloadKey] = useState(0); // force reload for fetchPage useEffect
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const dragCounter = useRef(0);
@@ -56,9 +54,6 @@ const BackgroundSelect: React.FC = () => {
 
   const [localTags, setLocalTags] = useState<LocalTag[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
-
-  const [scrollToId, setScrollToId] = useState<string | null>(null);
-  const didAttemptScrollRef = useRef(false);
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
@@ -194,109 +189,103 @@ const BackgroundSelect: React.FC = () => {
 
     return { page: bgPage, summary };
   };
-  // Handle scrolling after summaries are updated
+
   useEffect(() => {
-    if (
-      !scrollToId ||
-      !summaries.length ||
-      !gridItemRefs.current[scrollToId] ||
-      fetching.current // Bounce if still fetching page
-    )
-      return;
+    const initializeBackgrounds = async () => {
+      // Re-index backgrounds first
+      await window.electron.indexBackgrounds();
 
-    if (didAttemptScrollRef.current) return;
-    didAttemptScrollRef.current = true;
-    logger.info("Scrolling to ID:", scrollToId);
+      let targetId: string | null = null;
+      let targetPage = 0;
+      let targetBackground: BackgroundSummary | null = null;
 
-    requestAnimationFrame(() => {
-      const selectedElement = gridItemRefs.current[scrollToId];
+      // Determine what background to load
+      if (initialId) {
+        logger.info("Loading with initial ID:", initialId);
+        targetId = initialId;
+      } else {
+        const savedBackground = await window.electron.getSetting("background");
+        if (savedBackground) {
+          logger.info("Loading saved background:", savedBackground);
+          targetId = savedBackground;
+        }
+      }
+
+      // If we have a target ID, get its page
+      if (targetId) {
+        try {
+          const { addTags, removeTags, searchTerms } =
+            parseAdvancedSearch(search);
+          const newTags = Array.from(new Set([...includeTags, ...addTags]));
+          const newExcludeTags = Array.from(
+            new Set([...excludeTags, ...removeTags])
+          );
+
+          const { page: bgPage, summary } =
+            await window.electron.getBackgroundPageForId({
+              id: targetId,
+              pageSize: PAGE_SIZE,
+              search: searchTerms.join(" "),
+              includeTags: newTags,
+              excludeTags: newExcludeTags,
+            });
+
+          if (bgPage !== -1 && summary) {
+            targetPage = bgPage;
+            targetBackground = summary;
+            logger.info(`Found target background on page ${bgPage}`);
+          } else {
+            logger.warn(
+              `Target background ${targetId} not found, defaulting to page 0`
+            );
+          }
+        } catch (error) {
+          logger.error("Error finding target background:", error);
+        }
+      }
+
+      // Set the page and load summaries
+      setPage(targetPage);
+
+      // Set selection after a brief delay to ensure summaries are loaded
+      if (targetBackground) {
+        setTimeout(() => {
+          setSelectedIds([targetBackground.id]);
+          setSelectedBg(targetBackground);
+
+          // Scroll to the background
+          setTimeout(() => {
+            const selectedElement = gridItemRefs.current[targetBackground.id];
+            if (selectedElement) {
+              selectedElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }, 100);
+        }, 50);
+      }
+    };
+
+    initializeBackgrounds();
+  }, []);
+
+  useEffect(() => {
+    if (page === -1) return; // prevent initial call
+    fetchPage();
+  }, [page, search]);
+
+  const scrollToBackground = (backgroundId: string) => {
+    setTimeout(() => {
+      const selectedElement = gridItemRefs.current[backgroundId];
       if (selectedElement) {
         selectedElement.scrollIntoView({
           behavior: "smooth",
           block: "center",
         });
       }
-      setScrollToId(null);
-      didAttemptScrollRef.current = false;
-    });
-  }, [summaries, scrollToId, gridItemRefs]);
-
-  useEffect(() => {
-    const loadInitialBackground = async () => {
-      if (initialId) {
-        logger.info("Passed with id to scrollTo on launch:", initialId);
-
-        const { page: bgPage, summary } = await getBackgroundPage(initialId);
-
-        if (bgPage !== -1) {
-          setScrollToId(initialId);
-          setPage(bgPage);
-          setSelectedIds([initialId]);
-          if (summary) {
-            setSelectedBg(summary);
-          }
-          return;
-        } else {
-          logger.info("Initial ID not found in backgrounds list");
-        }
-      }
-
-      // Fall back to saved background if no initialId
-      const savedBackground = await window.electron.getSetting("background");
-      if (savedBackground) {
-        const { page: bgPage, summary } =
-          await getBackgroundPage(savedBackground);
-        if (bgPage !== -1) {
-          setScrollToId(savedBackground);
-          setPage(bgPage);
-          setSelectedIds([savedBackground]);
-          if (summary) {
-            setSelectedBg(summary);
-          }
-          return;
-        } else {
-          logger.info("Saved background not found in backgrounds list");
-        }
-      } else {
-        logger.info("No saved background found");
-      }
-
-      // Fallback show page 0
-      setPage(0);
-      setSelectedIds([]);
-      setSelectedBg(null);
-    };
-
-    const init = async () => {
-      if (initialId) {
-        logger.info("Passed with id to scrollTo on launch:", initialId);
-      }
-      await loadInitialBackground();
-      const [newBgs, remBgs] = await window.electron.indexBackgrounds(); // Re-index backgrounds
-      // If new or removed backgrounds, reload backgrounds and scroll to selectedBg
-      if (newBgs || remBgs) {
-        fetching.current = true;
-        await loadInitialBackground(); // Load from initialID or saved backgrounds.json
-        setReloadKey((k) => k + 1);
-        setPendingJump(true); // Jump to background (when selectedBg is available)
-      }
-    };
-
-    init();
-  }, []);
-
-  useEffect(() => {
-    if (pendingJump && selectedBg) {
-      logger.info("Jumping to background:", selectedBg.id);
-      handleJumpToClick();
-      setPendingJump(false);
-    }
-  }, [pendingJump, selectedBg]);
-
-  useEffect(() => {
-    if (page === -1) return; // prevent OnMount call.
-    fetchPage();
-  }, [page, search, reloadKey]);
+    }, 100);
+  };
 
   useEffect(() => {
     window.electron.on("backgrounds-updated", fetchPage);
@@ -582,13 +571,11 @@ const BackgroundSelect: React.FC = () => {
 
     const { page: bgPage } = await getBackgroundPage(selectedBg.id);
     if (bgPage !== -1) {
-      setScrollToId(selectedBg.id);
       setPage(bgPage);
-      setSelectedIds([selectedBg.id]);
+      // After page loads, scroll will happen automatically via the fetchPage effect
+      setTimeout(() => scrollToBackground(selectedBg.id), 100);
     } else {
-      // TODO fix this when excluding is eventually added. No set in stone idea for what it does when
-      // it is not in the current filter yet. Either discard filter, show regardless, or show a message.
-      logger.info("Selected background not found in backgrounds list");
+      logger.info("Selected background not found in current filter");
     }
   };
 
@@ -968,7 +955,7 @@ const BackgroundSelect: React.FC = () => {
                   </button>
                   <button
                     className="button"
-                    onClick={() => setPendingJump(true)}
+                    onClick={() => handleJumpToClick()}
                   >
                     Jump to
                   </button>
