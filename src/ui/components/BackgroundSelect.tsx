@@ -355,6 +355,7 @@ const BackgroundSelect: React.FC = () => {
         if (next.length === 0) {
           window.electron.previewBackgroundUpdate({ id: "fallback" });
           setSelectedBg(null);
+          window.electron.saveSettingsData({ background: "" });
         } else if (
           // If the selection just went from 0 to 1, or selectedBg is not in next
           prev.length === 0 ||
