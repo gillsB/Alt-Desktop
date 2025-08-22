@@ -488,15 +488,18 @@
   margin-left: auto;
 }
 
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #232323;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+.background-grid-item.loading {
+  pointer-events: none;
+}
+
+.background-icon.loading,
+.background-grid-item h4.loading {
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+.background-icon:not(.loading),
+.background-grid-item h4:not(.loading) {
+  opacity: 1;
+  transition: opacity 0.15s ease-in;
 }

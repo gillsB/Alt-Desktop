@@ -813,7 +813,6 @@ const BackgroundSelect: React.FC = () => {
             )}
           </div>
           <div className="background-select-content">
-            {isLoadingPage && <div className="loading-overlay"></div>}
             <div className="background-grid">
               {summaries.map((bg) => (
                 <div
@@ -823,7 +822,8 @@ const BackgroundSelect: React.FC = () => {
                   }}
                   className={
                     "background-grid-item" +
-                    (selectedIds.includes(bg.id) ? " selected" : "")
+                    (selectedIds.includes(bg.id) ? " selected" : "") +
+                    (isLoadingPage ? " loading" : "")
                   }
                   onClick={(e) => handleSelect(bg.id, e)}
                   onContextMenu={(e) => handleContextMenu(e, bg.id)}
@@ -831,9 +831,11 @@ const BackgroundSelect: React.FC = () => {
                 >
                   <SafeImage
                     imagePath={bg.iconPath ?? ""}
-                    className="background-icon"
+                    className={`background-icon${isLoadingPage ? " loading" : ""}`}
                   />
-                  <h4>{getDisplayName(bg)}</h4>
+                  <h4 className={isLoadingPage ? "loading" : ""}>
+                    {getDisplayName(bg)}
+                  </h4>
                 </div>
               ))}
             </div>
