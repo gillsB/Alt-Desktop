@@ -74,6 +74,8 @@ const BackgroundSelect: React.FC = () => {
     shouldScroll: boolean;
   } | null>(null);
 
+  const [isLoadingPage, setIsLoadingPage] = useState(false);
+
   useEffect(() => {
     const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
@@ -158,6 +160,9 @@ const BackgroundSelect: React.FC = () => {
   const fetchPage = async () => {
     if (page === -1) return; // Prevent fetching page before initial page load.
     logger.info(`Fetching page ${page + 1} with search "${search}"`);
+
+    setIsLoadingPage(true);
+
     const offset = page * PAGE_SIZE;
 
     // Parse search string for tags and terms
@@ -173,8 +178,15 @@ const BackgroundSelect: React.FC = () => {
       includeTags: newTags,
       excludeTags: newExcludeTags,
     });
+
     setSummaries(results);
     setTotal(total);
+
+    // Brief delay to let images start loading before removing overlay
+    setTimeout(() => {
+      setIsLoadingPage(false);
+    }, 100);
+
     fetching.current = false;
   };
 
@@ -801,6 +813,7 @@ const BackgroundSelect: React.FC = () => {
             )}
           </div>
           <div className="background-select-content">
+            {isLoadingPage && <div className="loading-overlay"></div>}
             <div className="background-grid">
               {summaries.map((bg) => (
                 <div
