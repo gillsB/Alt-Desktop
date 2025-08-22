@@ -44,6 +44,7 @@ logger.info(`Added main window URL to allowed list: ${mainWindowUrl}`);
  * or null if another subwindow was open and is being closed (the new window will be created asynchronously).
  *
  */
+
 export function openSubWindow(
   options: Electron.BrowserWindowConstructorOptions,
   subWindowHash: string,
@@ -93,11 +94,14 @@ export function openSubWindow(
     addAllowedUrl(subWindowUrl);
 
     activeSubWindow.once("ready-to-show", () => {
-      activeSubWindow!.show();
-      activeSubWindow!.focus();
-      if (isDev() && subWindowDevtoolsEnabled()) {
-        activeSubWindow?.webContents.openDevTools({ mode: "detach" });
-      }
+      // Add 100ms delay before showing the window
+      setTimeout(() => {
+        activeSubWindow!.show();
+        activeSubWindow!.focus();
+        if (isDev() && subWindowDevtoolsEnabled()) {
+          activeSubWindow?.webContents.openDevTools({ mode: "detach" });
+        }
+      }, 100);
     });
 
     logger.info(`Created subwindow with URL: ${subWindowUrl}`);
