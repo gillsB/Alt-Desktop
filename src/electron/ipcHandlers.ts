@@ -47,6 +47,7 @@ import {
 import { safeSpawn } from "./utils/safeSpawn.js";
 import {
   changeBackgroundDirectory,
+  deleteIconData,
   ensureFileExists,
   escapeRegExp,
   filterBackgroundEntries,
@@ -1122,16 +1123,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       // Move the icon folder to the recycle bin
       // TODO make this actually delete the folder if the icon is only visible in this profile.
       // but do not make it delete the folder if it exists/is visible in other profiles.
-      /**
-      const iconFolderPath = path.join(getDataFolderPath(), `${id}`);
-      if (fs.existsSync(iconFolderPath)) {
-        await shell.trashItem(iconFolderPath);
-        logger.info(
-          `Successfully moved folder to recycle bin: ${iconFolderPath}`
-        );
-      } else {
-        logger.warn(`Folder not found: ${iconFolderPath}`);
-      }**/
+      // just find if it is unique, if it is then call deleteIconData(id)
 
       return true;
     } catch (error) {
@@ -1141,17 +1133,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
 
   ipcMainHandle("deleteIconData", async (id: string): Promise<boolean> => {
-    const iconFolderPath = path.join(getDataFolderPath(), `${id}`);
-    if (fs.existsSync(iconFolderPath)) {
-      await shell.trashItem(iconFolderPath);
-      logger.info(
-        `Successfully moved folder to recycle bin: ${iconFolderPath}`
-      );
-      return true;
-    } else {
-      logger.warn(`Folder not found: ${iconFolderPath}`);
-      return false;
-    }
+    return deleteIconData(id);
   });
 
   ipcMainHandle(
