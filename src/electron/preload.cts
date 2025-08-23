@@ -72,6 +72,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getFilePath: (file: File) => webUtils.getPathForFile(file),
   getFileType: (filepath: string) => ipcInvoke("getFileType", filepath),
   deleteIcon: (id: string) => ipcInvoke("deleteIcon", id),
+  deleteIconData: (id: string) => ipcInvoke("deleteIconData", id),
   openInExplorer: (
     type: "image" | "programLink" | "background",
     filePath: string

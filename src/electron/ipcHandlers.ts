@@ -1139,6 +1139,21 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+
+  ipcMainHandle("deleteIconData", async (id: string): Promise<boolean> => {
+    const iconFolderPath = path.join(getDataFolderPath(), `${id}`);
+    if (fs.existsSync(iconFolderPath)) {
+      await shell.trashItem(iconFolderPath);
+      logger.info(
+        `Successfully moved folder to recycle bin: ${iconFolderPath}`
+      );
+      return true;
+    } else {
+      logger.warn(`Folder not found: ${iconFolderPath}`);
+      return false;
+    }
+  });
+
   ipcMainHandle(
     "openInExplorer",
     async (

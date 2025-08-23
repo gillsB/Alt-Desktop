@@ -230,6 +230,7 @@ interface EventParamMapping {
   getFilePath: [File];
   getFileType: [string];
   deleteIcon: [string];
+  deleteIconData: [string];
   openInExplorer: ["image" | "programLink" | "background", string];
   showSmallWindow: [string, string, string[]];
   previewIconUpdate: [string, Partial<DesktopIcon>];
@@ -303,6 +304,7 @@ type EventPayloadMapping = {
   getFilePath: string;
   getFileType: string;
   deleteIcon: boolean;
+  deleteIconData: boolean;
   openInExplorer: boolean;
   showSmallWindow: string;
   buttonResponse: { windowId: number; buttonText: string | null };
@@ -396,6 +398,7 @@ interface Window {
     getFilePath: (file: File) => string;
     getFileType: (filepath: string) => Promise<string>;
     deleteIcon: (id: string) => Promise<boolean>;
+    deleteIconData: (id: string) => Promise<boolean>;
     openInExplorer: (
       type: "image" | "programLink" | "background",
       filePath: string
