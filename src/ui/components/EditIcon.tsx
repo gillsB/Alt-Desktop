@@ -41,6 +41,8 @@ const EditIcon: React.FC = () => {
     undefined
   );
 
+  const [isNewIcon, setIsNewIcon] = useState(false);
+
   useEffect(() => {
     const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
@@ -86,6 +88,7 @@ const EditIcon: React.FC = () => {
         if (iconData) {
           setIcon(iconData);
           originalIcon.current = { ...iconData };
+          setIsNewIcon(false); // Existing icon
           logger.info("Fetched icon data successfully.");
         } else {
           // Use the default DesktopIcon values
@@ -96,6 +99,7 @@ const EditIcon: React.FC = () => {
           );
           setIcon(defaultIcon);
           originalIcon.current = { ...defaultIcon };
+          setIsNewIcon(true); // New icon
           logger.warn(`No icon found ${id}. Initialized with default values.`);
         }
       } catch (err) {
@@ -130,6 +134,14 @@ const EditIcon: React.FC = () => {
 
   const handleClose = async () => {
     logger.info(`User attempting to close EditIcon[${id}]`);
+
+    if (isNewIcon && !getChanges()) {
+      // New icon with no changes
+      logger.info("call delete here");
+      closeWindow();
+      return;
+    }
+
     if (getChanges()) {
       try {
         const ret = await showSmallWindow(
@@ -138,6 +150,10 @@ const EditIcon: React.FC = () => {
           ["Yes", "No"]
         );
         if (ret === "Yes") {
+          if (isNewIcon) {
+            // New icon being closed without saving
+            logger.info("call delete here 2");
+          }
           logger.info("User confirmed to close without saving.");
           closeWindow();
         }
