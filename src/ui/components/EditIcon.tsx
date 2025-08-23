@@ -137,7 +137,10 @@ const EditIcon: React.FC = () => {
 
     if (isNewIcon && !getChanges()) {
       // New icon with no changes
-      logger.info("call delete here");
+      logger.info(
+        "newIcon closed with no changes deleting folder for temp id: " + id
+      );
+      await window.electron.deleteIconData(id || "");
       closeWindow();
       return;
     }
@@ -152,7 +155,10 @@ const EditIcon: React.FC = () => {
         if (ret === "Yes") {
           if (isNewIcon) {
             // New icon being closed without saving
-            logger.info("call delete here 2");
+            logger.info(
+              "newIcon closing without saving deleting folder for temp id:" + id
+            );
+            await window.electron.deleteIconData(id || "");
           }
           logger.info("User confirmed to close without saving.");
           closeWindow();
