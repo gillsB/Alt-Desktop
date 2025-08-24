@@ -80,6 +80,8 @@ const EditBackground: React.FC = () => {
 
   const [bgSaveProgress, setBgSaveProgress] = useState<number | null>(null);
 
+  const [profiles, setProfiles] = useState<string[]>([]);
+
   // Filtered public categories/tags
   const filteredPublicTagCategories = React.useMemo(() => {
     if (!localTagSearch.trim()) return PUBLIC_TAG_CATEGORIES;
@@ -185,6 +187,25 @@ const EditBackground: React.FC = () => {
       return newVal;
     });
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const profileList = await window.electron.getProfiles();
+      if (!cancelled) {
+        // Sort profiles: "default" first (as "Default"), then alphabetically
+        const sortedProfiles = profileList.sort((a, b) => {
+          if (a === "default") return -1;
+          if (b === "default") return 1;
+          return a.localeCompare(b);
+        });
+        setProfiles(sortedProfiles);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // handles toggle for individual categories
   const toggleCategory = async (category: string) => {
@@ -1085,17 +1106,36 @@ const EditBackground: React.FC = () => {
             </div>
           )}
           <div className="edit-bg-field">
-            <label>Profile</label>
-            <div className="input-row"></div>
-            <input
-              type="text"
-              value={summary.localProfile ?? "default"}
-              placeholder="(For now) type name of profile"
-              onChange={async (e) => {
-                const newValue = e.target.value;
-                setSummary((prev) => ({ ...prev, localProfile: newValue }));
-              }}
-            />
+            <label>Desktop Icon Profile</label>
+            <div className="input-row" style={{ width: "90%" }}>
+              <div className="edit-bg-field dropdown-container">
+                <select
+                  id="profile-select"
+                  value={summary.localProfile ?? "default"}
+                  onChange={(e) => {
+                    setSummary((prev) => ({
+                      ...prev,
+                      localProfile: e.target.value,
+                    }));
+                  }}
+                >
+                  {profiles.map((profile) => (
+                    <option key={profile} value={profile}>
+                      {profile === "default" ? "Default" : profile}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                className="button"
+                onClick={() => logger.info("clicked add profile button")}
+                title="Add new profile"
+                tabIndex={-1}
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 
