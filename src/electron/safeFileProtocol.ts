@@ -60,7 +60,7 @@ export function registerSafeFileProtocol(
 
       // Read the file content for existing files
       const fileContent = fs.readFileSync(fullPath);
-      return new Response(fileContent, {
+      return new Response(new Uint8Array(fileContent), {
         status: 200,
         headers: {
           "Content-Type": mime.lookup(fullPath) || "application/octet-stream",
@@ -124,10 +124,9 @@ function fileNotExist(fullPath: string, reason?: string) {
  */
 export function getUnknownImageResponse(): Response {
   const fallbackImagePath = path.join(getAssetPath(), "unknown.svg");
-  logger.info("Returning unknown.svg from:", fallbackImagePath);
   try {
     const fileContent = fs.readFileSync(fallbackImagePath);
-    return new Response(fileContent, {
+    return new Response(new Uint8Array(fileContent), {
       status: 200,
       headers: {
         "Content-Type":
