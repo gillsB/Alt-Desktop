@@ -1154,3 +1154,19 @@ export async function deleteIconData(id: string) {
     return false;
   }
 }
+
+export async function getProfiles(): Promise<string[]> {
+  const profilesDir = getProfilesPath();
+  try {
+    const entries = await fs.promises.readdir(profilesDir, {
+      withFileTypes: true,
+    });
+    const profiles = entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+    return profiles;
+  } catch (e) {
+    logger.error("Failed to read profiles directory:", e);
+    return [];
+  }
+}

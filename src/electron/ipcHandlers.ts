@@ -61,6 +61,7 @@ import {
   getExternalPath,
   getLogsFolderPath,
   getProfileJsonPath,
+  getProfiles,
   getProfilesPath,
   getSettingsFilePath,
   indexBackgrounds,
@@ -2018,4 +2019,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle("getProfiles", async (): Promise<string[]> => {
+    return getProfiles();
+  });
 }

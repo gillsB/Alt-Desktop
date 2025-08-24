@@ -274,6 +274,7 @@ interface EventParamMapping {
   getInfoFromID: [string, InfoKey];
   getInfoFromBgPath: [string, PathKey];
   renameDataFolder: [string, string];
+  getProfiles: [];
 }
 
 // The returns from the main process to the renderer
@@ -349,6 +350,7 @@ type EventPayloadMapping = {
   getInfoFromID: IDInfo[K] | null;
   getInfoFromBgPath: PathInfo<K> | null;
   renameDataFolder: boolean;
+  getProfiles: string[];
 };
 
 type UnsubscribeFunction = () => void;
@@ -484,5 +486,6 @@ interface Window {
       oldFolder: string,
       newFolder: string
     ) => Promise<boolean>;
+    getProfiles: () => Promise<string[]>;
   };
 }

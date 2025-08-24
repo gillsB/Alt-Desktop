@@ -149,6 +149,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("getInfoFromBgPath", path, type) as Promise<PathInfo[K] | null>,
   renameDataFolder: (oldFolder: string, newFolder: string) =>
     ipcInvoke("renameDataFolder", oldFolder, newFolder),
+  getProfiles: () => ipcInvoke("getProfiles"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
