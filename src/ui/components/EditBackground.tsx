@@ -10,6 +10,7 @@ import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
+import AddProfileWindow from "./AddProfile";
 import AddTagWindow, { RenameTagModal } from "./AddTag";
 import ClearableInput from "./ClearableInput";
 import EditCategories from "./EditCategories";
@@ -51,7 +52,6 @@ const EditBackground: React.FC = () => {
         localVolume: 0.5,
         localTags: [],
       };
-  logger.info("initial summary = ", initialSummary);
 
   const [summary, setSummary] = useState<BackgroundSummary>(initialSummary);
   const [bgFileType, setBgFileType] = useState<string | null>(null);
@@ -81,6 +81,7 @@ const EditBackground: React.FC = () => {
   const [bgSaveProgress, setBgSaveProgress] = useState<number | null>(null);
 
   const [profiles, setProfiles] = useState<string[]>([]);
+  const [showAddProfile, setShowAddProfile] = useState(false);
 
   // Filtered public categories/tags
   const filteredPublicTagCategories = React.useMemo(() => {
@@ -902,6 +903,25 @@ const EditBackground: React.FC = () => {
     };
   }, []);
 
+  const handleAddProfileClick = () => {
+    setShowAddProfile(true);
+    console.log("Add profile clicked");
+  };
+
+  const handleCloseAddProfile = () => {
+    setShowAddProfile(false);
+    // Refresh profiles after closing modal
+    (async () => {
+      const profileList = await window.electron.getProfiles();
+      const sortedProfiles = profileList.sort((a, b) => {
+        if (a === "default") return -1;
+        if (b === "default") return 1;
+        return a.localeCompare(b);
+      });
+      setProfiles(sortedProfiles);
+    })();
+  };
+
   return (
     <div className="edit-background-root">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -1129,7 +1149,7 @@ const EditBackground: React.FC = () => {
               <button
                 type="button"
                 className="button"
-                onClick={() => logger.info("clicked add profile button")}
+                onClick={handleAddProfileClick}
                 title="Add new profile"
                 tabIndex={-1}
               >
@@ -1572,6 +1592,16 @@ const EditBackground: React.FC = () => {
             <div className="bg-save-progress-label">
               Saving background file...
             </div>
+          </div>
+        </div>
+      )}
+      {showAddProfile && (
+        <div className="add-tag-modal-overlay" onClick={handleCloseAddProfile}>
+          <div
+            className="add-tag-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AddProfileWindow onClose={handleCloseAddProfile} />
           </div>
         </div>
       )}
