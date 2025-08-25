@@ -11,11 +11,21 @@ const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const [profileInput, setProfileInput] = useState("");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [duplicateError, setDuplicateError] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<string>("default");
 
   useEffect(() => {
     const fetchProfiles = async () => {
       const result = await window.electron.getProfiles();
-      setProfiles(result ?? []);
+      let sortedProfiles: string[] = [];
+      if (result && result.length > 0) {
+        const filtered = result.filter((p) => p !== "default");
+        sortedProfiles = [
+          "default",
+          ...filtered.sort((a, b) => a.localeCompare(b)),
+        ];
+      }
+      setProfiles(sortedProfiles);
+      setSelectedProfile("default"); // Always default to "Default"
     };
     fetchProfiles();
   }, []);
@@ -71,6 +81,24 @@ const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                 That profile already exists
               </div>
             )}
+          </div>
+        </div>
+        <div className="subwindow-field">
+          <label>Copy from:</label>
+          <div className="dropdown-container">
+            <select
+              value={selectedProfile}
+              onChange={(e) => setSelectedProfile(e.target.value)}
+              className="create-tag-input"
+              style={{ width: "100%" }}
+            >
+              <option value="">None (Fresh)</option>
+              {profiles.map((profile) => (
+                <option key={profile} value={profile}>
+                  {profile === "default" ? "Default" : profile}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
