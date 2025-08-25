@@ -25,6 +25,7 @@ const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       return;
     }
     logger.info("Attempted to make profile: " + profileInput.trim());
+    await window.electron.ensureProfileFolder(profileInput.trim());
     onClose?.();
   };
 

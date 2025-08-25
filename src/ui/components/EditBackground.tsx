@@ -905,7 +905,7 @@ const EditBackground: React.FC = () => {
 
   const handleAddProfileClick = () => {
     setShowAddProfile(true);
-    console.log("Add profile clicked");
+    logger.info("showing add profile modal");
   };
 
   const handleCloseAddProfile = () => {
