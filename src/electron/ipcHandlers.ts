@@ -260,7 +260,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "ensureProfileFolder",
-    async (profile: string): Promise<boolean> => {
+    async (profile: string, copyFromProfile?: string): Promise<boolean> => {
       try {
         const profilesBase = getProfilesPath();
         const profileFolder = path.join(profilesBase, profile);
@@ -276,7 +276,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
         // Ensure profile.json exists in the profile folder
         const profileJsonPath = path.join(profileFolder, "profile.json");
-        if (!fs.existsSync(profileJsonPath)) {
+
+        if (copyFromProfile) {
+          const copyFromPath = path.join(
+            profilesBase,
+            copyFromProfile,
+            "profile.json"
+          );
+          if (!fs.existsSync(copyFromPath)) {
+            logger.error(`Copy source profile.json not found: ${copyFromPath}`);
+            openSmallWindow(
+              "Error copying profile",
+              `The profile to copy from does not exist. ${copyFromPath}`,
+              ["OK"]
+            );
+            return false;
+          }
+          const copiedData = fs.readFileSync(copyFromPath, "utf-8");
+
+          if (fs.existsSync(profileJsonPath)) {
+            // Backup the existing profile.json
+            const backupPath = path.join(profileFolder, "backup.json");
+            fs.renameSync(profileJsonPath, backupPath);
+            logger.info(`Existing profile.json backed up to backup.json`);
+          }
+
+          fs.writeFileSync(profileJsonPath, copiedData, "utf-8");
+          logger.info(
+            `Copied profile.json from ${copyFromProfile} to ${profile}`
+          );
+        } else if (!fs.existsSync(profileJsonPath)) {
           logger.info(
             `profile.json not found in ${profileFolder}, creating default.`
           );
