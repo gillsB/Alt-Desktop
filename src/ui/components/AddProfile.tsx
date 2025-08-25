@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import "../styles/AddProfile.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
 
@@ -8,6 +9,23 @@ const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g;
 
 const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const [profileInput, setProfileInput] = useState("");
+  const [profiles, setProfiles] = useState<string[]>([]);
+  const [duplicateError, setDuplicateError] = useState(false);
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      const result = await window.electron.getProfiles();
+      setProfiles(result ?? []);
+    };
+    fetchProfiles();
+  }, []);
+
+  useEffect(() => {
+    const trimmed = profileInput.trim().toLowerCase();
+    setDuplicateError(
+      trimmed.length > 0 && profiles.some((p) => p.toLowerCase() === trimmed)
+    );
+  }, [profileInput, profiles]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove invalid folder characters as user types
@@ -32,24 +50,36 @@ const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   return (
     <div className="modal-window-content">
       <div className="modal-content">
-        <div className="subwindow-field">
-          <label>Profile Name:</label>
-          <input
-            type="text"
-            value={profileInput}
-            onChange={handleInputChange}
-            placeholder="Enter new profile name"
-            className="create-tag-input"
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === "Escape") onClose?.();
-              if (e.key === "Enter") handleCreateProfile();
-            }}
-          />
+        <div className="profile-field">
+          <div className="profile-input-row">
+            <label>Profile Name:</label>
+            <input
+              type="text"
+              value={profileInput}
+              onChange={handleInputChange}
+              placeholder="Enter new profile name"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Escape") onClose?.();
+                if (e.key === "Enter") handleCreateProfile();
+              }}
+            />
+          </div>
+          <div className="error-space">
+            {duplicateError && (
+              <div className="add-profile-inline-error">
+                That profile already exists
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <div className="modal-window-footer">
-        <button className="button" onClick={handleCreateProfile}>
+        <button
+          className="button"
+          onClick={handleCreateProfile}
+          disabled={duplicateError}
+        >
           Create Profile
         </button>
         <button className="button" onClick={onClose}>
