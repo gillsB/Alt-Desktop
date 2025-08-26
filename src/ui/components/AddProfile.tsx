@@ -3,7 +3,7 @@ import "../styles/AddProfile.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
 
-const logger = createLogger("addProfile.tsx");
+const logger = createLogger("AddProfile.tsx");
 
 const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g;
 
@@ -52,8 +52,20 @@ const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       );
       return;
     }
-    logger.info("Attempted to make profile: " + profileInput.trim());
-    await window.electron.ensureProfileFolder(profileInput.trim());
+    if (selectedProfile) {
+      logger.info(
+        "Attempted to make profile: " +
+          profileInput.trim() +
+          "and copying from profile: " +
+          selectedProfile
+      );
+    } else {
+      logger.info("Attempted to make profile: " + profileInput.trim());
+    }
+    await window.electron.ensureProfileFolder(
+      profileInput.trim(),
+      selectedProfile
+    );
     onClose?.();
   };
 
