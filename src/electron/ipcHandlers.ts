@@ -1147,12 +1147,51 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       // Write the updated JSON back to the file
       fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
-      logger.info(`Successfully deleted icon at ${id}`);
+      logger.info(`Successfully deleted icon: ${id}`);
 
-      // Move the icon folder to the recycle bin
-      // TODO make this actually delete the folder if the icon is only visible in this profile.
-      // but do not make it delete the folder if it exists/is visible in other profiles.
-      // just find if it is unique, if it is then call deleteIconData(id)
+      try {
+        const profilesPath = getProfilesPath();
+        const profileFolders = fs
+          .readdirSync(profilesPath, { withFileTypes: true })
+          .filter((dirent) => dirent.isDirectory())
+          .map((dirent) => dirent.name);
+
+        for (const folder of profileFolders) {
+          // Skip current profile
+          if (folder === profile) continue;
+          const profileJsonPath = path.join(
+            profilesPath,
+            folder,
+            "profile.json"
+          );
+          if (fs.existsSync(profileJsonPath)) {
+            try {
+              const data = fs.readFileSync(profileJsonPath, "utf-8");
+              const parsed: DesktopIconData = JSON.parse(data);
+              if (Array.isArray(parsed.icons)) {
+                if (parsed.icons.some((icon) => icon.id === id)) {
+                  logger.info(
+                    `icon found in profile: ${folder}, keeping data folder`
+                  );
+                  return true; // Early return if found in another profile
+                }
+              }
+            } catch (err) {
+              logger.error(
+                `Failed to read or parse ${profileJsonPath}: ${err}`
+              );
+            }
+          }
+        }
+
+        // Icon is unique to this profile, delete its data folder
+        await deleteIconData(id);
+        logger.info(
+          `Icon ${id} was unique to profile ${profile}, deleted its data folder.`
+        );
+      } catch (err) {
+        logger.error(`Error checking icon usage in other profiles: ${err}`);
+      }
 
       return true;
     } catch (error) {
