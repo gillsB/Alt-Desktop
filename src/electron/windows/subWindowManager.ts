@@ -129,7 +129,7 @@ export function openSubWindow(
  * @param {string[]} [buttons=["Okay"]] - The buttons to display in the small window.
  * @returns {Promise<string>} A promise that resolves with the button text that was clicked.
  */
-export function openSmallWindow(
+export function showSmallWindow(
   title: string,
   message: string,
   buttons: string[] = ["Okay"]

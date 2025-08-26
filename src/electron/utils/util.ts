@@ -14,7 +14,7 @@ import { PUBLIC_TAG_CATEGORIES } from "../publicTags.js";
 import { getSetting } from "../settings.js";
 import {
   getAllowedUrls,
-  openSmallWindow,
+  showSmallWindow,
 } from "../windows/subWindowManager.js";
 import { idToBgJsonPath } from "./idToInfo.js";
 
@@ -129,7 +129,7 @@ export function ipcMainHandle<
       // Log the formatted error
       logger.error(formattedError);
 
-      openSmallWindow("IPC Handler Error", formattedError, ["OK"]);
+      showSmallWindow("IPC Handler Error", formattedError, ["OK"]);
 
       throw error;
     }
@@ -403,7 +403,7 @@ export async function indexBackgrounds(options?: {
       `backgrounds.json does not exist at: ${backgroundsJsonPath}` +
       "Restore backgrounds.json or restart program to build backgrounds.json";
     logger.error(errorMsg);
-    await openSmallWindow("Backgrounds Error", errorMsg, ["Okay"]);
+    await showSmallWindow("Backgrounds Error", errorMsg, ["Okay"]);
     throw new Error(errorMsg);
   }
 
@@ -418,13 +418,13 @@ export async function indexBackgrounds(options?: {
     ) {
       const errorMsg = `"backgrounds" object missing or invalid in backgrounds.json`;
       logger.error(errorMsg);
-      await openSmallWindow("Backgrounds Error", errorMsg, ["Okay"]);
+      await showSmallWindow("Backgrounds Error", errorMsg, ["Okay"]);
       throw new Error(errorMsg);
     }
   } catch (e) {
     const errorMsg = `Failed to parse backgrounds.json: ${e}`;
     logger.error(errorMsg);
-    await openSmallWindow("Backgrounds Error", errorMsg, ["Okay"]);
+    await showSmallWindow("Backgrounds Error", errorMsg, ["Okay"]);
     throw new Error(errorMsg);
   }
 
@@ -441,7 +441,7 @@ export async function indexBackgrounds(options?: {
 
   // Only prompt if unindexed bg.jsons found and newExternalPathAdded is true
   if (foundUnindexedBgJson && options?.newExternalPathAdded) {
-    const choice = await openSmallWindow(
+    const choice = await showSmallWindow(
       "Import Backgrounds",
       "Existing bg.json files found that are not indexed. \nHow would you like to import them?",
       ["Import as New (Appear first)", "Import with Saved Date"]

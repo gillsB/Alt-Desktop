@@ -2,7 +2,7 @@ import { spawn } from "child_process";
 import { shell } from "electron";
 import fs from "fs";
 import { createLoggerForFile } from "../logging.js";
-import { openSmallWindow } from "../windows/subWindowManager.js";
+import { showSmallWindow } from "../windows/subWindowManager.js";
 
 const logger = createLoggerForFile("safeSpawn.ts");
 
@@ -78,7 +78,7 @@ export function safeSpawn(
     return true;
   } catch (err) {
     logger.error(`Failed to launch ${executablePath} - ${err}`);
-    openSmallWindow(
+    showSmallWindow(
       "Error on launch",
       `Failed to launch ${executablePath}, due to ${err}`,
       ["OK"]

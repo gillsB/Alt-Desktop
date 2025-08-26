@@ -83,8 +83,8 @@ import {
   closeActiveSubWindow,
   getActiveSubWindow,
   openSelectIconWindow,
-  openSmallWindow,
   pendingSmallWindowResponses,
+  showSmallWindow,
 } from "./windows/subWindowManager.js";
 
 ffmpeg.setFfprobePath(ffprobeStatic.path);
@@ -285,7 +285,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           );
           if (!fs.existsSync(copyFromPath)) {
             logger.error(`Copy source profile.json not found: ${copyFromPath}`);
-            openSmallWindow(
+            showSmallWindow(
               "Error copying profile",
               `The profile to copy from does not exist. ${copyFromPath}`,
               ["OK"]
@@ -878,7 +878,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
               logger.info(`Shortcut created at: ${shortcutPath}`);
               resolve();
             } else {
-              openSmallWindow(
+              showSmallWindow(
                 "Failed to create shortcut",
                 `Failed to create shortcut for: ${sourcePath}\nError: ${errorOutput || "Unknown error"}`
               );
@@ -1012,7 +1012,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       if (!icon.programLink) {
         logger.warn(`No programLink found for icon: ${id}`);
-        openSmallWindow(
+        showSmallWindow(
           "No program",
           `No program path set for icon: ${id} name: ${icon.name}`,
           ["OK"]
@@ -1024,7 +1024,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       if (!fs.existsSync(launchPath)) {
         logger.warn(`Launch path does not exist: ${launchPath}`);
-        openSmallWindow(
+        showSmallWindow(
           "File not exist",
           `failed to launch ${launchPath} as it does not exist`,
           ["OK"]
@@ -1062,7 +1062,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       if (!icon.websiteLink) {
         logger.warn(`No websiteLink found for icon: ${icon.id}`);
-        openSmallWindow(
+        showSmallWindow(
           "No website",
           `No website link set for icon: ${icon.name}`,
           ["Ok"]
@@ -1224,8 +1224,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           `Showing small window with title: "${title}", message: "${message}", and buttons: ${JSON.stringify(buttons)}`
         );
 
-        // Call openSmallWindow and wait for the button clicked
-        const buttonClicked = await openSmallWindow(title, message, buttons);
+        // Call showSmallWindow and wait for the button clicked
+        const buttonClicked = await showSmallWindow(title, message, buttons);
 
         return buttonClicked;
       } catch (error) {
@@ -1798,7 +1798,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       // Validate name: no spaces, must be lowercase, not in PUBLIC_TAGS or localTags
       if (!tag.name || typeof tag.name !== "string") {
         logger.warn("Invalid tag name:", tag.name);
-        openSmallWindow(
+        showSmallWindow(
           "Invalid Tag",
           "Tag name must be a non-empty string without spaces.",
           ["Okay"]
@@ -1807,7 +1807,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
       if (/\s/.test(tag.name)) {
         logger.warn("Tag name contains spaces:", tag.name);
-        openSmallWindow("Invalid Tag", "Tag name cannot contain spaces.", [
+        showSmallWindow("Invalid Tag", "Tag name cannot contain spaces.", [
           "Okay",
         ]);
         return false;
@@ -1817,7 +1817,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       // Check against PUBLIC_TAGS
       if (PUBLIC_TAGS_FLAT.map((t) => t.toLowerCase()).includes(name)) {
         logger.warn(`Attempted to add a public tag as a local tag: ${name}`);
-        openSmallWindow(
+        showSmallWindow(
           "Invalid Tag",
           "You cannot add a public tag as a local tag.",
           ["Okay"]
@@ -1841,7 +1841,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const exists = localTags.some((t) => t.name === name);
       if (exists) {
         logger.warn(`Tag already exists: ${name}`);
-        openSmallWindow(
+        showSmallWindow(
           "Tag Already Exists",
           `The tag "${name}" already exists. Please choose a different name.`,
           ["Okay"]
@@ -1856,7 +1856,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return true;
     } catch (e) {
       logger.error("Failed to add local tag:", e);
-      openSmallWindow(
+      showSmallWindow(
         "Error Adding Tag",
         `An error occurred while adding the tag:\n ${e}`,
         ["Okay"]

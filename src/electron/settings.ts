@@ -8,7 +8,7 @@ import {
   getBackgroundsJsonFilePath,
   getSettingsFilePath,
 } from "./utils/util.js";
-import { openSmallWindow } from "./windows/subWindowManager.js";
+import { showSmallWindow } from "./windows/subWindowManager.js";
 
 export const defaultPublicCategories: Record<string, boolean> & {
   show: boolean;
@@ -107,12 +107,12 @@ app.on("ready", () => {
   app.whenReady().then(async () => {
     if (pendingSettingsError) {
       logger.info("Attempting to show settings error window.");
-      await openSmallWindow("Settings Error", pendingSettingsError, ["OK"]);
+      await showSmallWindow("Settings Error", pendingSettingsError, ["OK"]);
       pendingSettingsError = null; // Clear the error after showing the window
     }
     if (pendingSettingsNotice) {
       logger.info("Attempting to show settings notice window.");
-      await openSmallWindow("Settings Notice", pendingSettingsNotice, ["OK"]);
+      await showSmallWindow("Settings Notice", pendingSettingsNotice, ["OK"]);
       pendingSettingsNotice = null; // Clear the notice after showing the window
     }
   });
@@ -235,7 +235,7 @@ export async function renameLocalTag(
       );
       return true;
     } else {
-      await openSmallWindow(
+      await showSmallWindow(
         "Error Renaming Local Tag",
         `Failed to rename local tag from "${oldName}" to "${newName}".\nError: Tag not found.`,
         ["OK"]
@@ -244,7 +244,7 @@ export async function renameLocalTag(
       return false;
     }
   } catch (e) {
-    await openSmallWindow(
+    await showSmallWindow(
       "Error Renaming Local Tag",
       `Failed to rename local tag from "${oldName}" to "${newName}".\nError: ${e}`,
       ["OK"]
