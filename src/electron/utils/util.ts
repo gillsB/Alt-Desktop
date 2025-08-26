@@ -903,10 +903,6 @@ export const getLogsFolderPath = (): string => {
   return path.join(getBasePath(), "logs");
 };
 
-export const getDesktopIconsFilePath = (): string => {
-  return path.join(getBasePath(), "desktopIcons.json");
-};
-
 export const getSettingsFilePath = (): string => {
   return path.join(getBasePath(), "settings.json");
 };

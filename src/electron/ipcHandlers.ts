@@ -57,7 +57,6 @@ import {
   getBasePath,
   getBgJsonFile,
   getDataFolderPath,
-  getDesktopIconsFilePath,
   getExternalPath,
   getLogsFolderPath,
   getProfileJsonPath,
@@ -1959,8 +1958,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return getDataFolderPath();
       case "logsfolderpath":
         return getLogsFolderPath();
-      case "desktopiconsfilepath":
-        return getDesktopIconsFilePath();
       case "settingsfilepath":
         return getSettingsFilePath();
       case "backgroundfilepath":

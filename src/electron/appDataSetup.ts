@@ -8,35 +8,12 @@ import {
   getBackgroundsJsonFilePath,
   getDataFolderPath,
   getDefaultProfileJsonPath,
-  getDesktopIconsFilePath,
   getLogsFolderPath,
   getProfilesPath,
   getSettingsFilePath,
 } from "./utils/util.js";
 
 const logger = createLoggerForFile("appDataSetup.ts");
-
-const getDefaultProfile = (): DesktopIconData => {
-  const filePath = getDesktopIconsFilePath();
-
-  try {
-    // Read JSON file
-    const data = fs.readFileSync(filePath, "utf-8");
-    logger.info(`Read file contents from ${filePath}`);
-    const parsedData: DesktopIconData = JSON.parse(data);
-
-    if (parsedData.icons) {
-      parsedData.icons = parsedData.icons.map((icon) => {
-        return icon;
-      });
-    }
-
-    return parsedData;
-  } catch (error) {
-    logger.error(`Error reading or creating JSON file. ${error}`);
-    return { icons: [] }; // Return default if error
-  }
-};
 
 /**
  * Ensures that necessary AppData directories and files exist in .../AppData/Roaming/AltDesktop/
@@ -52,7 +29,6 @@ export const ensureAppDataFiles = () => {
   try {
     const dataFolderPath = getDataFolderPath();
     const logsFolderPath = getLogsFolderPath();
-    const desktopIconsFilePath = getDesktopIconsFilePath();
     const settingsFilePath = getSettingsFilePath();
     const backgroundFilePath = getBackgroundFilePath();
     const backgroundsFilePath = getBackgroundsJsonFilePath();
@@ -97,12 +73,11 @@ export const ensureAppDataFiles = () => {
     }
 
     // Ensure desktopIcons.json exists
-    ensureFileExists(desktopIconsFilePath, { icons: [] });
     ensureFileExists(backgroundsFilePath, {
       backgrounds: {},
     });
     ensureFileExists(settingsFilePath, defaultSettings);
-    ensureFileExists(defaultProfileJson, getDefaultProfile());
+    ensureFileExists(defaultProfileJson, { icons: [] });
     ensureDefaultSettings();
   } catch (error) {
     logger.error("Error ensuring AppData files:", error);
