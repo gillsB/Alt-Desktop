@@ -38,7 +38,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("ensureProfileFolder", profile, copyFromProfile),
   ensureDataFolder: (id: string) => ipcInvoke("ensureDataFolder", id),
   ensureUniqueIconId: (name: string) => ipcInvoke("ensureUniqueIconId", name),
-  setIconData: (icon: DesktopIcon) => ipcInvoke("setIconData", icon),
+  saveIconData: (icon: DesktopIcon) => ipcInvoke("saveIconData", icon),
   renameID: (oldId: string, newId: string) =>
     ipcInvoke("renameID", oldId, newId),
   sendSubWindowAction: (action, icon) =>

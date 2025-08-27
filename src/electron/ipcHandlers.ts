@@ -69,6 +69,7 @@ import {
   resetAllIconsFontColor,
   resolveShortcut,
   saveBgJsonFile,
+  saveIconData,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
   updateHeader,
@@ -392,51 +393,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
-  ipcMainHandle("setIconData", async (icon: DesktopIcon): Promise<boolean> => {
-    const profile = await getRendererState("profile");
-    let filePath = "";
-    if (!profile) {
-      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
-    } else {
-      filePath = getProfileJsonPath(profile);
-    }
-
-    try {
-      const { row, col } = icon; // Extract row and col from the icon object
-
-      logger.info(`Updating icon at [${row},${col}] in ${filePath}`);
-      let desktopData: DesktopIconData = { icons: [] };
-
-      // If file exists load data from it
-      if (fs.existsSync(filePath)) {
-        const data = fs.readFileSync(filePath, "utf-8");
-        desktopData = JSON.parse(data);
-      }
-
-      // Find existing icon or add new one
-      const existingIndex = desktopData.icons.findIndex(
-        (i) => i.row === row && i.col === col
-      );
-
-      if (existingIndex !== -1) {
-        // Update existing icon
-        desktopData.icons[existingIndex] = icon;
-      } else {
-        // Add new icon
-        desktopData.icons.push(icon);
-      }
-
-      // Write back updated JSON
-      fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
-
-      logger.info(`Successfully updated icon: ${icon.id} at [${row},${col}]`);
-      return true;
-    } catch (error) {
-      logger.error(
-        `Error updating icon at [${icon.row},${icon.col}]: ${error}`
-      );
-      return false;
-    }
+  ipcMainHandle("saveIconData", async (icon: DesktopIcon): Promise<boolean> => {
+    return saveIconData(icon);
   });
 
   ipcMainHandle(
