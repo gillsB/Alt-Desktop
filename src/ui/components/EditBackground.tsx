@@ -1330,6 +1330,7 @@ const EditBackground: React.FC = () => {
                           }}
                           onClick={() => handlePersonalTagToggle(tagObj.name)}
                           style={{ cursor: "pointer" }}
+                          title={tagObj.name}
                         >
                           <input
                             type="checkbox"
@@ -1443,6 +1444,7 @@ const EditBackground: React.FC = () => {
                                   handlePersonalTagToggle(tagObj.name)
                                 }
                                 style={{ cursor: "pointer" }}
+                                title={tagObj.name}
                               >
                                 <input
                                   type="checkbox"
