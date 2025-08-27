@@ -1213,6 +1213,53 @@ export async function saveIconData(icon: DesktopIcon): Promise<boolean> {
   }
 }
 
+export async function moveDesktopIcon(
+  id: string,
+  newRow: number,
+  newCol: number
+): Promise<boolean> {
+  const profile = await getRendererState("profile");
+  let filePath = "";
+  if (!profile) {
+    filePath = getProfileJsonPath("default");
+  } else {
+    filePath = getProfileJsonPath(profile);
+  }
+
+  try {
+    logger.info(
+      `Updating icon position for id=${id} to [${newRow},${newCol}] in ${filePath}`
+    );
+    let desktopData: DesktopIconData = { icons: [] };
+
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, "utf-8");
+      desktopData = JSON.parse(data);
+    }
+
+    // Find icon by id
+    const iconIndex = desktopData.icons.findIndex((icon) => icon.id === id);
+
+    if (iconIndex !== -1) {
+      // Update only row and col
+      desktopData.icons[iconIndex].row = newRow;
+      desktopData.icons[iconIndex].col = newCol;
+
+      fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+      logger.info(
+        `Successfully updated icon position: ${id} to [${newRow},${newCol}]`
+      );
+      return true;
+    } else {
+      logger.warn(`Icon with id=${id} not found.`);
+      return false;
+    }
+  } catch (error) {
+    logger.error(`Error updating icon position for id=${id}: ${error}`);
+    return false;
+  }
+}
+
 export async function getDesktopIcon(id: string): Promise<DesktopIcon | null> {
   const profile = await getRendererState("profile");
   let filePath = "";

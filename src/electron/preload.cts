@@ -150,6 +150,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   renameDataFolder: (oldFolder: string, newFolder: string) =>
     ipcInvoke("renameDataFolder", oldFolder, newFolder),
   getProfiles: () => ipcInvoke("getProfiles"),
+  moveDesktopIcon: (id: string, newRow: number, newCol: number) =>
+    ipcInvoke("moveDesktopIcon", id, newRow, newCol),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

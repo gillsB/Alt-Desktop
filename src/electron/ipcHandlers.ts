@@ -67,6 +67,7 @@ import {
   indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
+  moveDesktopIcon,
   resetAllIconsFontColor,
   resolveShortcut,
   saveBgJsonFile,
@@ -1935,7 +1936,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     setRendererStates(updates);
     logger.info("renderer states updated:", JSON.stringify(updates));
 
-    // TODO broadcast updates to all windows
     for (const win of BrowserWindow.getAllWindows()) {
       win.webContents.send("renderer-state-updated", updates);
     }
@@ -2011,4 +2011,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getProfiles", async (): Promise<string[]> => {
     return getProfiles();
   });
+  ipcMainHandle(
+    "moveDesktopIcon",
+    async (id: string, newRow: number, newCol: number): Promise<boolean> => {
+      const result = await moveDesktopIcon(id, newRow, newCol);
+      if (result) {
+        return true;
+      }
+      return false;
+    }
+  );
 }

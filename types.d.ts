@@ -275,6 +275,7 @@ interface EventParamMapping {
   getInfoFromBgPath: [string, PathKey];
   renameDataFolder: [string, string];
   getProfiles: [];
+  moveDesktopIcon: [string, number, number];
 }
 
 // The returns from the main process to the renderer
@@ -351,6 +352,7 @@ type EventPayloadMapping = {
   getInfoFromBgPath: PathInfo<K> | null;
   renameDataFolder: boolean;
   getProfiles: string[];
+  moveDesktopIcon: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -490,5 +492,10 @@ interface Window {
       newFolder: string
     ) => Promise<boolean>;
     getProfiles: () => Promise<string[]>;
+    moveDesktopIcon: (
+      id: string,
+      newRow: number,
+      newCol: number
+    ) => Promise<boolean>;
   };
 }
