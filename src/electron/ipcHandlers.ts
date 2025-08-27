@@ -57,6 +57,7 @@ import {
   getBasePath,
   getBgJsonFile,
   getDataFolderPath,
+  getDesktopIcon,
   getExternalPath,
   getLogsFolderPath,
   getProfileJsonPath,
@@ -160,42 +161,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "getDesktopIcon",
     async (id: string): Promise<DesktopIcon | null> => {
-      const profile = await getRendererState("profile");
-      let filePath = "";
-      if (!profile) {
-        filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
-      } else {
-        filePath = getProfileJsonPath(profile);
-      }
-
-      try {
-        logger.info(`Received request for getDesktopIcon with icon id: ${id}`);
-        logger.info(`DesktopIcons file path: ${filePath}`);
-
-        // Read JSON file
-        const data = fs.readFileSync(filePath, "utf-8");
-        logger.info(`Read file contents: ${filePath}`);
-        const parsedData: DesktopIconData = JSON.parse(data);
-
-        if (parsedData.icons) {
-          // Find the icon with the specified row and col
-          const icon = parsedData.icons.find((icon) => icon.id === id);
-
-          if (icon) {
-            logger.info(`Found icon ${id}: ${JSON.stringify(icon)}`);
-            return icon;
-          } else {
-            logger.warn(`No icon found ${id}`);
-            return null; // Return null if no matching icon is found
-          }
-        }
-
-        logger.warn("No icons found in the data file.");
-        return null; // Return null if no icons exist
-      } catch (error) {
-        logger.error(`Error reading or parsing JSON file: ${error}`);
-        return null; // Return null if an error occurs
-      }
+      return getDesktopIcon(id);
     }
   );
 
