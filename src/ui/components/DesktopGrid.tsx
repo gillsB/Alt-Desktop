@@ -985,6 +985,11 @@ const DesktopGrid: React.FC = () => {
 
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+
+    const { clientX: x, clientY: y } = e;
+    const [hoverRow, hoverCol] = getRowColFromXY(x, y);
+
+    showHighlightAt(hoverRow, hoverCol);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -1023,6 +1028,7 @@ const DesktopGrid: React.FC = () => {
 
   const handleDragEnd = () => {
     setDraggedIcon(null);
+    hideHighlightBox();
   };
 
   return (
