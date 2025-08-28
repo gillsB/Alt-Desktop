@@ -1237,6 +1237,22 @@ export async function moveDesktopIcon(
       desktopData = JSON.parse(data);
     }
 
+    // Check if another icon already exists at the target row/col
+    const conflictIndex = desktopData.icons.findIndex(
+      (icon) => icon.row === newRow && icon.col === newCol && icon.id !== id
+    );
+    if (conflictIndex !== -1) {
+      showSmallWindow(
+        "Move Icon Error",
+        `Cannot move icon: ${id} to [${newRow},${newCol}]: position already occupied by icon: ${desktopData.icons[conflictIndex].id}`,
+        ["Okay"]
+      );
+      logger.error(
+        `Cannot move icon ${id} to [${newRow},${newCol}]: position already occupied by icon: ${desktopData.icons[conflictIndex].id}`
+      );
+      return false;
+    }
+
     // Find icon by id
     const iconIndex = desktopData.icons.findIndex((icon) => icon.id === id);
 
