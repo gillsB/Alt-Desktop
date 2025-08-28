@@ -63,6 +63,7 @@ import {
   getProfileJsonPath,
   getProfiles,
   getProfilesPath,
+  getSelectedProfilePath,
   getSettingsFilePath,
   indexBackgrounds,
   ipcMainHandle,
@@ -447,13 +448,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
 
   ipcMainHandle("reloadIcon", async (id: string): Promise<boolean> => {
-    const profile = await getRendererState("profile");
-    let filePath = "";
-    if (!profile) {
-      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
-    } else {
-      filePath = getProfileJsonPath(profile);
-    }
+    const filePath = await getSelectedProfilePath();
     logger.info("reloadIcon filePath = ", filePath);
 
     try {
@@ -915,13 +910,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
 
   ipcMainHandle("launchProgram", async (id: string): Promise<boolean> => {
-    const profile = await getRendererState("profile");
-    let filePath = "";
-    if (!profile) {
-      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
-    } else {
-      filePath = getProfileJsonPath(profile);
-    }
+    const filePath = await getSelectedProfilePath();
 
     try {
       const data = fs.readFileSync(filePath, "utf-8");
@@ -965,13 +954,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
   ipcMainHandle("launchWebsite", async (id: string): Promise<boolean> => {
-    const profile = await getRendererState("profile");
-    let filePath = "";
-    if (!profile) {
-      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
-    } else {
-      filePath = getProfileJsonPath(profile);
-    }
+    const filePath = await getSelectedProfilePath();
 
     try {
       const data = fs.readFileSync(filePath, "utf-8");
@@ -1039,12 +1022,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle("deleteIcon", async (id: string): Promise<boolean> => {
     const profile = await getRendererState("profile");
-    let filePath = "";
-    if (!profile) {
-      filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
-    } else {
-      filePath = getProfileJsonPath(profile);
-    }
+    const filePath = await getSelectedProfilePath();
 
     try {
       logger.info(`Deleting icon ${id} from ${filePath}`);
@@ -2014,11 +1992,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "moveDesktopIcon",
     async (id: string, newRow: number, newCol: number): Promise<boolean> => {
-      const result = await moveDesktopIcon(id, newRow, newCol);
-      if (result) {
-        return true;
-      }
-      return false;
+      return await moveDesktopIcon(id, newRow, newCol);
     }
   );
 }

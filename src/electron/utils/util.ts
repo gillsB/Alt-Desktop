@@ -1298,3 +1298,14 @@ export async function getDesktopIcon(id: string): Promise<DesktopIcon | null> {
     return null; // Return null if an error occurs
   }
 }
+
+export async function getSelectedProfilePath(): Promise<string> {
+  const profile = await getRendererState("profile");
+  let filePath = "";
+  if (!profile) {
+    filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
+  } else {
+    filePath = getProfileJsonPath(profile);
+  }
+  return filePath;
+}
