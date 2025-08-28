@@ -93,6 +93,12 @@ const DesktopGrid: React.FC = () => {
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
+  const [draggedIcon, setDraggedIcon] = useState<{
+    icon: DesktopIcon;
+    startRow: number;
+    startCol: number;
+  } | null>(null);
+
   useEffect(() => {
     const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
@@ -953,9 +959,80 @@ const DesktopGrid: React.FC = () => {
     };
   }, []);
 
+  const handleDragStart = (
+    e: React.DragEvent,
+    icon: DesktopIcon,
+    row: number,
+    col: number
+  ) => {
+    e.dataTransfer.effectAllowed = "move";
+    setDraggedIcon({ icon, startRow: row, startCol: col });
+
+    // Copy image for drag image preview
+    const dragImage = e.currentTarget.cloneNode(true) as HTMLElement;
+    dragImage.style.opacity = "0.5";
+    e.dataTransfer.setDragImage(
+      dragImage,
+      dragImage.offsetWidth / 2,
+      dragImage.offsetHeight / 2
+    );
+
+    logger.info(`Started dragging icon: ${icon.name} from [${row}, ${col}]`);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!draggedIcon) return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+
+    if (!draggedIcon) return;
+
+    const { clientX: x, clientY: y } = e;
+    const [dropRow, dropCol] = getRowColFromXY(x, y);
+
+    // Check if dropping on existing icon
+    const existingIcon = getIcon(dropRow, dropCol);
+    if (existingIcon && existingIcon.id !== draggedIcon.icon.id) {
+      logger.info(
+        `Dropping on existing icon: ${existingIcon.name} at [${dropRow}, ${dropCol}]`
+      );
+      return; // Do not allow dropping on another icon (for now since no way to swap icons).
+    }
+
+    // Only move if position actually changed
+    if (dropRow !== draggedIcon.startRow || dropCol !== draggedIcon.startCol) {
+      logger.info(
+        `Dropping icon: ${draggedIcon.icon.name} at [${dropRow}, ${dropCol}]`
+      );
+
+      // Apply and reloadIcon
+      window.electron.moveDesktopIcon(draggedIcon.icon.id, dropRow, dropCol);
+      window.electron.reloadIcon(draggedIcon.icon.id);
+    }
+
+    // Clean up drag state
+    setDraggedIcon(null);
+
+    hideHighlightBox();
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIcon(null);
+  };
+
   return (
     <>
-      <div className="desktop-grid" onContextMenu={handleDesktopRightClick}>
+      <div
+        className="desktop-grid"
+        onContextMenu={handleDesktopRightClick}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         {/* Conditionally render horizontal grid lines */}
         {showGrid &&
           Array.from({ length: numRows + 1 }).map((_, rowIndex) => (
@@ -1169,7 +1246,13 @@ const DesktopGrid: React.FC = () => {
                     ICON_ROOT_OFFSET_TOP,
                   width: icon.width || defaultIconSize,
                   height: icon.height || defaultIconSize,
+                  cursor:
+                    draggedIcon?.icon.id === icon.id ? "grabbing" : "grab",
+                  opacity: draggedIcon?.icon.id === icon.id ? 0.5 : 1,
                 }}
+                draggable={true}
+                onDragStart={(e) => handleDragStart(e, icon, row, col)}
+                onDragEnd={handleDragEnd}
                 onDoubleClick={() => handleIconDoubleClick(icon)}
                 onContextMenu={(e) => {
                   e.stopPropagation();
