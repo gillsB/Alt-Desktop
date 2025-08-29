@@ -973,14 +973,17 @@ const DesktopGrid: React.FC = () => {
     e.dataTransfer.effectAllowed = "move";
     setDraggedIcon({ icon, startRow: row, startCol: col });
 
-    // Copy image for drag image preview
-    const dragImage = e.currentTarget.cloneNode(true) as HTMLElement;
-    dragImage.style.opacity = "0.5";
-    e.dataTransfer.setDragImage(
-      dragImage,
-      dragImage.offsetWidth / 2,
-      dragImage.offsetHeight / 2
-    );
+    // Create an empty div element to completely hide the drag image
+    const emptyDiv = document.createElement("div");
+    emptyDiv.style.width = "1px";
+    emptyDiv.style.height = "1px";
+    emptyDiv.style.backgroundColor = "transparent";
+    document.body.appendChild(emptyDiv);
+
+    e.dataTransfer.setDragImage(emptyDiv, 0, 0);
+
+    // Remove the element after a short delay
+    setTimeout(() => document.body.removeChild(emptyDiv), 0);
 
     logger.info(`Started dragging icon: ${icon.name} from [${row}, ${col}]`);
   };
@@ -996,6 +999,7 @@ const DesktopGrid: React.FC = () => {
 
     showHighlightAt(hoverRow, hoverCol);
 
+    // Set drag preview
     setDragPreview({
       icon: draggedIcon.icon,
       row: hoverRow,
@@ -1017,7 +1021,8 @@ const DesktopGrid: React.FC = () => {
       logger.info(
         `Dropping on existing icon: ${existingIcon.name} at [${dropRow}, ${dropCol}]`
       );
-      return; // Do not allow dropping on another icon (for now since no way to swap icons).
+      setDragPreview(null); // Clear preview
+      return;
     }
 
     // Only move if position actually changed
@@ -1026,14 +1031,13 @@ const DesktopGrid: React.FC = () => {
         `Dropping icon: ${draggedIcon.icon.name} at [${dropRow}, ${dropCol}]`
       );
 
-      // Apply and reloadIcon
       window.electron.moveDesktopIcon(draggedIcon.icon.id, dropRow, dropCol);
       window.electron.reloadIcon(draggedIcon.icon.id);
     }
 
     // Clean up drag state
     setDraggedIcon(null);
-    setDragPreview(null);
+    setDragPreview(null); // Clear preview
     hideHighlightBox();
   };
 
