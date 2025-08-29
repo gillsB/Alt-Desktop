@@ -242,3 +242,8 @@
   pointer-events: none;
   user-select: none;
 }
+
+.drag-preview {
+  pointer-events: "none";
+  z-index: 1000;
+}

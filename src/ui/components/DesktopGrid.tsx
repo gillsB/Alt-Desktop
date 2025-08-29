@@ -98,6 +98,11 @@ const DesktopGrid: React.FC = () => {
     startRow: number;
     startCol: number;
   } | null>(null);
+  const [dragPreview, setDragPreview] = useState<{
+    icon: DesktopIcon;
+    row: number;
+    col: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchRendererStates = async () => {
@@ -990,6 +995,12 @@ const DesktopGrid: React.FC = () => {
     const [hoverRow, hoverCol] = getRowColFromXY(x, y);
 
     showHighlightAt(hoverRow, hoverCol);
+
+    setDragPreview({
+      icon: draggedIcon.icon,
+      row: hoverRow,
+      col: hoverCol,
+    });
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -1022,12 +1033,13 @@ const DesktopGrid: React.FC = () => {
 
     // Clean up drag state
     setDraggedIcon(null);
-
+    setDragPreview(null);
     hideHighlightBox();
   };
 
   const handleDragEnd = () => {
     setDraggedIcon(null);
+    setDragPreview(null);
     hideHighlightBox();
   };
 
@@ -1091,6 +1103,57 @@ const DesktopGrid: React.FC = () => {
               height: iconBox + ICON_VERTICAL_PADDING,
             }}
           />
+        )}
+
+        {/* Render drag preview icon */}
+        {dragPreview && (
+          <div
+            key={`drag-preview-${dragPreview.icon.id}`}
+            className="desktop-icon drag-preview"
+            style={{
+              left:
+                dragPreview.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+                ICON_ROOT_OFFSET_LEFT,
+              top:
+                dragPreview.row * (iconBox + ICON_VERTICAL_PADDING) +
+                ICON_ROOT_OFFSET_TOP,
+              width: dragPreview.icon.width || defaultIconSize,
+              height: dragPreview.icon.height || defaultIconSize,
+            }}
+          >
+            <SafeImage
+              id={dragPreview.icon.id}
+              row={dragPreview.row}
+              col={dragPreview.col}
+              imagePath={dragPreview.icon.image}
+              width={dragPreview.icon.width || defaultIconSize}
+              height={dragPreview.icon.height || defaultIconSize}
+              highlighted={false}
+              forceReload={reloadTimestamps[dragPreview.icon.id] || 0}
+            />
+            {dragPreview.icon.fontSize !== 0 &&
+              !hideIconNames &&
+              (dragPreview.icon.fontSize || defaultFontSize) !== 0 && (
+                <div
+                  className="desktop-icon-name"
+                  title={dragPreview.icon.name}
+                  style={
+                    {
+                      color: dragPreview.icon.fontColor || defaultFontColor,
+                      fontSize: dragPreview.icon.fontSize || defaultFontSize,
+                      "--line-clamp": Math.max(
+                        1,
+                        Math.floor(
+                          48 / (dragPreview.icon.fontSize || defaultFontSize)
+                        )
+                      ),
+                    } as React.CSSProperties
+                  }
+                >
+                  {dragPreview.icon.name}
+                </div>
+              )}
+          </div>
         )}
 
         {/* Render all icons as highlighted if enabled */}
