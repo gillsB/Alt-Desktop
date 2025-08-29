@@ -1031,7 +1031,12 @@ const DesktopGrid: React.FC = () => {
         `Dropping icon: ${draggedIcon.icon.name} at [${dropRow}, ${dropCol}]`
       );
 
-      window.electron.moveDesktopIcon(draggedIcon.icon.id, dropRow, dropCol);
+      window.electron.moveDesktopIcon(
+        draggedIcon.icon.id,
+        dropRow,
+        dropCol,
+        true
+      );
       window.electron.reloadIcon(draggedIcon.icon.id);
     }
 
@@ -1046,6 +1051,9 @@ const DesktopGrid: React.FC = () => {
     setDragPreview(null);
     hideHighlightBox();
   };
+
+  // TODO add drag ctrl modifier which allows freely moving icons, syncs it to nearest icon home,
+  // and when dropping saves it with the offsetX/Y values.
 
   return (
     <>
