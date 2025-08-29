@@ -1216,7 +1216,8 @@ export async function saveIconData(icon: DesktopIcon): Promise<boolean> {
 export async function moveDesktopIcon(
   id: string,
   newRow: number,
-  newCol: number
+  newCol: number,
+  offsetReset?: boolean
 ): Promise<boolean> {
   const profile = await getRendererState("profile");
   let filePath = "";
@@ -1260,6 +1261,12 @@ export async function moveDesktopIcon(
       // Update only row and col
       desktopData.icons[iconIndex].row = newRow;
       desktopData.icons[iconIndex].col = newCol;
+
+      // Reset offsets if requested
+      if (offsetReset) {
+        desktopData.icons[iconIndex].offsetX = undefined;
+        desktopData.icons[iconIndex].offsetY = undefined;
+      }
 
       fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
       logger.info(

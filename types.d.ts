@@ -275,7 +275,7 @@ interface EventParamMapping {
   getInfoFromBgPath: [string, PathKey];
   renameDataFolder: [string, string];
   getProfiles: [];
-  moveDesktopIcon: [string, number, number];
+  moveDesktopIcon: [string, number, number, offsetReset?: boolean];
 }
 
 // The returns from the main process to the renderer
@@ -495,7 +495,8 @@ interface Window {
     moveDesktopIcon: (
       id: string,
       newRow: number,
-      newCol: number
+      newCol: number,
+      offsetReset?: boolean
     ) => Promise<boolean>;
   };
 }

@@ -500,7 +500,7 @@ const DesktopGrid: React.FC = () => {
         icon: null,
       });
       logger.info(
-        "Desktop right click at icon slot at row: " +
+        `Desktop right click at icon: ${existingIcon?.name} slot at row: ` +
           `${validRow}, col:${validCol}, type: ${hideIcons ? "hideIcons" : "desktop"}`
       );
     }

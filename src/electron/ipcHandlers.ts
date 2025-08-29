@@ -1991,7 +1991,15 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle(
     "moveDesktopIcon",
-    async (id: string, newRow: number, newCol: number): Promise<boolean> => {
+    async (
+      id: string,
+      newRow: number,
+      newCol: number,
+      offsetReset?: boolean
+    ): Promise<boolean> => {
+      if (offsetReset) {
+        return await moveDesktopIcon(id, newRow, newCol, offsetReset);
+      }
       return await moveDesktopIcon(id, newRow, newCol);
     }
   );
