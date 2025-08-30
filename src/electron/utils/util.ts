@@ -266,9 +266,9 @@ export function resolveShortcut(filePath: string): string {
  * Resets the fontColor of all icons in desktopIcons.json to an empty string.
  * Returns true if successful, false otherwise.
  */
-export function resetAllIconsFontColor(profile: string): boolean {
+export async function resetAllIconsFontColor(): Promise<boolean> {
   try {
-    const filePath = getProfileJsonPath(profile);
+    const filePath = await getSelectedProfilePath();
     if (!fs.existsSync(filePath)) {
       logger.warn(`desktopIcons.json does not exist at: ${filePath}`);
       return false;
@@ -1169,13 +1169,7 @@ export async function getProfiles(): Promise<string[]> {
 }
 
 export async function saveIconData(icon: DesktopIcon): Promise<boolean> {
-  const profile = await getRendererState("profile");
-  let filePath = "";
-  if (!profile) {
-    filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
-  } else {
-    filePath = getProfileJsonPath(profile);
-  }
+  const filePath = await getSelectedProfilePath();
 
   try {
     const { row, col } = icon; // Extract row and col from the icon object
@@ -1219,13 +1213,7 @@ export async function moveDesktopIcon(
   newCol: number,
   offsetReset?: boolean
 ): Promise<boolean> {
-  const profile = await getRendererState("profile");
-  let filePath = "";
-  if (!profile) {
-    filePath = getProfileJsonPath("default");
-  } else {
-    filePath = getProfileJsonPath(profile);
-  }
+  const filePath = await getSelectedProfilePath();
 
   try {
     logger.info(
@@ -1287,13 +1275,7 @@ export async function swapDesktopIcons(
   id1: string,
   id2: string
 ): Promise<boolean> {
-  const profile = await getRendererState("profile");
-  let filePath = "";
-  if (!profile) {
-    filePath = getProfileJsonPath("default");
-  } else {
-    filePath = getProfileJsonPath(profile);
-  }
+  const filePath = await getSelectedProfilePath();
 
   try {
     logger.info(`Swapping positions of icons ${id1} and ${id2} in ${filePath}`);
@@ -1349,13 +1331,7 @@ export async function swapDesktopIcons(
 }
 
 export async function getDesktopIcon(id: string): Promise<DesktopIcon | null> {
-  const profile = await getRendererState("profile");
-  let filePath = "";
-  if (!profile) {
-    filePath = getProfileJsonPath("default"); // Assume default profile (getDesktopIconData returns default if not set.)
-  } else {
-    filePath = getProfileJsonPath(profile);
-  }
+  const filePath = await getSelectedProfilePath();
 
   try {
     logger.info(`Received request for getDesktopIcon with icon id: ${id}`);

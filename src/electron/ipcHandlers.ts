@@ -1476,11 +1476,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
 
   ipcMainHandle("resetAllIconsFontColor", async () => {
-    const profile = await getRendererState("profile");
-    if (!profile) {
-      return resetAllIconsFontColor("default");
-    }
-    return resetAllIconsFontColor(profile);
+    return resetAllIconsFontColor();
   });
   ipcMainHandle("getBackgroundIDs", async () => {
     try {
