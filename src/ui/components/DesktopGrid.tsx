@@ -1021,23 +1021,27 @@ const DesktopGrid: React.FC = () => {
       logger.info(
         `Dropping on existing icon: ${existingIcon.name} at [${dropRow}, ${dropCol}]`
       );
-      setDragPreview(null); // Clear preview
-      return;
-    }
-
-    // Only move if position actually changed
-    if (dropRow !== draggedIcon.startRow || dropCol !== draggedIcon.startCol) {
-      logger.info(
-        `Dropping icon: ${draggedIcon.icon.name} at [${dropRow}, ${dropCol}]`
-      );
-
-      window.electron.moveDesktopIcon(
-        draggedIcon.icon.id,
-        dropRow,
-        dropCol,
-        true
-      );
+      window.electron.swapDesktopIcons(draggedIcon.icon.id, existingIcon.id);
       window.electron.reloadIcon(draggedIcon.icon.id);
+      window.electron.reloadIcon(existingIcon.id);
+    } else {
+      // Only move if position actually changed
+      if (
+        dropRow !== draggedIcon.startRow ||
+        dropCol !== draggedIcon.startCol
+      ) {
+        logger.info(
+          `Dropping icon: ${draggedIcon.icon.name} at [${dropRow}, ${dropCol}]`
+        );
+
+        window.electron.moveDesktopIcon(
+          draggedIcon.icon.id,
+          dropRow,
+          dropCol,
+          true
+        );
+        window.electron.reloadIcon(draggedIcon.icon.id);
+      }
     }
 
     // Clean up drag state
