@@ -1,4 +1,5 @@
 import { createLoggerForFile } from "../logging.js";
+import { ensureProfileFolder } from "./util.js";
 
 const logger = createLoggerForFile("rendererStates.ts");
 
@@ -15,6 +16,10 @@ export async function getRendererStates(): Promise<RendererStates> {
 export function setRendererStates(updates: Partial<RendererStates>) {
   rendererStates = { ...rendererStates, ...updates };
   logger.info("Renderer states updated:", JSON.stringify(rendererStates));
+  // Ensure profile actually exists
+  if (updates.profile) {
+    ensureProfileFolder(updates.profile);
+  }
 }
 
 export async function getRendererState<T extends keyof RendererStates>(
