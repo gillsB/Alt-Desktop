@@ -185,6 +185,11 @@ const EditIcon: React.FC = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
   };
 
+  const getBaseId = (id: string) => {
+    const match = id.match(/^(.*?)(?:_\d+)?$/);
+    return match ? match[1] : id;
+  };
+
   const handleSave = async () => {
     if (!icon) {
       logger.error("Icon data is missing.");
@@ -194,6 +199,8 @@ const EditIcon: React.FC = () => {
     try {
       const oldId = icon.id;
       const iconName = icon.name?.trim() || "";
+      logger.info(`Saving icon with name: "${iconName}" and id: "${oldId}"`);
+      const baseOldId = getBaseId(oldId);
 
       let newId: string | null;
       let nameChanged: boolean = false;
@@ -205,9 +212,9 @@ const EditIcon: React.FC = () => {
           iconName || "unknownIcon"
         );
         nameChanged = true;
-      } else if (oldId !== iconName) {
+      } else if (baseOldId !== iconName) {
         logger.info("icon name changed, generating new id");
-        // If sanitized id does not match name, generate new id
+        // If sanitized base id does not match name, generate new id
         newId = await window.electron.ensureUniqueIconId(iconName);
         nameChanged = true;
       } else {
