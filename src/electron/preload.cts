@@ -156,6 +156,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     newCol: number,
     offsetReset?: boolean
   ) => ipcInvoke("moveDesktopIcon", id, newRow, newCol, offsetReset),
+  swapDesktopIcons: (id1: string, id2: string) =>
+    ipcInvoke("swapDesktopIcons", id1, id2),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

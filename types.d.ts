@@ -276,6 +276,7 @@ interface EventParamMapping {
   renameDataFolder: [string, string];
   getProfiles: [];
   moveDesktopIcon: [string, number, number, offsetReset?: boolean];
+  swapDesktopIcons: [string, string];
 }
 
 // The returns from the main process to the renderer
@@ -353,6 +354,7 @@ type EventPayloadMapping = {
   renameDataFolder: boolean;
   getProfiles: string[];
   moveDesktopIcon: boolean;
+  swapDesktopIcons: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -498,5 +500,6 @@ interface Window {
       newCol: number,
       offsetReset?: boolean
     ) => Promise<boolean>;
+    swapDesktopIcons: (id1: string, id2: string) => Promise<boolean>;
   };
 }

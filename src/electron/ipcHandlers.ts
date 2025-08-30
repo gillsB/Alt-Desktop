@@ -75,6 +75,7 @@ import {
   saveIconData,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
+  swapDesktopIcons,
   updateHeader,
 } from "./utils/util.js";
 import { getVideoFileUrl } from "./videoFileProtocol.js";
@@ -2001,6 +2002,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return await moveDesktopIcon(id, newRow, newCol, offsetReset);
       }
       return await moveDesktopIcon(id, newRow, newCol);
+    }
+  );
+  ipcMainHandle(
+    "swapDesktopIcons",
+    async (id1: string, id2: string): Promise<boolean> => {
+      return await swapDesktopIcons(id1, id2);
     }
   );
 }

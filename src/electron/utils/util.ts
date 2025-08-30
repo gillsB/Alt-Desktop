@@ -1283,6 +1283,71 @@ export async function moveDesktopIcon(
   }
 }
 
+export async function swapDesktopIcons(
+  id1: string,
+  id2: string
+): Promise<boolean> {
+  const profile = await getRendererState("profile");
+  let filePath = "";
+  if (!profile) {
+    filePath = getProfileJsonPath("default");
+  } else {
+    filePath = getProfileJsonPath(profile);
+  }
+
+  try {
+    logger.info(`Swapping positions of icons ${id1} and ${id2} in ${filePath}`);
+    let desktopData: DesktopIconData = { icons: [] };
+
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, "utf-8");
+      desktopData = JSON.parse(data);
+    }
+
+    const iconIndex1 = desktopData.icons.findIndex((icon) => icon.id === id1);
+    const iconIndex2 = desktopData.icons.findIndex((icon) => icon.id === id2);
+
+    if (iconIndex1 === -1 || iconIndex2 === -1) {
+      logger.error(
+        `swapDesktopIcons: One or both icons not found (id1: ${id1}, id2: ${id2}), iconIndex1: ${iconIndex1}, iconIndex2: ${iconIndex2}`
+      );
+      showSmallWindow(
+        "Swap Icons Error",
+        `Cannot swap icons: One or both icons not found (id1: ${id1}, id2: ${id2}) iconIndex1: ${iconIndex1}, iconIndex2: ${iconIndex2}`,
+        ["Okay"]
+      );
+      return false;
+    }
+
+    // Swap row and col values
+    const icon1 = desktopData.icons[iconIndex1];
+    const icon2 = desktopData.icons[iconIndex2];
+
+    const tempRow = icon1.row;
+    const tempCol = icon1.col;
+
+    icon1.row = icon2.row;
+    icon1.col = icon2.col;
+    icon2.row = tempRow;
+    icon2.col = tempCol;
+
+    // Reset offsets for both icons
+    icon1.offsetX = undefined;
+    icon1.offsetY = undefined;
+    icon2.offsetX = undefined;
+    icon2.offsetY = undefined;
+
+    fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+    logger.info(
+      `Successfully swapped positions of icons ${id1} and ${id2} and reset offsets.`
+    );
+    return true;
+  } catch (error) {
+    logger.error(`Error swapping desktop icons: ${error}`);
+    return false;
+  }
+}
+
 export async function getDesktopIcon(id: string): Promise<DesktopIcon | null> {
   const profile = await getRendererState("profile");
   let filePath = "";
