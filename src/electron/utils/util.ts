@@ -702,6 +702,11 @@ export async function getBgJsonFile(id: string): Promise<BgJson | null> {
 
     return bgJson;
   } catch (error) {
+    showSmallWindow(
+      "Failed to get bg.json",
+      `Failed to get bg.json: ${error}`,
+      ["OK"]
+    );
     logger.error("Failed to get bg.json:", error);
     return null;
   }
@@ -716,7 +721,7 @@ export async function saveBgJsonFile(
 ): Promise<boolean> {
   try {
     if (!summary.id) throw new Error("Missing background id");
-    logger.info("bgsummary = ", JSON.stringify(summary));
+    logger.info("Saving bgJson with summary = ", JSON.stringify(summary));
     const bgJsonPath = await idToBgJsonPath(summary.id);
 
     // Ensure the directory exists

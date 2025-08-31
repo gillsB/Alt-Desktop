@@ -1,9 +1,3 @@
-# Notice:
-
-Currently re-writing the way that images are saved for desktop icons. Any existing icons will be broken, and any new icons will be broken.
-As of August 5th, 2025. This will be removed when it has been re-written and icon images are marked safe again. Any old icon images will require re-adjusting manually. As this is very low traffic, I am not writing the functions to migrate old icons as it is unlikely for users
-to be using this.
-
 # Alt-Desktop
 
 An extremely customizable Windows Desktop Alternative. Re-write from the ground up in Electron as opposed to the [python build](https://github.com/gillsB/Alternative-Desktop-Python).
