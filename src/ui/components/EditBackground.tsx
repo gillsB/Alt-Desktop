@@ -348,7 +348,7 @@ const EditBackground: React.FC = () => {
   // Preview background update when bgFile changes
   useEffect(() => {
     window.electron.previewBackgroundUpdate({
-      id: summary.bgFile,
+      id: summary.id,
       volume: summary.localVolume,
       profile: summary.localProfile,
     });
@@ -428,7 +428,7 @@ const EditBackground: React.FC = () => {
       const newTags = (prev.tags || []).filter(
         (tag) => !["16:9", "21:9", "32:9", "Portrait", "Other"].includes(tag)
       );
-      let aspectRatioTag = "Other";
+      let aspectRatioTag = "";
 
       if (width > height) {
         // Landscape
@@ -441,7 +441,7 @@ const EditBackground: React.FC = () => {
         } else if (ratio >= 1.77) {
           aspectRatioTag = "16:9";
         }
-      } else {
+      } else if (height && width) {
         aspectRatioTag = "Portrait"; // Anything taller than wide
       }
 
@@ -577,6 +577,15 @@ const EditBackground: React.FC = () => {
             : !saveBgFileAsShortcut // User choice for videos.
         );
       } else {
+        if (!bgFileType) {
+          await showSmallWindow(
+            "Background File not found",
+            `Selected Background File Path does not exist: ${bgFilePath}` +
+              "\nPlease select a valid image or video file.",
+            ["OK"]
+          );
+          return;
+        }
         logger.error("Invalid file type for bgFile:", bgFileType);
         await showSmallWindow(
           "Invalid File Type",
