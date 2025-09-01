@@ -12,7 +12,7 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("BackgroundSelect.tsx");
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 60;
 let includeTags: string[] = [];
 const excludeTags: string[] = [];
 
