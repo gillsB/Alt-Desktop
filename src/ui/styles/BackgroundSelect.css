@@ -51,6 +51,22 @@
   grid-auto-rows: min-content;
 }
 
+.background-grid.tiny-icons {
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+}
+.background-grid.small-icons {
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+}
+.background-grid.medium-icons {
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+}
+.background-grid.large-icons {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.background-grid.massive-icons {
+  grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
+}
+
 .background-grid-item {
   background: #2c2c2c;
   box-shadow: 0 2px 8px #0004;

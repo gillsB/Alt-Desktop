@@ -69,6 +69,10 @@ const BackgroundSelect: React.FC = () => {
   const [showDisplayDropdown, setShowDisplayDropdown] = useState(false);
   const displayDropdownRef = useRef<HTMLDivElement>(null);
 
+  const [iconSize] = useState<
+    "tiny" | "small" | "medium" | "large" | "massive"
+  >("small");
+
   const [scrollTarget, setScrollTarget] = useState<{
     backgroundId: string;
     shouldScroll: boolean;
@@ -814,12 +818,7 @@ const BackgroundSelect: React.FC = () => {
             )}
           </div>
           <div className="background-select-content">
-            <div
-              className="background-grid"
-              style={{
-                gridTemplateColumns: `repeat(auto-fit, minmax(90px, 1fr))`,
-              }}
-            >
+            <div className={`background-grid ${iconSize}-icons`}>
               {summaries.map((bg) => (
                 <div
                   key={bg.id}
