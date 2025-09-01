@@ -3,7 +3,7 @@ import { openSubWindow } from "./subWindowManager.js";
 
 export function openBackgroundSelectWindow(id?: string) {
   // Default dimensions (works well on 1080p+ screens both vertical and horizontal)
-  const defaultWidth = 910;
+  const defaultWidth = 845;
   const defaultHeight = 815;
 
   const minWidth = 645;

@@ -42,7 +42,6 @@
 
 .background-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 5px;
   padding: 2px 12px 12px 12px;
   flex: 1 1 0;
@@ -75,7 +74,7 @@
   height: 100% !important;
   overflow: hidden;
   aspect-ratio: 1 / 1;
-  min-width: 64px;
+  min-width: 32px;
   height: auto;
   display: block;
 }

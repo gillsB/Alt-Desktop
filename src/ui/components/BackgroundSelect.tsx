@@ -12,7 +12,7 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("BackgroundSelect.tsx");
 
-const PAGE_SIZE = 40;
+const PAGE_SIZE = 50;
 let includeTags: string[] = [];
 const excludeTags: string[] = [];
 
@@ -814,7 +814,12 @@ const BackgroundSelect: React.FC = () => {
             )}
           </div>
           <div className="background-select-content">
-            <div className="background-grid">
+            <div
+              className="background-grid"
+              style={{
+                gridTemplateColumns: `repeat(auto-fit, minmax(90px, 1fr))`,
+              }}
+            >
               {summaries.map((bg) => (
                 <div
                   key={bg.id}
