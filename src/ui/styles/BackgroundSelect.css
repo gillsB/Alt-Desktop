@@ -518,3 +518,14 @@
   opacity: 1;
   transition: opacity 0.15s ease-in;
 }
+
+.submenu-header {
+  font-size: 12px;
+  color: #ffffff;
+}
+
+.menu-item.selected {
+  font-weight: bold;
+  color: rgb(233, 233, 233);
+  background-color: #4b72fc;
+}

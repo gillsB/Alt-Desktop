@@ -69,9 +69,10 @@ const BackgroundSelect: React.FC = () => {
   const [showDisplayDropdown, setShowDisplayDropdown] = useState(false);
   const displayDropdownRef = useRef<HTMLDivElement>(null);
 
-  const [iconSize] = useState<
+  const [iconSize, setIconSize] = useState<
     "tiny" | "small" | "medium" | "large" | "massive"
   >("small");
+  const [showViewSubmenu, setShowViewSubmenu] = useState(false);
 
   const [scrollTarget, setScrollTarget] = useState<{
     backgroundId: string;
@@ -713,6 +714,12 @@ const BackgroundSelect: React.FC = () => {
     });
   };
 
+  const toggleIconSize = (size: typeof iconSize) => {
+    setIconSize(size);
+    setShowViewSubmenu(false);
+    setContextMenu(null);
+  };
+
   return (
     <div
       className="background-select-root"
@@ -1150,6 +1157,63 @@ const BackgroundSelect: React.FC = () => {
             onClick={() => handleDeleteBackground(contextMenu.backgroundId)}
           >
             Delete Background
+          </div>
+          <div className="menu-separator" />
+          <div
+            className="menu-item has-submenu"
+            onMouseEnter={() => setShowViewSubmenu(true)}
+            onMouseLeave={() => setShowViewSubmenu(false)}
+          >
+            View
+            <span className="submenu-arrow">▶</span>
+            {showViewSubmenu && (
+              <div className="submenu">
+                {/* "Icon size:" label */}
+                <div className="submenu-header">Icon size:</div>
+
+                {/* Menu items for icon sizes */}
+                <div
+                  className={`menu-item${iconSize === "tiny" ? " selected" : ""}`}
+                  onClick={() => {
+                    toggleIconSize("tiny");
+                  }}
+                >
+                  Tiny
+                </div>
+                <div
+                  className={`menu-item${iconSize === "small" ? " selected" : ""}`}
+                  onClick={() => {
+                    toggleIconSize("small");
+                  }}
+                >
+                  Small
+                </div>
+                <div
+                  className={`menu-item${iconSize === "medium" ? " selected" : ""}`}
+                  onClick={() => {
+                    toggleIconSize("medium");
+                  }}
+                >
+                  Medium
+                </div>
+                <div
+                  className={`menu-item${iconSize === "large" ? " selected" : ""}`}
+                  onClick={() => {
+                    toggleIconSize("large");
+                  }}
+                >
+                  Large
+                </div>
+                <div
+                  className={`menu-item${iconSize === "massive" ? " selected" : ""}`}
+                  onClick={() => {
+                    toggleIconSize("massive");
+                  }}
+                >
+                  Massive
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
