@@ -272,7 +272,13 @@ const BackgroundSelect: React.FC = () => {
       // Set the page - this will trigger fetchPage
       setPage(targetPage);
     };
+    const setIconSizeFromSettings = async () => {
+      const savedIconSize =
+        await window.electron.getSetting("bgSelectIconSize");
 
+      setIconSize(savedIconSize || "medium");
+    };
+    setIconSizeFromSettings();
     initializeBackgrounds();
   }, []);
 
