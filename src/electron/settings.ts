@@ -47,6 +47,18 @@ export const ensureDefaultSettings = (): void => {
     const settings = JSON.parse(fs.readFileSync(settingsFilePath, "utf-8"));
 
     let updated = false;
+    const addedKeys: string[] = [];
+    let completelyRestored = false;
+
+    const missingKeys = Object.keys(defaultSettings).filter(
+      (key) => !(key in settings)
+    );
+    if (missingKeys.length === Object.keys(defaultSettings).length) {
+      completelyRestored = true;
+      logger.warn(
+        "Settings file is missing all default keys. Completely restoring settings."
+      );
+    }
 
     // Check for missing keys in the settings file
     for (const [key, value] of Object.entries(defaultSettings)) {
@@ -54,6 +66,7 @@ export const ensureDefaultSettings = (): void => {
         logger.info(`Missing setting "${key}" detected. Adding default value.`);
         settings[key] = value;
         updated = true;
+        addedKeys.push(key);
       }
     }
 
@@ -90,8 +103,15 @@ export const ensureDefaultSettings = (): void => {
       logger.info(
         "Settings file updated with missing or fixed default settings."
       );
-      pendingSettingsNotice =
-        "Default settings have been restored or migrated to a new format.\nIf you notice any issues, a backup of your previous settings is saved as settings_old.json in User/AppData/Roaming/AltDesktop.";
+      if (completelyRestored) {
+        pendingSettingsError =
+          "Your settings file was missing all default keys and has been completely rebuilt. If this was unplanned, a backup of your previous settings is saved as settings_old.json in User/AppData/Roaming/AltDesktop.";
+      } else if (addedKeys.length > 0) {
+        pendingSettingsNotice =
+          "The following settings were restored or added:\n" +
+          addedKeys.map((k) => `• ${k}`).join("\n") +
+          "\nA backup of your previous settings is saved as settings_old.json in User/AppData/Roaming/AltDesktop.";
+      }
     } else {
       logger.info(
         "No missing or invalid settings detected. Settings file is up-to-date."
