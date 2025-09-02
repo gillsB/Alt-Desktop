@@ -92,13 +92,15 @@ type LocalTag = {
 };
 
 type SettingsData = {
-  background?: string;
-  defaultFontSize?: number;
+  externalPaths?: string[];
   defaultIconSize?: number;
+  defaultFontSize?: number;
   defaultFontColor?: string;
   windowType?: WindowType;
+  bgSelectIconSize?: "tiny" | "small" | "medium" | "large" | "massive";
+  // Do not appear in Settings window
+  background?: string;
   newBackgroundID?: number;
-  externalPaths?: string[];
   publicCategories?: Record<string, boolean>;
   localCategories?: Record<string, boolean>;
   localTags?: LocalTag[];

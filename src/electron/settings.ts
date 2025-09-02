@@ -18,13 +18,14 @@ export const defaultPublicCategories: Record<string, boolean> & {
 };
 
 export const defaultSettings: SettingsData = {
-  background: "",
-  defaultFontSize: 16,
+  externalPaths: [],
   defaultIconSize: 64,
+  defaultFontSize: 16,
   defaultFontColor: "#FFFFFF",
   windowType: "WINDOWED",
+  bgSelectIconSize: "medium",
+  background: "",
   newBackgroundID: 1,
-  externalPaths: [],
   publicCategories: defaultPublicCategories,
   localCategories: { show: true } as Record<string, boolean> & {
     show?: boolean;
