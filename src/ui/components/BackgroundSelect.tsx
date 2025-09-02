@@ -724,6 +724,7 @@ const BackgroundSelect: React.FC = () => {
     setIconSize(size);
     setShowViewSubmenu(false);
     setContextMenu(null);
+    window.electron.saveSettingsData({ bgSelectIconSize: size });
   };
 
   return (
