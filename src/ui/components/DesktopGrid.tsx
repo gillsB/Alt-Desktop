@@ -1015,6 +1015,7 @@ const DesktopGrid: React.FC = () => {
 
     // Check if there's an icon at the hover position
     const existingIcon = getIcon(hoverRow, hoverCol);
+    logger.info("existingIcon= ", existingIcon?.id);
 
     // If we were previously hovering over a different icon, reload it to clear its preview
     if (swapPreview) {
@@ -1062,7 +1063,10 @@ const DesktopGrid: React.FC = () => {
     const [dropRow, dropCol] = getRowColFromXY(x, y);
 
     // Check if dropping on existing icon
-    const existingIcon = getIcon(dropRow, dropCol);
+    const existingIcon = swapPreview?.icon;
+    logger.info(
+      `existingIcon = ${existingIcon?.id}, draggedIcon = ${draggedIcon.icon.id}`
+    );
     if (existingIcon && existingIcon.id !== draggedIcon.icon.id) {
       logger.info(
         `Dropping on existing icon: ${existingIcon.name} at [${dropRow}, ${dropCol}]`
