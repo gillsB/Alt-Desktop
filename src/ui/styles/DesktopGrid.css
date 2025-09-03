@@ -208,3 +208,14 @@
   pointer-events: "none";
   z-index: 1000;
 }
+
+.swap-highlight {
+  border: 2px dashed #ff9800;
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+}
+
+.swap-preview {
+  opacity: 1;
+  border: 2px solid #ff9800;
+  box-sizing: border-box;
+}

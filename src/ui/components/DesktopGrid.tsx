@@ -104,6 +104,12 @@ const DesktopGrid: React.FC = () => {
     col: number;
   } | null>(null);
 
+  const [swapPreview, setSwapPreview] = useState<{
+    icon: DesktopIcon;
+    row: number;
+    col: number;
+  } | null>(null);
+
   useEffect(() => {
     const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
@@ -999,7 +1005,22 @@ const DesktopGrid: React.FC = () => {
 
     showHighlightAt(hoverRow, hoverCol);
 
-    // Set drag preview
+    // Check if there's an icon at the hover position
+    const existingIcon = getIcon(hoverRow, hoverCol);
+
+    if (existingIcon && existingIcon.id !== draggedIcon.icon.id) {
+      // Show swap preview - existing icon moves to dragged icon's original position
+      setSwapPreview({
+        icon: existingIcon,
+        row: draggedIcon.startRow,
+        col: draggedIcon.startCol,
+      });
+    } else {
+      // Clear swap preview if not hovering over another icon
+      setSwapPreview(null);
+    }
+
+    // Set drag preview for the dragged icon
     setDragPreview({
       icon: draggedIcon.icon,
       row: hoverRow,
@@ -1044,15 +1065,16 @@ const DesktopGrid: React.FC = () => {
       }
     }
 
-    // Clean up drag state
-    setDraggedIcon(null);
-    setDragPreview(null); // Clear preview
-    hideHighlightBox();
+    resetDragStates();
+  };
+  const handleDragEnd = () => {
+    resetDragStates();
   };
 
-  const handleDragEnd = () => {
+  const resetDragStates = () => {
     setDraggedIcon(null);
     setDragPreview(null);
+    setSwapPreview(null);
     hideHighlightBox();
   };
 
@@ -1121,6 +1143,22 @@ const DesktopGrid: React.FC = () => {
           />
         )}
 
+        {swapPreview && (
+          <div
+            className="highlight-box swap-highlight"
+            style={{
+              left:
+                swapPreview.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+                ICON_ROOT_OFFSET_LEFT,
+              top:
+                swapPreview.row * (iconBox + ICON_VERTICAL_PADDING) +
+                ICON_ROOT_OFFSET_TOP,
+              width: iconBox,
+              height: iconBox + ICON_VERTICAL_PADDING,
+            }}
+          />
+        )}
+
         {/* Render drag preview icon */}
         {dragPreview && (
           <div
@@ -1167,6 +1205,56 @@ const DesktopGrid: React.FC = () => {
                   }
                 >
                   {dragPreview.icon.name}
+                </div>
+              )}
+          </div>
+        )}
+
+        {swapPreview && (
+          <div
+            key={`swap-preview-${swapPreview.icon.id}`}
+            className="desktop-icon swap-preview"
+            style={{
+              left:
+                swapPreview.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+                ICON_ROOT_OFFSET_LEFT,
+              top:
+                swapPreview.row * (iconBox + ICON_VERTICAL_PADDING) +
+                ICON_ROOT_OFFSET_TOP,
+              width: swapPreview.icon.width || defaultIconSize,
+              height: swapPreview.icon.height || defaultIconSize,
+            }}
+          >
+            <SafeImage
+              id={swapPreview.icon.id}
+              row={swapPreview.row}
+              col={swapPreview.col}
+              imagePath={swapPreview.icon.image}
+              width={swapPreview.icon.width || defaultIconSize}
+              height={swapPreview.icon.height || defaultIconSize}
+              highlighted={false}
+              forceReload={reloadTimestamps[swapPreview.icon.id] || 0}
+            />
+            {swapPreview.icon.fontSize !== 0 &&
+              !hideIconNames &&
+              (swapPreview.icon.fontSize || defaultFontSize) !== 0 && (
+                <div
+                  className="desktop-icon-name"
+                  title={swapPreview.icon.name}
+                  style={
+                    {
+                      color: swapPreview.icon.fontColor || defaultFontColor,
+                      fontSize: swapPreview.icon.fontSize || defaultFontSize,
+                      "--line-clamp": Math.max(
+                        1,
+                        Math.floor(
+                          48 / (swapPreview.icon.fontSize || defaultFontSize)
+                        )
+                      ),
+                    } as React.CSSProperties
+                  }
+                >
+                  {swapPreview.icon.name}
                 </div>
               )}
           </div>
@@ -1314,6 +1402,12 @@ const DesktopGrid: React.FC = () => {
             const icon = iconsById.get(id);
             if (!icon) return null;
 
+            // Hide the icon if it's being shown in swap preview
+            const isBeingSwapped =
+              swapPreview && swapPreview.icon.id === icon.id;
+            // Also hide if it's the dragged icon or the icon being dragged over
+            const isDraggedIcon = draggedIcon?.icon.id === icon.id;
+
             const reloadTimestamp = reloadTimestamps[icon.id] || 0;
 
             return (
@@ -1331,9 +1425,8 @@ const DesktopGrid: React.FC = () => {
                     ICON_ROOT_OFFSET_TOP,
                   width: icon.width || defaultIconSize,
                   height: icon.height || defaultIconSize,
-                  cursor:
-                    draggedIcon?.icon.id === icon.id ? "grabbing" : "grab",
-                  opacity: draggedIcon?.icon.id === icon.id ? 0.5 : 1,
+                  cursor: isDraggedIcon ? "grabbing" : "grab",
+                  opacity: isDraggedIcon ? 0 : isBeingSwapped ? 0 : 1,
                 }}
                 draggable={true}
                 onDragStart={(e) => handleDragStart(e, icon, row, col)}
