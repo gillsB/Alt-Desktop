@@ -1009,6 +1009,7 @@ const DesktopGrid: React.FC = () => {
 
     // Update the last hover position
     lastHoverKeyRef.current = currentHoverKey;
+    logger.info(`updating lastHoverKeyRef to ${currentHoverKey}`);
 
     showHighlightAt(hoverRow, hoverCol);
 
@@ -1016,10 +1017,7 @@ const DesktopGrid: React.FC = () => {
     const existingIcon = getIcon(hoverRow, hoverCol);
 
     // If we were previously hovering over a different icon, reload it to clear its preview
-    if (
-      swapPreview &&
-      (!existingIcon || existingIcon.id !== swapPreview.icon.id)
-    ) {
+    if (swapPreview) {
       // Reload the previously hovered icon to restore its original state
       window.electron.reloadIcon(swapPreview.icon.id);
     }
