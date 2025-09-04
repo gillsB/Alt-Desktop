@@ -94,6 +94,7 @@ const DesktopGrid: React.FC = () => {
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const lastHoverKeyRef = useRef<string>("");
+  const [showDragOrigin, setShowDragOrigin] = useState<boolean>(false);
 
   const [draggedIcon, setDraggedIcon] = useState<{
     icon: DesktopIcon;
@@ -975,6 +976,7 @@ const DesktopGrid: React.FC = () => {
   ) => {
     e.dataTransfer.effectAllowed = "move";
     setDraggedIcon({ icon, startRow: row, startCol: col });
+    setShowDragOrigin(true);
 
     // Create an empty div element to completely hide the drag image
     const emptyDiv = document.createElement("div");
@@ -1028,7 +1030,7 @@ const DesktopGrid: React.FC = () => {
         id: existingIcon.id,
         row: draggedIcon.startRow,
         col: draggedIcon.startCol,
-        updates: { ...existingIcon, offsetX: 0, offsetY: 0 },
+        updates: { ...existingIcon, offsetX: 0, offsetY: 0 }, // offsets reset on swapping
       };
       handlePreviewUpdate(null, existingIconData);
 
@@ -1037,9 +1039,13 @@ const DesktopGrid: React.FC = () => {
         row: draggedIcon.startRow,
         col: draggedIcon.startCol,
       });
+
+      // Hide drag origin when swap preview is shown
+      setShowDragOrigin(false);
     } else {
       // Clear swap preview if not hovering over another icon (or hovering over home icon)
       setSwapPreview(null);
+      setShowDragOrigin(true);
     }
 
     // Set drag preview for the dragged icon to appear in hovered
@@ -1047,7 +1053,7 @@ const DesktopGrid: React.FC = () => {
       id: draggedIcon.icon.id,
       row: hoverRow,
       col: hoverCol,
-      updates: { row: hoverRow, col: hoverCol, offsetX: 0, offsetY: 0 }, // Only pass the position changes
+      updates: { row: hoverRow, col: hoverCol, offsetX: 0, offsetY: 0 }, // offsets reset on swapping
     };
     handlePreviewUpdate(null, updateData);
   };
@@ -1101,6 +1107,7 @@ const DesktopGrid: React.FC = () => {
   const resetDragStates = () => {
     setDraggedIcon(null);
     setSwapPreview(null);
+    setShowDragOrigin(false);
     hideHighlightBox();
     lastHoverKeyRef.current = "";
   };
@@ -1460,6 +1467,59 @@ const DesktopGrid: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Render dimmed drag origin icon when dragging and not swapping */}
+      {showDragOrigin && draggedIcon && !swapPreview && (
+        <div
+          key={`drag-origin-${draggedIcon.icon.id}`}
+          className="desktop-icon drag-origin"
+          style={{
+            left:
+              draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
+              (draggedIcon.icon.offsetX || 0) +
+              ICON_ROOT_OFFSET_LEFT,
+            top:
+              draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
+              (draggedIcon.icon.offsetY || 0) +
+              ICON_ROOT_OFFSET_TOP,
+            width: draggedIcon.icon.width || defaultIconSize,
+            height: draggedIcon.icon.height || defaultIconSize,
+          }}
+        >
+          <SafeImage
+            id={draggedIcon.icon.id}
+            row={draggedIcon.startRow}
+            col={draggedIcon.startCol}
+            imagePath={draggedIcon.icon.image}
+            width={draggedIcon.icon.width || defaultIconSize}
+            height={draggedIcon.icon.height || defaultIconSize}
+            highlighted={false}
+            forceReload={reloadTimestamps[draggedIcon.icon.id] || 0}
+          />
+          {draggedIcon.icon.fontSize !== 0 &&
+            !hideIconNames &&
+            (draggedIcon.icon.fontSize || defaultFontSize) !== 0 && (
+              <div
+                className="desktop-icon-name"
+                title={draggedIcon.icon.name}
+                style={
+                  {
+                    color: draggedIcon.icon.fontColor || defaultFontColor,
+                    fontSize: draggedIcon.icon.fontSize || defaultFontSize,
+                    "--line-clamp": Math.max(
+                      1,
+                      Math.floor(
+                        48 / (draggedIcon.icon.fontSize || defaultFontSize)
+                      )
+                    ),
+                  } as React.CSSProperties
+                }
+              >
+                {draggedIcon.icon.name}
+              </div>
+            )}
+        </div>
+      )}
 
       {contextMenu && (
         <div

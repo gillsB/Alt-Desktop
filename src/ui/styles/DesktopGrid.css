@@ -219,3 +219,8 @@
   border: 2px solid #ff9800;
   box-sizing: border-box;
 }
+
+.desktop-icon.drag-origin {
+  opacity: 0.6;
+  pointer-events: none;
+}
