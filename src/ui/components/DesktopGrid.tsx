@@ -1028,7 +1028,7 @@ const DesktopGrid: React.FC = () => {
         id: existingIcon.id,
         row: draggedIcon.startRow,
         col: draggedIcon.startCol,
-        updates: { ...existingIcon },
+        updates: { ...existingIcon, offsetX: 0, offsetY: 0 },
       };
       handlePreviewUpdate(null, existingIconData);
 
@@ -1047,7 +1047,7 @@ const DesktopGrid: React.FC = () => {
       id: draggedIcon.icon.id,
       row: hoverRow,
       col: hoverCol,
-      updates: { row: hoverRow, col: hoverCol }, // Only pass the position changes
+      updates: { row: hoverRow, col: hoverCol, offsetX: 0, offsetY: 0 }, // Only pass the position changes
     };
     handlePreviewUpdate(null, updateData);
   };
