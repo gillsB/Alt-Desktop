@@ -1000,51 +1000,49 @@ const DesktopGrid: React.FC = () => {
     const { clientX: x, clientY: y } = e;
     const [hoverRow, hoverCol] = getRowColFromXY(x, y);
 
-    // Check if we're hovering over the same position - if so, do nothing
     const currentHoverKey = `${hoverRow},${hoverCol}`;
-
     if (currentHoverKey === lastHoverKeyRef.current) {
       return; // No change in position, skip all updates
     }
 
-    // Update the last hover position
+    // Update the last hover position to this position
     lastHoverKeyRef.current = currentHoverKey;
-    logger.info(`updating lastHoverKeyRef to ${currentHoverKey}`);
 
     showHighlightAt(hoverRow, hoverCol);
 
     // Check if there's an icon at the hover position
     const existingIcon = getIcon(hoverRow, hoverCol);
-    logger.info("existingIcon= ", existingIcon?.id);
 
-    // If we were previously hovering over a different icon, reload it to clear its preview
+    // Always reload old preview to reset it
     if (swapPreview) {
-      // Reload the previously hovered icon to restore its original state
       window.electron.reloadIcon(swapPreview.icon.id);
     }
 
-    if (existingIcon && existingIcon.id !== draggedIcon.icon.id) {
+    // setSwapPreview if drag is hovering over a different icon (ignore home position)
+    if (
+      existingIcon &&
+      (hoverRow !== draggedIcon.startRow || hoverCol !== draggedIcon.startCol)
+    ) {
       // Show swap preview - existing icon moves to dragged icon's original position
       const existingIconData = {
         id: existingIcon.id,
         row: draggedIcon.startRow,
         col: draggedIcon.startCol,
-        updates: { ...existingIcon }, // Use the existing icon's own data
+        updates: { ...existingIcon },
       };
       handlePreviewUpdate(null, existingIconData);
 
-      // Update swap preview state
       setSwapPreview({
         icon: existingIcon,
         row: draggedIcon.startRow,
         col: draggedIcon.startCol,
       });
     } else {
-      // Clear swap preview if not hovering over another icon
+      // Clear swap preview if not hovering over another icon (or hovering over home icon)
       setSwapPreview(null);
     }
 
-    // Set drag preview for the dragged icon
+    // Set drag preview for the dragged icon to appear in hovered
     const updateData = {
       id: draggedIcon.icon.id,
       row: hoverRow,
