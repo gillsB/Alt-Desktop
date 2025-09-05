@@ -17,9 +17,12 @@
     "dist:linux": "npm run build && electron-builder --linux --x64",
     "test:e2e": "npm run transpile:electron && playwright test",
     "test:unit": "vitest src",
-    "py": "nuitka --standalone --onefile --output-dir=src/scripts/bin src/scripts/file_to_image.py",
-    "pyInstaller": "pyinstaller --clean --noupx --onefile --distpath src/scripts/bin src/scripts/exe_to_image.py",
-    "postinstall": "echo 'The Python executable is already included. Run npm run py only if you modify the Python script. (Must have python installed with requirements.txt)'"
+    "create_shortcut": "cargo build --release --manifest-path src/scripts/create_shortcut/Cargo.toml && xcopy /Y src\\scripts\\create_shortcut\\target\\release\\create_shortcut.exe src\\scripts\\bin\\",
+    "file_to_image": "cargo build --release --manifest-path src/scripts/file_to_image/Cargo.toml && xcopy /Y src\\scripts\\file_to_image\\target\\release\\file_to_image.exe src\\scripts\\bin\\",
+    "exe_to_image": "pyinstaller --clean --noupx --onefile --distpath src/scripts/bin src/scripts/exe_to_image.py",
+    "rust": "npm run file_to_image && npm run create_shortcut",
+    "py": "npm run exe_to_image",
+    "postinstall": "echo 'The Python/Rust executables are already included. Run \"npm run rust\" or \"npm run py\" only if you modify the scripts. (Must have rust installed or python installed with requirements.txt)'"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

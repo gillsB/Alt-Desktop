@@ -190,7 +190,7 @@ const BackgroundSelect: React.FC = () => {
     // Brief delay to let images start loading before removing overlay
     setTimeout(() => {
       setIsLoadingPage(false);
-    }, 100);
+    }, 200);
 
     fetching.current = false;
   };
