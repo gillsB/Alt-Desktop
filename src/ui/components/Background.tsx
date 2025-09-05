@@ -238,7 +238,14 @@ const Background: React.FC<BackgroundProps> = ({
             if (resolved) filePath = resolved;
           }
         }
-        setBgJson(await window.electron.getBgJson(updates.id));
+        const filePathRegex =
+          /^(?:[a-zA-Z]:\\|\/)?(?:[\w\s.-]+[\\/])*[\w\s.-]+\.[\w]+$/;
+
+        if (filePathRegex.test(updates.id)) {
+          logger.info("ID appears to be a direct file path. (Using as is.)");
+        } else {
+          setBgJson(await window.electron.getBgJson(updates.id));
+        }
         setBackgroundPath(filePath || "");
       }
       if (!showVideoControlsRef.current) {
