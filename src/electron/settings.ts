@@ -5,6 +5,7 @@ import { PUBLIC_TAG_CATEGORIES } from "./publicTags.js";
 import { idToBgJsonPath } from "./utils/idToInfo.js";
 import {
   backupSettingsFile,
+  canReadWriteDir,
   getBackgroundsJsonFilePath,
   getSettingsFilePath,
 } from "./utils/util.js";
@@ -168,6 +169,20 @@ export const saveSettingsData = async (
   data: Partial<SettingsData>
 ): Promise<boolean> => {
   try {
+    // If externalPaths is being set, check all provided paths for read/write access
+    if (data.externalPaths && Array.isArray(data.externalPaths)) {
+      logger.info("Checking access for new external paths.");
+      for (const extPath of data.externalPaths) {
+        if (typeof extPath === "string" && extPath.length > 0) {
+          const ok = await canReadWriteDir(extPath);
+          if (!ok) {
+            logger.error(`Aborting settings save: cannot access ${extPath}`);
+            return false;
+          }
+          logger.info(`Access to external path verified: ${extPath}`);
+        }
+      }
+    }
     const settingsFilePath = getSettingsFilePath();
     // Read current settings
     let currentSettings: SettingsData = defaultSettings;

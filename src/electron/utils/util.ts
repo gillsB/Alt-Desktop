@@ -1442,3 +1442,53 @@ export async function ensureProfileFolder(
     return false;
   }
 }
+
+/**
+ * Checks if the provided directory path is readable and writable.
+ * Returns true if both permissions are granted, false otherwise.
+ */
+export async function canReadWriteDir(dirPath: string): Promise<boolean> {
+  try {
+    // Check if directory exists and is readable
+    await fs.promises.access(dirPath, fs.constants.R_OK);
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    logger.warn(`Cannot read directory: ${dirPath}`, err);
+
+    let reason = "The directory does not exist or is not readable.";
+    if (err.code === "ENOENT") {
+      reason = "The directory does not exist.";
+    } else if (err.code === "EACCES") {
+      reason = "Permission denied. Cannot access this directory.";
+    }
+
+    await showSmallWindow(
+      "External Path Error",
+      `${reason}\nPath: ${dirPath}\nPlease check the location or choose another directory.`,
+      ["OK"]
+    );
+
+    return false;
+  }
+
+  // Try to create and delete a temp file to verify write access
+  const testFile = path.join(
+    dirPath,
+    `.__alt_desktop_write_test_${Date.now()}`
+  );
+
+  try {
+    await fs.promises.writeFile(testFile, "test");
+    await fs.promises.unlink(testFile);
+    return true;
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    logger.warn(`Cannot write to directory: ${dirPath}`, err);
+    await showSmallWindow(
+      "External Path Error",
+      `Cannot write to directory: ${dirPath}\nPlease check permissions or choose another directory.`,
+      ["OK"]
+    );
+    return false;
+  }
+}

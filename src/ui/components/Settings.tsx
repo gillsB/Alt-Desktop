@@ -102,15 +102,6 @@ const Settings: React.FC = () => {
         closeWindow();
       } else {
         logger.error("Failed to save settings.");
-
-        const ret = await showSmallWindow(
-          "Did not save",
-          "Settings did not save correctly, check logs. \nClick yes to continue closing settings.",
-          ["Yes", "No"]
-        );
-        if (ret === "Yes") {
-          closeWindow();
-        }
       }
     } else {
       logger.error("No settings to save.");
@@ -231,6 +222,7 @@ const Settings: React.FC = () => {
             type="text"
             value={externalPathsInput}
             onChange={(e) => setExternalPathsInput(e.target.value)}
+            title="Full filepath separated by commas. List of folders to include in background indexing/saving"
             onBlur={() => {
               const paths = externalPathsInput
                 .split(",")
