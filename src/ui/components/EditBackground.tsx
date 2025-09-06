@@ -632,6 +632,13 @@ const EditBackground: React.FC = () => {
         );
         if (newId) {
           updatedSummary.id = newId;
+        } else {
+          showSmallWindow(
+            "Failed to Move Background",
+            `Program lacks the permissions to move the background to the restricted directory: ${saveLocation}`,
+            ["OK"]
+          );
+          return;
         }
       }
       if (applyBg) {
