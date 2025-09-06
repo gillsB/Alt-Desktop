@@ -275,16 +275,9 @@ const DesktopGrid: React.FC = () => {
     }
     // No updated icon -> remove placement at that position but keep icon data
     if (id) {
-      setPosIndex((prev) => {
-        const newPos = new Map(prev);
-        for (const [k, v] of prev) {
-          if (v === id) newPos.delete(k);
-        }
-        return newPos;
-      });
-
+      removeIconCompletely(id);
       logger.warn(
-        `IPC reload: no icon data for id=${id}. Cleared placement entries referencing this id.`
+        `IPC reload: no icon data for id=${id}. Cleared Map entries referencing this id.`
       );
     } else {
       logger.warn("IPC reload: received null id or no id in payload.");
