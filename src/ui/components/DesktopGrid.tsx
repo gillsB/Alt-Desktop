@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { getDefaultDesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 import "../styles/DesktopGrid.css";
 import { createLogger } from "../util/uiLogger";
@@ -241,6 +242,7 @@ const DesktopGrid: React.FC = () => {
 
   // Helper to fully remove an icon (used when user chooses Delete)
   const removeIconCompletely = (id: string) => {
+    logger.info("called removeIconCompletely for id=", id);
     setIconsById((prev) => {
       const newIcons = new Map(prev);
       newIcons.delete(id);
@@ -564,9 +566,16 @@ const DesktopGrid: React.FC = () => {
         window.electron.editIcon(icon.id, validRow, validCol);
         setContextMenu(null);
       } else {
+        // Send preview of default DesktopIcon for new icon
         const temp_id = await window.electron.ensureUniqueIconId("temp");
         if (temp_id) {
           window.electron.ensureDataFolder(temp_id);
+          const defaultIcon = getDefaultDesktopIcon(
+            temp_id,
+            validRow,
+            validCol
+          );
+          await window.electron.previewIconUpdate(temp_id, defaultIcon);
           window.electron.editIcon(temp_id, validRow, validCol);
           setContextMenu(null);
         } else {
