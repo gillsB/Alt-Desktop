@@ -914,7 +914,13 @@ export const getSettingsFilePath = (): string => {
 };
 
 export const getBackgroundFilePath = (): string => {
-  return path.join(getBasePath(), "backgrounds");
+  const bgPath = getSetting("defaultBackgroundPath") as string;
+  logger.info("Background path from settings:", bgPath);
+  if (bgPath) {
+    return bgPath;
+  } else {
+    return path.join(getBasePath(), "backgrounds");
+  }
 };
 
 export const getBackgroundsJsonFilePath = (): string => {

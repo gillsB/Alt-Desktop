@@ -97,10 +97,12 @@ type SettingsData = {
   defaultFontSize?: number;
   defaultFontColor?: string;
   windowType?: WindowType;
-  bgSelectIconSize?: "tiny" | "small" | "medium" | "large" | "massive";
+  // Do not appear in Settings window yet.
+  defaultBackgroundPath?: string;
   // Do not appear in Settings window
   background?: string;
   newBackgroundID?: number;
+  bgSelectIconSize?: "tiny" | "small" | "medium" | "large" | "massive";
   publicCategories?: Record<string, boolean>;
   localCategories?: Record<string, boolean>;
   localTags?: LocalTag[];

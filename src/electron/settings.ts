@@ -24,9 +24,10 @@ export const defaultSettings: SettingsData = {
   defaultFontSize: 16,
   defaultFontColor: "#FFFFFF",
   windowType: "WINDOWED",
-  bgSelectIconSize: "medium",
+  defaultBackgroundPath: "",
   background: "",
   newBackgroundID: 1,
+  bgSelectIconSize: "medium",
   publicCategories: defaultPublicCategories,
   localCategories: { show: true } as Record<string, boolean> & {
     show?: boolean;
@@ -107,7 +108,7 @@ export const ensureDefaultSettings = (): void => {
       if (completelyRestored) {
         pendingSettingsError =
           "Your settings file was missing all default keys and has been completely rebuilt. If this was unplanned, a backup of your previous settings is saved as settings_old.json in User/AppData/Roaming/AltDesktop.";
-      } else if (addedKeys.length > 0) {
+      } else if (addedKeys.length > 1) {
         pendingSettingsNotice =
           "The following settings were restored or added:\n" +
           addedKeys.map((k) => `• ${k}`).join("\n") +
