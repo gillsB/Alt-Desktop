@@ -16,6 +16,9 @@ const Settings: React.FC = () => {
       ? settings.externalPaths.join(", ")
       : ""
   );
+  const [defaultBackgroundPathInput, setDefaultBackgroundPathInput] = useState(
+    settings?.defaultBackgroundPath ?? ""
+  );
   const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleClose = async () => {
@@ -166,6 +169,10 @@ const Settings: React.FC = () => {
     );
   }, [settings?.externalPaths]);
 
+  useEffect(() => {
+    setDefaultBackgroundPathInput(settings?.defaultBackgroundPath ?? "");
+  }, [settings?.defaultBackgroundPath]);
+
   // Generic function to update a specific field in the settings
   const updateSetting = <K extends keyof SettingsData>(
     key: K,
@@ -215,8 +222,36 @@ const Settings: React.FC = () => {
     <div className="subwindow-container">
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
       <div className="subwindow-content">
+        {/* Default Background Folder input */}
         <div className="subwindow-field">
-          <label htmlFor="external-paths">External Paths</label>
+          <label htmlFor="default-background-path">
+            Default Background Folder
+          </label>
+          <input
+            id="default-background-path"
+            type="text"
+            value={defaultBackgroundPathInput}
+            onChange={(e) => setDefaultBackgroundPathInput(e.target.value)}
+            title="Folder path for default backgrounds. Used for saving and indexing backgrounds."
+            onBlur={() => {
+              updateSetting(
+                "defaultBackgroundPath",
+                defaultBackgroundPathInput
+              );
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                updateSetting(
+                  "defaultBackgroundPath",
+                  defaultBackgroundPathInput
+                );
+              }
+            }}
+            placeholder="Enter default background folder path"
+          />
+        </div>
+        <div className="subwindow-field">
+          <label htmlFor="external-paths">External Background Folders</label>
           <input
             id="external-paths"
             type="text"
