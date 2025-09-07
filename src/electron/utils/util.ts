@@ -1061,7 +1061,29 @@ export async function changeBackgroundDirectory(
       );
       try {
         await fsExtra.copy(sourceDir, targetDir);
-        await fsExtra.remove(sourceDir);
+        try {
+          await fsExtra.remove(sourceDir);
+        } catch (removeErr) {
+          if (
+            removeErr &&
+            typeof removeErr === "object" &&
+            "code" in removeErr &&
+            removeErr.code === "ENOTEMPTY"
+          ) {
+            logger.warn(
+              `Failed to remove source folder after copy (ENOTEMPTY): ${sourceDir}. Some files may be locked/in use. Will retry cleanup in background.`
+            );
+            // Schedule retries to clean up the folder after a delay
+            retryRemoveFolder(sourceDir, 5, 5000);
+            // Do not throw, allow move to succeed
+          } else {
+            logger.error(
+              `Failed to move background folder via copy+remove:`,
+              removeErr
+            );
+            throw removeErr;
+          }
+        }
       } catch (copyErr) {
         logger.error(
           `Failed to move background folder via copy+remove:`,
@@ -1497,4 +1519,56 @@ export async function canReadWriteDir(dirPath: string): Promise<boolean> {
     );
     return false;
   }
+}
+
+async function retryRemoveFolder(
+  folderPath: string,
+  maxAttempts = 5,
+  delayMs = 5000
+): Promise<boolean> {
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await fsExtra.remove(folderPath);
+      logger.info(`Successfully removed folder after retry: ${folderPath}`);
+      return true;
+    } catch (err: unknown) {
+      const isLast = attempt === maxAttempts;
+
+      if (typeof err === "object" && err !== null && "code" in err) {
+        const code = err.code;
+        if (
+          ["EPERM", "EACCES", "EBUSY", "ENOTEMPTY"].includes(code as string)
+        ) {
+          logger.warn(
+            `Attempt ${attempt} failed with lock error (${code}): ${folderPath}` +
+              (isLast
+                ? " No more retries."
+                : ` Retrying in ${delayMs * Math.pow(2, attempt - 1)}ms...`),
+            err
+          );
+        } else {
+          logger.warn(
+            `Attempt ${attempt} to remove folder failed: ${folderPath}` +
+              (isLast
+                ? " No more retries."
+                : ` Retrying in ${delayMs * Math.pow(2, attempt - 1)}ms...`),
+            err
+          );
+        }
+      } else {
+        logger.warn(
+          `Attempt ${attempt} failed with unknown error type: ${err}`,
+          err
+        );
+      }
+
+      if (isLast) return false;
+      await sleep(delayMs * Math.pow(2, attempt - 1));
+    }
+  }
+
+  return false;
 }
