@@ -170,6 +170,19 @@ export const saveSettingsData = async (
   data: Partial<SettingsData>
 ): Promise<boolean> => {
   try {
+    if (data.defaultBackgroundPath) {
+      logger.info("Checking access for new external paths.");
+      const ok = await canReadWriteDir(data.defaultBackgroundPath);
+      if (!ok) {
+        logger.error(
+          `Aborting settings save: cannot access ${data.defaultBackgroundPath}`
+        );
+        return false;
+      }
+      logger.info(
+        `Access to default path verified: ${data.defaultBackgroundPath}`
+      );
+    }
     // If externalPaths is being set, check all provided paths for read/write access
     if (data.externalPaths && Array.isArray(data.externalPaths)) {
       logger.info("Checking access for new external paths.");
