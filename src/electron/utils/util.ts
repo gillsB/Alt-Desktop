@@ -338,6 +338,7 @@ export async function getNameIndex(): Promise<Record<string, string[]>> {
  */
 export async function indexBackgrounds(options?: {
   newExternalPathAdded?: boolean;
+  newDefaultPathAdded?: boolean;
 }) {
   const backgroundsDir = getBackgroundFilePath();
   const backgroundsJsonPath = getBackgroundsJsonFilePath();
@@ -440,11 +441,20 @@ export async function indexBackgrounds(options?: {
     }
   }
 
-  // Only prompt if unindexed bg.jsons found and newExternalPathAdded is true
-  if (foundUnindexedBgJson && options?.newExternalPathAdded) {
+  // Only prompt if unindexed bg.jsons found and newExternalPathAdded or newDefaultPathAdded is true
+  if (
+    foundUnindexedBgJson &&
+    (options?.newExternalPathAdded || options?.newDefaultPathAdded)
+  ) {
+    const source =
+      options?.newExternalPathAdded && options?.newDefaultPathAdded
+        ? "external or default"
+        : options?.newExternalPathAdded
+          ? "external"
+          : "default";
     const choice = await showSmallWindow(
       "Import Backgrounds",
-      "Existing bg.json files found that are not indexed. \nHow would you like to import them?",
+      `Existing bg.json files found in ${source} path(s) that are not indexed. \nHow would you like to import them?`,
       ["Import as New (Appear first)", "Import with Saved Date"]
     );
     importWithSavedDate = choice === "Import with Saved Date";

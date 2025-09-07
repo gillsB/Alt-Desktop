@@ -72,6 +72,9 @@ const Settings: React.FC = () => {
       const updatedSettings = { ...settings };
 
       const externalPathsChanged = getSpecificChanges(["externalPaths"]);
+      const defaultBackgroundPathChanged = getSpecificChanges([
+        "defaultBackgroundPath",
+      ]);
 
       logger.info("Saving settings data to file:", updatedSettings);
 
@@ -95,10 +98,11 @@ const Settings: React.FC = () => {
         // Update the state once after everything is done
         setSettings(updatedSettings);
 
-        // If externalPaths changed, trigger re-index for new external paths
-        if (externalPathsChanged) {
+        // If externalPaths or defaultBackgroundPath changed, trigger re-index
+        if (externalPathsChanged || defaultBackgroundPathChanged) {
           await window.electron.indexBackgrounds({
-            newExternalPathAdded: true,
+            newExternalPathAdded: externalPathsChanged,
+            newDefaultPathAdded: defaultBackgroundPathChanged,
           });
         }
 

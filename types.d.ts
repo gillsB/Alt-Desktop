@@ -270,7 +270,9 @@ interface EventParamMapping {
   renameCategory: [string, string];
   deleteCategory: [string];
   renameLocalTag: [string, string];
-  indexBackgrounds: [options?: { newExternalPathAdded?: boolean }];
+  indexBackgrounds: [
+    options?: { newExternalPathAdded?: boolean; newDefaultPathAdded?: boolean },
+  ];
   changeBackgroundDirectory: [string, string];
   getBaseFilePaths: [name?: string];
   setRendererStates: [Partial<RendererStates>];
@@ -477,6 +479,7 @@ interface Window {
     renameLocalTag: (oldName: string, newName: string) => Promise<boolean>;
     indexBackgrounds: (options?: {
       newExternalPathAdded?: boolean;
+      newDefaultPathAdded?: boolean;
     }) => Promise<number, number>;
     changeBackgroundDirectory: (
       id: string,
