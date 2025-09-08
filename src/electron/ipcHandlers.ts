@@ -1470,12 +1470,15 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             continue;
           }
 
+          const iconPath = await idToIconPath(id);
+          const bgFile = await idToBackgroundPath(id);
+
           results.push({
             id,
             name: bgJson.public?.name,
-            bgFile: bgJson.public?.bgFile || undefined,
+            bgFile: bgFile || undefined,
             description: bgJson.public?.description,
-            iconPath: bgJson.public?.icon || undefined,
+            iconPath: iconPath || undefined,
             tags: (bgJson.public?.tags ?? []).filter((t: string) =>
               PUBLIC_TAGS_FLAT.includes(t)
             ),
