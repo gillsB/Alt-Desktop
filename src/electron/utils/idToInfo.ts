@@ -5,6 +5,7 @@ import { createLoggerForFile } from "../logging.js";
 import { getSetting } from "../settings.js";
 import {
   getBackgroundFilePath,
+  getBasePath,
   getExternalPath,
   resolveShortcut,
 } from "./util.js";
@@ -59,6 +60,14 @@ export const idToFolderPath = async (id: string) => {
       return path.join(extBase, folder);
     }
   }
+
+  const defaultMatch = id.match(/^default::(.+)$/);
+  if (defaultMatch) {
+    const folder = defaultMatch[1];
+    const defaultBackgroundsDir = path.join(getBasePath(), "backgrounds");
+    return path.join(defaultBackgroundsDir, folder);
+  }
+
   const baseDir = getBackgroundFilePath();
   const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
   return path.join(baseDir, folderPath);

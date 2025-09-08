@@ -171,11 +171,10 @@ export const saveSettingsData = async (
 ): Promise<boolean> => {
   try {
     if (data.defaultBackgroundPath) {
-      logger.info("Checking access for new external paths.");
       const ok = await canReadWriteDir(data.defaultBackgroundPath);
       if (!ok) {
         logger.error(
-          `Aborting settings save: cannot access ${data.defaultBackgroundPath}`
+          `Aborting settings save: cannot access default background folder: ${data.defaultBackgroundPath}`
         );
         return false;
       }
@@ -185,7 +184,6 @@ export const saveSettingsData = async (
     }
     // If externalPaths is being set, check all provided paths for read/write access
     if (data.externalPaths && Array.isArray(data.externalPaths)) {
-      logger.info("Checking access for new external paths.");
       for (const extPath of data.externalPaths) {
         if (typeof extPath === "string" && extPath.length > 0) {
           const ok = await canReadWriteDir(extPath);

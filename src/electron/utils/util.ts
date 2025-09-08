@@ -343,6 +343,10 @@ export async function indexBackgrounds(options?: {
   const backgroundsDir = getBackgroundFilePath();
   const backgroundsJsonPath = getBackgroundsJsonFilePath();
 
+  // Get the default backgrounds folder path
+  const appDataBackgroundsDir = path.join(getBasePath(), "backgrounds");
+  const hasCustomPath = getSetting("defaultBackgroundPath") as string;
+
   // Read all entries in the main backgrounds directory
   const entries = await fs.promises.readdir(backgroundsDir, {
     withFileTypes: true,
@@ -357,6 +361,31 @@ export async function indexBackgrounds(options?: {
       if (fs.existsSync(bgJsonPath)) {
         subfoldersWithBgJson.push(entry.name);
       }
+    }
+  }
+
+  // If user has a custom path, also index the default AppData /backgrounds/ folder
+  if (hasCustomPath && fs.existsSync(appDataBackgroundsDir)) {
+    try {
+      const defaultEntries = await fs.promises.readdir(appDataBackgroundsDir, {
+        withFileTypes: true,
+      });
+
+      for (const entry of defaultEntries) {
+        if (entry.isDirectory()) {
+          const subfolderPath = path.join(appDataBackgroundsDir, entry.name);
+          const bgJsonPath = path.join(subfolderPath, "bg.json");
+          if (fs.existsSync(bgJsonPath)) {
+            // Use a prefix to distinguish default folder backgrounds
+            subfoldersWithBgJson.push(`default::${entry.name}`);
+          }
+        }
+      }
+    } catch (e) {
+      logger.warn(
+        `Failed to index default backgrounds in ${appDataBackgroundsDir}:`,
+        e
+      );
     }
   }
 
@@ -512,7 +541,7 @@ export async function indexBackgrounds(options?: {
     removedIdMap.set(id, value);
   }
 
-  // Find suspected moves
+  // Find suspected moves (For keeping indexed time sorted order)
   const suspectedMoves = new Set<string>();
   for (const newId of newIds) {
     let matchedRemovedId: string | null = null;
@@ -529,6 +558,11 @@ export async function indexBackgrounds(options?: {
       if (newExtMatch) {
         newBaseId = newExtMatch[1];
       }
+      // Also handle default:: prefix
+      const newDefaultMatch = newId.match(/^default::(.+)$/);
+      if (newDefaultMatch) {
+        newBaseId = newDefaultMatch[1];
+      }
       newBaseId = newBaseId.replace(/_\d+$/, "");
 
       for (const removedId of removedIdMap.keys()) {
@@ -536,6 +570,10 @@ export async function indexBackgrounds(options?: {
         const extMatch = removedId.match(/^ext::\d+::(.+)$/);
         if (extMatch) {
           baseId = extMatch[1];
+        }
+        const defaultMatch = removedId.match(/^default::(.+)$/);
+        if (defaultMatch) {
+          baseId = defaultMatch[1];
         }
         baseId = baseId.replace(/_\d+$/, "");
         if (baseId === newBaseId) {
