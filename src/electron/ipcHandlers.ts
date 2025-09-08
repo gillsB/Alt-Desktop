@@ -1470,8 +1470,20 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             continue;
           }
 
-          const iconPath = await idToIconPath(id);
-          const bgFile = await idToBackgroundPath(id);
+          // Resolve icon and bgFile paths manually (saves two file reads compared to idToIconPath/idToBgFilePath)
+          const folderPath = await idToFolderPath(id);
+          let iconPath = null;
+          let bgFile = null;
+          if (bgJson.public?.icon) {
+            iconPath = path.join(folderPath, bgJson.public?.icon || "");
+          } else {
+            logger.warn(`No icon specified in bg.json for ${id}`);
+          }
+          if (bgJson.public?.bgFile) {
+            bgFile = path.join(folderPath, bgJson.public?.bgFile || "");
+          } else {
+            logger.warn(`No bgFile specified in bg.json for ${id}`);
+          }
 
           results.push({
             id,

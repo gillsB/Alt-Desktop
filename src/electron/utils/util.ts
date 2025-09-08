@@ -963,7 +963,6 @@ export const getSettingsFilePath = (): string => {
 
 export const getBackgroundFilePath = (): string => {
   const bgPath = getSetting("defaultBackgroundPath") as string;
-  logger.info("Background path from settings:", bgPath);
   if (bgPath) {
     return bgPath;
   } else {
