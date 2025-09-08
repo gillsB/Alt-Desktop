@@ -59,7 +59,6 @@ import {
   getBgJsonFile,
   getDataFolderPath,
   getDesktopIcon,
-  getExternalPath,
   getLogsFolderPath,
   getProfileJsonPath,
   getProfiles,
@@ -1462,64 +1461,35 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
       const results = [];
       for (const [id] of entries) {
-        let folderPath: string;
-        let bgJsonPath: string;
-        let iconPath = "";
-        let bgFile = "";
-
-        // Detect and resolve externalPath files
-        const extMatch = id.match(/^ext::(\d+)::(.+)$/);
-        if (extMatch) {
-          const extIndex = Number(extMatch[1]);
-          const folder = extMatch[2];
-          const extBase = await getExternalPath(extIndex);
-          if (extBase) {
-            folderPath = path.join(extBase, folder);
-            bgJsonPath = path.join(folderPath, "bg.json");
-          } else {
-            // fallback to backgrounds dir if external path not found
-            const baseDir = getBackgroundFilePath();
-            folderPath = path.join(baseDir, folder);
-            bgJsonPath = path.join(folderPath, "bg.json");
-          }
-        } else {
-          const baseDir = getBackgroundFilePath();
-          folderPath = id.includes("/")
-            ? path.join(baseDir, ...id.split("/"))
-            : path.join(baseDir, id);
-          bgJsonPath = path.join(folderPath, "bg.json");
-        }
-
         try {
-          const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
-          const bg = JSON.parse(rawBg);
+          const bgJson = await idToBgJson(id);
 
-          if (bg.public?.icon) {
-            iconPath = path.join(folderPath, bg.public.icon);
+          if (!bgJson) {
+            logger.error(`Failed to read bg.json for ${id}`);
+            results.push({ id });
+            continue;
           }
-          if (bg.public?.bgFile) {
-            bgFile = path.join(folderPath, bg.public.bgFile);
-          }
+
           results.push({
             id,
-            name: bg.public?.name,
-            bgFile: bgFile,
-            description: bg.public?.description,
-            iconPath: iconPath,
-            tags: (bg.public?.tags ?? []).filter((t: string) =>
+            name: bgJson.public?.name,
+            bgFile: bgJson.public?.bgFile || undefined,
+            description: bgJson.public?.description,
+            iconPath: bgJson.public?.icon || undefined,
+            tags: (bgJson.public?.tags ?? []).filter((t: string) =>
               PUBLIC_TAGS_FLAT.includes(t)
             ),
-            localProfile: bg.local?.profile,
-            localTags: (bg.local?.tags ?? []).filter((t: string) =>
+            localProfile: bgJson.local?.profile,
+            localTags: (bgJson.local?.tags ?? []).filter((t: string) =>
               (getSetting("localTags") as LocalTag[]).some(
                 (tag) => tag.name === t
               )
             ),
-            localIndexed: bg.local?.indexed,
-            localVolume: bg.local?.volume,
+            localIndexed: bgJson.local?.indexed,
+            localVolume: bgJson.local?.volume,
           });
         } catch (e) {
-          logger.error(`Failed to read bg.json for ${id}:`, e);
+          logger.error(`Failed to process background ${id}:`, e);
           results.push({ id });
         }
       }
