@@ -29,13 +29,27 @@ export const generateIcon = async (
       fs.mkdirSync(targetDir, { recursive: true });
     }
 
+    // Helper to copy file to targetDir and return relative filename
+    const ensureInTargetDir = (filePath: string): string => {
+      const fileName = path.basename(filePath);
+      const destPath = path.join(targetDir, fileName);
+      if (filePath !== destPath) {
+        try {
+          fs.copyFileSync(filePath, destPath);
+        } catch (e) {
+          logger.warn(`Failed to copy ${filePath} to ${destPath}:`, e);
+        }
+      }
+      return fileName;
+    };
+
     if (webLink) {
       if (!/^https?:\/\//i.test(webLink)) {
         webLink = `https://${webLink}`;
         logger.info(`Formatted website link to: ${webLink}`);
       }
       const faviconPath = await fetchAndSaveFavicon(webLink, targetDir);
-      if (faviconPath) foundPaths.push(faviconPath);
+      if (faviconPath) foundPaths.push(path.basename(faviconPath));
     }
 
     // Verify that the file exists
@@ -61,7 +75,7 @@ export const generateIcon = async (
     icoFiles.forEach((icoFile) => {
       const icoSource = path.join(folder, icoFile);
       logger.info(`Found .ico file ${icoSource}`);
-      foundPaths.push(icoSource);
+      foundPaths.push(ensureInTargetDir(icoSource));
     });
 
     const iconSize = 256;
@@ -152,7 +166,7 @@ async function fetchAndSaveFavicon(
     });
 
     logger.info(`Favicon downloaded from Google API: ${savePath}`);
-    return fileName;
+    return savePath;
   } catch (err) {
     logger.warn(`Failed to download favicon from Google API: ${err}`);
     // Fallback: try to get browser icon
