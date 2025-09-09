@@ -111,6 +111,12 @@ const DesktopGrid: React.FC = () => {
     col: number;
   } | null>(null);
 
+  const [editIconHighlight, setEditIconHighlight] = useState<{
+    row: number;
+    col: number;
+    visible: boolean;
+  } | null>(null);
+
   useEffect(() => {
     const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
@@ -470,7 +476,6 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleDesktopRightClick = async (e: React.MouseEvent) => {
-    // If a subwindow is active, do not show the context menu
     e.preventDefault();
     const { clientX: x, clientY: y } = e;
     // React.MouseEvent returns global coordinates, so we need to adjust them to local coordinates
@@ -512,10 +517,9 @@ const DesktopGrid: React.FC = () => {
     row: number,
     col: number
   ) => {
-    // If a subwindow is active, do not show the context menu
     e.stopPropagation();
     handleRightClick(e, "icon", row, col);
-    showHighlightAt(row, col, true);
+    showHighlightAt(row, col);
 
     logger.info(
       `Icon right click: ${getIcon(row, col)?.id} at row: ${row}, col: ${col} with icon name: ${getIcon(row, col)?.name}`
@@ -536,6 +540,11 @@ const DesktopGrid: React.FC = () => {
         window.electron.editIcon(icon.id, row, col);
         await window.electron.setRendererStates({ hideIconNames: false });
         setContextMenu(null);
+        setEditIconHighlight({
+          row: row,
+          col: col,
+          visible: true,
+        });
       } else {
         showSmallWindow(
           "Error getting icon",
@@ -554,6 +563,11 @@ const DesktopGrid: React.FC = () => {
       const [validRow, validCol] = getRowColFromXY(x, y);
 
       const icon = getIcon(validRow, validCol);
+      setEditIconHighlight({
+        row: validRow,
+        col: validCol,
+        visible: true,
+      });
       if (icon) {
         window.electron.ensureDataFolder(icon.id);
         window.electron.editIcon(icon.id, validRow, validCol);
@@ -584,6 +598,17 @@ const DesktopGrid: React.FC = () => {
       setContextMenu(null);
     }
   };
+
+  useEffect(() => {
+    const handleEditIconClosed = () => {
+      setEditIconHighlight(null);
+    };
+    // Listen for when Edit Icon window closes
+    window.electron.on("subwindow-closed", handleEditIconClosed);
+    return () => {
+      window.electron.off("subwindow-closed", handleEditIconClosed);
+    };
+  }, []);
 
   const handleReloadIcon = async () => {
     if (!contextMenu?.icon) return;
@@ -1138,6 +1163,24 @@ const DesktopGrid: React.FC = () => {
                 ICON_ROOT_OFFSET_LEFT,
               top:
                 highlightBox.row * (iconBox + ICON_VERTICAL_PADDING) +
+                ICON_ROOT_OFFSET_TOP,
+              width: iconBox,
+              height: iconBox + ICON_VERTICAL_PADDING,
+            }}
+          />
+        )}
+
+        {/* Render Edit Icon highlight box if visible */}
+        {editIconHighlight?.visible && (
+          <div
+            className={`highlight-box pulsing`}
+            style={{
+              position: "absolute",
+              left:
+                editIconHighlight.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+                ICON_ROOT_OFFSET_LEFT,
+              top:
+                editIconHighlight.row * (iconBox + ICON_VERTICAL_PADDING) +
                 ICON_ROOT_OFFSET_TOP,
               width: iconBox,
               height: iconBox + ICON_VERTICAL_PADDING,
