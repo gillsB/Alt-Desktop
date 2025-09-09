@@ -40,7 +40,7 @@ export const generateIcon = async (
 
     // Verify that the file exists
     if (!fs.existsSync(programLink)) {
-      logger.warn(`File does not exist: ${programLink}`);
+      logger.warn(`No valid program link: ${programLink}`);
       return foundPaths;
     }
 
@@ -152,7 +152,7 @@ async function fetchAndSaveFavicon(
     });
 
     logger.info(`Favicon downloaded from Google API: ${savePath}`);
-    return savePath;
+    return fileName;
   } catch (err) {
     logger.warn(`Failed to download favicon from Google API: ${err}`);
     // Fallback: try to get browser icon
