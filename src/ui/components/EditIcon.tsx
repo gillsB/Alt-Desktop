@@ -202,25 +202,21 @@ const EditIcon: React.FC = () => {
       logger.info(`Saving icon with name: "${iconName}" and id: "${oldId}"`);
       const baseOldId = getBaseId(oldId);
 
-      let newId: string | null;
+      let newId: string | null = oldId;
       let nameChanged: boolean = false;
 
-      if (!oldId || !iconName) {
-        // If either id or name is empty, use "unknownIcon"
-        logger.info("new icon and no name");
-        newId = await window.electron.ensureUniqueIconId(
-          iconName || "unknownIcon"
+      // If this is a new icon and the name is empty, rename to unknownIcon_#
+      if (isNewIcon && !iconName) {
+        newId = await window.electron.ensureUniqueIconId("unknownIcon");
+        logger.info(
+          "new icon and no name, setting to unknownIcon with id:  " + newId
         );
         nameChanged = true;
-      } else if (baseOldId !== iconName) {
-        logger.info("icon name changed, generating new id");
-        // If sanitized base id does not match name, generate new id
+      } else if (iconName && baseOldId !== iconName) {
+        // Only generate a new id if the name is non-empty and changed
         newId = await window.electron.ensureUniqueIconId(iconName);
+        logger.info("icon name changed, generated new id: " + newId);
         nameChanged = true;
-      } else {
-        // Otherwise, keep the current id
-        logger.info("icon name not changed, not updating id");
-        newId = icon.id;
       }
       // Fail to read -> cancel save and warn user. (Avoid giving it an arbitrary id as it could corrupt files)
       if (newId === null) {
@@ -231,7 +227,7 @@ const EditIcon: React.FC = () => {
         );
         return;
       }
-      if (nameChanged) {
+      if (nameChanged && newId !== oldId) {
         logger.info("Renaming folder : " + oldId + " To: " + newId);
         await window.electron.renameDataFolder(oldId, newId);
         await window.electron.renameID(oldId, newId);

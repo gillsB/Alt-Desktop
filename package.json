@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "color-string": "^2.1.0",
     "electron-log": "^5.3.3",
     "ffprobe-static": "^3.1.0",
     "fluent-ffmpeg": "^2.1.3",
