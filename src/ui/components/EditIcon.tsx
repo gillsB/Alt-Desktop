@@ -178,6 +178,10 @@ const EditIcon: React.FC = () => {
       logger.error("Icon data is missing. (closeWindow)");
       return;
     }
+    if (id && icon.id !== id) {
+      // Reload old icon to remove it from DesktopGrid if it was renamed
+      await window.electron.reloadIcon(id);
+    }
     await window.electron.reloadIcon(icon.id);
     logger.info("reloaded icon before closing");
 
