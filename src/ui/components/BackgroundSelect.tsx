@@ -617,6 +617,9 @@ const BackgroundSelect: React.FC = () => {
       // Remove "ext::<num>::" prefix for external paths backgrounds
       const match = bg.id.match(/^ext::\d+::(.+)$/);
       if (match) return match[1];
+    } else if (bg.id && bg.id.startsWith("default::")) {
+      // Remove "default::" prefix for default backgrounds
+      return bg.id.substring("default::".length);
     }
     return bg.id;
   }
