@@ -406,7 +406,7 @@ const DesktopGrid: React.FC = () => {
   }, [contextMenu]);
 
   useEffect(() => {
-    const handleReloadIcon = (
+    const ipcReload = (
       _: Electron.IpcRendererEvent,
       payload: { id: string; icon: DesktopIcon | null }
     ) => {
@@ -420,10 +420,7 @@ const DesktopGrid: React.FC = () => {
     };
 
     // Listen for the 'reload-icon' event
-    window.electron.on(
-      "reload-icon",
-      handleReloadIcon as (...a: unknown[]) => void
-    );
+    window.electron.on("reload-icon", ipcReload as (...a: unknown[]) => void);
 
     // Listen for the 'hide-highlight' event
     window.electron.on("hide-highlight", handleHideHighlightBox);
@@ -437,7 +434,7 @@ const DesktopGrid: React.FC = () => {
     return () => {
       window.electron.off(
         "reload-icon",
-        handleReloadIcon as (...a: unknown[]) => void
+        ipcReload as (...a: unknown[]) => void
       );
       window.electron.off("hide-highlight", handleHideHighlightBox);
       window.electron.off(
@@ -621,18 +618,9 @@ const DesktopGrid: React.FC = () => {
 
       if (!ret) {
         logger.info(
-          `Icon reload returned false for id=${id} (previously at [${row}, ${col}]). ` +
-            `Removing any placement mappings that reference this id.`
+          `Icon reload returned false for id=${id} (previously at [${row}, ${col}]). `
         );
-
-        // Remove any posIndex entries that reference this id (keep icon data)
-        setPosIndex((prevMap) => {
-          const newMap = new Map(prevMap);
-          for (const [k, v] of prevMap) {
-            if (v === id) newMap.delete(k);
-          }
-          return newMap;
-        });
+        removeIconCompletely(id);
       } else {
         // Successful reload — update reload timestamp for UI image refresh
         setReloadTimestamps((prev) => ({ ...prev, [id]: Date.now() }));
