@@ -94,14 +94,14 @@ export function openSubWindow(
     addAllowedUrl(subWindowUrl);
 
     activeSubWindow.once("ready-to-show", () => {
-      // Add 100ms delay before showing the window
+      // Add 200ms delay before showing the window
       setTimeout(() => {
         activeSubWindow!.show();
         activeSubWindow!.focus();
         if (isDev() && subWindowDevtoolsEnabled()) {
           activeSubWindow?.webContents.openDevTools({ mode: "detach" });
         }
-      }, 100);
+      }, 200);
     });
 
     logger.info(`Created subwindow with URL: ${subWindowUrl}`);
