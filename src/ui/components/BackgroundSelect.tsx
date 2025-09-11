@@ -338,7 +338,7 @@ const BackgroundSelect: React.FC = () => {
   const handleClose = async () => {
     logger.info("BackgroundSelect window closed");
     await window.electron.reloadBackground();
-    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "Background Select");
+    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "BackgroundSelect");
   };
 
   useEffect(() => {

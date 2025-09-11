@@ -27,5 +27,5 @@ export function openEditBackground(summary: BackgroundSummary) {
     minHeight,
   };
   const hash = `edit-background?summary=${encodeURIComponent(JSON.stringify(summary))}`;
-  return openSubWindow(options, hash, "Edit Background");
+  return openSubWindow(options, hash, "EditBackground");
 }

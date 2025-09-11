@@ -8,5 +8,5 @@ export function openEditIconWindow(id: string, row: number, col: number) {
   };
 
   const subWindowHash = `edit-icon?id=${encodeURIComponent(id)}&row=${row}&col=${col}`;
-  return openSubWindow(options, subWindowHash, "Edit Icon");
+  return openSubWindow(options, subWindowHash, "EditIcon");
 }

@@ -25,5 +25,5 @@ export function openBackgroundSelectWindow(id?: string) {
 
   const subWindowHash = id ? `background-select?id=${id}` : "background-select";
 
-  return openSubWindow(options, subWindowHash, "Background Select");
+  return openSubWindow(options, subWindowHash, "BackgroundSelect");
 }

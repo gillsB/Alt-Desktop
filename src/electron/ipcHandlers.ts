@@ -212,13 +212,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainOn(
     "sendSubWindowAction",
-    (payload: {
-      action: SubWindowAction;
-      title?: string;
-    }) => {
-      if (payload.title) {
-        logger.info(`sendSubWindowAction with title: ${payload.title}`);
-      }
+    (payload: { action: SubWindowAction; title: string }) => {
+      logger.info(`sendSubWindowAction with title: ${payload.title}`);
       switch (payload.action) {
         case "CLOSE_SUBWINDOW":
           logger.info(`SubWindowAction CLOSE_SUBWINDOW`);
