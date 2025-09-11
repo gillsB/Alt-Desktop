@@ -734,7 +734,10 @@ export async function indexBackgrounds(options?: {
 
 export async function getBgJsonFile(id: string): Promise<BgJson | null> {
   try {
-    if (!id) throw new Error("Missing background id");
+    if (!id) {
+      logger.info("No id set for getBgJsonFile, returning null");
+      return null;
+    }
 
     const bgJsonPath = await idToBgJsonPath(id);
 
