@@ -186,7 +186,7 @@ const EditIcon: React.FC = () => {
     logger.info("reloaded icon before closing");
 
     // close subwindow
-    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "Edit Icon");
   };
 
   const getBaseId = (id: string) => {

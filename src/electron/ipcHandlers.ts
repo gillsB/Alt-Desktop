@@ -212,7 +212,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainOn(
     "sendSubWindowAction",
-    (payload: { action: SubWindowAction; icon?: DesktopIcon }) => {
+    (payload: {
+      action: SubWindowAction;
+      title?: string;
+    }) => {
+      if (payload.title) {
+        logger.info(`sendSubWindowAction with title: ${payload.title}`);
+      }
       switch (payload.action) {
         case "CLOSE_SUBWINDOW":
           logger.info(`SubWindowAction CLOSE_SUBWINDOW`);
@@ -220,7 +226,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           closeActiveSubWindow();
           if (mainWindow) {
             mainWindow.webContents.send("hide-highlight");
-            mainWindow.webContents.send("subwindow-closed");
+            mainWindow.webContents.send("subwindow-closed", payload.title);
             logger.info("Sent 'hide-highlight' message to renderer.");
           }
           break;

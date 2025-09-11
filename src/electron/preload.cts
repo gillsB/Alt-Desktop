@@ -41,8 +41,10 @@ electron.contextBridge.exposeInMainWorld("electron", {
   saveIconData: (icon: DesktopIcon) => ipcInvoke("saveIconData", icon),
   renameID: (oldId: string, newId: string) =>
     ipcInvoke("renameID", oldId, newId),
-  sendSubWindowAction: (action, icon) =>
-    ipcSend("sendSubWindowAction", { action, icon }),
+  sendSubWindowAction: (
+    action: SubWindowAction,
+    title: string,
+  ) => ipcSend("sendSubWindowAction", { action, title }),
   getDesktopIcon: (id: string) => ipcInvoke("getDesktopIcon", id),
   getSubWindowTitle: () => ipcInvoke("getSubWindowTitle"),
   reloadIcon: (id: string) => ipcInvoke("reloadIcon", id),

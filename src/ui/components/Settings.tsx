@@ -56,7 +56,7 @@ const Settings: React.FC = () => {
 
   const closeWindow = () => {
     logger.info("Settings window closed");
-    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "Settings");
   };
 
   const handleSave = async () => {

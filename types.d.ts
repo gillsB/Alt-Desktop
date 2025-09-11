@@ -297,7 +297,10 @@ type EventPayloadMapping = {
   ensureUniqueIconId: string | null;
   saveIconData: boolean;
   renameID: boolean;
-  sendSubWindowAction: { action: SubWindowAction; icon?: DesktopIcon };
+  sendSubWindowAction: {
+    action: SubWindowAction;
+    title: string;
+  };
   getDesktopIcon: DesktopIcon | null;
   reloadIcon: boolean;
   openSettings: boolean;
@@ -385,7 +388,7 @@ interface Window {
     ensureUniqueIconId: (name: string) => Promise<string | null>;
     saveIconData: (icon: DesktopIcon) => Promise<boolean>;
     renameID: (oldId: string, newId: string) => Promise<boolean>;
-    sendSubWindowAction: (action: SubWindowAction, icon?: DesktopIcon) => void;
+    sendSubWindowAction: (action: SubWindowAction, title: string) => void;
     getDesktopIcon: (id: string) => Promise<DesktopIcon | null>;
     getSubWindowTitle: () => Promise<string>;
     reloadIcon: (id: string) => Promise<boolean>;

@@ -597,7 +597,9 @@ const DesktopGrid: React.FC = () => {
   };
 
   useEffect(() => {
-    const handleEditIconClosed = () => {
+    const handleEditIconClosed = (...args: unknown[]) => {
+      const closedWindow = args[1] as string;
+      logger.info("closedWindow = ", closedWindow);
       setEditIconHighlight(null);
     };
     // Listen for when Edit Icon window closes

@@ -14,7 +14,7 @@ export function SubWindowHeader({ title, onClose }: SubWindowHeaderProps) {
             if (onClose) {
               onClose();
             } else {
-              window.electron.sendSubWindowAction("CLOSE_SUBWINDOW");
+              window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", title);
             }
           }}
         >
