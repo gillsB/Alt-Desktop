@@ -621,10 +621,28 @@ const EditBackground: React.FC = () => {
     const success = await window.electron.saveBgJson(updatedSummary);
     if (success) {
       logger.info("Background saved successfully.");
-      // if saved location changed, move background file
+      // If saved location changed, move background file
+      let needsMove = false;
       if (saveLocation !== originalSaveLocationRef.current) {
+        needsMove = true;
+      } else if (
+        summary.id.startsWith("default::") &&
+        saveLocation === "default"
+      ) {
+        // Check if the background is in the correct default directory
+        const currentFolder = await window.electron.getInfoFromID(
+          summary.id,
+          "folderPath"
+        );
+        const expectedDefaultFolder =
+          await window.electron.getBaseFilePaths("backgroundfilepath");
+        if (currentFolder !== expectedDefaultFolder) {
+          needsMove = true;
+        }
+      }
+      if (needsMove) {
         logger.info(
-          `Save location changed from ${originalSaveLocationRef.current} to ${saveLocation}, moving background...`
+          `Moving background to correct directory for saveLocation=${saveLocation}...`
         );
         const newId = await window.electron.changeBackgroundDirectory(
           updatedSummary.id,

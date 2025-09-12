@@ -1043,12 +1043,13 @@ export async function changeBackgroundDirectory(
   targetLocation: string
 ): Promise<string | null> {
   try {
-    // Determine source folder and baseId
     let baseId = id;
     let sourceDir: string;
     let sourceExtIndex: number | null = null;
 
     const extMatch = id.match(/^ext::(\d+)::(.+)$/);
+    const defaultMatch = id.match(/^default::(.+)$/);
+
     if (extMatch) {
       sourceExtIndex = Number(extMatch[1]);
       baseId = extMatch[2];
@@ -1056,7 +1057,12 @@ export async function changeBackgroundDirectory(
       if (!extBase)
         throw new Error(`External path ${sourceExtIndex} not found`);
       sourceDir = path.join(extBase, baseId);
+    } else if (defaultMatch) {
+      // If id is prefixed with default::, source is fallback default backgrounds dir
+      baseId = defaultMatch[1];
+      sourceDir = path.join(getBasePath(), "backgrounds", baseId);
     } else {
+      // Otherwise, source is user-set defaultBackgroundPath
       sourceDir = path.join(getBackgroundFilePath(), baseId);
     }
 
