@@ -1532,6 +1532,15 @@ export async function ensureProfileFolder(
  * Returns true if both permissions are granted, false otherwise.
  */
 export async function canReadWriteDir(dirPath: string): Promise<boolean> {
+  if (!path.isAbsolute(dirPath)) {
+    logger.warn(`Provided path is not absolute: ${dirPath}`);
+    await showSmallWindow(
+      "Invalid Path",
+      `The path "${dirPath}" is not an absolute path.\nPlease enter a valid folder path.`,
+      ["OK"]
+    );
+    return false;
+  }
   try {
     // Check if directory exists and is readable
     await fs.promises.access(dirPath, fs.constants.R_OK);
