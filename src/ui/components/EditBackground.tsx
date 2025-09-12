@@ -650,6 +650,15 @@ const EditBackground: React.FC = () => {
         );
         if (newId) {
           updatedSummary.id = newId;
+
+          // Check if the old id was selected as the current background
+          const currentBgId = await window.electron.getSetting("background");
+          if (currentBgId === summary.id) {
+            // Update the background setting to the new id (adds/removes prefix to signal directory)
+            await window.electron.saveSettingsData({
+              background: newId,
+            });
+          }
         } else {
           showSmallWindow(
             "Failed to Move Background",
