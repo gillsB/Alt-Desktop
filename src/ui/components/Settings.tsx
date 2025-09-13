@@ -236,8 +236,18 @@ const Settings: React.FC = () => {
   const handleExternalBgFolderClick = async () => {
     const folderPath = await window.electron.openFileDialog("folder");
     if (folderPath) {
-      setExternalPathsInput(folderPath);
-      updateSetting("externalPaths", [folderPath]);
+      // Append to the list, comma separated
+      const paths = externalPathsInput
+        ? externalPathsInput
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+      if (!paths.includes(folderPath)) {
+        const newPaths = [...paths, folderPath];
+        setExternalPathsInput(newPaths.join(", "));
+        updateSetting("externalPaths", newPaths);
+      }
     }
   };
 
