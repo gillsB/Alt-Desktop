@@ -1,3 +1,4 @@
+import { FolderIcon, FolderOpenIcon } from "@heroicons/react/24/solid";
 import { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { createLogger } from "../util/uiLogger";
@@ -19,6 +20,8 @@ const Settings: React.FC = () => {
   const [defaultBackgroundPathInput, setDefaultBackgroundPathInput] = useState(
     settings?.defaultBackgroundPath ?? ""
   );
+  const [isHoveringDefaultBg, setHoveringDefaultBg] = useState(false);
+  const [isHoveringExternalBg, setHoveringExternalBg] = useState(false);
   const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleClose = async () => {
@@ -222,6 +225,22 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleDefaultBgFolderClick = async () => {
+    const folderPath = await window.electron.openFileDialog("folder");
+    if (folderPath) {
+      setDefaultBackgroundPathInput(folderPath);
+      updateSetting("defaultBackgroundPath", folderPath);
+    }
+  };
+
+  const handleExternalBgFolderClick = async () => {
+    const folderPath = await window.electron.openFileDialog("folder");
+    if (folderPath) {
+      setExternalPathsInput(folderPath);
+      updateSetting("externalPaths", [folderPath]);
+    }
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title={`Settings`} onClose={handleClose} />
@@ -253,7 +272,23 @@ const Settings: React.FC = () => {
             }}
             placeholder="Enter default background folder path"
           />
+          <button
+            className="file-select-button flex items-center gap-2"
+            type="button"
+            onClick={handleDefaultBgFolderClick}
+            onMouseEnter={() => setHoveringDefaultBg(true)}
+            onMouseLeave={() => setHoveringDefaultBg(false)}
+            title="Select a folder"
+          >
+            {isHoveringDefaultBg ? (
+              <FolderOpenIcon className="custom-folder-icon" />
+            ) : (
+              <FolderIcon className="custom-folder-icon" />
+            )}
+          </button>
         </div>
+
+        {/* External Background Folders input */}
         <div className="subwindow-field">
           <label htmlFor="external-paths">External Background Folders</label>
           <input
@@ -280,6 +315,20 @@ const Settings: React.FC = () => {
             }}
             placeholder="Enter external paths here"
           />
+          <button
+            className="file-select-button flex items-center gap-2"
+            type="button"
+            onClick={handleExternalBgFolderClick}
+            onMouseEnter={() => setHoveringExternalBg(true)}
+            onMouseLeave={() => setHoveringExternalBg(false)}
+            title="Add a folder"
+          >
+            {isHoveringExternalBg ? (
+              <FolderOpenIcon className="custom-folder-icon" />
+            ) : (
+              <FolderIcon className="custom-folder-icon" />
+            )}
+          </button>
         </div>
         <div className="subwindow-field">
           <label htmlFor="icon-size">Default Icon Size</label>
