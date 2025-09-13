@@ -500,35 +500,40 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         const extensions: string[] = [];
         let filterName = "";
 
-        if (type.includes("image")) {
-          extensions.push(
-            "png",
-            "jpg",
-            "jpeg",
-            "gif",
-            "bmp",
-            "svg",
-            "webp",
-            "ico"
-          );
-          filterName += "Images";
-        }
-        if (type.includes("video")) {
-          extensions.push("mp4", "webm", "ogg", "mov", "mkv");
-          filterName += filterName ? ", Video" : "Video";
-        }
-
-        if (extensions.length > 0) {
-          options.filters.push({
-            name: filterName,
-            extensions,
-          });
+        if (type === "folder") {
+          options.properties = ["openDirectory"];
         } else {
-          // Non supported type, allow all files
-          options.filters.push({
-            name: type,
-            extensions: ["*"],
-          });
+          options.properties = ["openFile"];
+          if (type.includes("image")) {
+            extensions.push(
+              "png",
+              "jpg",
+              "jpeg",
+              "gif",
+              "bmp",
+              "svg",
+              "webp",
+              "ico"
+            );
+            filterName += "Images";
+          }
+          if (type.includes("video")) {
+            extensions.push("mp4", "webm", "ogg", "mov", "mkv");
+            filterName += filterName ? ", Video" : "Video";
+          }
+
+          if (extensions.length > 0) {
+            options.filters.push({
+              name: filterName,
+              extensions,
+            });
+          } else {
+            // Non supported type, allow all files
+            options.filters.push({
+              name: type,
+              extensions: ["*"],
+            });
+          }
         }
 
         result = await dialog.showOpenDialog(options);
@@ -537,7 +542,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           return null; // No file selected
         }
 
-        return result.filePaths[0]; // Return the selected file path
+        return result.filePaths[0]; // Return the selected file or folder path
       } catch (error) {
         logger.error(`Error in openFileDialog: ${error}`);
         return null;
