@@ -1675,6 +1675,7 @@ const DesktopGrid: React.FC = () => {
                 New Icon
               </div>
               <div className="menu-separator" />
+              <div className="menu-item">Icons Profile</div>
               <div className="menu-item" onClick={handleOpenBackgroundSelect}>
                 Change Background
               </div>
@@ -1698,6 +1699,16 @@ const DesktopGrid: React.FC = () => {
                   onChange={toggleIconNames}
                 />
               </label>
+              {backgroundType.startsWith("video") && (
+                <label className="menu-checkbox">
+                  Show Video Controls
+                  <input
+                    type="checkbox"
+                    checked={showVideoControls}
+                    onChange={handleShowVideoControls}
+                  />
+                </label>
+              )}
               <div
                 className="menu-item has-submenu"
                 onMouseEnter={() => setShowOpenSubmenu(true)}
@@ -1727,16 +1738,6 @@ const DesktopGrid: React.FC = () => {
                 )}
               </div>
               <div className="menu-separator" />
-              {backgroundType.startsWith("video") && (
-                <label className="menu-checkbox">
-                  Show Video Controls
-                  <input
-                    type="checkbox"
-                    checked={showVideoControls}
-                    onChange={handleShowVideoControls}
-                  />
-                </label>
-              )}
               <div className="menu-item" onClick={handleReloadDesktop}>
                 Reload Desktop
               </div>
