@@ -181,8 +181,69 @@ const DesktopGrid: React.FC = () => {
     hideHighlightBox();
   };
 
+  const detectOffscreenIcons = () => {
+    const viewport = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+
+    const offscreenIcons: Array<{ name: string; id: string; reason: string }> =
+      [];
+
+    Array.from(iconsById.values()).forEach((icon) => {
+      // Calculate actual icon position (including offsets)
+      const actualLeft =
+        icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+        (icon.offsetX || 0) +
+        ICON_ROOT_OFFSET_LEFT;
+      const actualTop =
+        icon.row * (iconBox + ICON_VERTICAL_PADDING) +
+        (icon.offsetY || 0) +
+        ICON_ROOT_OFFSET_TOP;
+
+      const iconWidth = icon.width || defaultIconSize;
+      const iconHeight = icon.height || defaultIconSize;
+
+      const iconRight = actualLeft + iconWidth;
+      const iconBottom = actualTop + iconHeight;
+
+      const reasons: string[] = [];
+
+      // Check if icon is off-screen
+      if (actualLeft < 0) reasons.push("left edge");
+      if (actualTop < 0) reasons.push("top edge");
+      if (iconRight > viewport.width) reasons.push("right edge");
+      if (iconBottom > viewport.height) reasons.push("bottom edge");
+
+      if (reasons.length > 0) {
+        offscreenIcons.push({
+          name: icon.name,
+          id: icon.id,
+          reason: `off-screen (${reasons.join(", ")})`,
+        });
+      }
+    });
+
+    return offscreenIcons;
+  };
+
   const toggleHighlightAllIcons = () => {
-    setShowAllHighlights(!showAllHighlights);
+    const newShowAllHighlights = !showAllHighlights;
+    setShowAllHighlights(newShowAllHighlights);
+
+    // Detect off-screen icons when enabling highlights
+    if (newShowAllHighlights) {
+      const offscreenIcons = detectOffscreenIcons();
+      if (offscreenIcons.length > 0) {
+        logger.info("Off-screen icons detected:");
+        offscreenIcons.forEach((icon) => {
+          logger.info(`  - ${icon.name} (ID: ${icon.id}) - ${icon.reason}`);
+        });
+      } else {
+        logger.info("No off-screen icons detected");
+      }
+    }
+
     setContextMenu(null);
     hideHighlightBox();
   };
