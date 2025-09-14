@@ -117,6 +117,29 @@ const DesktopGrid: React.FC = () => {
     visible: boolean;
   } | null>(null);
 
+  const [offscreenIconsPanel, setOffscreenIconsPanel] = useState<{
+    visible: boolean;
+    position: { x: number; y: number };
+    icons: Array<{
+      name: string;
+      id: string;
+      reason: string;
+      icon: DesktopIcon;
+    }>;
+  }>({
+    visible: false,
+    position: { x: 50, y: 50 },
+    icons: [],
+  });
+
+  const [isDraggingPanel, setIsDraggingPanel] = useState(false);
+  const [panelDragStart, setPanelDragStart] = useState<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
+  const [draggedOffscreenIcon, setDraggedOffscreenIcon] =
+    useState<DesktopIcon | null>(null);
+
   useEffect(() => {
     const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
@@ -190,8 +213,12 @@ const DesktopGrid: React.FC = () => {
       height: window.innerHeight,
     };
 
-    const offscreenIcons: Array<{ name: string; id: string; reason: string }> =
-      [];
+    const offscreenIcons: Array<{
+      name: string;
+      id: string;
+      reason: string;
+      icon: DesktopIcon;
+    }> = [];
 
     Array.from(iconsById.values()).forEach((icon) => {
       // Calculate actual icon position (including offsets)
@@ -223,6 +250,7 @@ const DesktopGrid: React.FC = () => {
           name: icon.name,
           id: icon.id,
           reason: `off-screen (${reasons.join(", ")})`,
+          icon,
         });
       }
     });
@@ -236,20 +264,42 @@ const DesktopGrid: React.FC = () => {
 
     // Detect off-screen icons when enabling highlights
     if (newShowAllHighlights) {
-      const offscreenIcons = detectOffscreenIcons();
-      if (offscreenIcons.length > 0) {
+      const detectedOffscreenIcons = detectOffscreenIcons();
+
+      // Log results
+      if (detectedOffscreenIcons.length > 0) {
         logger.info("Off-screen icons detected:");
-        offscreenIcons.forEach((icon) => {
-          logger.info(`  - ${icon.name} (ID: ${icon.id}) - ${icon.reason}`);
+        detectedOffscreenIcons.forEach((iconData) => {
+          logger.info(
+            `  - ${iconData.name} (ID: ${iconData.id}) - ${iconData.reason}`
+          );
         });
+
+        // Show the floating panel
+        setOffscreenIconsPanel((prev) => ({
+          ...prev,
+          visible: true,
+          icons: detectedOffscreenIcons,
+        }));
       } else {
         logger.info("No off-screen icons detected");
+        // Hide panel if no off-screen icons
+        setOffscreenIconsPanel((prev) => ({
+          ...prev,
+          visible: false,
+          icons: [],
+        }));
       }
-      setContextMenu(null); // Keeps the Display > open on clicking for next context menu that opens.
-      hideHighlightBox();
     } else {
-      hideContextMenu();
+      // Hide panel when highlights are disabled
+      setOffscreenIconsPanel((prev) => ({
+        ...prev,
+        visible: false,
+      }));
     }
+
+    setContextMenu(null);
+    hideHighlightBox();
   };
 
   /**
@@ -1072,7 +1122,42 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleDragOver = (e: React.DragEvent) => {
-    if (!draggedIcon) return;
+    // Handle regular icon dragging
+    if (draggedIcon) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+
+      const { clientX: x, clientY: y } = e;
+      const [hoverRow, hoverCol] = getRowColFromXY(x, y);
+
+      showHighlightAt(hoverRow, hoverCol);
+
+      // Check if there's an icon at the hover position
+      const existingIcon = getIcon(hoverRow, hoverCol);
+
+      if (existingIcon && existingIcon.id !== draggedIcon.icon.id) {
+        // Show swap preview - existing icon moves to dragged icon's original position
+        setSwapPreview({
+          icon: existingIcon,
+          row: draggedIcon.startRow,
+          col: draggedIcon.startCol,
+        });
+      } else {
+        // Clear swap preview if not hovering over another icon
+        setSwapPreview(null);
+      }
+
+      // Set drag preview for the dragged icon
+      setDragPreview({
+        icon: draggedIcon.icon,
+        row: hoverRow,
+        col: hoverCol,
+      });
+      return;
+    }
+
+    // Handle offscreen icon dragging
+    if (!draggedOffscreenIcon) return;
 
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
@@ -1085,21 +1170,26 @@ const DesktopGrid: React.FC = () => {
     // Check if there's an icon at the hover position
     const existingIcon = getIcon(hoverRow, hoverCol);
 
-    if (existingIcon && existingIcon.id !== draggedIcon.icon.id) {
-      // Show swap preview - existing icon moves to dragged icon's original position
+    if (existingIcon && existingIcon.id !== draggedOffscreenIcon.id) {
+      // Show swap preview - existing icon moves to offscreen icon's original position
       setSwapPreview({
         icon: existingIcon,
-        row: draggedIcon.startRow,
-        col: draggedIcon.startCol,
+        row: draggedOffscreenIcon.row,
+        col: draggedOffscreenIcon.col,
       });
     } else {
-      // Clear swap preview if not hovering over another icon
       setSwapPreview(null);
     }
 
-    // Set drag preview for the dragged icon
+    // Set drag preview for the offscreen icon (standardized to 64x64)
     setDragPreview({
-      icon: draggedIcon.icon,
+      icon: {
+        ...draggedOffscreenIcon,
+        width: 64,
+        height: 64,
+        offsetX: 0,
+        offsetY: 0,
+      },
       row: hoverRow,
       col: hoverCol,
     });
@@ -1108,41 +1198,86 @@ const DesktopGrid: React.FC = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
 
-    if (!draggedIcon) return;
+    // Handle regular icon dropping
+    if (draggedIcon) {
+      const { clientX: x, clientY: y } = e;
+      const [dropRow, dropCol] = getRowColFromXY(x, y);
+
+      // Check if dropping on existing icon
+      const existingIcon = getIcon(dropRow, dropCol);
+      if (existingIcon && existingIcon.id !== draggedIcon.icon.id) {
+        logger.info(
+          `Dropping on existing icon: ${existingIcon.name} at [${dropRow}, ${dropCol}]`
+        );
+        window.electron.swapDesktopIcons(draggedIcon.icon.id, existingIcon.id);
+        window.electron.reloadIcon(draggedIcon.icon.id);
+        window.electron.reloadIcon(existingIcon.id);
+      } else {
+        // Only move if position actually changed
+        if (
+          dropRow !== draggedIcon.startRow ||
+          dropCol !== draggedIcon.startCol
+        ) {
+          logger.info(
+            `Dropping icon: ${draggedIcon.icon.name} at [${dropRow}, ${dropCol}]`
+          );
+
+          window.electron.moveDesktopIcon(
+            draggedIcon.icon.id,
+            dropRow,
+            dropCol,
+            true
+          );
+          window.electron.reloadIcon(draggedIcon.icon.id);
+        }
+      }
+
+      resetDragStates();
+      return;
+    }
+
+    // Handle offscreen icon dropping
+    if (!draggedOffscreenIcon) return;
 
     const { clientX: x, clientY: y } = e;
     const [dropRow, dropCol] = getRowColFromXY(x, y);
 
     // Check if dropping on existing icon
     const existingIcon = getIcon(dropRow, dropCol);
-    if (existingIcon && existingIcon.id !== draggedIcon.icon.id) {
+    if (existingIcon && existingIcon.id !== draggedOffscreenIcon.id) {
       logger.info(
-        `Dropping on existing icon: ${existingIcon.name} at [${dropRow}, ${dropCol}]`
+        `Dropping offscreen icon on existing icon: ${existingIcon.name} at [${dropRow}, ${dropCol}]`
       );
-      window.electron.swapDesktopIcons(draggedIcon.icon.id, existingIcon.id);
-      window.electron.reloadIcon(draggedIcon.icon.id);
+      window.electron.swapDesktopIcons(
+        draggedOffscreenIcon.id,
+        existingIcon.id
+      );
+      window.electron.reloadIcon(draggedOffscreenIcon.id);
       window.electron.reloadIcon(existingIcon.id);
     } else {
-      // Only move if position actually changed
-      if (
-        dropRow !== draggedIcon.startRow ||
-        dropCol !== draggedIcon.startCol
-      ) {
-        logger.info(
-          `Dropping icon: ${draggedIcon.icon.name} at [${dropRow}, ${dropCol}]`
-        );
-
-        window.electron.moveDesktopIcon(
-          draggedIcon.icon.id,
-          dropRow,
-          dropCol,
-          true
-        );
-        window.electron.reloadIcon(draggedIcon.icon.id);
-      }
+      logger.info(
+        `Dropping offscreen icon: ${draggedOffscreenIcon.name} at [${dropRow}, ${dropCol}]`
+      );
+      window.electron.moveDesktopIcon(
+        draggedOffscreenIcon.id,
+        dropRow,
+        dropCol,
+        true
+      );
+      window.electron.reloadIcon(draggedOffscreenIcon.id);
     }
 
     resetDragStates();
+
+    // TODO this is not working correctly, it currently updates BEFORE icon is moved, thus takes 2 drops to update and remove it.
+    if (showAllHighlights) {
+      const updatedOffscreenIcons = detectOffscreenIcons();
+      setOffscreenIconsPanel({
+        ...offscreenIconsPanel,
+        icons: updatedOffscreenIcons,
+        visible: updatedOffscreenIcons.length > 0,
+      });
+    }
   };
   const handleDragEnd = () => {
     resetDragStates();
@@ -1150,16 +1285,72 @@ const DesktopGrid: React.FC = () => {
 
   const resetDragStates = () => {
     setDraggedIcon(null);
+    setDraggedOffscreenIcon(null);
     setDragPreview(null);
     setSwapPreview(null);
     hideHighlightBox();
   };
-
   const hideContextMenu = () => {
     setContextMenu(null);
     hideHighlightBox();
     setShowOpenSubmenu(false);
   };
+
+  const handlePanelMouseDown = (e: React.MouseEvent) => {
+    setIsDraggingPanel(true);
+    setPanelDragStart({
+      x: e.clientX - offscreenIconsPanel.position.x,
+      y: e.clientY - offscreenIconsPanel.position.y,
+    });
+    e.preventDefault();
+  };
+
+  const handlePanelMouseMove = (e: MouseEvent) => {
+    if (!isDraggingPanel) return;
+
+    setOffscreenIconsPanel((prev) => ({
+      ...prev,
+      position: {
+        x: e.clientX - panelDragStart.x,
+        y: e.clientY - panelDragStart.y,
+      },
+    }));
+  };
+
+  const handlePanelMouseUp = () => {
+    setIsDraggingPanel(false);
+  };
+
+  const handleOffscreenIconDragStart = (
+    e: React.DragEvent,
+    icon: DesktopIcon
+  ) => {
+    e.dataTransfer.effectAllowed = "move";
+    setDraggedOffscreenIcon(icon);
+
+    // Create an empty div to hide the drag image
+    const emptyDiv = document.createElement("div");
+    emptyDiv.style.width = "1px";
+    emptyDiv.style.height = "1px";
+    emptyDiv.style.backgroundColor = "transparent";
+    document.body.appendChild(emptyDiv);
+    e.dataTransfer.setDragImage(emptyDiv, 0, 0);
+    setTimeout(() => document.body.removeChild(emptyDiv), 0);
+
+    logger.info(`Started dragging off-screen icon: ${icon.name}`);
+  };
+
+  useEffect(() => {
+    if (isDraggingPanel) {
+      document.addEventListener("mousemove", handlePanelMouseMove);
+      document.addEventListener("mouseup", handlePanelMouseUp);
+
+      return () => {
+        document.removeEventListener("mousemove", handlePanelMouseMove);
+        document.removeEventListener("mouseup", handlePanelMouseUp);
+      };
+    }
+  }, [isDraggingPanel]);
 
   // TODO add drag ctrl modifier which allows freely moving icons, syncs it to nearest icon home,
   // and when dropping saves it with the offsetX/Y values.
@@ -1866,11 +2057,54 @@ const DesktopGrid: React.FC = () => {
         </div>
       )}
 
-      {showAllHighlights && (
+      {offscreenIconsPanel.visible && (
         <div
-          className="background-dimmer"
-          style={{ background: `rgba(0,0,0,${dimmerValue / 100})` }}
-        />
+          className="offscreen-icons-panel"
+          style={{
+            left: `${offscreenIconsPanel.position.x}px`,
+            top: `${offscreenIconsPanel.position.y}px`,
+          }}
+        >
+          <div
+            className={`offscreen-icons-panel-header${isDraggingPanel ? " grabbing" : ""}`}
+            onMouseDown={handlePanelMouseDown}
+          >
+            Off-screen Icons ({offscreenIconsPanel.icons.length})
+          </div>
+          <div className="offscreen-icons-panel-list">
+            {offscreenIconsPanel.icons.map((iconData) => (
+              <div
+                key={`offscreen-${iconData.id}`}
+                className="offscreen-icon-item"
+                draggable
+                onDragStart={(e) =>
+                  handleOffscreenIconDragStart(e, iconData.icon)
+                }
+                onDragEnd={resetDragStates}
+              >
+                <div className="offscreen-icon-image">
+                  <SafeImage
+                    id={iconData.icon.id}
+                    row={iconData.icon.row}
+                    col={iconData.icon.col}
+                    imagePath={iconData.icon.image}
+                    width={32}
+                    height={32}
+                    highlighted={false}
+                    forceReload={reloadTimestamps[iconData.icon.id] || 0}
+                  />
+                </div>
+                <div className="offscreen-icon-details">
+                  <div className="offscreen-icon-name">{iconData.name}</div>
+                  <div className="offscreen-icon-reason">{iconData.reason}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="offscreen-icons-panel-footer">
+            Drag icons to Desktop to place them
+          </div>
+        </div>
       )}
     </>
   );

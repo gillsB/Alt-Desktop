@@ -224,3 +224,83 @@
   opacity: 0.6;
   pointer-events: none;
 }
+
+.offscreen-icons-panel {
+  position: fixed;
+  background-color: rgba(40, 40, 40, 0.95);
+  border: 1px solid #666;
+  border-radius: 8px;
+  padding: 12px;
+  z-index: 1000;
+  min-width: 200px;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  user-select: none;
+  cursor: default;
+}
+.offscreen-icons-panel-header {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: center;
+  border-bottom: 1px solid #666;
+  padding-bottom: 8px;
+  cursor: grab;
+  user-select: none;
+}
+.offscreen-icons-panel-header.grabbing {
+  cursor: grabbing;
+}
+.offscreen-icons-panel-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+.offscreen-icon-item {
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  margin: 2px 0;
+  background-color: rgba(60, 60, 60, 0.7);
+  border-radius: 4px;
+  cursor: grab;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+.offscreen-icon-item:hover {
+  background-color: rgba(80, 80, 80, 0.7);
+  border-color: #888;
+}
+.offscreen-icon-image {
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.offscreen-icon-details {
+  flex: 1;
+  min-width: 0;
+}
+.offscreen-icon-name {
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.offscreen-icon-reason {
+  color: #aaa;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.offscreen-icons-panel-footer {
+  text-align: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #666;
+  color: #aaa;
+  font-size: 10px;
+}
