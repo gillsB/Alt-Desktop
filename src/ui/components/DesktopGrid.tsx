@@ -157,16 +157,14 @@ const DesktopGrid: React.FC = () => {
       hideIcons: !hideIcons,
       hideIconNames: false,
     });
-    setContextMenu(null);
-    hideHighlightBox();
+    hideContextMenu();
   };
 
   const toggleIconNames = () => {
     window.electron.setRendererStates({
       hideIconNames: !hideIconNames,
     });
-    setContextMenu(null);
-    hideHighlightBox();
+    hideContextMenu();
   };
 
   const handleShowVideoControls = async () => {
@@ -176,9 +174,14 @@ const DesktopGrid: React.FC = () => {
   };
 
   const toggleGrid = () => {
+    const newGrid = !showGrid;
     setShowGrid((prev) => !prev);
-    setContextMenu(null);
-    hideHighlightBox();
+    if (newGrid) {
+      setContextMenu(null); // Keeps the Display > open on clicking for next context menu that opens.
+      hideHighlightBox();
+    } else {
+      hideContextMenu();
+    }
   };
 
   const detectOffscreenIcons = () => {
@@ -242,10 +245,11 @@ const DesktopGrid: React.FC = () => {
       } else {
         logger.info("No off-screen icons detected");
       }
+      setContextMenu(null); // Keeps the Display > open on clicking for next context menu that opens.
+      hideHighlightBox();
+    } else {
+      hideContextMenu();
     }
-
-    setContextMenu(null);
-    hideHighlightBox();
   };
 
   /**
@@ -455,8 +459,7 @@ const DesktopGrid: React.FC = () => {
         contextMenuElement &&
         !e.composedPath().includes(contextMenuElement)
       ) {
-        hideHighlightBox();
-        setContextMenu(null); // Hide the context menu when clicking outside
+        hideContextMenu();
       }
     };
 
@@ -695,8 +698,7 @@ const DesktopGrid: React.FC = () => {
       );
     }
 
-    setContextMenu(null);
-    hideHighlightBox();
+    hideContextMenu();
   };
 
   const handleDeleteIcon = async () => {
@@ -724,8 +726,7 @@ const DesktopGrid: React.FC = () => {
         logger.error(`Failed to delete icon at [${row}, ${col}]:`, error);
       }
 
-      setContextMenu(null);
-      hideHighlightBox();
+      hideContextMenu();
     }
   };
 
@@ -776,7 +777,7 @@ const DesktopGrid: React.FC = () => {
       logger.error(`Failed to reload window`, error);
     }
 
-    setContextMenu(null); // Close the context menu
+    hideContextMenu();
   };
 
   const handleOpenSettings = async () => {
@@ -790,8 +791,7 @@ const DesktopGrid: React.FC = () => {
     } catch (error) {
       logger.error(`Failed to open settings`, error);
     }
-    setContextMenu(null);
-    hideHighlightBox();
+    hideContextMenu();
   };
   const handleOpenBackgroundSelect = async () => {
     const title = await window.electron.getSubWindowTitle();
@@ -804,8 +804,7 @@ const DesktopGrid: React.FC = () => {
     } catch (error) {
       logger.error(`Failed to open background select`, error);
     }
-    setContextMenu(null);
-    hideHighlightBox();
+    hideContextMenu();
   };
 
   const handleLaunchSubmenuClick = async (option: string) => {
@@ -1154,6 +1153,12 @@ const DesktopGrid: React.FC = () => {
     setDragPreview(null);
     setSwapPreview(null);
     hideHighlightBox();
+  };
+
+  const hideContextMenu = () => {
+    setContextMenu(null);
+    hideHighlightBox();
+    setShowOpenSubmenu(false);
   };
 
   // TODO add drag ctrl modifier which allows freely moving icons, syncs it to nearest icon home,
