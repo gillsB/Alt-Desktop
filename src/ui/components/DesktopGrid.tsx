@@ -62,6 +62,7 @@ const DesktopGrid: React.FC = () => {
     pulse: false,
   });
   const [showAllHighlights, setShowAllHighlights] = useState(false);
+  const showAllHighlightsRef = useRef(showAllHighlights);
   const [reloadTimestamps, setReloadTimestamps] =
     useState<IconReloadTimestamps>({});
   const [defaultFontSize, setDefaultFontSize] = useState<number>(16);
@@ -174,6 +175,10 @@ const DesktopGrid: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    showAllHighlightsRef.current = showAllHighlights;
+  }, [showAllHighlights]);
+
   const toggleIcons = () => {
     // Always show icon names when toggled (only shows when icons show). So restoring icons shows names.
     window.electron.setRendererStates({
@@ -213,6 +218,14 @@ const DesktopGrid: React.FC = () => {
       height: window.innerHeight,
     };
 
+    // Calculate max rows and columns that fit within the viewport
+    const maxCols = Math.floor(
+      viewport.width / (iconBox + ICON_HORIZONTAL_PADDING)
+    );
+    const maxRows = Math.floor(
+      viewport.height / (iconBox + ICON_VERTICAL_PADDING)
+    );
+
     const offscreenIcons: Array<{
       name: string;
       id: string;
@@ -220,30 +233,18 @@ const DesktopGrid: React.FC = () => {
       icon: DesktopIcon;
     }> = [];
 
-    Array.from(iconsById.values()).forEach((icon) => {
-      // Calculate actual icon position (including offsets)
-      const actualLeft =
-        icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
-        (icon.offsetX || 0) +
-        ICON_ROOT_OFFSET_LEFT;
-      const actualTop =
-        icon.row * (iconBox + ICON_VERTICAL_PADDING) +
-        (icon.offsetY || 0) +
-        ICON_ROOT_OFFSET_TOP;
+    Array.from(iconsByIdRef.current.values()).forEach((icon) => {
+      logger.info(
+        `Checking icon ${icon.name} (${icon.id}) at [${icon.row}, ${icon.col}]`
+      );
 
-      const iconWidth = icon.width || defaultIconSize;
-      const iconHeight = icon.height || defaultIconSize;
-
-      const iconRight = actualLeft + iconWidth;
-      const iconBottom = actualTop + iconHeight;
-
+      // Determine if the icon is off-screen by comparing its row and col against maxRows/maxCols
       const reasons: string[] = [];
 
-      // Check if icon is off-screen
-      if (actualLeft < 0) reasons.push("left edge");
-      if (actualTop < 0) reasons.push("top edge");
-      if (iconRight > viewport.width) reasons.push("right edge");
-      if (iconBottom > viewport.height) reasons.push("bottom edge");
+      if (icon.row >= maxRows) reasons.push("bottom edge");
+      if (icon.col >= maxCols) reasons.push("right edge");
+      if (icon.row < 0) reasons.push("top edge");
+      if (icon.col < 0) reasons.push("left edge");
 
       if (reasons.length > 0) {
         offscreenIcons.push({
@@ -392,6 +393,15 @@ const DesktopGrid: React.FC = () => {
       logger.info(
         `IPC reload: updated icon id=${iconId} placed at [${updatedIcon.row}, ${updatedIcon.col}]`
       );
+      if (showAllHighlightsRef.current) {
+        // Delay the refresh to allow the icon data to be updated
+        const updatedOffscreenIcons = detectOffscreenIcons();
+        setOffscreenIconsPanel((prev) => ({
+          ...prev,
+          icons: updatedOffscreenIcons,
+          visible: updatedOffscreenIcons.length > 0,
+        }));
+      }
       return;
     }
     // No updated icon -> remove placement at that position but keep icon data
@@ -1268,16 +1278,6 @@ const DesktopGrid: React.FC = () => {
     }
 
     resetDragStates();
-
-    // TODO this is not working correctly, it currently updates BEFORE icon is moved, thus takes 2 drops to update and remove it.
-    if (showAllHighlights) {
-      const updatedOffscreenIcons = detectOffscreenIcons();
-      setOffscreenIconsPanel({
-        ...offscreenIconsPanel,
-        icons: updatedOffscreenIcons,
-        visible: updatedOffscreenIcons.length > 0,
-      });
-    }
   };
   const handleDragEnd = () => {
     resetDragStates();
