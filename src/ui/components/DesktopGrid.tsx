@@ -271,6 +271,12 @@ const DesktopGrid: React.FC = () => {
     // Call detectOffscreenIcons whenever showAllHighlights is true
     if (iconsById && showAllHighlights) {
       detectOffscreenIcons();
+    } else {
+      setOffscreenIconsPanel((prev) => ({
+        ...prev,
+        visible: false,
+        icons: [],
+      }));
     }
   }, [iconsById, showAllHighlights, iconBox]);
 
