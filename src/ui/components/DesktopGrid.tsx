@@ -62,6 +62,7 @@ const DesktopGrid: React.FC = () => {
     pulse: false,
   });
   const [showAllHighlights, setShowAllHighlights] = useState(false);
+  const [showOffscreen, setShowOffscreen] = useState(true);
   const showAllHighlightsRef = useRef(showAllHighlights);
   const [reloadTimestamps, setReloadTimestamps] =
     useState<IconReloadTimestamps>({});
@@ -213,7 +214,7 @@ const DesktopGrid: React.FC = () => {
   useEffect(() => {
     const detectOffscreenIcons = () => {
       // If showAllHighlights is false, return early
-      if (!showAllHighlights) {
+      if (!showAllHighlights && !showOffscreen) {
         return;
       }
 
@@ -269,7 +270,10 @@ const DesktopGrid: React.FC = () => {
     };
 
     // Call detectOffscreenIcons whenever showAllHighlights is true
-    if (iconsById && showAllHighlights) {
+    logger.info(
+      `iconsById size: ${iconsById.size}, showAllHighlights: ${showAllHighlights}, showOffscreen: ${showOffscreen}`
+    );
+    if (iconsById && (showAllHighlights || showOffscreen)) {
       detectOffscreenIcons();
     } else {
       setOffscreenIconsPanel((prev) => ({
@@ -278,7 +282,7 @@ const DesktopGrid: React.FC = () => {
         icons: [],
       }));
     }
-  }, [iconsById, showAllHighlights, iconBox]);
+  }, [iconsById, showAllHighlights, iconBox, showOffscreen]);
 
   const toggleHighlightAllIcons = async () => {
     const newShowAllHighlights = !showAllHighlights;
