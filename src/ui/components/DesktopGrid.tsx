@@ -67,6 +67,7 @@ const DesktopGrid: React.FC = () => {
     useState<IconReloadTimestamps>({});
   const [defaultFontSize, setDefaultFontSize] = useState<number>(16);
   const [defaultIconSize, setDefaultIconSize] = useState<number>(64);
+  const [iconBox, setIconBox] = useState(100);
   const [defaultFontColor, setDefaultFontColor] = useState<string>("white");
 
   const [dimmerValue, setDimmerValue] = useState(50);
@@ -77,9 +78,6 @@ const DesktopGrid: React.FC = () => {
 
   const [backgroundType, setBackgroundType] = useState<string>("image");
   const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
-
-  // iconBox refers to the rectangular size (width) of the icon box, not the icon's size in pixels.
-  const iconBox = defaultIconSize * 1.5625;
 
   // These padding values affect essentially only the root position of the icons
   // This is not padding between icons
@@ -212,92 +210,73 @@ const DesktopGrid: React.FC = () => {
     }
   };
 
-  const detectOffscreenIcons = () => {
-    const viewport = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
+  useEffect(() => {
+    const detectOffscreenIcons = () => {
+      // If showAllHighlights is false, return early
+      if (!showAllHighlights) {
+        return;
+      }
 
-    // Calculate max rows and columns that fit within the viewport
-    const maxCols = Math.floor(
-      viewport.width / (iconBox + ICON_HORIZONTAL_PADDING)
-    );
-    const maxRows = Math.floor(
-      viewport.height / (iconBox + ICON_VERTICAL_PADDING)
-    );
+      const viewport = {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
 
-    const offscreenIcons: Array<{
-      name: string;
-      id: string;
-      reason: string;
-      icon: DesktopIcon;
-    }> = [];
-
-    Array.from(iconsByIdRef.current.values()).forEach((icon) => {
-      logger.info(
-        `Checking icon ${icon.name} (${icon.id}) at [${icon.row}, ${icon.col}]`
+      // Calculate max rows and columns that fit within the viewport
+      const maxCols = Math.floor(
+        viewport.width / (iconBox + ICON_HORIZONTAL_PADDING)
+      );
+      const maxRows = Math.floor(
+        viewport.height / (iconBox + ICON_VERTICAL_PADDING)
       );
 
-      // Determine if the icon is off-screen by comparing its row and col against maxRows/maxCols
-      const reasons: string[] = [];
+      const offscreenIcons: Array<{
+        name: string;
+        id: string;
+        reason: string;
+        icon: DesktopIcon;
+      }> = [];
 
-      if (icon.row >= maxRows) reasons.push("bottom edge");
-      if (icon.col >= maxCols) reasons.push("right edge");
-      if (icon.row < 0) reasons.push("top edge");
-      if (icon.col < 0) reasons.push("left edge");
+      Array.from(iconsById.values()).forEach((icon) => {
+        logger.info(
+          `Checking icon ${icon.name} (${icon.id}) at [${icon.row}, ${icon.col}]`
+        );
 
-      if (reasons.length > 0) {
-        offscreenIcons.push({
-          name: icon.name,
-          id: icon.id,
-          reason: `off-screen (${reasons.join(", ")})`,
-          icon,
-        });
-      }
-    });
+        // Determine if the icon is off-screen by comparing its row and col against maxRows/maxCols
+        const reasons: string[] = [];
 
-    return offscreenIcons;
-  };
+        if (icon.row >= maxRows) reasons.push("bottom edge");
+        if (icon.col >= maxCols) reasons.push("right edge");
+        if (icon.row < 0) reasons.push("top edge");
+        if (icon.col < 0) reasons.push("left edge");
 
-  const toggleHighlightAllIcons = () => {
-    const newShowAllHighlights = !showAllHighlights;
-    setShowAllHighlights(newShowAllHighlights);
+        if (reasons.length > 0) {
+          offscreenIcons.push({
+            name: icon.name,
+            id: icon.id,
+            reason: `off-screen (${reasons.join(", ")})`,
+            icon,
+          });
+        }
+      });
 
-    // Detect off-screen icons when enabling highlights
-    if (newShowAllHighlights) {
-      const detectedOffscreenIcons = detectOffscreenIcons();
-
-      // Log results
-      if (detectedOffscreenIcons.length > 0) {
-        logger.info("Off-screen icons detected:");
-        detectedOffscreenIcons.forEach((iconData) => {
-          logger.info(
-            `  - ${iconData.name} (ID: ${iconData.id}) - ${iconData.reason}`
-          );
-        });
-
-        // Show the floating panel
-        setOffscreenIconsPanel((prev) => ({
-          ...prev,
-          visible: true,
-          icons: detectedOffscreenIcons,
-        }));
-      } else {
-        logger.info("No off-screen icons detected");
-        // Hide panel if no off-screen icons
-        setOffscreenIconsPanel((prev) => ({
-          ...prev,
-          visible: false,
-          icons: [],
-        }));
-      }
-    } else {
-      // Hide panel when highlights are disabled
+      // Update offscreen icons state
       setOffscreenIconsPanel((prev) => ({
         ...prev,
-        visible: false,
+        icons: offscreenIcons,
+        visible: offscreenIcons.length > 0,
       }));
+    };
+
+    // Call detectOffscreenIcons whenever showAllHighlights is true
+    if (iconsById && showAllHighlights) {
+      detectOffscreenIcons();
     }
+  }, [iconsById, showAllHighlights, iconBox]);
+
+  const toggleHighlightAllIcons = async () => {
+    const newShowAllHighlights = !showAllHighlights;
+    setShowAllHighlights(newShowAllHighlights);
 
     setContextMenu(null);
     hideHighlightBox();
@@ -393,15 +372,6 @@ const DesktopGrid: React.FC = () => {
       logger.info(
         `IPC reload: updated icon id=${iconId} placed at [${updatedIcon.row}, ${updatedIcon.col}]`
       );
-      if (showAllHighlightsRef.current) {
-        // Delay the refresh to allow the icon data to be updated
-        const updatedOffscreenIcons = detectOffscreenIcons();
-        setOffscreenIconsPanel((prev) => ({
-          ...prev,
-          icons: updatedOffscreenIcons,
-          visible: updatedOffscreenIcons.length > 0,
-        }));
-      }
       return;
     }
     // No updated icon -> remove placement at that position but keep icon data
@@ -422,6 +392,11 @@ const DesktopGrid: React.FC = () => {
     fetchIcons(true);
     fetchFontColor();
   }, []);
+
+  useEffect(() => {
+    setIconBox(defaultIconSize * 1.5625);
+    logger.info("setting iconBox to: " + defaultIconSize * 1.5625);
+  }, [defaultIconSize]);
 
   const fetchFontSize = async (override?: number) => {
     try {
