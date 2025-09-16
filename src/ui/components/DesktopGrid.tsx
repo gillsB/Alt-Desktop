@@ -140,6 +140,11 @@ const DesktopGrid: React.FC = () => {
   const [draggedOffscreenIcon, setDraggedOffscreenIcon] =
     useState<DesktopIcon | null>(null);
 
+  const [viewportSize, setViewportSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
   useEffect(() => {
     const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
@@ -212,6 +217,28 @@ const DesktopGrid: React.FC = () => {
   };
 
   useEffect(() => {
+    let resizeTimeout: number | undefined;
+
+    const handleResize = () => {
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      resizeTimeout = window.setTimeout(() => {
+        setViewportSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      }, 200); // Wait till user stops moving for 200ms before updating
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+    };
+  }, []);
+
+  useEffect(() => {
     const detectOffscreenIcons = () => {
       // If showAllHighlights is false, return early
       if (!showAllHighlights && !showOffscreen) {
@@ -266,9 +293,6 @@ const DesktopGrid: React.FC = () => {
     };
 
     // Call detectOffscreenIcons whenever showAllHighlights is true
-    logger.info(
-      `iconsById size: ${iconsById.size}, showAllHighlights: ${showAllHighlights}, showOffscreen: ${showOffscreen}`
-    );
     if (iconsById && (showAllHighlights || showOffscreen)) {
       detectOffscreenIcons();
     } else {
@@ -278,7 +302,7 @@ const DesktopGrid: React.FC = () => {
         icons: [],
       }));
     }
-  }, [iconsById, showAllHighlights, iconBox, showOffscreen]);
+  }, [iconsById, showAllHighlights, iconBox, showOffscreen, viewportSize]);
 
   const toggleHighlightAllIcons = async () => {
     const newShowAllHighlights = !showAllHighlights;
