@@ -239,17 +239,13 @@ const DesktopGrid: React.FC = () => {
       }> = [];
 
       Array.from(iconsById.values()).forEach((icon) => {
-        logger.info(
-          `Checking icon ${icon.name} (${icon.id}) at [${icon.row}, ${icon.col}]`
-        );
-
         // Determine if the icon is off-screen by comparing its row and col against maxRows/maxCols
         const reasons: string[] = [];
 
-        if (icon.row >= maxRows) reasons.push("bottom edge");
-        if (icon.col >= maxCols) reasons.push("right edge");
-        if (icon.row < 0) reasons.push("top edge");
-        if (icon.col < 0) reasons.push("left edge");
+        if (icon.row >= maxRows) reasons.push("bottom");
+        if (icon.col >= maxCols) reasons.push("right");
+        if (icon.row < 0) reasons.push("top");
+        if (icon.col < 0) reasons.push("left");
 
         if (reasons.length > 0) {
           offscreenIcons.push({
@@ -1299,12 +1295,30 @@ const DesktopGrid: React.FC = () => {
   const handlePanelMouseMove = (e: MouseEvent) => {
     if (!isDraggingPanel) return;
 
+    // Get panel size
+    const panel = document.querySelector(
+      ".offscreen-icons-panel"
+    ) as HTMLElement;
+    const panelWidth = panel?.offsetWidth || 300;
+    const panelHeight = panel?.offsetHeight || 200;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // minY due to header bar
+    const minY = 40;
+    const minX = 0;
+
+    // Clamp X and Y so panel stays in viewport and below header
+    let x = e.clientX - panelDragStart.x;
+    let y = e.clientY - panelDragStart.y;
+
+    x = Math.max(minX, Math.min(x, viewportWidth - panelWidth));
+    y = Math.max(minY, Math.min(y, viewportHeight - panelHeight));
+
     setOffscreenIconsPanel((prev) => ({
       ...prev,
-      position: {
-        x: e.clientX - panelDragStart.x,
-        y: e.clientY - panelDragStart.y,
-      },
+      position: { x, y },
     }));
   };
 
