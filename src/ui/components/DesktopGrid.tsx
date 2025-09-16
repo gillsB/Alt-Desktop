@@ -286,6 +286,12 @@ const DesktopGrid: React.FC = () => {
 
   const toggleHighlightAllIcons = async () => {
     const newShowAllHighlights = !showAllHighlights;
+    if (newShowAllHighlights) {
+      setOffscreenIconsPanel((prev) => ({
+        ...prev,
+        position: { x: 50, y: 50 },
+      }));
+    }
     setShowAllHighlights(newShowAllHighlights);
 
     setContextMenu(null);
