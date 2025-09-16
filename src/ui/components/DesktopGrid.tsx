@@ -2053,8 +2053,26 @@ const DesktopGrid: React.FC = () => {
           <div
             className={`offscreen-icons-panel-header${isDraggingPanel ? " grabbing" : ""}`}
             onMouseDown={handlePanelMouseDown}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
-            Off-screen Icons ({offscreenIconsPanel.icons.length})
+            <span>Off-screen Icons ({offscreenIconsPanel.icons.length})</span>
+            {/* Button only shows when showOffscreen is true and showAllHighlights is false */}
+            {showOffscreen && !showAllHighlights && (
+              <button
+                className="show-offscreen-close-button"
+                title="Hide Off-screen Icons Panel"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowOffscreen(false);
+                }}
+              >
+                ×
+              </button>
+            )}
           </div>
           <div className="offscreen-icons-panel-list">
             {offscreenIconsPanel.icons.map((iconData) => (

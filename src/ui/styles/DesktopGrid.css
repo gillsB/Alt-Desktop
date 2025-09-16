@@ -304,3 +304,15 @@
   color: #aaa;
   font-size: 10px;
 }
+
+.show-offscreen-close-button {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0 8px;
+  line-height: 1;
+}
