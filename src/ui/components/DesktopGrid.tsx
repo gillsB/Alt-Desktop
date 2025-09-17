@@ -285,11 +285,25 @@ const DesktopGrid: React.FC = () => {
       });
 
       // Update offscreen icons state
-      setOffscreenIconsPanel((prev) => ({
-        ...prev,
-        icons: offscreenIcons,
-        visible: offscreenIcons.length > 0,
-      }));
+      setOffscreenIconsPanel((prev) => {
+        // Clamp logic: ensure panel is within viewport, else reset to default (50,50)
+        const panelWidth = 250;
+        const panelHeight = 300;
+        const minX = 0;
+        const minY = 40;
+        const maxX = window.innerWidth - panelWidth;
+        const maxY = window.innerHeight - panelHeight;
+
+        const { x, y } = prev.position;
+        const outOfBounds = x < minX || y < minY || x > maxX || y > maxY;
+
+        return {
+          ...prev,
+          icons: offscreenIcons,
+          visible: offscreenIcons.length > 0,
+          position: outOfBounds ? { x: 50, y: 50 } : { x, y },
+        };
+      });
     };
 
     // Call detectOffscreenIcons whenever showAllHighlights is true
@@ -1324,7 +1338,7 @@ const DesktopGrid: React.FC = () => {
       ".offscreen-icons-panel"
     ) as HTMLElement;
     const panelWidth = panel?.offsetWidth || 300;
-    const panelHeight = panel?.offsetHeight || 200;
+    const panelHeight = panel?.offsetHeight || 300;
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;

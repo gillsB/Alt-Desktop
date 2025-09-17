@@ -233,7 +233,7 @@
   padding: 12px;
   z-index: 1000;
   min-width: 200px;
-  max-width: 300px;
+  max-width: 250px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   user-select: none;
   cursor: default;
@@ -253,7 +253,7 @@
   cursor: grabbing;
 }
 .offscreen-icons-panel-list {
-  max-height: 400px;
+  max-height: 300px;
   overflow-y: auto;
 }
 .offscreen-icon-item {
