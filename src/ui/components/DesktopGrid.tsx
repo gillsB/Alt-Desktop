@@ -1926,7 +1926,9 @@ const DesktopGrid: React.FC = () => {
                 New Icon
               </div>
               <div className="menu-separator" />
-              <div className="menu-item">Icons Profile</div>
+              <div className="menu-item" title="Coming soon">
+                Icons Profile
+              </div>
               <div className="menu-item" onClick={handleOpenBackgroundSelect}>
                 Change Background
               </div>
@@ -1934,6 +1936,15 @@ const DesktopGrid: React.FC = () => {
                 Settings
               </div>
               <div className="menu-separator" />
+              <label className="menu-checkbox">
+                Icons Overview
+                <input
+                  type="checkbox"
+                  checked={showAllHighlights}
+                  onChange={toggleHighlightAllIcons}
+                  title="A variety of visual cues and tools to help manage your Desktop icons"
+                />
+              </label>
               <label className="menu-checkbox">
                 Hide Icons
                 <input
@@ -1960,34 +1971,6 @@ const DesktopGrid: React.FC = () => {
                   />
                 </label>
               )}
-              <div
-                className="menu-item has-submenu"
-                onMouseEnter={() => setShowOpenSubmenu(true)}
-                onMouseLeave={() => setShowOpenSubmenu(false)}
-              >
-                Display
-                <span className="submenu-arrow">▶</span>
-                {showOpenSubmenu && (
-                  <div className="submenu">
-                    <label className="menu-checkbox">
-                      Grid
-                      <input
-                        type="checkbox"
-                        checked={showGrid}
-                        onChange={toggleGrid}
-                      />
-                    </label>
-                    <label className="menu-checkbox">
-                      All icon boxes
-                      <input
-                        type="checkbox"
-                        checked={showAllHighlights}
-                        onChange={toggleHighlightAllIcons}
-                      />
-                    </label>
-                  </div>
-                )}
-              </div>
               <div className="menu-separator" />
               <div className="menu-item" onClick={handleReloadDesktop}>
                 Reload Desktop
@@ -2010,35 +1993,6 @@ const DesktopGrid: React.FC = () => {
               </div>
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings
-              </div>
-              <div className="menu-separator" />
-              <div
-                className="menu-item has-submenu"
-                onMouseEnter={() => setShowOpenSubmenu(true)}
-                onMouseLeave={() => setShowOpenSubmenu(false)}
-              >
-                Display
-                <span className="submenu-arrow">▶</span>
-                {showOpenSubmenu && (
-                  <div className="submenu">
-                    <label className="menu-checkbox">
-                      Grid
-                      <input
-                        type="checkbox"
-                        checked={showGrid}
-                        onChange={toggleGrid}
-                      />
-                    </label>
-                    <label className="menu-checkbox">
-                      All icon boxes
-                      <input
-                        type="checkbox"
-                        checked={showAllHighlights}
-                        onChange={toggleHighlightAllIcons}
-                      />
-                    </label>
-                  </div>
-                )}
               </div>
               <div className="menu-separator" />
               <div className="menu-item" onClick={handleReloadDesktop}>
