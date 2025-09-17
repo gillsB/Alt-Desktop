@@ -62,6 +62,8 @@ app.on("ready", () => {
     },
     frame: false,
     title: "AltDesktop",
+    minHeight: 600,
+    minWidth: 550,
   });
   if (isDev()) {
     mainWindow.loadURL("http://localhost:5123");
