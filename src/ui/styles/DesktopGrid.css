@@ -121,7 +121,7 @@
   transform: translateX(-50%);
   z-index: 1000;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 18px;
   background: rgba(30, 30, 30, 0.85);
   border-radius: 8px;
@@ -132,6 +132,12 @@
   align-items: center;
   user-select: none;
   white-space: nowrap;
+}
+.show-all-highlights-legend-row {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  align-items: center;
 }
 
 .show-all-highlights-legend-item {
