@@ -711,7 +711,7 @@ const DesktopGrid: React.FC = () => {
           col: col,
           visible: true,
         });
-        //setEditIconActive(true); // Lock dragging
+        setEditIconActive(true); // Lock dragging
       } else {
         showSmallWindow(
           "Error getting icon",
@@ -738,7 +738,7 @@ const DesktopGrid: React.FC = () => {
         window.electron.ensureDataFolder(icon.id);
         window.electron.editIcon(icon.id, validRow, validCol);
         setContextMenu(null);
-        //setEditIconActive(true); // Lock dragging
+        setEditIconActive(true); // Lock dragging
       } else {
         // Send preview of default DesktopIcon for new icon
         const temp_id = await window.electron.ensureUniqueIconId("temp");
@@ -752,7 +752,7 @@ const DesktopGrid: React.FC = () => {
           await window.electron.previewIconUpdate(temp_id, defaultIcon);
           window.electron.editIcon(temp_id, validRow, validCol);
           setContextMenu(null);
-          //setEditIconActive(true); // Lock icon dragging
+          setEditIconActive(true); // Lock icon dragging
         } else {
           showSmallWindow(
             "Error getting temp_id",
