@@ -266,13 +266,31 @@ const DesktopGrid: React.FC = () => {
       }> = [];
 
       Array.from(iconsById.values()).forEach((icon) => {
-        // Determine if the icon is off-screen by comparing its row and col against maxRows/maxCols
         const reasons: string[] = [];
 
-        if (icon.row >= maxRows) reasons.push("bottom");
-        if (icon.col >= maxCols) reasons.push("right");
-        if (icon.row < 0) reasons.push("top");
-        if (icon.col < 0) reasons.push("left");
+        if (icon.offsetX || icon.offsetY) {
+          const left =
+            icon.col * (iconBox + ICON_HORIZONTAL_PADDING) +
+            (icon.offsetX || 0) +
+            ICON_ROOT_OFFSET_LEFT;
+          const top =
+            icon.row * (iconBox + ICON_VERTICAL_PADDING) +
+            (icon.offsetY || 0) +
+            ICON_ROOT_OFFSET_TOP;
+          const width = icon.width || defaultIconSize;
+          const height = icon.height || defaultIconSize;
+
+          if (left + width > viewport.width) reasons.push("right");
+          if (top + height > viewport.height) reasons.push("bottom");
+          if (left < 0) reasons.push("left");
+          if (top < 0) reasons.push("top");
+        } else {
+          // Icons without offsets (or = 0)
+          if (icon.row >= maxRows) reasons.push("bottom");
+          if (icon.col >= maxCols) reasons.push("right");
+          if (icon.row < 0) reasons.push("top");
+          if (icon.col < 0) reasons.push("left");
+        }
 
         if (reasons.length > 0) {
           offscreenIcons.push({
