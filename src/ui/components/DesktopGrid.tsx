@@ -80,6 +80,8 @@ const DesktopGrid: React.FC = () => {
   const [backgroundType, setBackgroundType] = useState<string>("image");
   const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
 
+  const [editIconActive, setEditIconActive] = useState(false);
+
   // These padding values affect essentially only the root position of the icons
   // This is not padding between icons
   const ICON_ROOT_OFFSET_TOP = 40;
@@ -709,6 +711,7 @@ const DesktopGrid: React.FC = () => {
           col: col,
           visible: true,
         });
+        //setEditIconActive(true); // Lock dragging
       } else {
         showSmallWindow(
           "Error getting icon",
@@ -716,7 +719,6 @@ const DesktopGrid: React.FC = () => {
           ["Okay"]
         );
       }
-
       return;
     }
 
@@ -736,6 +738,7 @@ const DesktopGrid: React.FC = () => {
         window.electron.ensureDataFolder(icon.id);
         window.electron.editIcon(icon.id, validRow, validCol);
         setContextMenu(null);
+        //setEditIconActive(true); // Lock dragging
       } else {
         // Send preview of default DesktopIcon for new icon
         const temp_id = await window.electron.ensureUniqueIconId("temp");
@@ -749,6 +752,7 @@ const DesktopGrid: React.FC = () => {
           await window.electron.previewIconUpdate(temp_id, defaultIcon);
           window.electron.editIcon(temp_id, validRow, validCol);
           setContextMenu(null);
+          //setEditIconActive(true); // Lock icon dragging
         } else {
           showSmallWindow(
             "Error getting temp_id",
@@ -768,6 +772,7 @@ const DesktopGrid: React.FC = () => {
       const closedWindow = args[1] as string;
       logger.info("closedWindow = ", closedWindow);
       setEditIconHighlight(null);
+      setEditIconActive(false); // Unlock icon dragging
     };
     // Listen for when Edit Icon window closes
     window.electron.on("subwindow-closed", handleEditIconClosed);
@@ -1778,11 +1783,19 @@ const DesktopGrid: React.FC = () => {
                     ICON_ROOT_OFFSET_TOP,
                   width: icon.width || defaultIconSize,
                   height: icon.height || defaultIconSize,
-                  cursor: isDraggedIcon ? "grabbing" : "grab",
+                  cursor: editIconActive
+                    ? "not-allowed"
+                    : isDraggedIcon
+                      ? "grabbing"
+                      : "grab",
                   opacity: isDraggedIcon ? 0 : isBeingSwapped ? 0 : 1,
                 }}
-                draggable={true}
-                onDragStart={(e) => handleDragStart(e, icon, row, col)}
+                draggable={!editIconActive}
+                onDragStart={
+                  !editIconActive
+                    ? (e) => handleDragStart(e, icon, row, col)
+                    : undefined
+                }
                 onDragEnd={handleDragEnd}
                 onDoubleClick={() => handleIconDoubleClick(icon)}
                 onContextMenu={(e) => {
