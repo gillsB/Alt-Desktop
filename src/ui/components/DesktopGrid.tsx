@@ -1807,6 +1807,13 @@ const DesktopGrid: React.FC = () => {
           })}
 
         {showAllHighlights && (
+          <div
+            className="background-dimmer"
+            style={{ background: `rgba(0,0,0,${dimmerValue / 100})` }}
+          />
+        )}
+
+        {showAllHighlights && (
           <div className="show-all-highlights-legend">
             <div className="show-all-highlights-legend-row">
               <span className="show-all-highlights-legend-item">
