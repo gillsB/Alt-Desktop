@@ -1484,7 +1484,18 @@ const DesktopGrid: React.FC = () => {
     const newOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
     const newOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
 
-    window.electron.editIconOffsetUpdate(newOffsetX, newOffsetY);
+    setIconsById((prev) => {
+      const newMap = new Map(prev);
+      const icon = newMap.get(editingIconId);
+      if (icon) {
+        newMap.set(editingIconId, {
+          ...icon,
+          offsetX: newOffsetX,
+          offsetY: newOffsetY,
+        });
+      }
+      return newMap;
+    });
   };
 
   const handleOffsetDrop = (e: React.DragEvent) => {
@@ -1501,8 +1512,12 @@ const DesktopGrid: React.FC = () => {
     const newOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
     const newOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
 
-    // Send final offset update
+    // Send final offset update to EditIcon window
     window.electron.editIconOffsetUpdate(newOffsetX, newOffsetY);
+
+    logger.info(
+      `Dropped icon: [${draggedIcon.icon.name}] with new offsets X: ${newOffsetX}, Y: ${newOffsetY}`
+    );
 
     resetDragStates();
   };
