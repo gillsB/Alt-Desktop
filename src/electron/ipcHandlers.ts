@@ -1940,4 +1940,21 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return await swapDesktopIcons(id1, id2);
     }
   );
+  ipcMainHandle(
+    "editIconOffsetUpdate",
+    async (offsetX: number, offsetY: number): Promise<boolean> => {
+      logger.info(
+        "editIconOffsetUpdate X update:" + offsetX + ", Y update: " + offsetY
+      );
+      const subWindow = getActiveSubWindow();
+      if (subWindow) {
+        subWindow.webContents.send("edit-icon-offset-update", {
+          offsetX,
+          offsetY,
+        });
+        return true;
+      }
+      return false;
+    }
+  );
 }

@@ -41,10 +41,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   saveIconData: (icon: DesktopIcon) => ipcInvoke("saveIconData", icon),
   renameID: (oldId: string, newId: string) =>
     ipcInvoke("renameID", oldId, newId),
-  sendSubWindowAction: (
-    action: SubWindowAction,
-    title: string,
-  ) => ipcSend("sendSubWindowAction", { action, title }),
+  sendSubWindowAction: (action: SubWindowAction, title: string) =>
+    ipcSend("sendSubWindowAction", { action, title }),
   getDesktopIcon: (id: string) => ipcInvoke("getDesktopIcon", id),
   getSubWindowTitle: () => ipcInvoke("getSubWindowTitle"),
   reloadIcon: (id: string) => ipcInvoke("reloadIcon", id),
@@ -160,6 +158,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   ) => ipcInvoke("moveDesktopIcon", id, newRow, newCol, offsetReset),
   swapDesktopIcons: (id1: string, id2: string) =>
     ipcInvoke("swapDesktopIcons", id1, id2),
+  editIconOffsetUpdate: (offsetX: number, offsetY: number) =>
+    ipcInvoke("editIconOffsetUpdate", offsetX, offsetY),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

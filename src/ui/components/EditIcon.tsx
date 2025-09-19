@@ -65,6 +65,28 @@ const EditIcon: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const updateOffsets = (...args: unknown[]) => {
+      const offsets = args[1] as { offsetX?: number; offsetY?: number };
+      logger.info(
+        "Received edit-icon-offset-update: " + JSON.stringify(offsets)
+      );
+      setIcon((prevIcon) =>
+        prevIcon
+          ? {
+              ...prevIcon,
+              offsetX: offsets.offsetX ?? prevIcon.offsetX,
+              offsetY: offsets.offsetY ?? prevIcon.offsetY,
+            }
+          : null
+      );
+    };
+    window.electron.on("edit-icon-offset-update", updateOffsets);
+    return () => {
+      window.electron.off("edit-icon-offset-update", updateOffsets);
+    };
+  }, []);
+
+  useEffect(() => {
     const fetchFontColorDefault = async () => {
       const color = await window.electron.getSetting("defaultFontColor");
       setFontColorDefault(color);
