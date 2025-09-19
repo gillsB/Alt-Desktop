@@ -333,7 +333,6 @@ const EditIcon: React.FC = () => {
         setIcon((prevIcon) =>
           prevIcon ? { ...prevIcon, image: selectedIcon } : null
         );
-        sendPreviewUpdate({ image: selectedIcon });
       } else {
         logger.info("No selected icon");
       }
@@ -355,7 +354,6 @@ const EditIcon: React.FC = () => {
           setIcon((prevIcon) =>
             prevIcon ? { ...prevIcon, image: filePath } : null
           );
-          sendPreviewUpdate({ image: filePath });
         }
       } else {
         logger.info(`Opening file dialog for ${type} selection.`);
@@ -422,7 +420,6 @@ const EditIcon: React.FC = () => {
         setIcon((prevIcon) =>
           prevIcon ? { ...prevIcon, image: filePath } : null
         );
-        sendPreviewUpdate({ image: filePath });
       } catch (error) {
         logger.error("Failed to save image:", error);
       }
@@ -439,18 +436,16 @@ const EditIcon: React.FC = () => {
     }
   };
 
-  const sendPreviewUpdate = async (updatedFields: Partial<DesktopIcon>) => {
-    if (!icon) return;
-    try {
-      await window.electron.previewIconUpdate(icon.id, {
-        ...updatedFields,
-        row: icon.row,
-        col: icon.col,
-      });
-    } catch (error) {
-      logger.error("Failed to send icon preview update:", error);
-    }
-  };
+  useEffect(() => {
+    const updateIconPreview = async () => {
+      if (icon) {
+        await window.electron.previewIconUpdate(icon.id, icon);
+      } else {
+        logger.error("Icon data is missing. (updateIconPreview)");
+      }
+    };
+    updateIconPreview();
+  }, [icon]);
 
   const handleImageMagnifyClick = async () => {
     if (icon) {
@@ -462,7 +457,6 @@ const EditIcon: React.FC = () => {
         setIcon((prevIcon) =>
           prevIcon ? { ...prevIcon, image: success } : null
         );
-        sendPreviewUpdate({ image: success });
       } else {
         logger.info(
           "No file selected or dialog closed without selection.",
@@ -504,7 +498,6 @@ const EditIcon: React.FC = () => {
                   );
                   const updatedValue = sanitized;
                   setIcon({ ...icon, name: updatedValue });
-                  sendPreviewUpdate({ name: updatedValue });
                 }}
               />
             </div>
@@ -517,7 +510,6 @@ const EditIcon: React.FC = () => {
                 onChange={(e) => {
                   const updatedValue = e.target.value;
                   setIcon({ ...icon, image: updatedValue });
-                  sendPreviewUpdate({ image: updatedValue });
                 }}
               />
               <button
@@ -598,7 +590,6 @@ const EditIcon: React.FC = () => {
                   title="Leave blank for default font color (in settings)"
                   onChange={(e) => {
                     setIcon({ ...icon, fontColor: e.target.value });
-                    sendPreviewUpdate({ fontColor: e.target.value });
                   }}
                 />
                 <div
@@ -613,7 +604,6 @@ const EditIcon: React.FC = () => {
                     value={icon.fontColor}
                     onChange={(e) => {
                       setIcon({ ...icon, fontColor: e.target.value });
-                      sendPreviewUpdate({ fontColor: e.target.value });
                     }}
                     tabIndex={-1}
                   />
@@ -623,7 +613,6 @@ const EditIcon: React.FC = () => {
                   className="default-font-color-btn"
                   onClick={() => {
                     setIcon({ ...icon, fontColor: "" });
-                    sendPreviewUpdate({ fontColor: "" });
                   }}
                   title="Reset to default font color"
                 >
@@ -642,12 +631,6 @@ const EditIcon: React.FC = () => {
                   const updatedValue = e.target.value;
                   setIcon({
                     ...icon,
-                    fontSize:
-                      updatedValue === ""
-                        ? undefined
-                        : parseFloat(updatedValue),
-                  });
-                  sendPreviewUpdate({
                     fontSize:
                       updatedValue === ""
                         ? undefined
@@ -672,12 +655,6 @@ const EditIcon: React.FC = () => {
                         ? undefined
                         : parseFloat(updatedValue),
                   });
-                  sendPreviewUpdate({
-                    offsetX:
-                      updatedValue === ""
-                        ? undefined
-                        : parseFloat(updatedValue),
-                  });
                 }}
               />
             </div>
@@ -692,12 +669,6 @@ const EditIcon: React.FC = () => {
                   const updatedValue = e.target.value;
                   setIcon({
                     ...icon,
-                    offsetY:
-                      updatedValue === ""
-                        ? undefined
-                        : parseFloat(updatedValue),
-                  });
-                  sendPreviewUpdate({
                     offsetY:
                       updatedValue === ""
                         ? undefined
@@ -722,12 +693,6 @@ const EditIcon: React.FC = () => {
                         ? undefined
                         : parseFloat(updatedValue),
                   });
-                  sendPreviewUpdate({
-                    width:
-                      updatedValue === ""
-                        ? undefined
-                        : parseFloat(updatedValue),
-                  });
                 }}
               />
             </div>
@@ -742,12 +707,6 @@ const EditIcon: React.FC = () => {
                   const updatedValue = e.target.value;
                   setIcon({
                     ...icon,
-                    height:
-                      updatedValue === ""
-                        ? undefined
-                        : parseFloat(updatedValue),
-                  });
-                  sendPreviewUpdate({
                     height:
                       updatedValue === ""
                         ? undefined
@@ -771,7 +730,6 @@ const EditIcon: React.FC = () => {
                       ? { ...prevIcon, launchDefault: updatedValue }
                       : null
                   );
-                  sendPreviewUpdate({ launchDefault: updatedValue });
                 }}
               >
                 <option value="Program">Program</option>
