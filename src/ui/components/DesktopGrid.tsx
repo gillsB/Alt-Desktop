@@ -81,6 +81,7 @@ const DesktopGrid: React.FC = () => {
   const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
 
   const [editIconActive, setEditIconActive] = useState(false);
+  const [editingIconId, setEditingIconId] = useState<string | null>(null);
 
   // These padding values affect essentially only the root position of the icons
   // This is not padding between icons
@@ -96,8 +97,14 @@ const DesktopGrid: React.FC = () => {
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
+  type DraggedDesktopIcon = DesktopIcon & {
+    initialMouseX: number;
+    initialMouseY: number;
+    initialOffsetX: number;
+    initialOffsetY: number;
+  };
   const [draggedIcon, setDraggedIcon] = useState<{
-    icon: DesktopIcon;
+    icon: DraggedDesktopIcon;
     startRow: number;
     startCol: number;
   } | null>(null);
@@ -711,7 +718,7 @@ const DesktopGrid: React.FC = () => {
           col: col,
           visible: true,
         });
-        setEditIconActive(true); // Lock dragging
+        setEditingIconId(icon.id); // Lock dragging
       } else {
         showSmallWindow(
           "Error getting icon",
@@ -738,7 +745,7 @@ const DesktopGrid: React.FC = () => {
         window.electron.ensureDataFolder(icon.id);
         window.electron.editIcon(icon.id, validRow, validCol);
         setContextMenu(null);
-        setEditIconActive(true); // Lock dragging
+        setEditingIconId(icon.id); // Lock dragging
       } else {
         // Send preview of default DesktopIcon for new icon
         const temp_id = await window.electron.ensureUniqueIconId("temp");
@@ -772,7 +779,8 @@ const DesktopGrid: React.FC = () => {
       const closedWindow = args[1] as string;
       logger.info("closedWindow = ", closedWindow);
       setEditIconHighlight(null);
-      setEditIconActive(false); // Unlock icon dragging
+      setEditIconActive(false);
+      setEditingIconId(null); // Unlock icon dragging
     };
     // Listen for when Edit Icon window closes
     window.electron.on("subwindow-closed", handleEditIconClosed);
@@ -1046,15 +1054,6 @@ const DesktopGrid: React.FC = () => {
       updates,
     }: { id: string; row: number; col: number; updates: Partial<DesktopIcon> }
   ) => {
-    // Font color changes can be extremely frequent, so ignore them for logging.
-    if (!updates["fontColor"]) {
-      logger.info(
-        `Received preview update for icon ${id}: [${row}, ${col}], updates: ${JSON.stringify(
-          updates
-        )}`
-      );
-    }
-
     setIconsById((prevMap) => {
       const newMap = new Map(prevMap);
       const currentIcon = prevMap.get(id);
@@ -1162,7 +1161,17 @@ const DesktopGrid: React.FC = () => {
     col: number
   ) => {
     e.dataTransfer.effectAllowed = "move";
-    setDraggedIcon({ icon, startRow: row, startCol: col });
+    setDraggedIcon({
+      icon: {
+        ...icon,
+        initialMouseX: e.clientX,
+        initialMouseY: e.clientY,
+        initialOffsetX: icon.offsetX || 0,
+        initialOffsetY: icon.offsetY || 0,
+      },
+      startRow: row,
+      startCol: col,
+    });
 
     // Create an empty div element to completely hide the drag image
     const emptyDiv = document.createElement("div");
@@ -1180,6 +1189,10 @@ const DesktopGrid: React.FC = () => {
   };
 
   const handleDragOver = (e: React.DragEvent) => {
+    if (editingIconId && draggedIcon && draggedIcon.icon.id === editingIconId) {
+      handleOffsetDragOver(e);
+      return;
+    }
     // Handle regular icon dragging
     if (draggedIcon) {
       e.preventDefault();
@@ -1418,6 +1431,82 @@ const DesktopGrid: React.FC = () => {
     }
   }, [isDraggingPanel]);
 
+  const handleOffsetDragStart = (
+    e: React.DragEvent,
+    icon: DesktopIcon,
+    row: number,
+    col: number
+  ) => {
+    e.dataTransfer.effectAllowed = "move";
+
+    // Store initial mouse position and icon offset
+    const initialMouseX = e.clientX;
+    const initialMouseY = e.clientY;
+    const initialOffsetX = icon.offsetX || 0;
+    const initialOffsetY = icon.offsetY || 0;
+
+    const draggedIconWithState: DraggedDesktopIcon = {
+      ...icon,
+      initialMouseX,
+      initialMouseY,
+      initialOffsetX,
+      initialOffsetY,
+    };
+
+    setDraggedIcon({
+      icon: draggedIconWithState,
+      startRow: row,
+      startCol: col,
+    });
+
+    // Hide drag image
+    const emptyDiv = document.createElement("div");
+    emptyDiv.style.width = "1px";
+    emptyDiv.style.height = "1px";
+    emptyDiv.style.backgroundColor = "transparent";
+    document.body.appendChild(emptyDiv);
+    e.dataTransfer.setDragImage(emptyDiv, 0, 0);
+    setTimeout(() => document.body.removeChild(emptyDiv), 0);
+  };
+
+  const handleOffsetDragOver = (e: React.DragEvent) => {
+    if (!draggedIcon || !editingIconId) return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+
+    const currentMouseX = e.clientX;
+    const currentMouseY = e.clientY;
+
+    const deltaX = currentMouseX - draggedIcon.icon.initialMouseX;
+    const deltaY = currentMouseY - draggedIcon.icon.initialMouseY;
+
+    const newOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
+    const newOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
+
+    window.electron.editIconOffsetUpdate(newOffsetX, newOffsetY);
+  };
+
+  const handleOffsetDrop = (e: React.DragEvent) => {
+    if (!draggedIcon || !editingIconId) return;
+
+    e.preventDefault();
+
+    const currentMouseX = e.clientX;
+    const currentMouseY = e.clientY;
+
+    const deltaX = currentMouseX - draggedIcon.icon.initialMouseX;
+    const deltaY = currentMouseY - draggedIcon.icon.initialMouseY;
+
+    const newOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
+    const newOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
+
+    // Send final offset update
+    window.electron.editIconOffsetUpdate(newOffsetX, newOffsetY);
+
+    resetDragStates();
+  };
+
   // TODO add drag ctrl modifier which allows freely moving icons, syncs it to nearest icon home,
   // and when dropping saves it with the offsetX/Y values.
 
@@ -1426,8 +1515,8 @@ const DesktopGrid: React.FC = () => {
       <div
         className="desktop-grid"
         onContextMenu={handleDesktopRightClick}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
+        onDragOver={editingIconId ? handleOffsetDragOver : handleDragOver}
+        onDrop={editingIconId ? handleOffsetDrop : handleDrop}
       >
         {/* Conditionally render horizontal grid lines */}
         {showGrid &&
@@ -1788,13 +1877,23 @@ const DesktopGrid: React.FC = () => {
                     : isDraggedIcon
                       ? "grabbing"
                       : "grab",
-                  opacity: isDraggedIcon ? 0 : isBeingSwapped ? 0 : 1,
+                  opacity: editingIconId
+                    ? 1
+                    : isDraggedIcon || isBeingSwapped
+                      ? 0
+                      : 1,
                 }}
-                draggable={!editIconActive}
+                draggable={
+                  editingIconId ? icon.id === editingIconId : !editIconActive
+                }
                 onDragStart={
-                  !editIconActive
-                    ? (e) => handleDragStart(e, icon, row, col)
-                    : undefined
+                  editingIconId
+                    ? icon.id === editingIconId
+                      ? (e) => handleOffsetDragStart(e, icon, row, col)
+                      : undefined // Explicitly disable drag start for non-editing icons
+                    : !editIconActive
+                      ? (e) => handleDragStart(e, icon, row, col)
+                      : undefined
                 }
                 onDragEnd={handleDragEnd}
                 onDoubleClick={() => handleIconDoubleClick(icon)}

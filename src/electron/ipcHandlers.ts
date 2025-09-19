@@ -1943,9 +1943,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "editIconOffsetUpdate",
     async (offsetX: number, offsetY: number): Promise<boolean> => {
-      logger.info(
-        "editIconOffsetUpdate X update:" + offsetX + ", Y update: " + offsetY
-      );
       const subWindow = getActiveSubWindow();
       if (subWindow) {
         subWindow.webContents.send("edit-icon-offset-update", {

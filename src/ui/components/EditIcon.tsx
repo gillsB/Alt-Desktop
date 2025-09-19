@@ -67,9 +67,6 @@ const EditIcon: React.FC = () => {
   useEffect(() => {
     const updateOffsets = (...args: unknown[]) => {
       const offsets = args[1] as { offsetX?: number; offsetY?: number };
-      logger.info(
-        "Received edit-icon-offset-update: " + JSON.stringify(offsets)
-      );
       setIcon((prevIcon) =>
         prevIcon
           ? {
