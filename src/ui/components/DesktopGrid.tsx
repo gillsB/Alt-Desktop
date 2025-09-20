@@ -2266,11 +2266,6 @@ const DesktopGrid: React.FC = () => {
           <div
             className={`offscreen-icons-panel-header${isDraggingPanel ? " grabbing" : ""}`}
             onMouseDown={handlePanelMouseDown}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
           >
             <span>Off-screen Icons ({offscreenIconsPanel.icons.length})</span>
             {/* Button only shows when showOffscreen is true and showAllHighlights is false */}
@@ -2311,7 +2306,12 @@ const DesktopGrid: React.FC = () => {
                   />
                 </div>
                 <div className="offscreen-icon-details">
-                  <div className="offscreen-icon-name">{iconData.name}</div>
+                  <div
+                    className="offscreen-icon-name"
+                    title={iconData.name || iconData.id}
+                  >
+                    {iconData.name || iconData.id}
+                  </div>
                   <div className="offscreen-icon-reason">{iconData.reason}</div>
                 </div>
               </div>
