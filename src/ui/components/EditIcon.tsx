@@ -71,8 +71,14 @@ const EditIcon: React.FC = () => {
         prevIcon
           ? {
               ...prevIcon,
-              offsetX: offsets.offsetX ?? prevIcon.offsetX,
-              offsetY: offsets.offsetY ?? prevIcon.offsetY,
+              offsetX:
+                offsets.offsetX === 0
+                  ? undefined
+                  : (offsets.offsetX ?? prevIcon.offsetX),
+              offsetY:
+                offsets.offsetY === 0
+                  ? undefined
+                  : (offsets.offsetY ?? prevIcon.offsetY),
             }
           : null
       );
