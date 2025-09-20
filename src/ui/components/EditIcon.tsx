@@ -670,7 +670,7 @@ const EditIcon: React.FC = () => {
                 id="offset-x"
                 type="number"
                 title="Leave blank for default offset"
-                value={icon.offsetX}
+                value={icon.offsetX === undefined ? "" : icon.offsetX}
                 onChange={(e) => {
                   const updatedValue = e.target.value;
                   setIcon({
@@ -689,7 +689,7 @@ const EditIcon: React.FC = () => {
                 id="offset-y"
                 type="number"
                 title="Leave blank for default offset"
-                value={icon.offsetY}
+                value={icon.offsetY === undefined ? "" : icon.offsetY}
                 onChange={(e) => {
                   const updatedValue = e.target.value;
                   setIcon({
