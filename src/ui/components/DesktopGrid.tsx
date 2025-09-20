@@ -82,6 +82,11 @@ const DesktopGrid: React.FC = () => {
 
   const [editIconActive, setEditIconActive] = useState(false);
   const [editingIconId, setEditingIconId] = useState<string | null>(null);
+  const [originalEditIconOffset, setOriginalEditIconOffset] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const editIconDropOccurred = useRef(false);
 
   // These padding values affect essentially only the root position of the icons
   // This is not padding between icons
@@ -719,6 +724,10 @@ const DesktopGrid: React.FC = () => {
           visible: true,
         });
         setEditingIconId(icon.id); // Lock dragging
+        setOriginalEditIconOffset({
+          x: icon.offsetX || 0,
+          y: icon.offsetY || 0,
+        });
       } else {
         showSmallWindow(
           "Error getting icon",
@@ -1503,6 +1512,8 @@ const DesktopGrid: React.FC = () => {
 
     e.preventDefault();
 
+    editIconDropOccurred.current = true; // Mark that a drop occurred
+
     const currentMouseX = e.clientX;
     const currentMouseY = e.clientY;
 
@@ -1512,13 +1523,32 @@ const DesktopGrid: React.FC = () => {
     const newOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
     const newOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
 
-    // Send final offset update to EditIcon window
     window.electron.editIconOffsetUpdate(newOffsetX, newOffsetY);
-
     logger.info(
       `Dropped icon: [${draggedIcon.icon.name}] with new offsets X: ${newOffsetX}, Y: ${newOffsetY}`
     );
 
+    resetDragStates();
+  };
+
+  const handleEditIconDragEnd = async () => {
+    if (
+      !editIconDropOccurred.current &&
+      originalEditIconOffset &&
+      editingIconId
+    ) {
+      logger.info(
+        "Drag cancelled, reverting offsets to: " +
+          originalEditIconOffset.x +
+          ", " +
+          originalEditIconOffset.y
+      );
+      window.electron.editIconOffsetUpdate(
+        originalEditIconOffset.x,
+        originalEditIconOffset.y
+      );
+    }
+    editIconDropOccurred.current = false; // Reset for next drag
     resetDragStates();
   };
 
@@ -1910,7 +1940,9 @@ const DesktopGrid: React.FC = () => {
                       ? (e) => handleDragStart(e, icon, row, col)
                       : undefined
                 }
-                onDragEnd={handleDragEnd}
+                onDragEnd={
+                  editingIconId ? handleEditIconDragEnd : handleDragEnd
+                }
                 onDoubleClick={() => handleIconDoubleClick(icon)}
                 onContextMenu={(e) => {
                   e.stopPropagation();
