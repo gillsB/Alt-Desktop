@@ -1576,8 +1576,8 @@ const DesktopGrid: React.FC = () => {
     let newOffsetY = baseOffsetY;
 
     if (shiftKey) {
-      const iconWidth = draggedIcon.icon.width || 64;
-      const iconHeight = draggedIcon.icon.height || 64;
+      const iconWidth = draggedIcon.icon.width || defaultIconSize;
+      const iconHeight = draggedIcon.icon.height || defaultIconSize;
 
       const baseLeft =
         draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
