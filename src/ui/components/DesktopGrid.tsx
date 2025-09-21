@@ -1500,6 +1500,9 @@ const DesktopGrid: React.FC = () => {
       shiftSnapActive.current = true;
 
       // Calculate icon's top-left after offset
+      const iconWidth = draggedIcon.icon.width || 64;
+      const iconHeight = draggedIcon.icon.height || 64;
+
       const iconLeft =
         draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
         ICON_ROOT_OFFSET_LEFT +
@@ -1508,9 +1511,13 @@ const DesktopGrid: React.FC = () => {
         draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
         ICON_ROOT_OFFSET_TOP +
         newOffsetY;
+      const iconRight = iconLeft + iconWidth;
+      const iconBottom = iconTop + iconHeight;
 
       let snappedOffsetX = newOffsetX;
       let snappedOffsetY = newOffsetY;
+      let snappedToX = false;
+      let snappedToY = false;
 
       // Snap to vertical grid lines (left edge)
       for (let col = 0; col <= numCols; col++) {
@@ -1521,7 +1528,25 @@ const DesktopGrid: React.FC = () => {
             gridX -
             (draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
               ICON_ROOT_OFFSET_LEFT);
+          snappedToX = true;
           break;
+        }
+      }
+
+      // Snap to vertical grid lines (right edge)
+      if (!snappedToX) {
+        for (let col = 0; col <= numCols; col++) {
+          const gridX =
+            ICON_ROOT_OFFSET_LEFT + col * (iconBox + ICON_HORIZONTAL_PADDING);
+          if (Math.abs(iconRight - gridX) < SNAP_RADIUS) {
+            snappedOffsetX =
+              gridX -
+              (draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
+                ICON_ROOT_OFFSET_LEFT +
+                iconWidth);
+            snappedToX = true;
+            break;
+          }
         }
       }
 
@@ -1534,22 +1559,30 @@ const DesktopGrid: React.FC = () => {
             gridY -
             (draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
               ICON_ROOT_OFFSET_TOP);
+          snappedToY = true;
           break;
         }
       }
 
-      const snappedToX = snappedOffsetX !== newOffsetX;
-      const snappedToY = snappedOffsetY !== newOffsetY;
-
-      // Only snap to a corner if both are close, otherwise snap to just one axis
-      if (snappedToX && snappedToY) {
-        newOffsetX = snappedOffsetX;
-        newOffsetY = snappedOffsetY;
-      } else if (snappedToX) {
-        newOffsetX = snappedOffsetX;
-      } else if (snappedToY) {
-        newOffsetY = snappedOffsetY;
+      // Snap to horizontal grid lines (bottom edge)
+      if (!snappedToY) {
+        for (let row = 0; row <= numRows; row++) {
+          const gridY =
+            ICON_ROOT_OFFSET_TOP + row * (iconBox + ICON_VERTICAL_PADDING);
+          if (Math.abs(iconBottom - gridY) < SNAP_RADIUS) {
+            snappedOffsetY =
+              gridY -
+              (draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
+                ICON_ROOT_OFFSET_TOP +
+                iconHeight);
+            snappedToY = true;
+            break;
+          }
+        }
       }
+
+      newOffsetX = snappedOffsetX;
+      newOffsetY = snappedOffsetY;
     }
 
     setIconsById((prev) => {
