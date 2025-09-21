@@ -88,6 +88,9 @@ const DesktopGrid: React.FC = () => {
   } | null>(null);
   const editIconDropOccurred = useRef(false);
 
+  const shiftSnapActive = useRef(false);
+  const SNAP_RADIUS = 10;
+
   // These padding values affect essentially only the root position of the icons
   // This is not padding between icons
   const ICON_ROOT_OFFSET_TOP = 40;
@@ -1490,8 +1493,64 @@ const DesktopGrid: React.FC = () => {
     const deltaX = currentMouseX - draggedIcon.icon.initialMouseX;
     const deltaY = currentMouseY - draggedIcon.icon.initialMouseY;
 
-    const newOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
-    const newOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
+    let newOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
+    let newOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
+
+    if (e.shiftKey) {
+      shiftSnapActive.current = true;
+
+      // Calculate icon's top-left after offset
+      const iconLeft =
+        draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
+        ICON_ROOT_OFFSET_LEFT +
+        newOffsetX;
+      const iconTop =
+        draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
+        ICON_ROOT_OFFSET_TOP +
+        newOffsetY;
+
+      let snappedOffsetX = newOffsetX;
+      let snappedOffsetY = newOffsetY;
+
+      // Snap to vertical grid lines (left edge)
+      for (let col = 0; col <= numCols; col++) {
+        const gridX =
+          ICON_ROOT_OFFSET_LEFT + col * (iconBox + ICON_HORIZONTAL_PADDING);
+        if (Math.abs(iconLeft - gridX) < SNAP_RADIUS) {
+          snappedOffsetX =
+            gridX -
+            (draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
+              ICON_ROOT_OFFSET_LEFT);
+          break;
+        }
+      }
+
+      // Snap to horizontal grid lines (top edge)
+      for (let row = 0; row <= numRows; row++) {
+        const gridY =
+          ICON_ROOT_OFFSET_TOP + row * (iconBox + ICON_VERTICAL_PADDING);
+        if (Math.abs(iconTop - gridY) < SNAP_RADIUS) {
+          snappedOffsetY =
+            gridY -
+            (draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
+              ICON_ROOT_OFFSET_TOP);
+          break;
+        }
+      }
+
+      const snappedToX = snappedOffsetX !== newOffsetX;
+      const snappedToY = snappedOffsetY !== newOffsetY;
+
+      // Only snap to a corner if both are close, otherwise snap to just one axis
+      if (snappedToX && snappedToY) {
+        newOffsetX = snappedOffsetX;
+        newOffsetY = snappedOffsetY;
+      } else if (snappedToX) {
+        newOffsetX = snappedOffsetX;
+      } else if (snappedToY) {
+        newOffsetY = snappedOffsetY;
+      }
+    }
 
     setIconsById((prev) => {
       const newMap = new Map(prev);
