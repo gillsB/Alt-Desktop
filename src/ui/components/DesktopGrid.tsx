@@ -88,7 +88,6 @@ const DesktopGrid: React.FC = () => {
   } | null>(null);
   const editIconDropOccurred = useRef(false);
 
-  const shiftSnapActive = useRef(false);
   const SNAP_RADIUS = 10;
 
   // These padding values affect essentially only the root position of the icons
@@ -110,6 +109,11 @@ const DesktopGrid: React.FC = () => {
     initialMouseY: number;
     initialOffsetX: number;
     initialOffsetY: number;
+  };
+  type DraggedIconState = {
+    icon: DraggedDesktopIcon;
+    startRow: number;
+    startCol: number;
   };
   const [draggedIcon, setDraggedIcon] = useState<{
     icon: DraggedDesktopIcon;
@@ -1487,103 +1491,18 @@ const DesktopGrid: React.FC = () => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
 
-    const currentMouseX = e.clientX;
-    const currentMouseY = e.clientY;
+    const deltaX = e.clientX - draggedIcon.icon.initialMouseX;
+    const deltaY = e.clientY - draggedIcon.icon.initialMouseY;
 
-    const deltaX = currentMouseX - draggedIcon.icon.initialMouseX;
-    const deltaY = currentMouseY - draggedIcon.icon.initialMouseY;
+    const baseOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
+    const baseOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
 
-    let newOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
-    let newOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
-
-    if (e.shiftKey) {
-      shiftSnapActive.current = true;
-
-      // Calculate icon's top-left after offset
-      const iconWidth = draggedIcon.icon.width || 64;
-      const iconHeight = draggedIcon.icon.height || 64;
-
-      const iconLeft =
-        draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
-        ICON_ROOT_OFFSET_LEFT +
-        newOffsetX;
-      const iconTop =
-        draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
-        ICON_ROOT_OFFSET_TOP +
-        newOffsetY;
-      const iconRight = iconLeft + iconWidth;
-      const iconBottom = iconTop + iconHeight;
-
-      let snappedOffsetX = newOffsetX;
-      let snappedOffsetY = newOffsetY;
-      let snappedToX = false;
-      let snappedToY = false;
-
-      // Snap to vertical grid lines (left edge)
-      for (let col = 0; col <= numCols; col++) {
-        const gridX =
-          ICON_ROOT_OFFSET_LEFT + col * (iconBox + ICON_HORIZONTAL_PADDING);
-        if (Math.abs(iconLeft - gridX) < SNAP_RADIUS) {
-          snappedOffsetX =
-            gridX -
-            (draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
-              ICON_ROOT_OFFSET_LEFT);
-          snappedToX = true;
-          break;
-        }
-      }
-
-      // Snap to vertical grid lines (right edge)
-      if (!snappedToX) {
-        for (let col = 0; col <= numCols; col++) {
-          const gridX =
-            ICON_ROOT_OFFSET_LEFT + col * (iconBox + ICON_HORIZONTAL_PADDING);
-          if (Math.abs(iconRight - gridX) < SNAP_RADIUS) {
-            snappedOffsetX =
-              gridX -
-              (draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
-                ICON_ROOT_OFFSET_LEFT +
-                iconWidth);
-            snappedToX = true;
-            break;
-          }
-        }
-      }
-
-      // Snap to horizontal grid lines (top edge)
-      for (let row = 0; row <= numRows; row++) {
-        const gridY =
-          ICON_ROOT_OFFSET_TOP + row * (iconBox + ICON_VERTICAL_PADDING);
-        if (Math.abs(iconTop - gridY) < SNAP_RADIUS) {
-          snappedOffsetY =
-            gridY -
-            (draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
-              ICON_ROOT_OFFSET_TOP);
-          snappedToY = true;
-          break;
-        }
-      }
-
-      // Snap to horizontal grid lines (bottom edge)
-      if (!snappedToY) {
-        for (let row = 0; row <= numRows; row++) {
-          const gridY =
-            ICON_ROOT_OFFSET_TOP + row * (iconBox + ICON_VERTICAL_PADDING);
-          if (Math.abs(iconBottom - gridY) < SNAP_RADIUS) {
-            snappedOffsetY =
-              gridY -
-              (draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
-                ICON_ROOT_OFFSET_TOP +
-                iconHeight);
-            snappedToY = true;
-            break;
-          }
-        }
-      }
-
-      newOffsetX = snappedOffsetX;
-      newOffsetY = snappedOffsetY;
-    }
+    const [newOffsetX, newOffsetY] = getSnappedOffsets(
+      draggedIcon,
+      baseOffsetX,
+      baseOffsetY,
+      e.shiftKey
+    );
 
     setIconsById((prev) => {
       const newMap = new Map(prev);
@@ -1603,17 +1522,20 @@ const DesktopGrid: React.FC = () => {
     if (!draggedIcon || !editingIconId) return;
 
     e.preventDefault();
+    editIconDropOccurred.current = true;
 
-    editIconDropOccurred.current = true; // Mark that a drop occurred
+    const deltaX = e.clientX - draggedIcon.icon.initialMouseX;
+    const deltaY = e.clientY - draggedIcon.icon.initialMouseY;
 
-    const currentMouseX = e.clientX;
-    const currentMouseY = e.clientY;
+    const baseOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
+    const baseOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
 
-    const deltaX = currentMouseX - draggedIcon.icon.initialMouseX;
-    const deltaY = currentMouseY - draggedIcon.icon.initialMouseY;
-
-    const newOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
-    const newOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
+    const [newOffsetX, newOffsetY] = getSnappedOffsets(
+      draggedIcon,
+      baseOffsetX,
+      baseOffsetY,
+      e.shiftKey
+    );
 
     window.electron.editIconOffsetUpdate(newOffsetX, newOffsetY);
     logger.info(
@@ -1643,6 +1565,91 @@ const DesktopGrid: React.FC = () => {
     editIconDropOccurred.current = false; // Reset for next drag
     resetDragStates();
   };
+
+  function getSnappedOffsets(
+    draggedIcon: DraggedIconState,
+    baseOffsetX: number,
+    baseOffsetY: number,
+    shiftKey: boolean
+  ): [number, number] {
+    let newOffsetX = baseOffsetX;
+    let newOffsetY = baseOffsetY;
+
+    if (shiftKey) {
+      const iconWidth = draggedIcon.icon.width || 64;
+      const iconHeight = draggedIcon.icon.height || 64;
+
+      const baseLeft =
+        draggedIcon.startCol * (iconBox + ICON_HORIZONTAL_PADDING) +
+        ICON_ROOT_OFFSET_LEFT;
+      const baseTop =
+        draggedIcon.startRow * (iconBox + ICON_VERTICAL_PADDING) +
+        ICON_ROOT_OFFSET_TOP;
+
+      const iconLeft = baseLeft + newOffsetX;
+      const iconTop = baseTop + newOffsetY;
+      const iconRight = iconLeft + iconWidth;
+      const iconBottom = iconTop + iconHeight;
+
+      let snappedOffsetX = newOffsetX;
+      let snappedOffsetY = newOffsetY;
+      let snappedToX = false;
+      let snappedToY = false;
+
+      // Snap to vertical grid lines (left edge)
+      for (let col = 0; col <= numCols; col++) {
+        const gridX =
+          ICON_ROOT_OFFSET_LEFT + col * (iconBox + ICON_HORIZONTAL_PADDING);
+        if (Math.abs(iconLeft - gridX) < SNAP_RADIUS) {
+          snappedOffsetX = gridX - baseLeft;
+          snappedToX = true;
+          break;
+        }
+      }
+
+      // Snap to vertical grid lines (right edge)
+      if (!snappedToX) {
+        for (let col = 0; col <= numCols; col++) {
+          const gridX =
+            ICON_ROOT_OFFSET_LEFT + col * (iconBox + ICON_HORIZONTAL_PADDING);
+          if (Math.abs(iconRight - gridX) < SNAP_RADIUS) {
+            snappedOffsetX = gridX - baseLeft - iconWidth;
+            snappedToX = true;
+            break;
+          }
+        }
+      }
+
+      // Snap to horizontal grid lines (top edge)
+      for (let row = 0; row <= numRows; row++) {
+        const gridY =
+          ICON_ROOT_OFFSET_TOP + row * (iconBox + ICON_VERTICAL_PADDING);
+        if (Math.abs(iconTop - gridY) < SNAP_RADIUS) {
+          snappedOffsetY = gridY - baseTop;
+          snappedToY = true;
+          break;
+        }
+      }
+
+      // Snap to horizontal grid lines (bottom edge)
+      if (!snappedToY) {
+        for (let row = 0; row <= numRows; row++) {
+          const gridY =
+            ICON_ROOT_OFFSET_TOP + row * (iconBox + ICON_VERTICAL_PADDING);
+          if (Math.abs(iconBottom - gridY) < SNAP_RADIUS) {
+            snappedOffsetY = gridY - baseTop - iconHeight;
+            snappedToY = true;
+            break;
+          }
+        }
+      }
+
+      newOffsetX = snappedOffsetX;
+      newOffsetY = snappedOffsetY;
+    }
+
+    return [Math.round(newOffsetX), Math.round(newOffsetY)];
+  }
 
   // TODO add drag ctrl modifier which allows freely moving icons, syncs it to nearest icon home,
   // and when dropping saves it with the offsetX/Y values.
