@@ -11,7 +11,7 @@ const logger = createLogger("DesktopGrid.tsx");
 interface ContextMenu {
   x: number;
   y: number;
-  type: "desktop" | "icon" | "hideIcons";
+  type: "desktop" | "iconBox" | "icon" | "hideIcons";
   icon?: DesktopIcon | null;
 }
 
@@ -677,7 +677,7 @@ const DesktopGrid: React.FC = () => {
       setContextMenu({
         x,
         y,
-        type: "icon",
+        type: "iconBox",
         icon: existingIcon,
       });
       logger.info(
@@ -2215,10 +2215,22 @@ const DesktopGrid: React.FC = () => {
             top: `${contextMenu.y}px`,
           }}
         >
-          {contextMenu.type === "desktop" && (
+          {(contextMenu.type === "desktop" ||
+            contextMenu.type === "iconBox") && (
             <>
-              <div className="menu-item" onClick={() => handleEditIcon()}>
-                New Icon
+              <div
+                className="menu-item"
+                onClick={() => {
+                  if (contextMenu.type === "iconBox" && contextMenu.icon) {
+                    handleEditIcon(contextMenu.icon.row, contextMenu.icon.col);
+                  } else {
+                    handleEditIcon();
+                  }
+                }}
+              >
+                {contextMenu.type === "iconBox" && contextMenu.icon
+                  ? `Edit ${contextMenu.icon.name}`
+                  : "New Icon"}
               </div>
               <div className="menu-separator" />
               <div className="menu-item" title="Coming soon">

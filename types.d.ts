@@ -167,6 +167,13 @@ type DesktopIcon = {
   launchDefault: "program" | "website";
 };
 
+interface ContextMenu {
+  x: number;
+  y: number;
+  type: "desktop" | "iconBox" | "icon" | "hideIcons";
+  icon?: DesktopIcon | null;
+}
+
 type VideoMetadata = {
   format: {
     filename: string;
