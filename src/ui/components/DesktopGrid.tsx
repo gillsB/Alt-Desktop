@@ -1499,6 +1499,12 @@ const DesktopGrid: React.FC = () => {
     const baseOffsetX = draggedIcon.icon.initialOffsetX + deltaX;
     const baseOffsetY = draggedIcon.icon.initialOffsetY + deltaY;
 
+    if (e.shiftKey && !showGrid) {
+      setShowGrid(true);
+    } else if (!e.shiftKey && showGrid) {
+      setShowGrid(false);
+    }
+
     const [newOffsetX, newOffsetY] = getSnappedOffsets(
       draggedIcon,
       baseOffsetX,
@@ -1543,6 +1549,10 @@ const DesktopGrid: React.FC = () => {
     logger.info(
       `Dropped icon: [${draggedIcon.icon.name}] with new offsets X: ${newOffsetX}, Y: ${newOffsetY}`
     );
+
+    if (showGrid) {
+      setShowGrid(false);
+    }
 
     resetDragStates();
   };
