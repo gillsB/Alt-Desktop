@@ -1320,6 +1320,7 @@ const DesktopGrid: React.FC = () => {
       }
 
       resetDragStates();
+      hideHighlightBox();
       return;
     }
 
@@ -1355,9 +1356,11 @@ const DesktopGrid: React.FC = () => {
     }
 
     resetDragStates();
+    hideHighlightBox();
   };
   const handleDragEnd = () => {
     resetDragStates();
+    hideHighlightBox();
   };
 
   const resetDragStates = () => {
@@ -1365,7 +1368,6 @@ const DesktopGrid: React.FC = () => {
     setDraggedOffscreenIcon(null);
     setDragPreview(null);
     setSwapPreview(null);
-    hideHighlightBox();
   };
   const hideContextMenu = () => {
     setContextMenu(null);
