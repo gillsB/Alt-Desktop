@@ -200,6 +200,25 @@ const DesktopGrid: React.FC = () => {
     };
   }, []);
 
+  const updateVisibleRowsColsRendererState = async () => {
+    const { visibleRows, visibleCols } = computeVisibleRowsCols();
+    await window.electron.setRendererStates({ visibleRows, visibleCols });
+  }
+
+  useEffect(() => {
+    updateVisibleRowsColsRendererState();
+  }, [iconBox, viewportSize]);
+
+  const computeVisibleRowsCols = () => {
+    const visibleCols = Math.floor(
+      viewportSize.width / (iconBox + ICON_HORIZONTAL_PADDING)
+    );
+    const visibleRows = Math.floor(
+      viewportSize.height / (iconBox + ICON_VERTICAL_PADDING)
+    );
+    return { visibleRows, visibleCols };
+  };
+
   useEffect(() => {
     showAllHighlightsRef.current = showAllHighlights;
   }, [showAllHighlights]);

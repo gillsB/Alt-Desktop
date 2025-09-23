@@ -211,6 +211,8 @@ type RendererStates = {
   hideIcons?: boolean;
   hideIconNames?: boolean;
   profile?: string;
+  visibleRows?: number;
+  visibleCols?: number;
 };
 
 // Items/objects being sent from the renderer to the main process
