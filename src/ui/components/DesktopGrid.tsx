@@ -928,13 +928,31 @@ const DesktopGrid: React.FC = () => {
   const handleOpenBackgroundSelect = async () => {
     const title = await window.electron.getSubWindowTitle();
     if (title) {
-      logger.info(`Not opening settings as subWindow: ${title} already open.`);
+      logger.info(
+        `Not opening BackgroundSelect as subWindow: ${title} already open.`
+      );
       return;
     }
     try {
       await window.electron.openBackgroundSelect();
     } catch (error) {
       logger.error(`Failed to open background select`, error);
+    }
+    hideContextMenu();
+  };
+
+  const handleOpenIconsProfile = async () => {
+    const title = await window.electron.getSubWindowTitle();
+    if (title) {
+      logger.info(
+        `Not opening IconsProfile as subWindow: ${title} already open.`
+      );
+      return;
+    }
+    try {
+      await window.electron.openIconsProfile();
+    } catch (error) {
+      logger.error(`Failed to IconsProfile`, error);
     }
     hideContextMenu();
   };
@@ -2233,7 +2251,11 @@ const DesktopGrid: React.FC = () => {
                   : "New Icon"}
               </div>
               <div className="menu-separator" />
-              <div className="menu-item" title="Coming soon">
+              <div
+                className="menu-item"
+                onClick={handleOpenIconsProfile}
+                title="Coming soon"
+              >
                 Icons Profile
               </div>
               <div className="menu-item" onClick={handleOpenBackgroundSelect}>
