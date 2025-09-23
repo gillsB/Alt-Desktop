@@ -160,6 +160,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("swapDesktopIcons", id1, id2),
   editIconOffsetUpdate: (offsetX: number, offsetY: number) =>
     ipcInvoke("editIconOffsetUpdate", offsetX, offsetY),
+  openIconsProfile: () => ipcInvoke("openIconsProfile"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

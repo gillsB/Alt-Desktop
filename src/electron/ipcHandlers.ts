@@ -1954,4 +1954,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   );
+  ipcMainHandle("openIconsProfile", async (): Promise<boolean> => {
+    try {
+      logger.info("called openIconsProfile");
+      return true;
+    } catch (error) {
+      logger.error(`Error opening settings window: ${error}`);
+      return false;
+    }
+  });
 }
