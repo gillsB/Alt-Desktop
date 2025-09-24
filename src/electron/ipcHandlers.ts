@@ -1859,14 +1859,20 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     logger.warn("getBaseFilePaths, returning empty due to name = " + name);
     return "";
   });
+  ipcMainHandle("getProfiles", async (): Promise<string[]> => {
+    return getProfiles();
+  });
   ipcMainHandle("setRendererStates", (updates: Partial<RendererStates>) => {
-    setRendererStates(updates);
-    logger.info("renderer states updated:", JSON.stringify(updates));
+    if (updates) {
+      setRendererStates(updates);
+      logger.info("renderer states updated:", JSON.stringify(updates));
 
-    for (const win of BrowserWindow.getAllWindows()) {
-      win.webContents.send("renderer-state-updated", updates);
+      for (const win of BrowserWindow.getAllWindows()) {
+        win.webContents.send("renderer-state-updated", updates);
+      }
+      return true;
     }
-    return true;
+    return false;
   });
   ipcMainHandle("getRendererStates", (): Promise<RendererStates> => {
     return getRendererStates();
@@ -1939,9 +1945,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
-  ipcMainHandle("getProfiles", async (): Promise<string[]> => {
-    return getProfiles();
-  });
   ipcMainHandle(
     "moveDesktopIcon",
     async (
