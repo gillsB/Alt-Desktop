@@ -223,8 +223,8 @@ interface EventParamMapping {
   sendHeaderAction: [HeaderAction];
   getDesktopIconData: [profile?: string];
   ensureProfileFolder: [string, copyFromProfile?: string];
-  ensureDataFolder: [string];
-  ensureUniqueIconId: [string];
+  ensureDataFolder: [string, string];
+  ensureUniqueIconId: [string, string];
   saveIconData: [DesktopIcon];
   renameID: [string, string];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
@@ -236,14 +236,14 @@ interface EventParamMapping {
   logMessage: [string, string, string];
   logVideoMessage: [string, string, string];
   openFileDialog: [string, string?];
-  saveIconImage: [string, string];
+  saveIconImage: [string, string, string];
   saveToBackgroundIDFile: [string, string, boolean];
   launchProgram: [string];
   launchWebsite: [string];
   getFilePath: [File];
   getFileType: [string];
-  deleteIcon: [string];
-  deleteIconData: [string];
+  deleteIcon: [string, string];
+  deleteIconData: [string, string];
   openInExplorer: ["image" | "programLink" | "background", string];
   showSmallWindow: [string, string, string[]];
   previewIconUpdate: [string, Partial<DesktopIcon>];
@@ -260,7 +260,7 @@ interface EventParamMapping {
   reloadGrid: [];
   reloadHeader: [];
   getVideoMetadata: [string];
-  generateIcon: [string, string, string];
+  generateIcon: [string, string, string, string];
   selectIconFromList: [string, string[], string, number, number];
   resetAllIconsFontColor: [];
   openBackgroundSelect: [id?: string];
@@ -288,7 +288,7 @@ interface EventParamMapping {
   getRendererStates: [];
   getInfoFromID: [string, InfoKey];
   getInfoFromBgPath: [string, PathKey];
-  renameDataFolder: [string, string];
+  renameDataFolder: [string, string, string];
   getProfiles: [];
   moveDesktopIcon: [string, number, number, offsetReset?: boolean];
   swapDesktopIcons: [string, string];
@@ -397,8 +397,11 @@ interface Window {
       profile: string,
       copyFromProfile?: string
     ) => Promise<boolean>;
-    ensureDataFolder: (id: string) => Promise<boolean>;
-    ensureUniqueIconId: (name: string) => Promise<string | null>;
+    ensureDataFolder: (profile: string, id: string) => Promise<boolean>;
+    ensureUniqueIconId: (
+      profile: string,
+      name: string
+    ) => Promise<string | null>;
     saveIconData: (icon: DesktopIcon) => Promise<boolean>;
     renameID: (oldId: string, newId: string) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, title: string) => void;
@@ -418,7 +421,11 @@ interface Window {
       type: string,
       appDataFilePath?: string
     ) => Promise<string | null>;
-    saveIconImage: (sourcePath: string, id: string) => Promise<string>;
+    saveIconImage: (
+      sourcePath: string,
+      profile: string,
+      id: string
+    ) => Promise<string>;
     saveToBackgroundIDFile: (
       id: string,
       sourcePath: string,
@@ -428,8 +435,8 @@ interface Window {
     launchWebsite: (id: string) => Promise<boolean>;
     getFilePath: (file: File) => string;
     getFileType: (filepath: string) => Promise<string>;
-    deleteIcon: (id: string) => Promise<boolean>;
-    deleteIconData: (id: string) => Promise<boolean>;
+    deleteIcon: (profile: string, id: string) => Promise<boolean>;
+    deleteIconData: (profile: string, id: string) => Promise<boolean>;
     openInExplorer: (
       type: "image" | "programLink" | "background",
       filePath: string
@@ -462,6 +469,7 @@ interface Window {
     reloadHeader: () => Promise<boolean>;
     getVideoMetadata: (filePath: string) => Promise<VideoMetadata>;
     generateIcon: (
+      profile: string,
       id: string,
       programLink: string,
       webLink: string
@@ -513,6 +521,7 @@ interface Window {
       key: K
     ) => Promise<PathInfo<K> | null>;
     renameDataFolder: (
+      profile: string,
       oldFolder: string,
       newFolder: string
     ) => Promise<boolean>;

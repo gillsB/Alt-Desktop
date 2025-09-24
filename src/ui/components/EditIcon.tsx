@@ -165,7 +165,7 @@ const EditIcon: React.FC = () => {
       logger.info(
         "newIcon closed with no changes deleting folder for temp id: " + id
       );
-      await window.electron.deleteIconData(id || "");
+      await window.electron.deleteIconData(profile, id || "");
       closeWindow();
       return;
     }
@@ -183,7 +183,7 @@ const EditIcon: React.FC = () => {
             logger.info(
               "newIcon closing without saving deleting folder for temp id:" + id
             );
-            await window.electron.deleteIconData(id || "");
+            await window.electron.deleteIconData(profile, id || "");
           }
           logger.info("User confirmed to close without saving.");
           closeWindow();
@@ -236,14 +236,17 @@ const EditIcon: React.FC = () => {
 
       // If this is a new icon and the name is empty, rename to unknownIcon_#
       if (isNewIcon && !iconName) {
-        newId = await window.electron.ensureUniqueIconId("unknownIcon");
+        newId = await window.electron.ensureUniqueIconId(
+          profile,
+          "unknownIcon"
+        );
         logger.info(
           "new icon and no name, setting to unknownIcon with id:  " + newId
         );
         nameChanged = true;
       } else if (iconName && baseOldId !== iconName) {
         // Only generate a new id if the name is non-empty and changed
-        newId = await window.electron.ensureUniqueIconId(iconName);
+        newId = await window.electron.ensureUniqueIconId(profile, iconName);
         logger.info("icon name changed, generated new id: " + newId);
         nameChanged = true;
       }
@@ -258,7 +261,7 @@ const EditIcon: React.FC = () => {
       }
       if (nameChanged && newId !== oldId) {
         logger.info("Renaming folder : " + oldId + " To: " + newId);
-        await window.electron.renameDataFolder(oldId, newId);
+        await window.electron.renameDataFolder(profile, oldId, newId);
         await window.electron.renameID(oldId, newId);
       }
 
@@ -274,6 +277,7 @@ const EditIcon: React.FC = () => {
           try {
             const savedFilePath = await window.electron.saveIconImage(
               icon.image,
+              profile,
               icon.id
             );
 
@@ -327,6 +331,7 @@ const EditIcon: React.FC = () => {
     if (!icon) return;
     try {
       let iconPaths = await window.electron.generateIcon(
+        profile,
         icon.id,
         icon.programLink ?? "",
         icon.websiteLink ?? ""

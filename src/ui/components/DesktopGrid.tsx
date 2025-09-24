@@ -203,7 +203,7 @@ const DesktopGrid: React.FC = () => {
   const updateVisibleRowsColsRendererState = async () => {
     const { visibleRows, visibleCols } = computeVisibleRowsCols();
     await window.electron.setRendererStates({ visibleRows, visibleCols });
-  }
+  };
 
   useEffect(() => {
     updateVisibleRowsColsRendererState();
@@ -567,7 +567,10 @@ const DesktopGrid: React.FC = () => {
       // Create an array of promises for ensuring folders
       const folderPromises = data.icons.map(async (icon: DesktopIcon) => {
         // Ensure data folder exists for each icon
-        const success = await window.electron.ensureDataFolder(icon.id);
+        const success = await window.electron.ensureDataFolder(
+          profile,
+          icon.id
+        );
         if (!success) {
           logger.warn(`Failed to create data folder for icon id=${icon.id}`);
         }
@@ -740,7 +743,7 @@ const DesktopGrid: React.FC = () => {
       // If row and col are provided, directly call editIcon
       const icon = getIcon(row, col);
       if (icon) {
-        window.electron.ensureDataFolder(icon.id);
+        window.electron.ensureDataFolder(profile, icon.id);
         window.electron.editIcon(icon.id, row, col);
         await window.electron.setRendererStates({ hideIconNames: false });
         setContextMenu(null);
@@ -777,15 +780,18 @@ const DesktopGrid: React.FC = () => {
         visible: true,
       });
       if (icon) {
-        window.electron.ensureDataFolder(icon.id);
+        window.electron.ensureDataFolder(profile, icon.id);
         window.electron.editIcon(icon.id, validRow, validCol);
         setContextMenu(null);
         setEditingIconId(icon.id); // Lock dragging
       } else {
         // Send preview of default DesktopIcon for new icon
-        const temp_id = await window.electron.ensureUniqueIconId("temp");
+        const temp_id = await window.electron.ensureUniqueIconId(
+          profile,
+          "temp"
+        );
         if (temp_id) {
-          window.electron.ensureDataFolder(temp_id);
+          window.electron.ensureDataFolder(profile, temp_id);
           const defaultIcon = getDefaultDesktopIcon(
             temp_id,
             validRow,
@@ -859,12 +865,12 @@ const DesktopGrid: React.FC = () => {
       try {
         const ret = await showSmallWindow(
           "Delete Icon",
-          `Are you sure you want to delete the icon: ${name} \nat [${row}, ${col}]?`,
+          `Are you sure you want to delete the icon: ${id}, ${name} \nat [${row}, ${col}]?`,
           ["Yes", "No"]
         );
         // Call the Electron API to delete the icon
         if (ret === "Yes") {
-          await window.electron.deleteIcon(id);
+          await window.electron.deleteIcon(profile, id);
           // remove fully from both maps
           removeIconCompletely(id);
           logger.info(`Deleted icon id=${id} at [${row}, ${col}]`);
@@ -1019,20 +1025,41 @@ const DesktopGrid: React.FC = () => {
           if (image === "") {
             image = "default.png";
           }
-          const filePath = `data/${icon.id}/${image}`;
-          logger.info(
-            `Opening image folder for icon: ${name}, path: ${filePath}`
-          );
-          const success = await window.electron.openInExplorer(
-            "image",
-            filePath
-          );
-          if (!success) {
-            logger.error(`Failed to open image folder for icon: ${name}`);
-            await showSmallWindow(
-              "Cannot resolve icon image path",
-              `No image path available for icon: ${name} \nLocalPath: ${filePath}`,
-              ["Okay"]
+          try {
+            const folderPath =
+              await window.electron.getBaseFilePaths("profilespath");
+            logger.info("folderPath =", folderPath); // Check the folderPath value
+
+            if (!folderPath) {
+              throw new Error("Invalid folderPath returned");
+            }
+            logger.info(`icon.id: ${icon.id}, image: ${image}`);
+            const filePath =
+              folderPath + `/${profile}/icons/${icon.id}/${image}`;
+            logger.info("filePath =", filePath); // Check the filePath value
+
+            logger.info(
+              `Opening image folder for icon: ${name}, path: ${filePath}`
+            );
+
+            const success = await window.electron.openInExplorer(
+              "image",
+              filePath
+            );
+            if (success) {
+              logger.info("Explorer opened successfully");
+            } else {
+              logger.error(`Failed to open image folder for icon: ${name}`);
+              await showSmallWindow(
+                "Cannot resolve icon image path",
+                `No image path available for icon: ${name} \nLocalPath: ${filePath}`,
+                ["Okay"]
+              );
+            }
+          } catch (error) {
+            logger.error(
+              "Error during file path creation or explorer opening:",
+              error
             );
           }
           break;
@@ -1816,6 +1843,7 @@ const DesktopGrid: React.FC = () => {
             }}
           >
             <SafeImage
+              profile={profile}
               id={dragPreview.icon.id}
               row={dragPreview.row}
               col={dragPreview.col}
@@ -1866,6 +1894,7 @@ const DesktopGrid: React.FC = () => {
             }}
           >
             <SafeImage
+              profile={profile}
               id={swapPreview.icon.id}
               row={swapPreview.row}
               col={swapPreview.col}
@@ -2098,6 +2127,7 @@ const DesktopGrid: React.FC = () => {
                 }}
               >
                 <SafeImage
+                  profile={profile}
                   id={icon.id}
                   row={row}
                   col={col}
@@ -2459,6 +2489,7 @@ const DesktopGrid: React.FC = () => {
               >
                 <div className="offscreen-icon-image">
                   <SafeImage
+                    profile={profile}
                     id={iconData.icon.id}
                     row={iconData.icon.row}
                     col={iconData.icon.col}

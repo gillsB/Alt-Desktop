@@ -13,7 +13,12 @@ const logger = createLogger("safeImage.tsx");
  * @param timestamp - Optional timestamp for cache busting
  * @returns A safe file URL or fallback image path
  */
-const getImagePath = (imagePath: string, id?: string, timestamp?: number) => {
+const getImagePath = (
+  imagePath: string,
+  profile?: string,
+  id?: string,
+  timestamp?: number
+) => {
   if (imagePath === " " || imagePath.toLowerCase() === "none") {
     return ""; // Return empty string for special cases
   }
@@ -34,7 +39,7 @@ const getImagePath = (imagePath: string, id?: string, timestamp?: number) => {
   if (typeof id === "string") {
     // If imagePath is a local path, append the /data/id
     if (!/^[a-zA-Z]:[\\/]/.test(imagePath)) {
-      const folderPath = `/data/${id}`;
+      const folderPath = `/profiles/${profile}/icons/${id}`;
       const encodedImagePath = encodeURIComponent(imagePath).replace(
         /[()]/g,
         (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
@@ -103,6 +108,7 @@ const getUnknownAssetPath = (timestamp?: number) => {
  */
 const SafeImageComponent: React.FC<{
   imagePath: string;
+  profile?: string;
   id?: string;
   row?: number;
   col?: number;
@@ -113,6 +119,7 @@ const SafeImageComponent: React.FC<{
   forceReload?: number;
 }> = ({
   imagePath,
+  profile,
   id,
   row,
   col,
@@ -146,7 +153,12 @@ const SafeImageComponent: React.FC<{
       return;
     }
 
-    const newImageSrc = getImagePath(imagePath, id, forceReload || undefined);
+    const newImageSrc = getImagePath(
+      imagePath,
+      profile,
+      id,
+      forceReload || undefined
+    );
 
     if (newImageSrc !== imageSrc) {
       setImageSrc(newImageSrc);

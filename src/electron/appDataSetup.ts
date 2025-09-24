@@ -6,7 +6,6 @@ import {
   ensureFileExists,
   getBackgroundFilePath,
   getBackgroundsJsonFilePath,
-  getDataFolderPath,
   getDefaultProfileJsonPath,
   getLogsFolderPath,
   getProfilesPath,
@@ -27,7 +26,6 @@ const logger = createLoggerForFile("appDataSetup.ts");
  */
 export const ensureAppDataFiles = () => {
   try {
-    const dataFolderPath = getDataFolderPath();
     const logsFolderPath = getLogsFolderPath();
     const settingsFilePath = getSettingsFilePath();
     const backgroundFilePath = getBackgroundFilePath();
@@ -43,13 +41,6 @@ export const ensureAppDataFiles = () => {
       logger.info("Logs folder created successfully.");
     } else {
       logger.info("Logs folder already exists:", logsFolderPath);
-    }
-    if (!fs.existsSync(dataFolderPath)) {
-      logger.info("Data folder does not exist, creating:", dataFolderPath);
-      fs.mkdirSync(dataFolderPath, { recursive: true });
-      logger.info("Data folder created successfully.");
-    } else {
-      logger.info("Data folder already exists:", dataFolderPath);
     }
     if (!fs.existsSync(backgroundFilePath)) {
       logger.info(

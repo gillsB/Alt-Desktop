@@ -57,8 +57,8 @@ import {
   getBackgroundsJsonFilePath,
   getBasePath,
   getBgJsonFile,
-  getDataFolderPath,
   getDesktopIcon,
+  getIconsFolderPath,
   getLogsFolderPath,
   getProfileJsonPath,
   getProfiles,
@@ -237,31 +237,36 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   );
 
-  ipcMainHandle("ensureDataFolder", async (id: string): Promise<boolean> => {
-    try {
-      const fullPath = path.join(getDataFolderPath(), id);
+  ipcMainHandle(
+    "ensureDataFolder",
+    async (profile: string, id: string): Promise<boolean> => {
+      try {
+        const fullPath = path.join(getIconsFolderPath(profile), id);
 
-      if (!fs.existsSync(fullPath)) {
-        logger.info(`Data folder ${id} does not exist, creating: ${fullPath}`);
-        fs.mkdirSync(fullPath, { recursive: true });
-        logger.info(`Data folder ${id} created successfully.`);
+        if (!fs.existsSync(fullPath)) {
+          logger.info(
+            `Data folder ${id} does not exist, creating: ${fullPath}`
+          );
+          fs.mkdirSync(fullPath, { recursive: true });
+          logger.info(`Data folder ${id} created successfully.`);
+        }
+
+        // Ensure Data file exists
+        return ensureFileExists(fullPath, { icons: [] });
+      } catch (error) {
+        logger.error(`Error ensuring Data folder ${id}: ${error}`);
+        return false;
       }
-
-      // Ensure Data file exists
-      return ensureFileExists(fullPath, { icons: [] });
-    } catch (error) {
-      logger.error(`Error ensuring Data folder ${id}: ${error}`);
-      return false;
     }
-  });
+  );
 
   ipcMainHandle(
     "ensureUniqueIconId",
-    async (name: string): Promise<string | null> => {
+    async (profile: string, name: string): Promise<string | null> => {
       logger.info("ensureUniqueIconId called with: ", name);
 
       const baseName = name;
-      const dataFolder = getDataFolderPath();
+      const dataFolder = getIconsFolderPath(profile);
 
       let folderNames: string[] = [];
       try {
@@ -553,8 +558,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle(
     "saveIconImage",
-    async (sourcePath: string, id: string): Promise<string> => {
-      const targetDir = path.join(getDataFolderPath(), `${id}`);
+    async (
+      sourcePath: string,
+      profile: string,
+      id: string
+    ): Promise<string> => {
+      const targetDir = path.join(getIconsFolderPath(profile), `${id}`);
 
       const ext = path.extname(sourcePath);
       const baseName = path.basename(sourcePath, ext);
@@ -970,92 +979,97 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return "";
     }
   });
-  ipcMainHandle("deleteIcon", async (id: string): Promise<boolean> => {
-    const profile = await getRendererState("profile");
-    const filePath = await getSelectedProfilePath();
-
-    try {
-      logger.info(`Deleting icon ${id} from ${filePath}`);
-
-      // Ensure the file exists
-      if (!fs.existsSync(filePath)) {
-        logger.warn(`File not found: ${filePath}`);
-        return false;
-      }
-
-      // Read the JSON file
-      const data = fs.readFileSync(filePath, "utf-8");
-      const desktopData: DesktopIconData = JSON.parse(data);
-
-      // Filter out the icon with the matching row and col
-      const updatedIcons = desktopData.icons.filter((icon) => icon.id !== id);
-
-      if (updatedIcons.length === desktopData.icons.length) {
-        logger.warn(`No icon found to delete.`);
-        return false; // No icon was deleted
-      }
-
-      // Update the JSON data
-      desktopData.icons = updatedIcons;
-
-      // Write the updated JSON back to the file
-      fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
-      logger.info(`Successfully deleted icon: ${id}`);
+  ipcMainHandle(
+    "deleteIcon",
+    async (profile: string, id: string): Promise<boolean> => {
+      const filePath = await getSelectedProfilePath();
 
       try {
-        const profilesPath = getProfilesPath();
-        const profileFolders = fs
-          .readdirSync(profilesPath, { withFileTypes: true })
-          .filter((dirent) => dirent.isDirectory())
-          .map((dirent) => dirent.name);
+        logger.info(`Deleting icon ${id} from ${filePath}`);
 
-        for (const folder of profileFolders) {
-          // Skip current profile
-          if (folder === profile) continue;
-          const profileJsonPath = path.join(
-            profilesPath,
-            folder,
-            "profile.json"
-          );
-          if (fs.existsSync(profileJsonPath)) {
-            try {
-              const data = fs.readFileSync(profileJsonPath, "utf-8");
-              const parsed: DesktopIconData = JSON.parse(data);
-              if (Array.isArray(parsed.icons)) {
-                if (parsed.icons.some((icon) => icon.id === id)) {
-                  logger.info(
-                    `icon found in profile: ${folder}, keeping data folder`
-                  );
-                  return true; // Early return if found in another profile
-                }
-              }
-            } catch (err) {
-              logger.error(
-                `Failed to read or parse ${profileJsonPath}: ${err}`
-              );
-            }
-          }
+        // Ensure the file exists
+        if (!fs.existsSync(filePath)) {
+          logger.warn(`File not found: ${filePath}`);
+          return false;
         }
 
-        // Icon is unique to this profile, delete its data folder
-        await deleteIconData(id);
-        logger.info(
-          `Icon ${id} was unique to profile ${profile}, deleted its data folder.`
-        );
-      } catch (err) {
-        logger.error(`Error checking icon usage in other profiles: ${err}`);
+        // Read the JSON file
+        const data = fs.readFileSync(filePath, "utf-8");
+        const desktopData: DesktopIconData = JSON.parse(data);
+
+        // Filter out the icon with the matching row and col
+        const updatedIcons = desktopData.icons.filter((icon) => icon.id !== id);
+
+        if (updatedIcons.length === desktopData.icons.length) {
+          logger.warn(`No icon found to delete.`);
+          return false; // No icon was deleted
+        }
+
+        // Update the JSON data
+        desktopData.icons = updatedIcons;
+
+        // Write the updated JSON back to the file
+        fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
+        logger.info(`Successfully deleted icon: ${id}`);
+
+        try {
+          const profilesPath = getProfilesPath();
+          const profileFolders = fs
+            .readdirSync(profilesPath, { withFileTypes: true })
+            .filter((dirent) => dirent.isDirectory())
+            .map((dirent) => dirent.name);
+
+          for (const folder of profileFolders) {
+            // Skip current profile
+            if (folder === profile) continue;
+            const profileJsonPath = path.join(
+              profilesPath,
+              folder,
+              "profile.json"
+            );
+            if (fs.existsSync(profileJsonPath)) {
+              try {
+                const data = fs.readFileSync(profileJsonPath, "utf-8");
+                const parsed: DesktopIconData = JSON.parse(data);
+                if (Array.isArray(parsed.icons)) {
+                  if (parsed.icons.some((icon) => icon.id === id)) {
+                    logger.info(
+                      `icon found in profile: ${folder}, keeping data folder`
+                    );
+                    return true; // Early return if found in another profile
+                  }
+                }
+              } catch (err) {
+                logger.error(
+                  `Failed to read or parse ${profileJsonPath}: ${err}`
+                );
+              }
+            }
+          }
+
+          // Icon is unique to this profile, delete its data folder
+          await deleteIconData(profile, id);
+          logger.info(
+            `Icon ${id} was unique to profile ${profile}, deleted its data folder.`
+          );
+        } catch (err) {
+          logger.error(`Error checking icon usage in other profiles: ${err}`);
+        }
+
+        return true;
+      } catch (error) {
+        logger.error(`Error deleting icon ${id}: ${error}`);
+        return false;
       }
-
-      return true;
-    } catch (error) {
-      logger.error(`Error deleting icon ${id}: ${error}`);
-      return false;
     }
-  });
+  );
 
-  ipcMainHandle("deleteIconData", async (id: string): Promise<boolean> => {
-    return deleteIconData(id);
-  });
+  ipcMainHandle(
+    "deleteIconData",
+    async (profile: string, id: string): Promise<boolean> => {
+      return deleteIconData(profile, id);
+    }
+  );
 
   ipcMainHandle(
     "openInExplorer",
@@ -1395,11 +1409,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "generateIcon",
     async (
+      profile: string,
       id: string,
       filePath: string,
       webLink: string
     ): Promise<string[]> => {
-      const savePath = path.join(getDataFolderPath(), `${id}`);
+      const savePath = path.join(getIconsFolderPath(profile), `${id}`);
       logger.info("savePath= ", savePath);
       return generateIcon(savePath, filePath, webLink);
     }
@@ -1828,8 +1843,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
     const normalizedName = name.toLowerCase().replace(/\s+/g, "");
     switch (normalizedName) {
-      case "datafolderpath":
-        return getDataFolderPath();
+      case "profilespath":
+        return getProfilesPath();
+      case "iconsfolderpath":
+        return getIconsFolderPath((await getRendererState("profile")) || "");
       case "logsfolderpath":
         return getLogsFolderPath();
       case "settingsfilepath":
@@ -1890,9 +1907,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
   ipcMainHandle(
     "renameDataFolder",
-    async (oldFolder: string, newFolder: string): Promise<boolean> => {
+    async (
+      profile: string,
+      oldFolder: string,
+      newFolder: string
+    ): Promise<boolean> => {
       try {
-        const dataFolder = getDataFolderPath();
+        const dataFolder = getIconsFolderPath(profile);
         const oldPath = path.join(dataFolder, oldFolder);
         const newPath = path.join(dataFolder, newFolder);
 

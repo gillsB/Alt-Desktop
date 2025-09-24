@@ -54,6 +54,66 @@ export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
 }
 
+/**
+ * Retrieves the appData path for "AltDesktop" within the user's AppData/Roaming directory.
+ *
+ * @returns {string} The full path ..../AppData/Roaming/AltDesktop
+ * @throws {Error} If the APPDATA environment variable is not in process.env.APPDATA
+ *
+ */
+export const getAppDataPath = (): string => {
+  const appDataPath = process.env.APPDATA;
+  if (!appDataPath) {
+    logger.error("APPDATA environment variable is not set.");
+    throw new Error("APPDATA environment variable is not set.");
+  }
+  return path.join(appDataPath, "AltDesktop");
+};
+
+export const getBasePath = (): string => {
+  return getAppDataPath();
+};
+
+export const getIconsFolderPath = (profile: string): string => {
+  const profilesPath = getProfilesPath();
+  const profilePath = path.join(profilesPath, profile);
+  return path.join(profilePath, "icons");
+};
+
+export const getLogsFolderPath = (): string => {
+  return path.join(getBasePath(), "logs");
+};
+
+export const getSettingsFilePath = (): string => {
+  return path.join(getBasePath(), "settings.json");
+};
+
+export const getBackgroundFilePath = (): string => {
+  const bgPath = getSetting("defaultBackgroundPath") as string;
+  if (bgPath) {
+    return bgPath;
+  } else {
+    return path.join(getBasePath(), "backgrounds");
+  }
+};
+
+export const getBackgroundsJsonFilePath = (): string => {
+  return path.join(getBasePath(), "backgrounds.json");
+};
+
+export const getProfilesPath = (): string => {
+  return path.join(getBasePath(), "profiles");
+};
+export const getDefaultProfileJsonPath = (): string => {
+  const defaultFolder = path.join(getProfilesPath(), "default");
+  return path.join(defaultFolder, "profile.json");
+};
+
+export const getProfileJsonPath = (profileName: string): string => {
+  const profileFolder = path.join(getProfilesPath(), profileName);
+  return path.join(profileFolder, "profile.json");
+};
+
 interface ErrorDetails {
   name: string;
   message: string;
@@ -226,22 +286,6 @@ export const ensureFileExists = (
     logger.error("Failed to create file:", filePath, error);
     return false;
   }
-};
-
-/**
- * Retrieves the appData path for "AltDesktop" within the user's AppData/Roaming directory.
- *
- * @returns {string} The full path ..../AppData/Roaming/AltDesktop
- * @throws {Error} If the APPDATA environment variable is not in process.env.APPDATA
- *
- */
-export const getAppDataPath = (): string => {
-  const appDataPath = process.env.APPDATA;
-  if (!appDataPath) {
-    logger.error("APPDATA environment variable is not set.");
-    throw new Error("APPDATA environment variable is not set.");
-  }
-  return path.join(appDataPath, "AltDesktop");
 };
 
 /**
@@ -948,48 +992,6 @@ export const parseSearchQuery = (search: string) => {
   return null;
 };
 
-export const getBasePath = (): string => {
-  return getAppDataPath();
-};
-
-export const getDataFolderPath = (): string => {
-  return path.join(getBasePath(), "data");
-};
-
-export const getLogsFolderPath = (): string => {
-  return path.join(getBasePath(), "logs");
-};
-
-export const getSettingsFilePath = (): string => {
-  return path.join(getBasePath(), "settings.json");
-};
-
-export const getBackgroundFilePath = (): string => {
-  const bgPath = getSetting("defaultBackgroundPath") as string;
-  if (bgPath) {
-    return bgPath;
-  } else {
-    return path.join(getBasePath(), "backgrounds");
-  }
-};
-
-export const getBackgroundsJsonFilePath = (): string => {
-  return path.join(getBasePath(), "backgrounds.json");
-};
-
-export const getProfilesPath = (): string => {
-  return path.join(getBasePath(), "profiles");
-};
-export const getDefaultProfileJsonPath = (): string => {
-  const defaultFolder = path.join(getProfilesPath(), "default");
-  return path.join(defaultFolder, "profile.json");
-};
-
-export const getProfileJsonPath = (profileName: string): string => {
-  const profileFolder = path.join(getProfilesPath(), profileName);
-  return path.join(profileFolder, "profile.json");
-};
-
 // Helper: concurrency-limited promise pool
 export async function promisePool<T>(
   items: T[],
@@ -1229,8 +1231,8 @@ export function calculateSubWindowDimensions(
   return { actualWidth, actualHeight };
 }
 
-export async function deleteIconData(id: string) {
-  const iconFolderPath = path.join(getDataFolderPath(), `${id}`);
+export async function deleteIconData(profile: string, id: string) {
+  const iconFolderPath = path.join(getIconsFolderPath(profile), `${id}`);
   if (fs.existsSync(iconFolderPath)) {
     await shell.trashItem(iconFolderPath);
     logger.info(`Successfully moved folder to recycle bin: ${iconFolderPath}`);

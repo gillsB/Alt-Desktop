@@ -36,8 +36,10 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getSafeFileUrl: (relativePath: string) => getSafeFileUrl(relativePath),
   ensureProfileFolder: (profile: string, copyFromProfile?: string) =>
     ipcInvoke("ensureProfileFolder", profile, copyFromProfile),
-  ensureDataFolder: (id: string) => ipcInvoke("ensureDataFolder", id),
-  ensureUniqueIconId: (name: string) => ipcInvoke("ensureUniqueIconId", name),
+  ensureDataFolder: (profile: string, id: string) =>
+    ipcInvoke("ensureDataFolder", profile, id),
+  ensureUniqueIconId: (profile: string, name: string) =>
+    ipcInvoke("ensureUniqueIconId", profile, name),
   saveIconData: (icon: DesktopIcon) => ipcInvoke("saveIconData", icon),
   renameID: (oldId: string, newId: string) =>
     ipcInvoke("renameID", oldId, newId),
@@ -63,16 +65,18 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("logVideoMessage", level, file, message),
   openFileDialog: (type: string, appDataFilePath?: string) =>
     ipcInvoke("openFileDialog", type, appDataFilePath),
-  saveIconImage: (sourcePath: string, id: string) =>
-    ipcInvoke("saveIconImage", sourcePath, id),
+  saveIconImage: (sourcePath: string, profile: string, id: string) =>
+    ipcInvoke("saveIconImage", sourcePath, profile, id),
   saveToBackgroundIDFile: (id: string, sourcePath: string, saveFile: boolean) =>
     ipcInvoke("saveToBackgroundIDFile", id, sourcePath, saveFile),
   launchProgram: (id: string) => ipcInvoke("launchProgram", id),
   launchWebsite: (id: string) => ipcInvoke("launchWebsite", id),
   getFilePath: (file: File) => webUtils.getPathForFile(file),
   getFileType: (filepath: string) => ipcInvoke("getFileType", filepath),
-  deleteIcon: (id: string) => ipcInvoke("deleteIcon", id),
-  deleteIconData: (id: string) => ipcInvoke("deleteIconData", id),
+  deleteIcon: (profile: string, id: string) =>
+    ipcInvoke("deleteIcon", profile, id),
+  deleteIconData: (profile: string, id: string) =>
+    ipcInvoke("deleteIconData", profile, id),
   openInExplorer: (
     type: "image" | "programLink" | "background",
     filePath: string
@@ -104,8 +108,12 @@ electron.contextBridge.exposeInMainWorld("electron", {
   reloadHeader: () => ipcInvoke("reloadHeader"),
   getVideoMetadata: (filePath: string): Promise<VideoMetadata> =>
     ipcInvoke("getVideoMetadata", filePath),
-  generateIcon: (id: string, programLink: string, webLink: string) =>
-    ipcInvoke("generateIcon", id, programLink, webLink),
+  generateIcon: (
+    profile: string,
+    id: string,
+    programLink: string,
+    webLink: string
+  ) => ipcInvoke("generateIcon", profile, id, programLink, webLink),
   selectIconFromList: (
     title: string,
     images: string[],
@@ -147,8 +155,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("getInfoFromID", id, type) as Promise<IDInfo[K] | null>,
   getInfoFromBgPath: <K extends PathKey>(path: string, type: K) =>
     ipcInvoke("getInfoFromBgPath", path, type) as Promise<PathInfo[K] | null>,
-  renameDataFolder: (oldFolder: string, newFolder: string) =>
-    ipcInvoke("renameDataFolder", oldFolder, newFolder),
+  renameDataFolder: (profile: string, oldFolder: string, newFolder: string) =>
+    ipcInvoke("renameDataFolder", profile, oldFolder, newFolder),
   getProfiles: () => ipcInvoke("getProfiles"),
   moveDesktopIcon: (
     id: string,
