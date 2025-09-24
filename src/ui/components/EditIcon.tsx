@@ -479,7 +479,7 @@ const EditIcon: React.FC = () => {
 
   const handleImageMagnifyClick = async () => {
     if (icon) {
-      const filePath = `data/${id}/`;
+      const filePath = `profiles/${profile}/icons/${id}/`;
 
       const success = await window.electron.openFileDialog("image", filePath);
       logger.info("Open file dialog result:", success);

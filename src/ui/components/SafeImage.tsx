@@ -37,7 +37,7 @@ const getImagePath = (
 
   // If id provided
   if (typeof id === "string") {
-    // If imagePath is a local path, append the /data/id
+    // If imagePath is a local path, append the directory setup
     if (!/^[a-zA-Z]:[\\/]/.test(imagePath)) {
       const folderPath = `/profiles/${profile}/icons/${id}`;
       const encodedImagePath = encodeURIComponent(imagePath).replace(
