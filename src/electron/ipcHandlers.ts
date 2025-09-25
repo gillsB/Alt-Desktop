@@ -283,29 +283,37 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return null;
       }
 
-      // Collect all folder names that match baseName or baseName_N
+      // Ensure case-insensitive (Windows folders are case-insensitive)
+      const lowerBaseName = baseName.toLowerCase();
       const takenIds = new Set(
-        folderNames.filter((id) => {
-          if (!id) return false;
-          // Match baseName or baseName_N (where N is a number)
-          return (
-            id === baseName ||
-            id.match(new RegExp(`^${escapeRegExp(baseName)}(_\\d+)?$`))
-          );
-        })
+        folderNames
+          .filter((id) => {
+            if (!id) return false;
+            // Match baseName or baseName_N (where N is a number)
+            const lowerId = id.toLowerCase();
+            return (
+              lowerId === lowerBaseName ||
+              lowerId.match(
+                new RegExp(`^${escapeRegExp(lowerBaseName)}(_\\d+)?$`, "i")
+              )
+            );
+          })
+          .map((id) => id.toLowerCase())
       );
 
       // If baseName is not taken, use it
-      if (!takenIds.has(baseName)) {
+      if (!takenIds.has(lowerBaseName)) {
         return baseName;
       }
 
       // Otherwise, find the next available baseName_N
       let counter = 1;
       let candidate = `${baseName}_${counter}`;
-      while (takenIds.has(candidate)) {
+      let lowerCandidate = candidate.toLowerCase();
+      while (takenIds.has(lowerCandidate)) {
         counter++;
         candidate = `${baseName}_${counter}`;
+        lowerCandidate = candidate.toLowerCase();
       }
       return candidate;
     }
