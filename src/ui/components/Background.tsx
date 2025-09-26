@@ -218,10 +218,10 @@ const Background: React.FC<BackgroundProps> = ({
         "received preview-background-update with: ",
         JSON.stringify(updates)
       );
-      if (typeof updates.id === "string" && updates.id !== backgroundPath) {
+      if (typeof updates.id === "string") {
         logger.info("Updating background to:", updates.id);
         backgroundId.current = updates.id || "";
-        if (updates.id === "fallback") {
+        if (updates.id === "fallback" || updates.id === "") {
           logger.info("Background set to fallback, skipping background logic.");
           setBackgroundPath("");
           return;
