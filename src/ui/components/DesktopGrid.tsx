@@ -1380,6 +1380,18 @@ const DesktopGrid: React.FC = () => {
             true
           );
           window.electron.reloadIcon(draggedIcon.icon.id);
+        } else if (draggedIcon.icon.offsetX || draggedIcon.icon.offsetY) {
+          // If dropped back to original position but has offset, reset offset
+          logger.info(
+            `Resetting offset for icon: ${draggedIcon.icon.name} at [${dropRow}, ${dropCol}]`
+          );
+          window.electron.moveDesktopIcon(
+            draggedIcon.icon.id,
+            dropRow,
+            dropCol,
+            true
+          );
+          window.electron.reloadIcon(draggedIcon.icon.id);
         }
       }
 
