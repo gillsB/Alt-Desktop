@@ -342,6 +342,18 @@ const BackgroundSelect: React.FC = () => {
   };
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleClose]);
+
+  useEffect(() => {
     const handleClickOutside = () => {
       setContextMenu(null);
     };
