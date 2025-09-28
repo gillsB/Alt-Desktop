@@ -526,6 +526,18 @@ const EditBackground: React.FC = () => {
     window.electron.openBackgroundSelect();
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleClose]); // Needs updated handleClose reference or does not detect changes.
+
   const getChanges = (): boolean => {
     const orig = originalSummary.current;
     const curr = summary;

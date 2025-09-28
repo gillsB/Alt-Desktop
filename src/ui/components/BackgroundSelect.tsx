@@ -351,7 +351,7 @@ const BackgroundSelect: React.FC = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [handleClose]); // Not required, but added in case handleClose is updated to use things like states.
 
   useEffect(() => {
     const handleClickOutside = () => {
