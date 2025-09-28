@@ -351,7 +351,7 @@ const BackgroundSelect: React.FC = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleClose]);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = () => {

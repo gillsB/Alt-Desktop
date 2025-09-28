@@ -53,6 +53,8 @@ const EditBackground: React.FC = () => {
         localTags: [],
       };
 
+  const originalSummary = useRef<BackgroundSummary>(initialSummary);
+
   const [summary, setSummary] = useState<BackgroundSummary>(initialSummary);
   const [bgFileType, setBgFileType] = useState<string | null>(null);
   const [saveBgFileAsShortcut, setSaveBgFileAsShortcut] =
@@ -508,10 +510,35 @@ const EditBackground: React.FC = () => {
     }));
   };
 
-  const handleClose = () => {
-    logger.info("Closing EditBackground");
+  const handleClose = async () => {
+    logger.info("Attempting to close EditBackground");
+    if (getChanges()) {
+      const ret = await showSmallWindow(
+        "Close Without Saving",
+        "Close without saving the changes?",
+        ["Yes", "No"]
+      );
+      if (ret !== "Yes") {
+        return;
+      }
+    }
     window.electron.reloadBackground();
     window.electron.openBackgroundSelect();
+  };
+
+  const getChanges = (): boolean => {
+    const orig = originalSummary.current;
+    const curr = summary;
+    for (const key of Object.keys(orig) as (keyof BackgroundSummary)[]) {
+      if (Array.isArray(orig[key]) || Array.isArray(curr[key])) {
+        if (JSON.stringify(orig[key]) !== JSON.stringify(curr[key])) {
+          return true;
+        }
+      } else if (orig[key] !== curr[key]) {
+        return true;
+      }
+    }
+    return false;
   };
 
   // Save handler

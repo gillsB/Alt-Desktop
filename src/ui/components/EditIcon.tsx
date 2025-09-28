@@ -206,7 +206,7 @@ const EditIcon: React.FC = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleClose]);
+  }, [handleClose]); // needs updated version of handleClose
 
   const closeWindow = async () => {
     // reload icon
