@@ -60,8 +60,35 @@ const EditBackground: React.FC = () => {
   const [saveBgFileAsShortcut, setSaveBgFileAsShortcut] =
     useState<boolean>(true);
 
+  // SUB MODALS
   const [showAddTag, setShowAddTag] = useState(false);
   const [showEditCategories, setShowEditCategories] = useState(false);
+  const [renameModal, setRenameModal] = useState<{
+    tag: LocalTag;
+    category: string;
+  } | null>(null);
+  const [showAddProfile, setShowAddProfile] = useState(false);
+
+  const showAddTagRef = useRef(false);
+  const showEditCategoriesRef = useRef(false);
+  const renameModalRef = useRef<{ tag: LocalTag; category: string } | null>(
+    null
+  );
+  const showAddProfileRef = useRef(false);
+
+  useEffect(() => {
+    showAddTagRef.current = showAddTag;
+  }, [showAddTag]);
+  useEffect(() => {
+    showEditCategoriesRef.current = showEditCategories;
+  }, [showEditCategories]);
+  useEffect(() => {
+    renameModalRef.current = renameModal;
+  }, [renameModal]);
+  useEffect(() => {
+    logger.info("updating showAddProfileRef:", showAddProfile);
+    showAddProfileRef.current = showAddProfile;
+  }, [showAddProfile]);
 
   const [ids, setIds] = useState<Set<string>>(new Set<string>());
   const [isHoveringBgFile, setIsHoveringBgFile] = useState(false);
@@ -83,7 +110,6 @@ const EditBackground: React.FC = () => {
   const [bgSaveProgress, setBgSaveProgress] = useState<number | null>(null);
 
   const [profiles, setProfiles] = useState<string[]>([]);
-  const [showAddProfile, setShowAddProfile] = useState(false);
 
   // Filtered public categories/tags
   const filteredPublicTagCategories = React.useMemo(() => {
@@ -529,10 +555,28 @@ const EditBackground: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        if (
+          showAddTagRef.current ||
+          showEditCategoriesRef.current ||
+          renameModalRef.current ||
+          showAddProfileRef.current
+        ) {
+          logger.info(
+            "Sub-modal open, closing sub-modal instead of EditBackground"
+          );
+          setShowAddTag(false);
+          setShowEditCategories(false);
+          setRenameModal(null);
+          setShowAddProfile(false);
+          return;
+        }
+        logger.info("No sub-modals open, closing EditBackground");
         handleClose();
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
@@ -874,11 +918,6 @@ const EditBackground: React.FC = () => {
     await window.electron.updateLocalTag(tag.name, updatedTag);
     await loadLocalTags();
   };
-
-  const [renameModal, setRenameModal] = useState<{
-    tag: LocalTag;
-    category: string;
-  } | null>(null);
 
   // Handler for starting edit
   const handleRenameTag = (tag: LocalTag, category: string) => {

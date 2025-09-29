@@ -182,9 +182,6 @@ export const RenameTagModal: React.FC<{
             onChange={handleInputChange}
             autoFocus
             className="create-tag-input"
-            onKeyDown={async (e) => {
-              if (e.key === "Escape") onCancel();
-            }}
           />
         </div>
       </div>

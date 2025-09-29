@@ -82,7 +82,6 @@ const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
               placeholder="Enter new profile name"
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === "Escape") onClose?.();
                 if (e.key === "Enter") handleCreateProfile();
               }}
             />
