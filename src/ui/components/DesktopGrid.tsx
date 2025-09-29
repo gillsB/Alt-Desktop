@@ -383,6 +383,9 @@ const DesktopGrid: React.FC = () => {
         ...prev,
         position: { x: 50, y: 50 },
       }));
+    } else {
+      // Hide grid on toggling off highlights
+      setShowGrid(false);
     }
     setShowAllHighlights(newShowAllHighlights);
 
