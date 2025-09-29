@@ -62,6 +62,18 @@ const Settings: React.FC = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "Settings");
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleClose]);
+
   const handleSave = async () => {
     if (!getChanges()) {
       logger.info("No changes detected, closing settings.");
