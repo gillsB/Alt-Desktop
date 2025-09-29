@@ -44,6 +44,7 @@ const BackgroundSelect: React.FC = () => {
   const [pageInputValue, setPageInputValue] = useState("");
 
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const showFilterPanelRef = useRef(showFilterPanel);
   const [filterOptions, setFilterOptions] = useState(() =>
     Object.fromEntries(publicTagsFlat.map((tag) => [tag, false]))
   );
@@ -91,6 +92,10 @@ const BackgroundSelect: React.FC = () => {
     };
     fetchRendererStates();
   }, []);
+
+  useEffect(() => {
+    showFilterPanelRef.current = showFilterPanel;
+  }, [showFilterPanel]);
 
   useEffect(() => {
     const updateStates = (...args: unknown[]) => {
@@ -344,6 +349,10 @@ const BackgroundSelect: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        if (showFilterPanelRef.current) {
+          setShowFilterPanel(false);
+          return;
+        }
         handleClose();
       }
     };
