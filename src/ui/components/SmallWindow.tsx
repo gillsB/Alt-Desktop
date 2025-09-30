@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { useLocation } from "react-router-dom";
 import "../styles/SmallWindow.css";
@@ -24,6 +24,22 @@ const SmallWindow: React.FC = () => {
     });
     window.close();
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        window.electron.sendButtonResponse({
+          windowId,
+          buttonText: "Escape",
+        });
+        window.close();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   return (
     <div className="small-window-container">
