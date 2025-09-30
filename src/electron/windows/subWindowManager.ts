@@ -132,7 +132,8 @@ export function openSubWindow(
 export function showSmallWindow(
   title: string,
   message: string,
-  buttons: string[] = ["Okay"]
+  buttons: string[] = ["Okay"],
+  closeable: boolean = true
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     try {
@@ -176,11 +177,11 @@ export function showSmallWindow(
       if (isDev()) {
         smallWindowUrl = `http://localhost:5123/#/small-window?title=${encodeURIComponent(
           title
-        )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}&windowId=${windowId}`;
+        )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}&windowId=${windowId}&closeable=${closeable}`;
       } else {
         smallWindowUrl = `${pathToFileURL(getUIPath()).toString()}#/small-window?title=${encodeURIComponent(
           title
-        )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}&windowId=${windowId}`;
+        )}&message=${encodeURIComponent(message)}&buttons=${encodedButtons}&windowId=${windowId}&closeable=${closeable}`;
       }
 
       logger.info(`Loading small window URL: ${smallWindowUrl}`);

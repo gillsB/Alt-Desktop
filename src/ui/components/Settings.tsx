@@ -24,8 +24,16 @@ const Settings: React.FC = () => {
   const [isHoveringExternalBg, setHoveringExternalBg] = useState(false);
   const colorInputRef = useRef<HTMLInputElement>(null);
 
+  const [changes, setChanges] = useState(false);
+
+  const [pendingSave, setPendingSave] = useState(false);
+
   const handleClose = async () => {
-    if (getChanges()) {
+    if (pendingSave) {
+      logger.info("Save is pending, ignoring close request.");
+      return;
+    }
+    if (getChanges() || changes) {
       try {
         const ret = await showSmallWindow(
           "Close Without Saving",
@@ -75,6 +83,7 @@ const Settings: React.FC = () => {
   }, [handleClose]);
 
   const handleSave = async () => {
+    setPendingSave(true);
     if (!getChanges()) {
       logger.info("No changes detected, closing settings.");
       handleClose();
@@ -124,6 +133,7 @@ const Settings: React.FC = () => {
         closeWindow();
       } else {
         logger.error("Failed to save settings.");
+        setPendingSave(false);
       }
     } else {
       logger.error("No settings to save.");
@@ -133,6 +143,7 @@ const Settings: React.FC = () => {
         "No settings to save. \nClick yes to continue closing settings.",
         ["Yes", "No"]
       );
+      setPendingSave(false);
       if (ret === "Yes") {
         closeWindow();
       }
@@ -308,13 +319,27 @@ const Settings: React.FC = () => {
             value={externalPathsInput}
             onChange={(e) => {
               setExternalPathsInput(e.target.value);
-              const paths = e.target.value
+              setChanges(true);
+            }}
+            title="Full filepath separated by commas. List of folders to include in background indexing/saving"
+            onBlur={() => {
+              setChanges(false);
+              const paths = externalPathsInput
                 .split(",")
                 .map((s) => s.trim())
                 .filter(Boolean);
               updateSetting("externalPaths", paths);
             }}
-            title="Full filepath separated by commas. List of folders to include in background indexing/saving"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setChanges(false);
+                const paths = externalPathsInput
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean);
+                updateSetting("externalPaths", paths);
+              }
+            }}
             placeholder="Enter external paths here"
           />
           <button
@@ -425,7 +450,7 @@ const Settings: React.FC = () => {
               onClick={async () => {
                 const ret = await showSmallWindow(
                   "Reset All Icon Font Colors",
-                  "Do you want to reset **ALL ICONS**\n to use the default font color? \nThis does not require a save,\nand **CANNOT be undone.**",
+                  "Do you want to reset **ALL ICONS**\n in the current profile\nto use the default font color? \nThis does not require a save,\nand **CANNOT be undone.**",
                   ["Yes", "No"]
                 );
                 if (ret === "Yes") {

@@ -12,6 +12,7 @@ const SmallWindow: React.FC = () => {
   const title = queryParams.get("title") || "SmallWindow";
   const message = queryParams.get("message") || "No message provided.";
   const windowId = parseInt(queryParams.get("windowId") || "-1", 10); // Get the windowId from query parameters
+  const closeable = queryParams.get("closeable") === "true";
   const buttons: string[] = JSON.parse(
     queryParams.get("buttons") || '["Okay"]'
   );
@@ -27,6 +28,9 @@ const SmallWindow: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!closeable) {
+        return;
+      }
       if (e.key === "Escape") {
         window.electron.sendButtonResponse({
           windowId,
@@ -46,15 +50,17 @@ const SmallWindow: React.FC = () => {
       <header className="subwindow-header">
         <div className="header-title">{title}</div>
         <div className="window-controls">
-          <button
-            id="close"
-            onClick={() => {
-              logger.info("Close button clicked");
-              handleButtonClick("Close");
-            }}
-          >
-            ✕
-          </button>
+          {closeable && (
+            <button
+              id="close"
+              onClick={() => {
+                logger.info("Close button clicked");
+                handleButtonClick("Close");
+              }}
+            >
+              ✕
+            </button>
+          )}
         </div>
       </header>
       <div className="small-window-content">

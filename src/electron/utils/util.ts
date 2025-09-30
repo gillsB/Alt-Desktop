@@ -528,8 +528,11 @@ export async function indexBackgrounds(options?: {
     const choice = await showSmallWindow(
       "Import Backgrounds",
       `Existing bg.json files found in ${source} path(s) that are not indexed. \nHow would you like to import them?`,
-      ["Import as New (Appear first)", "Import with Saved Date"]
+      ["Import as New (Appear first)", "Import with Saved Date"],
+      false
     );
+    // Defaults to Import as New, only true if user explicitly chooses "Import with Saved Date"
+    // If user somehow closes smallWindow without choosing, it indexes as new.
     importWithSavedDate = choice === "Import with Saved Date";
   }
 
