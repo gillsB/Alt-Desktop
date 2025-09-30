@@ -276,22 +276,11 @@ const Settings: React.FC = () => {
             id="default-background-path"
             type="text"
             value={defaultBackgroundPathInput}
-            onChange={(e) => setDefaultBackgroundPathInput(e.target.value)}
+            onChange={(e) => {
+              setDefaultBackgroundPathInput(e.target.value);
+              updateSetting("defaultBackgroundPath", e.target.value);
+            }}
             title="Folder path for default backgrounds. Used for saving and indexing backgrounds."
-            onBlur={() => {
-              updateSetting(
-                "defaultBackgroundPath",
-                defaultBackgroundPathInput
-              );
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                updateSetting(
-                  "defaultBackgroundPath",
-                  defaultBackgroundPathInput
-                );
-              }
-            }}
             placeholder="Enter default background folder path"
           />
           <button
@@ -317,24 +306,15 @@ const Settings: React.FC = () => {
             id="external-paths"
             type="text"
             value={externalPathsInput}
-            onChange={(e) => setExternalPathsInput(e.target.value)}
-            title="Full filepath separated by commas. List of folders to include in background indexing/saving"
-            onBlur={() => {
-              const paths = externalPathsInput
+            onChange={(e) => {
+              setExternalPathsInput(e.target.value);
+              const paths = e.target.value
                 .split(",")
                 .map((s) => s.trim())
                 .filter(Boolean);
               updateSetting("externalPaths", paths);
             }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                const paths = externalPathsInput
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean);
-                updateSetting("externalPaths", paths);
-              }
-            }}
+            title="Full filepath separated by commas. List of folders to include in background indexing/saving"
             placeholder="Enter external paths here"
           />
           <button
