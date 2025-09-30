@@ -156,7 +156,14 @@ const Background: React.FC<BackgroundProps> = ({
   }, []);
 
   const setVolumeFromDefault = async (id?: string) => {
-    logger.info("setVolumeFromDefault called with id:", id);
+    if (id) {
+      logger.info("setVolumeFromDefault called with id:", id);
+    } else {
+      logger.info(
+        "setVolumeFromDefault called with no id, using backgroundId:",
+        backgroundId.current
+      );
+    }
     const vol = await window.electron.getInfoFromID(
       id || backgroundId.current || "",
       "volume"
@@ -649,7 +656,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   useEffect(() => {
     if (positionRef.current.x === -100 && positionRef.current.y === -100) {
       const x = window.innerWidth / 2 - componentWidth / 2;
-      const y = window.innerHeight - componentHeight - 50;
+      const y = window.innerHeight - componentHeight - 90;
       positionRef.current = { x, y };
     }
   }, []);
