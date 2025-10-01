@@ -669,6 +669,11 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     const controlsWidth = componentWidth;
     const controlsHeight = componentHeight;
 
+    const legend = document.querySelector(
+      ".show-all-highlights-legend"
+    ) as HTMLElement;
+    const legendRect = legend ? legend.getBoundingClientRect() : null;
+
     let x = positionRef.current.x;
     let y = positionRef.current.y;
     const minX = 0;
@@ -679,8 +684,18 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     // Check if offscreen
     const isOffscreen = x < minX || y < minY || x > maxX || y > maxY;
 
+    // Check if overlapping legend
+    let overlapsLegend = false;
+    if (legendRect) {
+      const overlapX =
+        x < legendRect.right && x + controlsWidth > legendRect.left;
+      const overlapY =
+        y < legendRect.bottom && y + controlsHeight > legendRect.top;
+      overlapsLegend = overlapX && overlapY;
+    }
+
     // If offscreen or overlapping legend, reset to default spawn position
-    if (isOffscreen) {
+    if (isOffscreen || overlapsLegend) {
       const { x: defX, y: defY } = defaultSpawnPosition();
       x = defX;
       y = defY;
