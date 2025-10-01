@@ -80,6 +80,14 @@ export function openSubWindow(
     }) as CustomBrowserWindow;
     activeSubWindow.customTitle = title;
 
+    // Disable windows default context-menu for webkit-app-region: drag; areas
+    // (the default menu functions destroy/bug out subWindow objects)
+    const WM_INITMENU = 0x0116;
+    activeSubWindow.hookWindowMessage(WM_INITMENU, () => {
+      activeSubWindow?.setEnabled(false);
+      activeSubWindow?.setEnabled(true);
+    });
+
     // Generate the subwindow URL
     let subWindowUrl: string;
     if (isDev()) {
@@ -214,6 +222,14 @@ export function showSmallWindow(
             pendingResponse.resolve(buttons[0] || "");
           }
         }
+      });
+
+      // Disable windows default context-menu for webkit-app-region: drag; areas
+      // (the default menu functions can cause issues with electron child windows)
+      const WM_INITMENU = 0x0116;
+      smallWindow.hookWindowMessage(WM_INITMENU, () => {
+        smallWindow?.setEnabled(false);
+        smallWindow?.setEnabled(true);
       });
 
       if (isDev() && smallWindowDevtoolsEnabled()) {
