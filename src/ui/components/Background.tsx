@@ -653,13 +653,61 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   const componentWidth = 385;
   const componentHeight = 55;
 
+  const defaultSpawnPosition = () => ({
+    x: window.innerWidth / 2 - componentWidth / 2,
+    y: window.innerHeight - componentHeight - 90,
+  });
+
   useEffect(() => {
     if (positionRef.current.x === -100 && positionRef.current.y === -100) {
-      const x = window.innerWidth / 2 - componentWidth / 2;
-      const y = window.innerHeight - componentHeight - 90;
+      const { x, y } = defaultSpawnPosition();
       positionRef.current = { x, y };
     }
   }, []);
+
+  const clampOrResetControlsPosition = () => {
+    const controlsWidth = componentWidth;
+    const controlsHeight = componentHeight;
+
+    let x = positionRef.current.x;
+    let y = positionRef.current.y;
+    const minX = 0;
+    const minY = 0;
+    const maxX = window.innerWidth - controlsWidth;
+    const maxY = window.innerHeight - controlsHeight;
+
+    // Check if offscreen
+    const isOffscreen = x < minX || y < minY || x > maxX || y > maxY;
+
+    // If offscreen or overlapping legend, reset to default spawn position
+    if (isOffscreen) {
+      const { x: defX, y: defY } = defaultSpawnPosition();
+      x = defX;
+      y = defY;
+    } else {
+      // Otherwise, clamp to viewport
+      x = Math.max(minX, Math.min(x, maxX));
+      y = Math.max(minY, Math.min(y, maxY));
+    }
+
+    positionRef.current = { x, y };
+    const controlsElement = document.querySelector(
+      ".video-controls"
+    ) as HTMLElement;
+    if (controlsElement) {
+      controlsElement.style.left = `${x}px`;
+      controlsElement.style.top = `${y}px`;
+    }
+  };
+
+  useEffect(() => {
+    // Clamp on window resize
+    const handleResize = () => clampOrResetControlsPosition();
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [VideoControls]);
 
   // Sync play/pause state
   useEffect(() => {
@@ -813,6 +861,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
 
     const handleMouseUp = () => {
       setDragging(false);
+      clampOrResetControlsPosition();
       document.body.style.userSelect = "";
     };
 
