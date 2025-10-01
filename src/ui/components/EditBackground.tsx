@@ -587,10 +587,29 @@ const EditBackground: React.FC = () => {
     const curr = summary;
     for (const key of Object.keys(orig) as (keyof BackgroundSummary)[]) {
       if (Array.isArray(orig[key]) || Array.isArray(curr[key])) {
-        if (JSON.stringify(orig[key]) !== JSON.stringify(curr[key])) {
+        const original = orig[key] as string[];
+        const current = curr[key] as string[];
+        if (original.length !== current.length) {
+          logger.info(
+            `Change detected in array key ${key}:`,
+            orig[key],
+            curr[key]
+          );
+          return true;
+        }
+        const originalSorted = [...original].sort();
+        const currentSorted = [...current].sort();
+        // If any value is different, return true
+        if (!originalSorted.every((val, idx) => val === currentSorted[idx])) {
+          logger.info(
+            `Change detected in array key ${key}:`,
+            originalSorted,
+            currentSorted
+          );
           return true;
         }
       } else if (orig[key] !== curr[key]) {
+        logger.info(`Change detected in key ${key}:`, orig[key], curr[key]);
         return true;
       }
     }
