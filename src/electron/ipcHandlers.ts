@@ -65,6 +65,7 @@ import {
   getProfilesPath,
   getSelectedProfilePath,
   getSettingsFilePath,
+  importIconsFromDesktop,
   indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
@@ -2000,7 +2001,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("importIconsFromDesktop", async (): Promise<boolean> => {
     try {
       logger.info("called importIconsFromDesktop");
-      return true;
+      const ret = importIconsFromDesktop();
+      return ret;
     } catch (error) {
       logger.error(`Error importing icons from desktop: ${error}`);
       return false;

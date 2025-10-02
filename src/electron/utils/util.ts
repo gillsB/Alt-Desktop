@@ -1642,3 +1642,22 @@ async function retryRemoveFolder(
 
   return false;
 }
+
+/**
+ * Logs the names of all files and folders on the user's desktop.
+ */
+export async function importIconsFromDesktop(): Promise<boolean> {
+  try {
+    const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
+    if (!fs.existsSync(desktopPath)) {
+      logger.warn(`Desktop path does not exist: ${desktopPath}`);
+      return false;
+    }
+    const files = await fs.promises.readdir(desktopPath);
+    logger.info("Files on Desktop:", files);
+    return true;
+  } catch (error) {
+    logger.error("Failed to import icons from desktop:", error);
+    return false;
+  }
+}
