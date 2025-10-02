@@ -1644,6 +1644,81 @@ async function retryRemoveFolder(
   return false;
 }
 
+/**
+ * Saves an image file to the icon's data folder.
+ * Returns the local file name (e.g. "icon.png").
+ */
+export function saveImageToIconFolder(
+  sourcePath: string,
+  profile: string,
+  id: string
+): string {
+  const targetDir = path.join(getIconsFolderPath(profile), `${id}`);
+
+  const ext = path.extname(sourcePath);
+  const baseName = path.basename(sourcePath, ext);
+
+  // Verify that the source file exists
+  if (!fs.existsSync(sourcePath)) {
+    logger.error(
+      `saveImageToIconFolder Source file does not exist: ${sourcePath}`
+    );
+    throw new Error(`Source file does not exist: ${sourcePath}`);
+  }
+
+  // Ensure the target directory exists
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+
+  // If already in the target directory, just return the file name
+  if (sourcePath.startsWith(targetDir)) {
+    logger.info("Source already in target directory, skipping copy.");
+    return path.basename(sourcePath);
+  }
+
+  // Check for existing files with the same name or name with a counter
+  const filesInDir = fs.readdirSync(targetDir);
+  for (const file of filesInDir) {
+    logger.info(`Checking file: ${file}`);
+    const fileExt = path.extname(file);
+    const fileBaseName = path.basename(file, fileExt);
+
+    // Match files with the same base name or base name with a counter
+    const escapedBaseName = escapeRegExp(baseName);
+    const baseNameRegex = new RegExp(`^${escapedBaseName}(\\(\\d+\\))?$`, "i");
+    if (
+      baseNameRegex.test(fileBaseName) &&
+      fileExt.toLowerCase() === ext.toLowerCase()
+    ) {
+      const existingFilePath = path.join(targetDir, file);
+      logger.info(`Found matching base name file: ${existingFilePath}`);
+      // Compare the two files to see if they are the same
+      if (
+        fs.readFileSync(sourcePath).equals(fs.readFileSync(existingFilePath))
+      ) {
+        logger.info(`Matching file found: ${file}`);
+        return file; // Return the matching file's name
+      }
+    }
+  }
+
+  let localFileName = `${baseName}${ext}`;
+  let targetPath = path.join(targetDir, localFileName);
+  let counter = 1;
+
+  // Increment filename if it already exists
+  while (fs.existsSync(targetPath)) {
+    localFileName = `${baseName}(${counter})${ext}`;
+    targetPath = path.join(targetDir, localFileName);
+    counter++;
+  }
+  fs.copyFileSync(sourcePath, targetPath);
+  logger.info(`Image saved to: ${targetPath}`);
+
+  return localFileName;
+}
+
 export async function importIconsFromDesktop(
   profile: string
 ): Promise<DesktopIcon | null> {

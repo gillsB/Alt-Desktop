@@ -236,7 +236,7 @@ interface EventParamMapping {
   logMessage: [string, string, string];
   logVideoMessage: [string, string, string];
   openFileDialog: [string, string?];
-  saveIconImage: [string, string, string];
+  saveImageToIconFolder: [string, string, string];
   saveToBackgroundIDFile: [string, string, boolean];
   launchProgram: [string];
   launchWebsite: [string];
@@ -321,7 +321,7 @@ type EventPayloadMapping = {
   logMessage: boolean;
   logVideoMessage: boolean;
   openFileDialog: string | null;
-  saveIconImage: string;
+  saveImageToIconFolder: string;
   saveToBackgroundIDFile: string;
   launchProgram: boolean;
   launchWebsite: boolean;
@@ -423,7 +423,7 @@ interface Window {
       type: string,
       appDataFilePath?: string
     ) => Promise<string | null>;
-    saveIconImage: (
+    saveImageToIconFolder: (
       sourcePath: string,
       profile: string,
       id: string

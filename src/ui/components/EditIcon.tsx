@@ -286,7 +286,7 @@ const EditIcon: React.FC = () => {
         if (fileType.startsWith("image/")) {
           logger.info(`Resolving full file path for image: ${icon.image}`);
           try {
-            const savedFilePath = await window.electron.saveIconImage(
+            const savedFilePath = await window.electron.saveImageToIconFolder(
               icon.image,
               profile,
               icon.id
@@ -313,7 +313,7 @@ const EditIcon: React.FC = () => {
           }
         } else {
           logger.warn(
-            `SaveIconImage failed with ${icon.image}, external drive detected but fileType not image ${fileType}`
+            `saveImageToIconFolder failed with ${icon.image}, external drive detected but fileType not image ${fileType}`
           );
         }
       }

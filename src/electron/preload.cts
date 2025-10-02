@@ -65,8 +65,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("logVideoMessage", level, file, message),
   openFileDialog: (type: string, appDataFilePath?: string) =>
     ipcInvoke("openFileDialog", type, appDataFilePath),
-  saveIconImage: (sourcePath: string, profile: string, id: string) =>
-    ipcInvoke("saveIconImage", sourcePath, profile, id),
+  saveImageToIconFolder: (sourcePath: string, profile: string, id: string) =>
+    ipcInvoke("saveImageToIconFolder", sourcePath, profile, id),
   saveToBackgroundIDFile: (id: string, sourcePath: string, saveFile: boolean) =>
     ipcInvoke("saveToBackgroundIDFile", id, sourcePath, saveFile),
   launchProgram: (id: string) => ipcInvoke("launchProgram", id),
