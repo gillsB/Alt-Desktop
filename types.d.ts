@@ -294,6 +294,7 @@ interface EventParamMapping {
   swapDesktopIcons: [string, string];
   editIconOffsetUpdate: [number, number];
   openIconsProfile: [];
+  importIconsFromDesktop: [];
 }
 
 // The returns from the main process to the renderer
@@ -377,6 +378,7 @@ type EventPayloadMapping = {
   swapDesktopIcons: boolean;
   editIconOffsetUpdate: boolean;
   openIconsProfile: boolean;
+  importIconsFromDesktop: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -535,5 +537,6 @@ interface Window {
     swapDesktopIcons: (id1: string, id2: string) => Promise<boolean>;
     editIconOffsetUpdate: (offsetX: number, offsetY: number) => void;
     openIconsProfile: () => Promise<boolean>;
+    importIconsFromDesktop: () => Promise<boolean>;
   };
 }

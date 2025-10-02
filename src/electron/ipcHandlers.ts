@@ -1997,4 +1997,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+  ipcMainHandle("importIconsFromDesktop", async (): Promise<boolean> => {
+    try {
+      logger.info("called importIconsFromDesktop");
+      return true;
+    } catch (error) {
+      logger.error(`Error importing icons from desktop: ${error}`);
+      return false;
+    }
+  });
 }
