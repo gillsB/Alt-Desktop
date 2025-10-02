@@ -1998,13 +1998,29 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+
   ipcMainHandle("importIconsFromDesktop", async (): Promise<boolean> => {
     try {
       logger.info("called importIconsFromDesktop");
-      const ret = importIconsFromDesktop();
-      return ret;
+      const profile = (await getRendererState("profile")) || "";
+      const icon = await importIconsFromDesktop(profile);
+
+      if (!icon) return false;
+
+      const saved = await saveIconData(icon);
+
+      if (saved) {
+        if (mainWindow) {
+          mainWindow.webContents.send("reload-icon", { id: icon.id, icon });
+        }
+        logger.info(`Imported and saved icon from Desktop: ${icon.name}`);
+        return true;
+      } else {
+        logger.warn("Failed to save icon from Desktop.");
+        return false;
+      }
     } catch (error) {
-      logger.error(`Error importing icons from desktop: ${error}`);
+      logger.error("Error importing icons from desktop:", error);
       return false;
     }
   });

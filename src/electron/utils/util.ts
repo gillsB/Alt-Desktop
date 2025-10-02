@@ -16,6 +16,7 @@ import {
   getAllowedUrls,
   showSmallWindow,
 } from "../windows/subWindowManager.js";
+import { generateIcon } from "./generateIcon.js";
 import { idToBgJsonPath } from "./idToInfo.js";
 import { getRendererState } from "./rendererStates.js";
 
@@ -1643,21 +1644,50 @@ async function retryRemoveFolder(
   return false;
 }
 
-/**
- * Logs the names of all files and folders on the user's desktop.
- */
-export async function importIconsFromDesktop(): Promise<boolean> {
+export async function importIconsFromDesktop(
+  profile: string
+): Promise<DesktopIcon | null> {
   try {
     const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
     if (!fs.existsSync(desktopPath)) {
       logger.warn(`Desktop path does not exist: ${desktopPath}`);
-      return false;
+      return null;
     }
     const files = await fs.promises.readdir(desktopPath);
     logger.info("Files on Desktop:", files);
-    return true;
+
+    if (!files.length) {
+      logger.warn("No files found on Desktop.");
+      return null;
+    }
+
+    // TODO: for now we are just grabbing the first file/folder
+    const first = files[0];
+    const firstPath = path.join(desktopPath, first);
+
+    const iconId = first;
+    const iconFolder = path.join(getIconsFolderPath(profile), iconId);
+    if (!fs.existsSync(iconFolder)) {
+      fs.mkdirSync(iconFolder, { recursive: true });
+    }
+    const generatedImages = await generateIcon(iconFolder, firstPath, "");
+    const image = generatedImages[0] || "";
+    logger.info("Generated icon image:", image);
+
+    const icon: DesktopIcon = {
+      id: iconId,
+      name: first,
+      row: 0,
+      col: 0,
+      image,
+      programLink: firstPath,
+      launchDefault: "program",
+    };
+
+    logger.info("Importing icon:", JSON.stringify(icon));
+    return icon;
   } catch (error) {
-    logger.error("Failed to import icons from desktop:", error);
-    return false;
+    logger.error("Error importing icons from desktop:", error);
+    return null;
   }
 }
