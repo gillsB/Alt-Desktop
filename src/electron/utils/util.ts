@@ -1749,11 +1749,11 @@ export async function importIconsFromDesktop(
 
     let image = "";
 
-    const mimeType = mime.lookup(firstPath);
+    let mimeType = mime.lookup(firstPath);
 
     if (!mimeType) {
-      logger.warn(`Could not determine MIME type for file: ${path}`);
-      return null;
+      logger.warn(`Could not determine MIME type for file: ${firstPath}`);
+      mimeType = "unknown";
     }
     // If it's an image, save directly. Otherwise, generate icon.
     if (mimeType.startsWith("image/")) {
