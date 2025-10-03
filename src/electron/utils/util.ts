@@ -1737,9 +1737,45 @@ export async function importIconsFromDesktop(
       return null;
     }
 
-    // TODO: for now we are just grabbing the first file/folder
-    const first = files[0];
-    const firstPath = path.join(desktopPath, first);
+    // Fetch current profile's DesktopIconData
+    const profileJsonPath = getProfileJsonPath(profile);
+    let existingIcons: DesktopIcon[] = [];
+    if (fs.existsSync(profileJsonPath)) {
+      try {
+        const data = fs.readFileSync(profileJsonPath, "utf-8");
+        const parsedData: DesktopIconData = JSON.parse(data);
+        existingIcons = parsedData.icons || [];
+      } catch (e) {
+        logger.warn("Failed to read profile icon data:", e);
+      }
+    }
+
+    // Helper to check if a file is already an icon (by programLink)
+    function isAlreadyIcon(filePath: string): boolean {
+      const normFilePath = path.resolve(filePath).toLowerCase();
+      return existingIcons.some(
+        (icon) =>
+          icon.programLink &&
+          path.resolve(icon.programLink).toLowerCase() === normFilePath
+      );
+    }
+
+    // Find the first file/folder not already imported as an icon
+    let first: string | undefined;
+    let firstPath: string | undefined;
+    for (const file of files) {
+      const candidatePath = path.join(desktopPath, file);
+      if (!isAlreadyIcon(candidatePath)) {
+        first = file;
+        firstPath = candidatePath;
+        break;
+      }
+    }
+
+    if (!first || !firstPath) {
+      logger.warn("No new files found on Desktop to import as icon.");
+      return null;
+    }
 
     const iconId = first;
     const iconFolder = path.join(getIconsFolderPath(profile), iconId);
