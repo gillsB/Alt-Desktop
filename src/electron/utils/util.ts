@@ -1750,13 +1750,14 @@ export async function importIconsFromDesktop(
       }
     }
 
-    // Helper to check if a file is already an icon (by programLink)
-    function isAlreadyIcon(filePath: string): boolean {
+    // Check if icon exists with same name as filePath and program path as programLink
+    function isAlreadyIcon(filePath: string, candidateName: string): boolean {
       const normFilePath = path.resolve(filePath).toLowerCase();
       return existingIcons.some(
         (icon) =>
           icon.programLink &&
-          path.resolve(icon.programLink).toLowerCase() === normFilePath
+          path.resolve(icon.programLink).toLowerCase() === normFilePath &&
+          icon.name === candidateName
       );
     }
 
@@ -1765,7 +1766,7 @@ export async function importIconsFromDesktop(
     let firstPath: string | undefined;
     for (const file of files) {
       const candidatePath = path.join(desktopPath, file);
-      if (!isAlreadyIcon(candidatePath)) {
+      if (!isAlreadyIcon(candidatePath, file)) {
         first = file;
         firstPath = candidatePath;
         break;
