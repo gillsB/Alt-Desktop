@@ -8,6 +8,7 @@ import {
 } from "electron";
 import fs from "fs";
 import fsExtra from "fs-extra";
+import mime from "mime-types";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
 import { PUBLIC_TAG_CATEGORIES } from "../publicTags.js";
@@ -1745,9 +1746,24 @@ export async function importIconsFromDesktop(
     if (!fs.existsSync(iconFolder)) {
       fs.mkdirSync(iconFolder, { recursive: true });
     }
-    const generatedImages = await generateIcon(iconFolder, firstPath, "");
-    const image = generatedImages[0] || "";
-    logger.info("Generated icon image:", image);
+
+    let image = "";
+
+    const mimeType = mime.lookup(firstPath);
+
+    if (!mimeType) {
+      logger.warn(`Could not determine MIME type for file: ${path}`);
+      return null;
+    }
+    // If it's an image, save directly. Otherwise, generate icon.
+    if (mimeType.startsWith("image/")) {
+      image = saveImageToIconFolder(firstPath, profile, iconId);
+    } else {
+      // TODO for now this is just setting it to the first image returned from generateIcon. (might not be the most desired one)
+      const generatedImages = await generateIcon(iconFolder, firstPath, "");
+      image = generatedImages[0] || "";
+      logger.info("Generated icon image:", image);
+    }
 
     const icon: DesktopIcon = {
       id: iconId,
