@@ -1722,19 +1722,19 @@ export function saveImageToIconFolder(
 
 export async function importIconsFromDesktop(
   profile: string
-): Promise<DesktopIcon | null> {
+): Promise<DesktopIcon[]> {
   try {
     const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
     if (!fs.existsSync(desktopPath)) {
       logger.warn(`Desktop path does not exist: ${desktopPath}`);
-      return null;
+      return [];
     }
     const files = await fs.promises.readdir(desktopPath);
     logger.info("Files on Desktop:", files);
 
     if (!files.length) {
       logger.warn("No files found on Desktop.");
-      return null;
+      return [];
     }
 
     // Fetch current profile's DesktopIconData
@@ -1758,6 +1758,11 @@ export async function importIconsFromDesktop(
     logger.info(`Max visible rows: ${maxRows}, Max visible cols: ${maxCols}`);
     logger.info("Taken icon coordinates:", takenCoordinates.join(", "));
 
+    // Create a set of taken coordinates for quick lookup
+    const takenCoords = new Set(
+      existingIcons.map((icon) => `${icon.row},${icon.col}`)
+    );
+
     // Check if icon exists with same name as filePath and program path as programLink
     function isAlreadyIcon(filePath: string, candidateName: string): boolean {
       const normFilePath = path.resolve(filePath).toLowerCase();
@@ -1769,69 +1774,102 @@ export async function importIconsFromDesktop(
       );
     }
 
-    // Find the first file/folder not already imported as an icon
-    let first: string | undefined;
-    let firstPath: string | undefined;
+    // Find all files/folders not already imported as icons
+    const filesToImport: Array<{ name: string; path: string }> = [];
     for (const file of files) {
       const candidatePath = path.join(desktopPath, file);
       if (!isAlreadyIcon(candidatePath, file)) {
-        first = file;
-        firstPath = candidatePath;
-        break;
+        filesToImport.push({ name: file, path: candidatePath });
       }
     }
 
-    if (!first || !firstPath) {
-      logger.warn("No new files found on Desktop to import as icon.");
-      return null;
+    if (!filesToImport.length) {
+      logger.warn("No new files found on Desktop to import as icons.");
+      return [];
     }
 
-    const iconId = await ensureUniqueIconId(profile, first);
-    if (!iconId) {
-      logger.error("Failed to generate unique icon ID.");
-      return null;
-    }
-    const iconFolder = path.join(getIconsFolderPath(profile), iconId);
-    if (!fs.existsSync(iconFolder)) {
-      fs.mkdirSync(iconFolder, { recursive: true });
-    }
+    logger.info(`Found ${filesToImport.length} new files to import.`);
 
-    let image = "";
+    // Function to get next available coordinate
+    function getNextAvailableCoordinate(): { row: number; col: number } {
+      let col = 0;
+      let row = 0;
 
-    let mimeType = mime.lookup(firstPath);
+      while (true) {
+        // Check if current position is taken
+        if (!takenCoords.has(`${row},${col}`)) {
+          takenCoords.add(`${row},${col}`); // Mark as taken
+          return { row, col };
+        }
 
-    if (!mimeType) {
-      logger.warn(`Could not determine MIME type for file: ${firstPath}`);
-      mimeType = "unknown";
-    }
-    // If it's an image, save directly. Otherwise, generate icon.
-    if (mimeType.startsWith("image/")) {
-      image = saveImageToIconFolder(firstPath, profile, iconId);
-    } else {
-      // TODO for now this is just setting it to the first image returned from generateIcon. (might not be the most desired one)
-      const generatedImages = await generateIcon(iconFolder, firstPath, "");
-      image = generatedImages[0] || "";
-      logger.info("Generated icon image:", image);
+        // Move to next position
+        row++;
+        if (row >= (typeof maxRows === "number" ? maxRows : 10)) {
+          row = 0;
+          col++;
+        }
+      }
     }
 
-    const icon: DesktopIcon = {
-      id: iconId,
-      name: first,
-      row: 0,
-      col: 0,
-      image,
-      programLink: firstPath,
-      launchDefault: "program",
-    };
+    const importedIcons: DesktopIcon[] = [];
 
-    logger.info("Importing icon:", JSON.stringify(icon));
-    return icon;
+    // Import all files
+    for (const file of filesToImport) {
+      try {
+        const iconId = await ensureUniqueIconId(profile, file.name);
+        if (!iconId) {
+          logger.error(`Failed to generate unique icon ID for ${file.name}`);
+          continue;
+        }
+
+        const iconFolder = path.join(getIconsFolderPath(profile), iconId);
+        if (!fs.existsSync(iconFolder)) {
+          fs.mkdirSync(iconFolder, { recursive: true });
+        }
+
+        let image = "";
+        let mimeType = mime.lookup(file.path);
+
+        if (!mimeType) {
+          logger.warn(`Could not determine MIME type for file: ${file.path}`);
+          mimeType = "unknown";
+        }
+
+        // If it's an image, save directly. Otherwise, generate icon.
+        if (mimeType.startsWith("image/")) {
+          image = saveImageToIconFolder(file.path, profile, iconId);
+        } else {
+          const generatedImages = await generateIcon(iconFolder, file.path, "");
+          image = generatedImages[0] || "";
+          logger.info("Generated icon image:", image);
+        }
+
+        const { row, col } = getNextAvailableCoordinate();
+
+        const icon: DesktopIcon = {
+          id: iconId,
+          name: file.name,
+          row,
+          col,
+          image,
+          programLink: file.path,
+          launchDefault: "program",
+        };
+
+        logger.info(`Importing icon at (${row},${col}):`, JSON.stringify(icon));
+        importedIcons.push(icon);
+      } catch (error) {
+        logger.error(`Error importing ${file.name}:`, error);
+      }
+    }
+
+    logger.info(`Successfully imported ${importedIcons.length} icons.`);
+    return importedIcons;
   } catch (error) {
     logger.error("Error importing icons from desktop:", error);
-    return null;
+    return [];
   }
 }
-
 export async function ensureUniqueIconId(
   profile: string,
   name: string
