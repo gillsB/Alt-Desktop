@@ -1819,3 +1819,62 @@ export async function importIconsFromDesktop(
     return null;
   }
 }
+
+export async function ensureUniqueIconId(
+  profile: string,
+  name: string
+): Promise<string | null> {
+  logger.info("ensureUniqueIconId called with: ", name);
+
+  const baseName = name;
+  const dataFolder = getIconsFolderPath(profile);
+
+  let folderNames: string[] = [];
+  try {
+    if (!fs.existsSync(dataFolder)) {
+      logger.error("Data folder does not exist: " + dataFolder);
+      return null;
+    }
+    folderNames = fs
+      .readdirSync(dataFolder, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
+  } catch (e) {
+    logger.error("Failed to read data folder:", e);
+    return null;
+  }
+
+  // Ensure case-insensitive (Windows folders are case-insensitive)
+  const lowerBaseName = baseName.toLowerCase();
+  const takenIds = new Set(
+    folderNames
+      .filter((id) => {
+        if (!id) return false;
+        // Match baseName or baseName_N (where N is a number)
+        const lowerId = id.toLowerCase();
+        return (
+          lowerId === lowerBaseName ||
+          lowerId.match(
+            new RegExp(`^${escapeRegExp(lowerBaseName)}(_\\d+)?$`, "i")
+          )
+        );
+      })
+      .map((id) => id.toLowerCase())
+  );
+
+  // If baseName is not taken, use it
+  if (!takenIds.has(lowerBaseName)) {
+    return baseName;
+  }
+
+  // Otherwise, find the next available baseName_N
+  let counter = 1;
+  let candidate = `${baseName}_${counter}`;
+  let lowerCandidate = candidate.toLowerCase();
+  while (takenIds.has(lowerCandidate)) {
+    counter++;
+    candidate = `${baseName}_${counter}`;
+    lowerCandidate = candidate.toLowerCase();
+  }
+  return candidate;
+}
