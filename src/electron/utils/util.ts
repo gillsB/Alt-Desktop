@@ -1778,7 +1778,11 @@ export async function importIconsFromDesktop(
       return null;
     }
 
-    const iconId = first;
+    const iconId = await ensureUniqueIconId(profile, first);
+    if (!iconId) {
+      logger.error("Failed to generate unique icon ID.");
+      return null;
+    }
     const iconFolder = path.join(getIconsFolderPath(profile), iconId);
     if (!fs.existsSync(iconFolder)) {
       fs.mkdirSync(iconFolder, { recursive: true });
