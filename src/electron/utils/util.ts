@@ -1750,6 +1750,14 @@ export async function importIconsFromDesktop(
       }
     }
 
+    const takenCoordinates = existingIcons.map(
+      (icon) => `(${icon.row},${icon.col})`
+    );
+    const maxRows = await getRendererState("visibleRows");
+    const maxCols = await getRendererState("visibleCols");
+    logger.info(`Max visible rows: ${maxRows}, Max visible cols: ${maxCols}`);
+    logger.info("Taken icon coordinates:", takenCoordinates.join(", "));
+
     // Check if icon exists with same name as filePath and program path as programLink
     function isAlreadyIcon(filePath: string, candidateName: string): boolean {
       const normFilePath = path.resolve(filePath).toLowerCase();
