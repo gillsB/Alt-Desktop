@@ -228,33 +228,38 @@ const Background: React.FC<BackgroundProps> = ({
       if (typeof updates.id === "string") {
         logger.info("Updating background to:", updates.id);
         backgroundId.current = updates.id || "";
+        let skipBackgroundLogic = false;
         if (updates.id === "fallback" || updates.id === "") {
           logger.info("Background set to fallback, skipping background logic.");
           setBackgroundPath("");
-          return;
+          skipBackgroundLogic = true;
         }
-        let filePath = updates.id;
-        if (filePath && !isAbsolutePath(filePath)) {
-          filePath = (await convertIDToFilePath(filePath)) || "";
-        }
-        if (filePath) {
-          // Always resolve shortcut if the file is a shortcut
-          const fileType = await window.electron.getFileType(filePath);
-          if (fileType === "application/x-ms-shortcut") {
-            const resolved = await window.electron.resolveShortcut(filePath);
-            if (resolved) filePath = resolved;
-          }
-        }
-        const filePathRegex =
-          /^(?:[a-zA-Z]:\\|\/)?(?:[\w\s.-]+[\\/])*[\w\s.-]+\.[\w]+$/;
 
-        if (filePathRegex.test(updates.id)) {
-          logger.info("ID appears to be a direct file path. (Using as is.)");
-        } else {
-          setBgJson(await window.electron.getBgJson(updates.id));
+        if (!skipBackgroundLogic) {
+          let filePath = updates.id;
+          if (filePath && !isAbsolutePath(filePath)) {
+            filePath = (await convertIDToFilePath(filePath)) || "";
+          }
+          if (filePath) {
+            // Always resolve shortcut if the file is a shortcut
+            const fileType = await window.electron.getFileType(filePath);
+            if (fileType === "application/x-ms-shortcut") {
+              const resolved = await window.electron.resolveShortcut(filePath);
+              if (resolved) filePath = resolved;
+            }
+          }
+          const filePathRegex =
+            /^(?:[a-zA-Z]:\\|\/)?(?:[\w\s.-]+[\\/])*[\w\s.-]+\.[\w]+$/;
+
+          if (filePathRegex.test(updates.id)) {
+            logger.info("ID appears to be a direct file path. (Using as is.)");
+          } else {
+            setBgJson(await window.electron.getBgJson(updates.id));
+          }
+          setBackgroundPath(filePath || "");
         }
-        setBackgroundPath(filePath || "");
       }
+
       if (!showVideoControlsRef.current) {
         if (updates.volume === 0 || (updates.volume && updates.volume <= 1)) {
           videoLogger.info(
