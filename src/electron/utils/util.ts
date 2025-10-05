@@ -1723,6 +1723,7 @@ export function saveImageToIconFolder(
 export async function importIconsFromDesktop(
   profile: string
 ): Promise<DesktopIcon[]> {
+  const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g;
   try {
     const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
     if (!fs.existsSync(desktopPath)) {
@@ -1816,9 +1817,12 @@ export async function importIconsFromDesktop(
     // Import all files
     for (const file of filesToImport) {
       try {
-        const iconId = await ensureUniqueIconId(profile, file.name);
+        const sanitizedName = file.name.replace(INVALID_FOLDER_CHARS, "");
+        const iconId = await ensureUniqueIconId(profile, sanitizedName);
         if (!iconId) {
-          logger.error(`Failed to generate unique icon ID for ${file.name}`);
+          logger.error(
+            `Failed to generate unique icon ID for ${file.name} -> ${sanitizedName}`
+          );
           continue;
         }
 
@@ -1870,6 +1874,7 @@ export async function importIconsFromDesktop(
     return [];
   }
 }
+
 export async function ensureUniqueIconId(
   profile: string,
   name: string
