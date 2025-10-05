@@ -1721,21 +1721,22 @@ export function saveImageToIconFolder(
 }
 
 export async function importIconsFromDesktop(
+  mainWindow: BrowserWindow,
   profile: string
-): Promise<DesktopIcon[]> {
+): Promise<boolean> {
   const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g;
   try {
     const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
     if (!fs.existsSync(desktopPath)) {
       logger.warn(`Desktop path does not exist: ${desktopPath}`);
-      return [];
+      return false;
     }
     const files = await fs.promises.readdir(desktopPath);
     logger.info("Files on Desktop:", files);
 
     if (!files.length) {
       logger.warn("No files found on Desktop.");
-      return [];
+      return false;
     }
 
     // Fetch current profile's DesktopIconData
@@ -1786,7 +1787,7 @@ export async function importIconsFromDesktop(
 
     if (!filesToImport.length) {
       logger.warn("No new files found on Desktop to import as icons.");
-      return [];
+      return true;
     }
 
     logger.info(`Found ${filesToImport.length} new files to import.`);
@@ -1861,17 +1862,26 @@ export async function importIconsFromDesktop(
         };
 
         logger.info(`Importing icon at (${row},${col}):`, JSON.stringify(icon));
-        importedIcons.push(icon);
+        // Save icon data immediately as it is created
+        const saved = await saveIconData(icon);
+        if (saved) {
+          importedIcons.push(icon);
+          if (mainWindow) {
+            mainWindow.webContents.send("reload-icon", { id: icon.id, icon });
+          }
+        } else {
+          logger.warn(`Failed to save icon from Desktop: ${icon.name}`);
+        }
       } catch (error) {
         logger.error(`Error importing ${file.name}:`, error);
       }
     }
 
     logger.info(`Successfully imported ${importedIcons.length} icons.`);
-    return importedIcons;
+    return true;
   } catch (error) {
     logger.error("Error importing icons from desktop:", error);
-    return [];
+    return false;
   }
 }
 

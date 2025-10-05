@@ -1886,38 +1886,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
 
   ipcMainHandle("importIconsFromDesktop", async (): Promise<boolean> => {
-    try {
-      logger.info("called importIconsFromDesktop");
-      const profile = (await getRendererState("profile")) || "";
-      const icons = await importIconsFromDesktop(profile);
-
-      if (!icons || icons.length === 0) {
-        logger.warn("No icons to import from Desktop.");
-        return false;
-      }
-
-      let allSaved = true;
-
-      // Save each icon
-      for (const icon of icons) {
-        const saved = await saveIconData(icon);
-
-        if (saved) {
-          if (mainWindow) {
-            mainWindow.webContents.send("reload-icon", { id: icon.id, icon });
-          }
-          logger.info(`Imported and saved icon from Desktop: ${icon.name}`);
-        } else {
-          logger.warn(`Failed to save icon from Desktop: ${icon.name}`);
-          allSaved = false;
-        }
-      }
-
-      logger.info(`Imported ${icons.length} icons from Desktop.`);
-      return allSaved;
-    } catch (error) {
-      logger.error("Error importing icons from desktop:", error);
-      return false;
-    }
+    logger.info("called importIconsFromDesktop");
+    const profile = (await getRendererState("profile")) || "";
+    return await importIconsFromDesktop(mainWindow, profile);
   });
 }
