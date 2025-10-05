@@ -548,6 +548,10 @@ const EditBackground: React.FC = () => {
         return;
       }
     }
+    close();
+  };
+
+  const close = async () => {
     window.electron.reloadBackground();
     window.electron.openBackgroundSelect();
   };
@@ -775,7 +779,7 @@ const EditBackground: React.FC = () => {
           background: updatedSummary.id,
         });
       }
-      handleClose();
+      close();
     } else {
       logger.error("Failed to save background.");
     }
