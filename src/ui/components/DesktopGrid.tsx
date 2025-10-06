@@ -3,7 +3,7 @@ import { getDefaultDesktopIcon } from "../../electron/DesktopIcon";
 import "../App.css";
 import "../styles/DesktopGrid.css";
 import { createLogger } from "../util/uiLogger";
-import { showSmallWindow } from "../util/uiUtil";
+import { arePosMapsEqual, showSmallWindow } from "../util/uiUtil";
 import { SafeImage } from "./SafeImage";
 
 const logger = createLogger("DesktopGrid.tsx");
@@ -591,6 +591,18 @@ const DesktopGrid: React.FC = () => {
         posMap.set(posKey(icon.row, icon.col), icon.id);
       });
 
+      // Compare the posMap to saved posIndex (last profile), if same reload Desktop icons.
+      // Checking posMap is faster and covers more cases than checking idMap.
+      if (arePosMapsEqual(posMap, posIndex)) {
+        setReloadTimestamps(() => {
+          const now = Date.now();
+          const newTimestamps: IconReloadTimestamps = {};
+          for (const id of idMap.keys()) {
+            newTimestamps[id] = now;
+          }
+          return newTimestamps;
+        });
+      }
       setIconsById(idMap);
       setPosIndex(posMap);
     } catch (error) {

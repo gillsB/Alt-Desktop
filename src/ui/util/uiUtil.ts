@@ -74,3 +74,15 @@ export function parseAdvancedSearch(search: string) {
     searchTerms,
   };
 }
+
+/**
+ * Compares two Map<string, string> objects for equality.
+ * Returns true if both maps have the same keys and values.
+ */
+export function arePosMapsEqual(a: Map<string, string>, b: Map<string, string>): boolean {
+  if (a.size !== b.size) return false;
+  for (const [key, value] of a) {
+    if (b.get(key) !== value) return false;
+  }
+  return true;
+}
