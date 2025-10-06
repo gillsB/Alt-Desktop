@@ -1487,6 +1487,12 @@ export async function ensureProfileFolder(
       logger.info(`Profile folder ${profile} created successfully.`);
     }
 
+    const iconsFolderPath = path.join(profileFolder, "icons");
+    if (!fs.existsSync(iconsFolderPath)) {
+      fs.mkdirSync(iconsFolderPath, { recursive: true });
+      logger.info(`Created icons folder: ${iconsFolderPath}`);
+    }
+
     // Ensure profile.json exists in the profile folder
     const profileJsonPath = path.join(profileFolder, "profile.json");
 
