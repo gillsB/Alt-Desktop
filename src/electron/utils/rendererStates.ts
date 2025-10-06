@@ -14,6 +14,9 @@ export async function getRendererStates(): Promise<RendererStates> {
   return rendererStates;
 }
 export function setRendererStates(updates: Partial<RendererStates>) {
+  if (updates.profile === "") {
+    updates.profile = "default";
+  }
   rendererStates = { ...rendererStates, ...updates };
   logger.info("Renderer states updated:", JSON.stringify(rendererStates));
   // Ensure profile actually exists

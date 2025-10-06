@@ -1887,7 +1887,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
 
   ipcMainHandle("importIconsFromDesktop", async (): Promise<boolean> => {
     logger.info("called importIconsFromDesktop");
-    const profile = (await getRendererState("profile")) || "";
+    const profile = await getRendererState("profile");
+    // Do not import if no profile returned from getRendererState
+    if (!profile) {
+      logger.error("No profile set in renderer state, cannot import icons.");
+      showSmallWindow("Error Importing Icons", "No profile is set.", ["Okay"]);
+      return false;
+    }
     return await importIconsFromDesktop(mainWindow, profile);
   });
 }
