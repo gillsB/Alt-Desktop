@@ -1522,6 +1522,30 @@ export async function ensureProfileFolder(
 
       fs.writeFileSync(profileJsonPath, copiedData, "utf-8");
       logger.info(`Copied profile.json from ${copyFromProfile} to ${profile}`);
+
+      const oldIconsFolder = path.join(profilesBase, copyFromProfile, "icons");
+      if (fs.existsSync(oldIconsFolder)) {
+        const newIconsFolder = iconsFolderPath;
+        // Copy all folders/files from old profile to new profile's icons folder
+        const items = fs.readdirSync(oldIconsFolder, { withFileTypes: true });
+        for (const item of items) {
+          const srcPath = path.join(oldIconsFolder, item.name);
+          const destPath = path.join(newIconsFolder, item.name);
+          if (item.isDirectory()) {
+            // Recursively copy directory
+            fsExtra.copySync(srcPath, destPath, { overwrite: true });
+          } else if (item.isFile()) {
+            fs.copyFileSync(srcPath, destPath);
+          }
+        }
+        logger.info(
+          `Copied icons folder from ${copyFromProfile} to ${profile}`
+        );
+      } else {
+        logger.warn(
+          `Source icons folder does not exist: ${oldIconsFolder}, skipping icons copy.`
+        );
+      }
     } else if (!fs.existsSync(profileJsonPath)) {
       logger.info(
         `profile.json not found in ${profileFolder}, creating default.`
