@@ -6,6 +6,7 @@ import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { getSetting } from "./settings.js";
 import { createTray } from "./tray.js";
+import { initializeRendererStatesProfile } from "./utils/rendererStates.js";
 import { indexBackgrounds, isDev, setMainWindow } from "./utils/util.js";
 import { registerVideoFileProtocol } from "./videoFileProtocol.js";
 import { getActiveSubWindow } from "./windows/subWindowManager.js";
@@ -91,6 +92,7 @@ app.on("ready", () => {
   handleCloseEvents(mainWindow);
 
   indexBackgrounds();
+  initializeRendererStatesProfile();
 
   mainWindow.on("maximize", async () => {
     const windowType = await getSetting("windowType");
