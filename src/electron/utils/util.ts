@@ -1820,8 +1820,6 @@ export async function importIconsFromDesktop(
       return true;
     }
 
-    logger.info(`Found ${filesToImport.length} new files to import.`);
-
     // Function to get next available coordinate
     function getNextAvailableCoordinate(): { row: number; col: number } {
       let col = 0;
@@ -1843,72 +1841,91 @@ export async function importIconsFromDesktop(
       }
     }
 
-    const importedIcons: DesktopIcon[] = [];
+    logger.info(`Found ${filesToImport.length} new files to import.`);
+    const importIcons = await showSmallWindow(
+      "Import Desktop Icons",
+      `Found ${filesToImport.length} new unique Desktop icon(s).\nWould you like to import them?`,
+      ["Import", "Cancel"]
+    );
 
-    // Import all files
-    for (const file of filesToImport) {
-      try {
-        const sanitizedName = file.name.replace(INVALID_FOLDER_CHARS, "");
-        const iconId = await ensureUniqueIconId(profile, sanitizedName);
-        if (!iconId) {
-          logger.error(
-            `Failed to generate unique icon ID for ${file.name} -> ${sanitizedName}`
-          );
-          continue;
-        }
+    if (importIcons === "Import") {
+      const importedIcons: DesktopIcon[] = [];
 
-        const iconFolder = path.join(getIconsFolderPath(profile), iconId);
-        if (!fs.existsSync(iconFolder)) {
-          fs.mkdirSync(iconFolder, { recursive: true });
-        }
-
-        let image = "";
-        let mimeType = mime.lookup(file.path);
-
-        if (!mimeType) {
-          logger.warn(`Could not determine MIME type for file: ${file.path}`);
-          mimeType = "unknown";
-        }
-
-        // If it's an image, save directly. Otherwise, generate icon.
-        if (mimeType.startsWith("image/")) {
-          image = saveImageToIconFolder(file.path, profile, iconId);
-        } else {
-          const generatedImages = await generateIcon(iconFolder, file.path, "");
-          image = generatedImages[0] || "";
-          logger.info("Generated icon image:", image);
-        }
-
-        const { row, col } = getNextAvailableCoordinate();
-
-        const icon: DesktopIcon = {
-          id: iconId,
-          name: file.name,
-          row,
-          col,
-          image,
-          programLink: file.path,
-          launchDefault: "program",
-        };
-
-        logger.info(`Importing icon at (${row},${col}):`, JSON.stringify(icon));
-        // Save icon data immediately as it is created
-        const saved = await saveIconData(icon);
-        if (saved) {
-          importedIcons.push(icon);
-          if (mainWindow) {
-            mainWindow.webContents.send("reload-icon", { id: icon.id, icon });
+      // Import all files
+      for (const file of filesToImport) {
+        try {
+          const sanitizedName = file.name.replace(INVALID_FOLDER_CHARS, "");
+          const iconId = await ensureUniqueIconId(profile, sanitizedName);
+          if (!iconId) {
+            logger.error(
+              `Failed to generate unique icon ID for ${file.name} -> ${sanitizedName}`
+            );
+            continue;
           }
-        } else {
-          logger.warn(`Failed to save icon from Desktop: ${icon.name}`);
-        }
-      } catch (error) {
-        logger.error(`Error importing ${file.name}:`, error);
-      }
-    }
 
-    logger.info(`Successfully imported ${importedIcons.length} icons.`);
-    return true;
+          const iconFolder = path.join(getIconsFolderPath(profile), iconId);
+          if (!fs.existsSync(iconFolder)) {
+            fs.mkdirSync(iconFolder, { recursive: true });
+          }
+
+          let image = "";
+          let mimeType = mime.lookup(file.path);
+
+          if (!mimeType) {
+            logger.warn(`Could not determine MIME type for file: ${file.path}`);
+            mimeType = "unknown";
+          }
+
+          // If it's an image, save directly. Otherwise, generate icon.
+          if (mimeType.startsWith("image/")) {
+            image = saveImageToIconFolder(file.path, profile, iconId);
+          } else {
+            const generatedImages = await generateIcon(
+              iconFolder,
+              file.path,
+              ""
+            );
+            image = generatedImages[0] || "";
+            logger.info("Generated icon image:", image);
+          }
+
+          const { row, col } = getNextAvailableCoordinate();
+
+          const icon: DesktopIcon = {
+            id: iconId,
+            name: file.name,
+            row,
+            col,
+            image,
+            programLink: file.path,
+            launchDefault: "program",
+          };
+
+          logger.info(
+            `Importing icon at (${row},${col}):`,
+            JSON.stringify(icon)
+          );
+          // Save icon data immediately as it is created
+          const saved = await saveIconData(icon);
+          if (saved) {
+            importedIcons.push(icon);
+            if (mainWindow) {
+              mainWindow.webContents.send("reload-icon", { id: icon.id, icon });
+            }
+          } else {
+            logger.warn(`Failed to save icon from Desktop: ${icon.name}`);
+          }
+        } catch (error) {
+          logger.error(`Error importing ${file.name}:`, error);
+        }
+      }
+
+      logger.info(`Successfully imported ${importedIcons.length} icons.`);
+      return true;
+    } else {
+      logger.info("User cancelled icon import from Desktop.");
+      return false;
+    }
   } catch (error) {
     logger.error("Error importing icons from desktop:", error);
     return false;
