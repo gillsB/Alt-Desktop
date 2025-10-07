@@ -1750,25 +1750,63 @@ export function saveImageToIconFolder(
   return localFileName;
 }
 
+export async function getDesktopUniqueFiles(
+  profile: string,
+  existingIcons?: DesktopIcon[]
+): Promise<Array<{ name: string; path: string }>> {
+  const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
+  if (!fs.existsSync(desktopPath)) {
+    logger.warn(`Desktop path does not exist: ${desktopPath}`);
+    return [];
+  }
+  const files = await fs.promises.readdir(desktopPath);
+  logger.info("Files on Desktop:", files);
+
+  // Only fetch existingIcons if not provided
+  let icons: DesktopIcon[] = [];
+  if (existingIcons) {
+    icons = existingIcons;
+  } else {
+    const profileJsonPath = getProfileJsonPath(profile);
+    if (fs.existsSync(profileJsonPath)) {
+      try {
+        const data = fs.readFileSync(profileJsonPath, "utf-8");
+        const parsedData: DesktopIconData = JSON.parse(data);
+        icons = parsedData.icons || [];
+      } catch (e) {
+        logger.warn("Failed to read profile icon data:", e);
+      }
+    }
+  }
+
+  // Check if icon exists with same name as filePath and program path as programLink
+  function isAlreadyIcon(filePath: string, candidateName: string): boolean {
+    const normFilePath = path.resolve(filePath).toLowerCase();
+    return icons.some(
+      (icon) =>
+        icon.programLink &&
+        path.resolve(icon.programLink).toLowerCase() === normFilePath &&
+        icon.name === candidateName
+    );
+  }
+
+  // Find all files/folders not already imported as icons
+  const filesToImport: Array<{ name: string; path: string }> = [];
+  for (const file of files) {
+    const candidatePath = path.join(desktopPath, file);
+    if (!isAlreadyIcon(candidatePath, file)) {
+      filesToImport.push({ name: file, path: candidatePath });
+    }
+  }
+  return filesToImport;
+}
+
 export async function importIconsFromDesktop(
   mainWindow: BrowserWindow,
   profile: string
 ): Promise<boolean> {
   const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g;
   try {
-    const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
-    if (!fs.existsSync(desktopPath)) {
-      logger.warn(`Desktop path does not exist: ${desktopPath}`);
-      return false;
-    }
-    const files = await fs.promises.readdir(desktopPath);
-    logger.info("Files on Desktop:", files);
-
-    if (!files.length) {
-      logger.warn("No files found on Desktop.");
-      return false;
-    }
-
     // Fetch current profile's DesktopIconData
     const profileJsonPath = getProfileJsonPath(profile);
     let existingIcons: DesktopIcon[] = [];
@@ -1782,63 +1820,11 @@ export async function importIconsFromDesktop(
       }
     }
 
-    const takenCoordinates = existingIcons.map(
-      (icon) => `(${icon.row},${icon.col})`
-    );
-    const maxRows = await getRendererState("visibleRows");
-    const maxCols = await getRendererState("visibleCols");
-    logger.info(`Max visible rows: ${maxRows}, Max visible cols: ${maxCols}`);
-    logger.info("Taken icon coordinates:", takenCoordinates.join(", "));
-
-    // Create a set of taken coordinates for quick lookup
-    const takenCoords = new Set(
-      existingIcons.map((icon) => `${icon.row},${icon.col}`)
-    );
-
-    // Check if icon exists with same name as filePath and program path as programLink
-    function isAlreadyIcon(filePath: string, candidateName: string): boolean {
-      const normFilePath = path.resolve(filePath).toLowerCase();
-      return existingIcons.some(
-        (icon) =>
-          icon.programLink &&
-          path.resolve(icon.programLink).toLowerCase() === normFilePath &&
-          icon.name === candidateName
-      );
-    }
-
-    // Find all files/folders not already imported as icons
-    const filesToImport: Array<{ name: string; path: string }> = [];
-    for (const file of files) {
-      const candidatePath = path.join(desktopPath, file);
-      if (!isAlreadyIcon(candidatePath, file)) {
-        filesToImport.push({ name: file, path: candidatePath });
-      }
-    }
+    const filesToImport = await getDesktopUniqueFiles(profile, existingIcons);
 
     if (!filesToImport.length) {
       logger.warn("No new files found on Desktop to import as icons.");
       return true;
-    }
-
-    // Function to get next available coordinate
-    function getNextAvailableCoordinate(): { row: number; col: number } {
-      let col = 0;
-      let row = 0;
-
-      while (true) {
-        // Check if current position is taken
-        if (!takenCoords.has(`${row},${col}`)) {
-          takenCoords.add(`${row},${col}`); // Mark as taken
-          return { row, col };
-        }
-
-        // Move to next position
-        row++;
-        if (row >= (typeof maxRows === "number" ? maxRows : 10)) {
-          row = 0;
-          col++;
-        }
-      }
     }
 
     logger.info(`Found ${filesToImport.length} new files to import.`);
@@ -1848,7 +1834,42 @@ export async function importIconsFromDesktop(
       ["Import", "Cancel"]
     );
 
+    // Import icons if user confirmed
     if (importIcons === "Import") {
+      const takenCoordinates = existingIcons.map(
+        (icon) => `(${icon.row},${icon.col})`
+      );
+      const maxRows = await getRendererState("visibleRows");
+      const maxCols = await getRendererState("visibleCols");
+      logger.info(`Max visible rows: ${maxRows}, Max visible cols: ${maxCols}`);
+      logger.info("Taken icon coordinates:", takenCoordinates.join(", "));
+
+      // Create a set of taken coordinates for quick lookup
+      const takenCoords = new Set(
+        existingIcons.map((icon) => `${icon.row},${icon.col}`)
+      );
+
+      // Function to get next available coordinate
+      function getNextAvailableCoordinate(): { row: number; col: number } {
+        let col = 0;
+        let row = 0;
+
+        while (true) {
+          // Check if current position is taken
+          if (!takenCoords.has(`${row},${col}`)) {
+            takenCoords.add(`${row},${col}`); // Mark as taken
+            return { row, col };
+          }
+
+          // Move to next position
+          row++;
+          if (row >= (typeof maxRows === "number" ? maxRows : 10)) {
+            row = 0;
+            col++;
+          }
+        }
+      }
+
       const importedIcons: DesktopIcon[] = [];
 
       // Import all files
