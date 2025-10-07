@@ -269,36 +269,10 @@ async function migrateLegacyDataFolders() {
     );
   }
 
-  // Move processed data folders to trash (both successfully copied and already existing)
-  if (processedDataIds.size > 0) {
-    logger.info(
-      `Moving ${processedDataIds.size} processed data folders to trash...`
-    );
-
-    for (const dataId of processedDataIds) {
-      const dataFolderToTrash = path.join(dataFolderPath, dataId);
-      try {
-        await shell.trashItem(dataFolderToTrash);
-        logger.info(`Moved data folder to trash: ${dataId}`);
-      } catch (e) {
-        logger.error(`Failed to move data folder ${dataId} to trash:`, e);
-      }
-    }
-
-    logger.info(
-      `Cleanup complete. Moved ${processedDataIds.size} data folders to trash.`
-    );
-
-    // Log what is being kept
-    const keptDataIds = dataIds.filter((id) => !processedDataIds.has(id));
-    if (keptDataIds.length > 0) {
-      logger.info(
-        `Kept ${keptDataIds.length} unreferenced data folders: ${keptDataIds.join(", ")}`
-      );
-    }
-  } else {
-    logger.info(
-      "No data folders were processed, so none will be moved to trash."
-    );
+  try {
+    await shell.trashItem(dataFolderPath);
+    logger.info(`Deleted legacy data folder: ${dataFolderPath}`);
+  } catch (e) {
+    logger.error(`Failed to delete legacy data folder:`, e);
   }
 }
