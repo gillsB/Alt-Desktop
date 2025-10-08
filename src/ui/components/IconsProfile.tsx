@@ -7,9 +7,30 @@ const logger = createLogger("IconsProfile.tsx");
 const IconsProfile: React.FC = () => {
   const [uniqueFiles, setUniqueFiles] = useState<desktopFile[]>([]);
   const [profile, setProfile] = useState<string>("default");
+  const [profiles, setProfiles] = useState<string[]>([]);
+
   const handleClose = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "IconsProfile");
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const profileList = await window.electron.getProfiles();
+      if (!cancelled) {
+        // Sort profiles: "default" first, then alphabetically
+        const sortedProfiles = profileList.sort((a, b) => {
+          if (a === "default") return -1;
+          if (b === "default") return 1;
+          return a.localeCompare(b);
+        });
+        setProfiles(sortedProfiles);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const fetchRendererStates = async () => {
@@ -43,11 +64,46 @@ const IconsProfile: React.FC = () => {
     fetchUniqueFiles();
   }, [profile]);
 
+  const handleProfileChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const newProfile = e.target.value;
+    setProfile(newProfile);
+    window.electron.setRendererStates({ profile: newProfile });
+
+    // Save the current background with the new profile
+    try {
+      // Get the current background ID from settings
+      const bgId = await window.electron.getSetting("background");
+      if (bgId) {
+        await window.electron.saveBgJson({
+          id: bgId,
+          localProfile: newProfile,
+        });
+      }
+    } catch (err) {
+      logger.error(
+        "Failed to update background profile on profile change:",
+        err
+      );
+    }
+  };
+
   logger.info("Rendering IconsProfile component");
 
   return (
     <div className="subwindow-container">
       <SubWindowHeader title={`Icons Profile`} onClose={handleClose} />
+      <div>
+        <label>Profile:</label>
+        <select value={profile} onChange={handleProfileChange}>
+          {profiles.map((p) => (
+            <option key={p} value={p}>
+              {p === "default" ? "Default" : p}
+            </option>
+          ))}
+        </select>
+      </div>
       <div>Total unique DesktopFiles found: {uniqueFiles.length}</div>
 
       <div
