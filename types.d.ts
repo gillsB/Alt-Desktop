@@ -81,6 +81,11 @@ interface BackgroundsData {
   names?: Record<string, string[]>;
 }
 
+type desktopFile = {
+  name: string;
+  path: string;
+};
+
 type DesktopIconData = {
   icons: DesktopIcon[];
 };
@@ -295,6 +300,7 @@ interface EventParamMapping {
   editIconOffsetUpdate: [number, number];
   openIconsProfile: [];
   importIconsFromDesktop: [];
+  getDesktopUniqueFiles: [string];
 }
 
 // The returns from the main process to the renderer
@@ -379,6 +385,7 @@ type EventPayloadMapping = {
   editIconOffsetUpdate: boolean;
   openIconsProfile: boolean;
   importIconsFromDesktop: boolean;
+  getDesktopUniqueFiles: desktopFile[];
 };
 
 type UnsubscribeFunction = () => void;
@@ -538,5 +545,6 @@ interface Window {
     editIconOffsetUpdate: (offsetX: number, offsetY: number) => void;
     openIconsProfile: () => Promise<boolean>;
     importIconsFromDesktop: () => Promise<boolean>;
+    getDesktopUniqueFiles: (profile: string) => Promise<desktopFile[]>;
   };
 }

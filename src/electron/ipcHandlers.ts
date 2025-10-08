@@ -59,6 +59,7 @@ import {
   getBasePath,
   getBgJsonFile,
   getDesktopIcon,
+  getDesktopUniqueFiles,
   getIconsFolderPath,
   getLogsFolderPath,
   getProfileJsonPath,
@@ -1895,5 +1896,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
     return await importIconsFromDesktop(mainWindow, profile);
+  });
+  ipcMainHandle("getDesktopUniqueFiles", async (profile: string): Promise<desktopFile[]> => {
+    return await getDesktopUniqueFiles(profile);
   });
 }
