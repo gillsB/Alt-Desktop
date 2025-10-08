@@ -132,6 +132,9 @@ const SafeImageComponent: React.FC<{
   // Fallback if width and height are not provided
   const defaultIconSize = width || height || 64;
 
+  const [resolvedProfile, setResolvedProfile] = useState<string | undefined>(
+    profile
+  );
   const [imageSrc, setImageSrc] = useState<string>(() => "");
   const [imageDimensions, setImageDimensions] = useState<{
     width: number;
@@ -141,6 +144,23 @@ const SafeImageComponent: React.FC<{
     height: height || defaultIconSize,
   });
   const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (profile === undefined) {
+      logger.warn(
+        "SafeImageComponent Profile is undefined, fetching from renderer state"
+      );
+      window.electron.getRendererStates().then((states: RendererStates) => {
+        if (!cancelled) setResolvedProfile(states.profile || "default");
+      });
+    } else {
+      setResolvedProfile(profile);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [profile]);
 
   useEffect(() => {
     setImageError(false);
@@ -155,7 +175,7 @@ const SafeImageComponent: React.FC<{
 
     const newImageSrc = getImagePath(
       imagePath,
-      profile,
+      resolvedProfile,
       id,
       forceReload || undefined
     );
@@ -222,7 +242,16 @@ const SafeImageComponent: React.FC<{
       img.onload = null;
       img.onerror = null;
     };
-  }, [imagePath, row, col, forceReload, width, height, defaultIconSize]);
+  }, [
+    imagePath,
+    row,
+    col,
+    forceReload,
+    width,
+    height,
+    defaultIconSize,
+    resolvedProfile,
+  ]);
 
   return (
     <div
