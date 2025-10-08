@@ -1801,11 +1801,95 @@ export async function getDesktopUniqueFiles(
   return filesToImport;
 }
 
+export async function importDesktopFileAsIcon(
+  file: { name: string; path: string },
+  profile: string,
+  takenCoords: Set<string>,
+  maxRows: number,
+  mainWindow?: BrowserWindow
+): Promise<DesktopIcon | null> {
+  const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g;
+  try {
+    const sanitizedName = file.name.replace(INVALID_FOLDER_CHARS, "");
+    const iconId = await ensureUniqueIconId(profile, sanitizedName);
+    if (!iconId) {
+      logger.error(
+        `Failed to generate unique icon ID for ${file.name} -> ${sanitizedName}`
+      );
+      return null;
+    }
+
+    const iconFolder = path.join(getIconsFolderPath(profile), iconId);
+    if (!fs.existsSync(iconFolder)) {
+      fs.mkdirSync(iconFolder, { recursive: true });
+    }
+
+    let image = "";
+    let mimeType = mime.lookup(file.path);
+
+    if (!mimeType) {
+      logger.warn(`Could not determine MIME type for file: ${file.path}`);
+      mimeType = "unknown";
+    }
+
+    // If it's an image, save directly. Otherwise, generate icon.
+    if (mimeType.startsWith("image/")) {
+      image = saveImageToIconFolder(file.path, profile, iconId);
+    } else {
+      const generatedImages = await generateIcon(iconFolder, file.path, "");
+      image = generatedImages[0] || "";
+      logger.info("Generated icon image:", image);
+    }
+
+    // Find next available coordinate
+    function getNextAvailableCoordinate(): { row: number; col: number } {
+      let col = 0;
+      let row = 0;
+      while (true) {
+        if (!takenCoords.has(`${row},${col}`)) {
+          takenCoords.add(`${row},${col}`);
+          return { row, col };
+        }
+        row++;
+        if (row >= (typeof maxRows === "number" ? maxRows : 10)) {
+          row = 0;
+          col++;
+        }
+      }
+    }
+    const { row, col } = getNextAvailableCoordinate();
+
+    const icon: DesktopIcon = {
+      id: iconId,
+      name: file.name,
+      row,
+      col,
+      image,
+      programLink: file.path,
+      launchDefault: "program",
+    };
+
+    logger.info(`Importing icon at (${row},${col}):`, JSON.stringify(icon));
+    const saved = await saveIconData(icon);
+    if (saved) {
+      if (mainWindow) {
+        mainWindow.webContents.send("reload-icon", { id: icon.id, icon });
+      }
+      return icon;
+    } else {
+      logger.warn(`Failed to save icon from Desktop: ${icon.name}`);
+      return null;
+    }
+  } catch (error) {
+    logger.error(`Error importing ${file.name}:`, error);
+    return null;
+  }
+}
+
 export async function importIconsFromDesktop(
   mainWindow: BrowserWindow,
   profile: string
 ): Promise<boolean> {
-  const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g;
   try {
     // Fetch current profile's DesktopIconData
     const profileJsonPath = getProfileJsonPath(profile);
@@ -1834,110 +1918,25 @@ export async function importIconsFromDesktop(
       ["Import", "Cancel"]
     );
 
-    // Import icons if user confirmed
     if (importIcons === "Import") {
-      const takenCoordinates = existingIcons.map(
-        (icon) => `(${icon.row},${icon.col})`
-      );
-      const maxRows = await getRendererState("visibleRows");
-      const maxCols = await getRendererState("visibleCols");
-      logger.info(`Max visible rows: ${maxRows}, Max visible cols: ${maxCols}`);
-      logger.info("Taken icon coordinates:", takenCoordinates.join(", "));
-
-      // Create a set of taken coordinates for quick lookup
+      const maxRows = (await getRendererState("visibleRows")) || 10;
       const takenCoords = new Set(
         existingIcons.map((icon) => `${icon.row},${icon.col}`)
       );
 
-      // Function to get next available coordinate
-      function getNextAvailableCoordinate(): { row: number; col: number } {
-        let col = 0;
-        let row = 0;
-
-        while (true) {
-          // Check if current position is taken
-          if (!takenCoords.has(`${row},${col}`)) {
-            takenCoords.add(`${row},${col}`); // Mark as taken
-            return { row, col };
-          }
-
-          // Move to next position
-          row++;
-          if (row >= (typeof maxRows === "number" ? maxRows : 10)) {
-            row = 0;
-            col++;
-          }
-        }
-      }
-
       const importedIcons: DesktopIcon[] = [];
 
-      // Import all files
+      // import all icons from filesToImport
       for (const file of filesToImport) {
-        try {
-          const sanitizedName = file.name.replace(INVALID_FOLDER_CHARS, "");
-          const iconId = await ensureUniqueIconId(profile, sanitizedName);
-          if (!iconId) {
-            logger.error(
-              `Failed to generate unique icon ID for ${file.name} -> ${sanitizedName}`
-            );
-            continue;
-          }
-
-          const iconFolder = path.join(getIconsFolderPath(profile), iconId);
-          if (!fs.existsSync(iconFolder)) {
-            fs.mkdirSync(iconFolder, { recursive: true });
-          }
-
-          let image = "";
-          let mimeType = mime.lookup(file.path);
-
-          if (!mimeType) {
-            logger.warn(`Could not determine MIME type for file: ${file.path}`);
-            mimeType = "unknown";
-          }
-
-          // If it's an image, save directly. Otherwise, generate icon.
-          if (mimeType.startsWith("image/")) {
-            image = saveImageToIconFolder(file.path, profile, iconId);
-          } else {
-            const generatedImages = await generateIcon(
-              iconFolder,
-              file.path,
-              ""
-            );
-            image = generatedImages[0] || "";
-            logger.info("Generated icon image:", image);
-          }
-
-          const { row, col } = getNextAvailableCoordinate();
-
-          const icon: DesktopIcon = {
-            id: iconId,
-            name: file.name,
-            row,
-            col,
-            image,
-            programLink: file.path,
-            launchDefault: "program",
-          };
-
-          logger.info(
-            `Importing icon at (${row},${col}):`,
-            JSON.stringify(icon)
-          );
-          // Save icon data immediately as it is created
-          const saved = await saveIconData(icon);
-          if (saved) {
-            importedIcons.push(icon);
-            if (mainWindow) {
-              mainWindow.webContents.send("reload-icon", { id: icon.id, icon });
-            }
-          } else {
-            logger.warn(`Failed to save icon from Desktop: ${icon.name}`);
-          }
-        } catch (error) {
-          logger.error(`Error importing ${file.name}:`, error);
+        const icon = await importDesktopFileAsIcon(
+          file,
+          profile,
+          takenCoords,
+          maxRows,
+          mainWindow
+        );
+        if (icon) {
+          importedIcons.push(icon);
         }
       }
 
