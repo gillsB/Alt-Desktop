@@ -266,7 +266,7 @@ interface EventParamMapping {
   reloadHeader: [];
   getVideoMetadata: [string];
   generateIcon: [string, string, string, string];
-  selectIconFromList: [string, string[], string, number, number];
+  selectIconFromList: [string, string, string[], string, number, number];
   resetAllIconsFontColor: [];
   openBackgroundSelect: [id?: string];
   getBackgroundIDs: [];
@@ -485,6 +485,7 @@ interface Window {
     ) => Promise<string[]>;
     selectIconFromList: (
       title: string,
+      profile: string,
       images: string[],
       id: string,
       row: number,

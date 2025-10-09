@@ -10,6 +10,7 @@ const SelectIconWindow: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const title = queryParams.get("title") || "Select Icon";
+  const profile = queryParams.get("profile") || "default";
   const images: string[] = JSON.parse(queryParams.get("images") || "[]");
   const id = queryParams.get("id") || "";
   const row = parseInt(queryParams.get("row") || "0", 10);
@@ -72,6 +73,7 @@ const SelectIconWindow: React.FC = () => {
             >
               <SafeImage
                 id={id}
+                profile={profile}
                 row={row}
                 col={col}
                 imagePath={img}

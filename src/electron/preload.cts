@@ -116,11 +116,12 @@ electron.contextBridge.exposeInMainWorld("electron", {
   ) => ipcInvoke("generateIcon", profile, id, programLink, webLink),
   selectIconFromList: (
     title: string,
+    profile: string,
     images: string[],
     id: string,
     row: number,
     col: number
-  ) => ipcInvoke("selectIconFromList", title, images, id, row, col),
+  ) => ipcInvoke("selectIconFromList", title, profile, images, id, row, col),
   resetAllIconsFontColor: () => ipcInvoke("resetAllIconsFontColor"),
   getBackgroundIDs: () => ipcInvoke("getBackgroundIDs"),
   getBackgroundSummaries: (params) =>
@@ -170,7 +171,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("editIconOffsetUpdate", offsetX, offsetY),
   openIconsProfile: () => ipcInvoke("openIconsProfile"),
   importIconsFromDesktop: () => ipcInvoke("importIconsFromDesktop"),
-  getDesktopUniqueFiles: (profile: string) => ipcInvoke("getDesktopUniqueFiles", profile),
+  getDesktopUniqueFiles: (profile: string) =>
+    ipcInvoke("getDesktopUniqueFiles", profile),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

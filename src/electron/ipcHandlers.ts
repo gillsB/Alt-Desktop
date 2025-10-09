@@ -1320,12 +1320,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "selectIconFromList",
     async (
       title: string,
+      profile: string,
       images: string[],
       id: string,
       row: number,
       col: number
     ): Promise<string> => {
-      const ret = await openSelectIconWindow(title, images, id, row, col);
+      const ret = await openSelectIconWindow(title, profile, images, id, row, col);
       if (ret === "Close") {
         //Closes without selecting an icon return empty string.
         return "";
@@ -1897,7 +1898,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
     return await importIconsFromDesktop(mainWindow, profile);
   });
-  ipcMainHandle("getDesktopUniqueFiles", async (profile: string): Promise<desktopFile[]> => {
-    return await getDesktopUniqueFiles(profile);
-  });
+  ipcMainHandle(
+    "getDesktopUniqueFiles",
+    async (profile: string): Promise<desktopFile[]> => {
+      return await getDesktopUniqueFiles(profile);
+    }
+  );
 }

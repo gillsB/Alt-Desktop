@@ -355,6 +355,7 @@ const EditIcon: React.FC = () => {
       if (iconPaths.length > 1) {
         selectedIcon = await window.electron.selectIconFromList(
           "Select an icon",
+          profile,
           iconPaths,
           icon.id,
           icon.row,
