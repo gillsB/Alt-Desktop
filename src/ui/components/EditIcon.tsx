@@ -377,6 +377,9 @@ const EditIcon: React.FC = () => {
         );
       } else {
         logger.info("No selected icon");
+        if (icon) {
+          await window.electron.previewIconUpdate(icon.id, icon);
+        }
       }
     } catch (e) {
       logger.error("Error during autoGenIcon", e);
