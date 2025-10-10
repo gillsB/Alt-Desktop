@@ -494,15 +494,61 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
               extensions,
             });
           } else {
-            // Non supported type, allow all files
+            // All files
             options.filters.push({
-              name: type,
+              name: "All Files",
               extensions: ["*"],
+            });
+
+            // Stupidest trick ever adding "*" filter resolves all shortcuts (.lnks) to their targets.
+            // But adding all other extensions via wildcard doesn't....
+            // Its important especially for program path to get shortcuts as they might have saved command args (looking at you discord)...
+            options.filters.push({
+              name: "All Files",
+              extensions: [
+                "a*",
+                "b*",
+                "c*",
+                "d*",
+                "e*",
+                "f*",
+                "g*",
+                "h*",
+                "i*",
+                "j*",
+                "k*",
+                "l*",
+                "m*",
+                "n*",
+                "o*",
+                "p*",
+                "q*",
+                "r*",
+                "s*",
+                "t*",
+                "u*",
+                "v*",
+                "w*",
+                "x*",
+                "y*",
+                "z*",
+                "1*",
+                "2*",
+                "3*",
+                "4*",
+                "5*",
+                "6*",
+                "7*",
+                "8*",
+                "9*",
+                "0*",
+              ],
             });
           }
         }
 
         result = await dialog.showOpenDialog(options);
+        logger.info(`File dialog result: ${JSON.stringify(result)}`);
 
         if (result.canceled || result.filePaths.length === 0) {
           return null; // No file selected
@@ -1326,7 +1372,14 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       row: number,
       col: number
     ): Promise<string> => {
-      const ret = await openSelectIconWindow(title, profile, images, id, row, col);
+      const ret = await openSelectIconWindow(
+        title,
+        profile,
+        images,
+        id,
+        row,
+        col
+      );
       if (ret === "Close") {
         //Closes without selecting an icon return empty string.
         return "";
