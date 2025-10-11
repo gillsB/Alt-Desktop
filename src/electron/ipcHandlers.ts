@@ -506,42 +506,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             options.filters.push({
               name: "All Files",
               extensions: [
-                "a*",
-                "b*",
-                "c*",
-                "d*",
-                "e*",
-                "f*",
-                "g*",
-                "h*",
-                "i*",
-                "j*",
-                "k*",
-                "l*",
-                "m*",
-                "n*",
-                "o*",
-                "p*",
-                "q*",
-                "r*",
-                "s*",
-                "t*",
-                "u*",
-                "v*",
-                "w*",
-                "x*",
-                "y*",
-                "z*",
-                "1*",
-                "2*",
-                "3*",
-                "4*",
-                "5*",
-                "6*",
-                "7*",
-                "8*",
-                "9*",
-                "0*",
+                ...[..."abcdefghijklmnopqrstuvwxyz"].map(
+                  // append a* b* c* ... z* to extensions
+                  (letter) => `${letter}*`
+                ),
+                ...[..."0123456789"].map((number) => `${number}*`), // append 0* 1* ... 9* to extensions
               ],
             });
           }
