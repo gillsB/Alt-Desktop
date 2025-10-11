@@ -1793,6 +1793,7 @@ export async function getDesktopUniqueFiles(
   // Find all files/folders not already imported as icons
   const filesToImport: Array<{ name: string; path: string }> = [];
   for (const file of files) {
+    if (file.toLowerCase() === "desktop.ini") continue;
     const candidatePath = path.join(desktopPath, file);
     if (!isAlreadyIcon(candidatePath, file)) {
       filesToImport.push({ name: file, path: candidatePath });
