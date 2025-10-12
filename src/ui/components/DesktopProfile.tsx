@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { createLogger } from "../util/uiLogger";
 import { SubWindowHeader } from "./SubWindowHeader";
 
-const logger = createLogger("IconsProfile.tsx");
+const logger = createLogger("DesktopProfile.tsx");
 
-const IconsProfile: React.FC = () => {
+const DesktopProfile: React.FC = () => {
   const [uniqueFiles, setUniqueFiles] = useState<desktopFile[]>([]);
   const [profile, setProfile] = useState<string>("default");
   const [profiles, setProfiles] = useState<string[]>([]);
 
   const handleClose = () => {
-    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "IconsProfile");
+    window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "DesktopProfile");
   };
 
   useEffect(() => {
@@ -89,11 +89,11 @@ const IconsProfile: React.FC = () => {
     }
   };
 
-  logger.info("Rendering IconsProfile component");
+  logger.info("Rendering DesktopProfile component");
 
   return (
     <div className="subwindow-container">
-      <SubWindowHeader title={`Icons Profile`} onClose={handleClose} />
+      <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
       <div>
         <label>Profile:</label>
         <select value={profile} onChange={handleProfileChange}>
@@ -120,4 +120,4 @@ const IconsProfile: React.FC = () => {
   );
 };
 
-export default IconsProfile;
+export default DesktopProfile;

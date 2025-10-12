@@ -1,8 +1,8 @@
 import { calculateSubWindowDimensions } from "../utils/util.js";
 import { openSubWindow } from "./subWindowManager.js";
 
-// TODO most of this size copied from settings, so adjust when a style is setup for iconsProfile.
-export function openIconsProfileWindow() {
+// TODO most of this size copied from settings, so adjust when a style is setup for DesktopProfile.
+export function openDesktopProfileWindow() {
   const defaultWidth = 600;
   const defaultHeight = 660;
   const minWidth = 465;
@@ -23,6 +23,6 @@ export function openIconsProfileWindow() {
     minHeight: minHeight,
   };
 
-  const subWindowHash = `icons-profile`;
-  return openSubWindow(options, subWindowHash, "IconsProfile");
+  const subWindowHash = `desktop-profile`;
+  return openSubWindow(options, subWindowHash, "DesktopProfile");
 }

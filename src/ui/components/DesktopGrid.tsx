@@ -981,18 +981,18 @@ const DesktopGrid: React.FC = () => {
     hideContextMenu();
   };
 
-  const handleOpenIconsProfile = async () => {
+  const handleOpenDesktopProfile = async () => {
     const title = await window.electron.getSubWindowTitle();
     if (title) {
       logger.info(
-        `Not opening IconsProfile as subWindow: ${title} already open.`
+        `Not opening DesktopProfile as subWindow: ${title} already open.`
       );
       return;
     }
     try {
-      await window.electron.openIconsProfile();
+      await window.electron.openDesktopProfile();
     } catch (error) {
-      logger.error(`Failed to IconsProfile`, error);
+      logger.error(`Failed to open DesktopProfile`, error);
     }
     hideContextMenu();
   };
@@ -2329,10 +2329,10 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-separator" />
               <div
                 className="menu-item"
-                onClick={handleOpenIconsProfile}
+                onClick={handleOpenDesktopProfile}
                 title="Coming soon"
               >
-                Icons Profile
+                Desktop Profile
               </div>
               <div className="menu-item" onClick={handleOpenBackgroundSelect}>
                 Change Background

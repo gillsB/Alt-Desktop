@@ -84,9 +84,9 @@ import {
 } from "./utils/util.js";
 import { getVideoFileUrl } from "./videoFileProtocol.js";
 import { openBackgroundSelectWindow } from "./windows/backgroundSelectWindow.js";
+import { openDesktopProfileWindow } from "./windows/desktopProfile.js";
 import { openEditBackground } from "./windows/editBackgroundWindow.js";
 import { openEditIconWindow } from "./windows/editIconWindow.js";
-import { openIconsProfileWindow } from "./windows/iconsProfile.js";
 import { openSettingsWindow } from "./windows/settingsWindow.js";
 import {
   closeActiveSubWindow,
@@ -1898,10 +1898,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   );
-  ipcMainHandle("openIconsProfile", async (): Promise<boolean> => {
+  ipcMainHandle("openDesktopProfile", async (): Promise<boolean> => {
     try {
-      logger.info("called openIconsProfile");
-      openIconsProfileWindow();
+      logger.info("called openDesktopProfile");
+      openDesktopProfileWindow();
       return true;
     } catch (error) {
       logger.error(`Error opening settings window: ${error}`);

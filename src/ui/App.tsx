@@ -4,11 +4,11 @@ import "./App.css";
 import Background from "./components/Background";
 import BackgroundSelect from "./components/BackgroundSelect";
 import DesktopGrid from "./components/DesktopGrid";
+import DesktopProfile from "./components/DesktopProfile";
 import EditBackground from "./components/EditBackground";
 import EditIcon from "./components/EditIcon";
 import { Header } from "./components/Header";
 import HoverOpacityItem from "./components/HoverOpacityItem";
-import IconsProfile from "./components/IconsProfile";
 import SelectIconWindow from "./components/SelectIconWindow";
 import Settings from "./components/Settings";
 import SmallWindow from "./components/SmallWindow";
@@ -40,7 +40,7 @@ const App: React.FC = () => {
         <Route path="/select-icon" element={<SelectIconWindow />} />
         <Route path="/background-select" element={<BackgroundSelect />} />
         <Route path="/edit-background" element={<EditBackground />} />
-        <Route path="/icons-profile" element={<IconsProfile />} />
+        <Route path="/desktop-profile" element={<DesktopProfile />} />
       </Routes>
     </Router>
   );
