@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "../styles/DesktopProfile.css";
 import { createLogger } from "../util/uiLogger";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -94,28 +95,32 @@ const DesktopProfile: React.FC = () => {
   return (
     <div className="subwindow-container">
       <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
-      <div>
-        <label>Profile:</label>
-        <select value={profile} onChange={handleProfileChange}>
+      <section className="desktop-profile-top">
+        <label className="desktop-profile-label">Profile:</label>
+        <select
+          className="desktop-profile-select"
+          value={profile}
+          onChange={handleProfileChange}
+        >
           {profiles.map((p) => (
             <option key={p} value={p}>
               {p === "default" ? "Default" : p}
             </option>
           ))}
         </select>
-      </div>
-      <div>Total unique DesktopFiles found: {uniqueFiles.length}</div>
-
-      <div
-        style={{
-          overflowY: "auto",
-          overflowX: "hidden",
-        }}
-      >
-        {uniqueFiles.map((file, index) => (
-          <div key={index}>{JSON.stringify(file)}</div>
-        ))}
-      </div>
+      </section>
+      <section className="desktop-profile-bottom">
+        <div className="desktop-profile-count">
+          Total unique DesktopFiles found: {uniqueFiles.length}
+        </div>
+        <div className="desktop-profile-list">
+          {uniqueFiles.map((file, index) => (
+            <div key={index} className="desktop-profile-file">
+              {JSON.stringify(file)}
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };

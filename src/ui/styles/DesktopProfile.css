@@ -1,0 +1,68 @@
+.desktop-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 18px 5px 18px;
+  background: #232323;
+  border-bottom: 1px solid #292929;
+}
+
+.desktop-profile-label {
+  font-weight: bold;
+  color: white;
+  font-size: 16px;
+  user-select: none;
+  min-width: 80px;
+}
+
+.desktop-profile-select {
+  padding: 8px 10px;
+  font-size: 15px;
+  border-radius: 4px;
+  background-color: #2c2c2c;
+  color: white;
+  border: none;
+  outline: none;
+  transition:
+    box-shadow 0.2s,
+    background 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.desktop-profile-select:focus {
+  background: #121212;
+  box-shadow: 0 0 0 2px #007bff88;
+}
+
+.desktop-profile-bottom {
+  flex-grow: 1;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.desktop-profile-count {
+  font-size: 15px;
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+.desktop-profile-list {
+  overflow-y: auto;
+  max-height: calc(100vh - 180px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.desktop-profile-file {
+  background: #292929;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  word-break: break-all;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
