@@ -5,10 +5,17 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("DesktopProfile.tsx");
 
+const TABS = [
+  { key: "current", label: "Current Profile" },
+  { key: "desktop", label: "Desktop Files" },
+  { key: "other", label: "Other Profiles" },
+];
+
 const DesktopProfile: React.FC = () => {
   const [uniqueFiles, setUniqueFiles] = useState<desktopFile[]>([]);
   const [profile, setProfile] = useState<string>("default");
   const [profiles, setProfiles] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("desktop");
 
   const handleClose = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "DesktopProfile");
@@ -90,8 +97,6 @@ const DesktopProfile: React.FC = () => {
     }
   };
 
-  logger.info("Rendering DesktopProfile component");
-
   return (
     <div className="subwindow-container">
       <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
@@ -110,15 +115,55 @@ const DesktopProfile: React.FC = () => {
         </select>
       </section>
       <section className="desktop-profile-bottom">
-        <div className="desktop-profile-count">
-          Total unique DesktopFiles found: {uniqueFiles.length}
+        <div className="import-icons-header">
+          <h2>Edit and Import Icons</h2>
+          <div className="import-icons-subtitle">
+            Edit current profile or import icons from other sources.
+          </div>
         </div>
-        <div className="desktop-profile-list">
-          {uniqueFiles.map((file, index) => (
-            <div key={index} className="desktop-profile-file">
-              {JSON.stringify(file)}
-            </div>
+        <div className="import-icons-tabs">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              className={`import-icons-tab-btn${activeTab === tab.key ? " active" : ""}`}
+              onClick={() => setActiveTab(tab.key)}
+              type="button"
+            >
+              {tab.label}
+            </button>
           ))}
+        </div>
+        <div className="import-icons-tab-content">
+          {activeTab === "current" && (
+            <div className="import-icons-current">
+              {/* TODO: List current profile icons here */}
+              <div className="import-icons-placeholder">
+                Current profile icons will be listed here.
+              </div>
+            </div>
+          )}
+          {activeTab === "desktop" && (
+            <div className="import-icons-desktop">
+              <div className="desktop-profile-count">
+                Total unique DesktopFiles found: {uniqueFiles.length}
+              </div>
+              <div className="desktop-profile-list">
+                {uniqueFiles.map((file, index) => (
+                  <div key={index} className="desktop-profile-file">
+                    {JSON.stringify(file)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {activeTab === "other" && (
+            <div className="import-icons-other">
+              {/* TODO: UI for copying from other profiles */}
+              <div className="import-icons-placeholder">
+                Copy icons from other profiles here.
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>
