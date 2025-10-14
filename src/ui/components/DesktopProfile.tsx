@@ -6,7 +6,6 @@ import { SubWindowHeader } from "./SubWindowHeader";
 const logger = createLogger("DesktopProfile.tsx");
 
 const TABS = [
-  { key: "current", label: "Current Profile" },
   { key: "desktop", label: "Desktop Files" },
   { key: "other", label: "Other Profiles" },
 ];
@@ -116,9 +115,9 @@ const DesktopProfile: React.FC = () => {
       </section>
       <section className="desktop-profile-bottom">
         <div className="import-icons-header">
-          <h2>Edit and Import Icons</h2>
+          <h2>Import Icons</h2>
           <div className="import-icons-subtitle">
-            Edit current profile or import icons from other sources.
+            Import icons from other sources.
           </div>
         </div>
         <div className="import-icons-tabs">
@@ -134,14 +133,6 @@ const DesktopProfile: React.FC = () => {
           ))}
         </div>
         <div className="import-icons-tab-content">
-          {activeTab === "current" && (
-            <div className="import-icons-current">
-              {/* TODO: List current profile icons here */}
-              <div className="import-icons-placeholder">
-                Current profile icons will be listed here.
-              </div>
-            </div>
-          )}
           {activeTab === "desktop" && (
             <div className="import-icons-desktop">
               <div className="desktop-profile-count">
