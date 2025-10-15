@@ -369,6 +369,13 @@ const EditIcon: React.FC = () => {
           selectedIcon
         );
       } else {
+        await showSmallWindow(
+          "No Icons Found",
+          `No icon images could be generated\nfrom the Program path: \n${icon.programLink || '""'}\n` +
+            `or Website link: \n${icon.websiteLink || '""'}\n` +
+            `Please ensure the paths are correct and try again.`,
+          ["Okay"]
+        );
         logger.warn("No icon paths available.");
       }
       if (selectedIcon) {
