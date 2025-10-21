@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../styles/DesktopProfile.css";
 import { createLogger } from "../util/uiLogger";
+import { showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("DesktopProfile.tsx");
@@ -112,7 +113,7 @@ const DesktopProfile: React.FC = () => {
     <div className="subwindow-container">
       <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
       <section className="desktop-profile-top">
-        <label className="desktop-profile-label">Profile:</label>
+        <label className="desktop-profile-label">Current Profile:</label>
         <select
           className="desktop-profile-select"
           value={profile}
@@ -124,6 +125,16 @@ const DesktopProfile: React.FC = () => {
             </option>
           ))}
         </select>
+        <button
+          type="button"
+          className="button"
+          onClick={() => {
+            showSmallWindow("Placeholder", "Placeholder", ["Ok"]);
+          }}
+          title="Placeholder"
+        >
+          Manage Profiles
+        </button>
       </section>
       <section className="desktop-profile-bottom">
         <div className="import-icons-header">
