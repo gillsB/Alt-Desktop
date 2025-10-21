@@ -106,6 +106,17 @@
   margin-bottom: 8px;
 }
 
+.desktop-profile-count-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.desktop-profile-count {
+  margin-bottom: 0;
+}
+
 .desktop-profile-list {
   overflow-y: auto;
   max-height: calc(100vh - 250px);
@@ -131,4 +142,10 @@
   background: #292929;
   border-radius: 4px;
   margin-top: 8px;
+}
+
+/* override global .button left margin for inline placement */
+.desktop-profile-count-row .button,
+.import-all-inline {
+  margin-left: 0;
 }
