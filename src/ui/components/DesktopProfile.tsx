@@ -96,6 +96,18 @@ const DesktopProfile: React.FC = () => {
     }
   };
 
+  const handleImportAll = async () => {
+    if (!uniqueFiles || uniqueFiles.length === 0) return;
+    try {
+      await window.electron.importIconsFromDesktop();
+
+      const refreshed = await window.electron.getDesktopUniqueFiles(profile);
+      setUniqueFiles(refreshed);
+    } catch (err) {
+      logger.error("Failed to import desktop files:", err);
+    }
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
@@ -124,7 +136,9 @@ const DesktopProfile: React.FC = () => {
           {TABS.map((tab) => (
             <button
               key={tab.key}
-              className={`import-icons-tab-btn${activeTab === tab.key ? " active" : ""}`}
+              className={`import-icons-tab-btn${
+                activeTab === tab.key ? " active" : ""
+              }`}
               onClick={() => setActiveTab(tab.key)}
               type="button"
             >
@@ -135,8 +149,18 @@ const DesktopProfile: React.FC = () => {
         <div className="import-icons-tab-content">
           {activeTab === "desktop" && (
             <div className="import-icons-desktop">
-              <div className="desktop-profile-count">
-                Total unique DesktopFiles found: {uniqueFiles.length}
+              <div className="desktop-profile-count-row">
+                <div className="desktop-profile-count">
+                  Total unique DesktopFiles found: {uniqueFiles.length}
+                </div>
+                <button
+                  type="button"
+                  className="button import-all-inline"
+                  onClick={handleImportAll}
+                  title="Import all unique desktop files into current profile"
+                >
+                  Import All
+                </button>
               </div>
               <div className="desktop-profile-list">
                 {uniqueFiles.map((file, index) => (
