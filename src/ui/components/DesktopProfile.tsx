@@ -168,7 +168,6 @@ const DesktopProfile: React.FC = () => {
                   type="button"
                   className="button import-all-inline"
                   onClick={handleImportAll}
-                  title="Import all unique desktop files into current profile"
                 >
                   Import All
                 </button>
@@ -176,7 +175,22 @@ const DesktopProfile: React.FC = () => {
               <div className="desktop-profile-list">
                 {uniqueFiles.map((file, index) => (
                   <div key={index} className="desktop-profile-file">
-                    {JSON.stringify(file)}
+                    <div className="desktop-file-content">
+                      {JSON.stringify(file)}
+                    </div>
+                    <button
+                      type="button"
+                      className="button import-file-btn"
+                      onClick={() => {
+                        showSmallWindow(
+                          "Placeholder",
+                          "import specific icon placeholder",
+                          ["Ok"]
+                        );
+                      }}
+                    >
+                      Import
+                    </button>
                   </div>
                 ))}
               </div>

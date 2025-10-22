@@ -118,6 +118,7 @@
 }
 
 .desktop-profile-list {
+  flex: 1;
   overflow-y: auto;
   max-height: calc(100vh - 250px);
   display: flex;
@@ -133,6 +134,23 @@
   font-size: 13px;
   word-break: break-all;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.desktop-file-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.import-file-btn {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: 60px;
+  margin: 0;
 }
 
 .import-icons-placeholder {
@@ -142,6 +160,25 @@
   background: #292929;
   border-radius: 4px;
   margin-top: 8px;
+}
+
+.desktop-files-container {
+  display: flex;
+  gap: 12px;
+  height: 100%;
+}
+
+.desktop-files-actions {
+  width: 100px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.desktop-files-actions .button {
+  width: 100%;
+  margin: 0;
 }
 
 /* override global .button left margin for inline placement */
