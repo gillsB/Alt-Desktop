@@ -301,6 +301,7 @@ interface EventParamMapping {
   openDesktopProfile: [];
   importAllIconsFromDesktop: [];
   getDesktopUniqueFiles: [string];
+  importDesktopFile: [desktopFile, string];
 }
 
 // The returns from the main process to the renderer
@@ -386,6 +387,7 @@ type EventPayloadMapping = {
   openDesktopProfile: boolean;
   importAllIconsFromDesktop: boolean;
   getDesktopUniqueFiles: desktopFile[];
+  importDesktopFile: DesktopIcon | null;
 };
 
 type UnsubscribeFunction = () => void;
@@ -547,5 +549,9 @@ interface Window {
     openDesktopProfile: () => Promise<boolean>;
     importAllIconsFromDesktop: () => Promise<boolean>;
     getDesktopUniqueFiles: (profile: string) => Promise<desktopFile[]>;
+    importDesktopFile: (
+      file: desktopFile,
+      profile: string
+    ) => Promise<DesktopIcon | null>;
   };
 }

@@ -109,6 +109,23 @@ const DesktopProfile: React.FC = () => {
     }
   };
 
+  const handleImportFile = async (file: desktopFile) => {
+    try {
+      const importedIcon = await window.electron.importDesktopFile(
+        file,
+        profile
+      );
+      if (importedIcon) {
+        // Refresh the unique files list after import
+        const refreshed = await window.electron.getDesktopUniqueFiles(profile);
+        setUniqueFiles(refreshed);
+        logger.info(`Successfully imported ${file.name}`);
+      }
+    } catch (error) {
+      logger.error(`Failed to import ${file.name}:`, error);
+    }
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
@@ -181,13 +198,7 @@ const DesktopProfile: React.FC = () => {
                     <button
                       type="button"
                       className="button import-file-btn"
-                      onClick={() => {
-                        showSmallWindow(
-                          "Placeholder",
-                          "import specific icon placeholder",
-                          ["Ok"]
-                        );
-                      }}
+                      onClick={() => handleImportFile(file)}
                     >
                       Import
                     </button>

@@ -68,6 +68,7 @@ import {
   getSelectedProfilePath,
   getSettingsFilePath,
   importAllIconsFromDesktop,
+  importDesktopFileAsIcon,
   indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
@@ -1924,6 +1925,42 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "getDesktopUniqueFiles",
     async (profile: string): Promise<desktopFile[]> => {
       return await getDesktopUniqueFiles(profile);
+    }
+  );
+  ipcMainHandle(
+    "importDesktopFile",
+    async (file: desktopFile, profile: string): Promise<DesktopIcon | null> => {
+      logger.info(`Importing desktop file: ${file.name}`);
+
+      const rendererStates = await getRendererStates();
+      const maxRows = rendererStates.visibleRows || 10;
+      const takenCoords = new Set<string>();
+
+      try {
+        const profileJsonPath = getProfileJsonPath(profile);
+        if (fs.existsSync(profileJsonPath)) {
+          const raw = fs.readFileSync(profileJsonPath, "utf-8");
+          const parsed: DesktopIconData = JSON.parse(raw);
+          const existingIcons: DesktopIcon[] = parsed.icons || [];
+          existingIcons.forEach((icon) => {
+            if (typeof icon.row === "number" && typeof icon.col === "number") {
+              takenCoords.add(`${icon.row},${icon.col}`);
+            }
+          });
+        } else {
+          logger.warn(`Profile JSON not found for profile: ${profile}`);
+        }
+      } catch (err) {
+        logger.warn("Failed to read profile icons for taken coords:", err);
+      }
+
+      return importDesktopFileAsIcon(
+        file,
+        profile,
+        takenCoords,
+        maxRows,
+        mainWindow
+      );
     }
   );
 }

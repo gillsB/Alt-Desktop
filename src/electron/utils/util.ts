@@ -1887,23 +1887,32 @@ export async function importDesktopFileAsIcon(
   }
 }
 
+async function loadExistingIconsAndTakenCoords(profile: string) {
+  const profileJsonPath = getProfileJsonPath(profile);
+  let existingIcons: DesktopIcon[] = [];
+  if (fs.existsSync(profileJsonPath)) {
+    try {
+      const data = fs.readFileSync(profileJsonPath, "utf-8");
+      const parsedData: DesktopIconData = JSON.parse(data);
+      existingIcons = parsedData.icons || [];
+    } catch (e) {
+      logger.warn("Failed to read profile icon data:", e);
+    }
+  }
+  const takenCoords = new Set(
+    existingIcons.map((icon) => `${icon.row},${icon.col}`)
+  );
+  return { existingIcons, takenCoords };
+}
+
 export async function importAllIconsFromDesktop(
   mainWindow: BrowserWindow,
   profile: string
 ): Promise<boolean> {
   try {
+    const { existingIcons, takenCoords } =
+      await loadExistingIconsAndTakenCoords(profile);
     // Fetch current profile's DesktopIconData
-    const profileJsonPath = getProfileJsonPath(profile);
-    let existingIcons: DesktopIcon[] = [];
-    if (fs.existsSync(profileJsonPath)) {
-      try {
-        const data = fs.readFileSync(profileJsonPath, "utf-8");
-        const parsedData: DesktopIconData = JSON.parse(data);
-        existingIcons = parsedData.icons || [];
-      } catch (e) {
-        logger.warn("Failed to read profile icon data:", e);
-      }
-    }
 
     const filesToImport = await getDesktopUniqueFiles(profile, existingIcons);
 
@@ -1921,9 +1930,6 @@ export async function importAllIconsFromDesktop(
 
     if (importIcons === "Import") {
       const maxRows = (await getRendererState("visibleRows")) || 10;
-      const takenCoords = new Set(
-        existingIcons.map((icon) => `${icon.row},${icon.col}`)
-      );
 
       const importedIcons: DesktopIcon[] = [];
 
