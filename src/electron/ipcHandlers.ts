@@ -67,7 +67,7 @@ import {
   getProfilesPath,
   getSelectedProfilePath,
   getSettingsFilePath,
-  importIconsFromDesktop,
+  importAllIconsFromDesktop,
   indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
@@ -1909,8 +1909,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
 
-  ipcMainHandle("importIconsFromDesktop", async (): Promise<boolean> => {
-    logger.info("called importIconsFromDesktop");
+  ipcMainHandle("importAllIconsFromDesktop", async (): Promise<boolean> => {
+    logger.info("called importAllIconsFromDesktop");
     const profile = await getRendererState("profile");
     // Do not import if no profile returned from getRendererState
     if (!profile) {
@@ -1918,7 +1918,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       showSmallWindow("Error Importing Icons", "No profile is set.", ["Okay"]);
       return false;
     }
-    return await importIconsFromDesktop(mainWindow, profile);
+    return await importAllIconsFromDesktop(mainWindow, profile);
   });
   ipcMainHandle(
     "getDesktopUniqueFiles",

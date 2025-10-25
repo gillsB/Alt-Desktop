@@ -170,7 +170,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   editIconOffsetUpdate: (offsetX: number, offsetY: number) =>
     ipcInvoke("editIconOffsetUpdate", offsetX, offsetY),
   openDesktopProfile: () => ipcInvoke("openDesktopProfile"),
-  importIconsFromDesktop: () => ipcInvoke("importIconsFromDesktop"),
+  importAllIconsFromDesktop: () => ipcInvoke("importAllIconsFromDesktop"),
   getDesktopUniqueFiles: (profile: string) =>
     ipcInvoke("getDesktopUniqueFiles", profile),
 } satisfies Window["electron"]);

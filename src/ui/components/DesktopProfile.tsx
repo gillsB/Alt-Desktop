@@ -100,7 +100,7 @@ const DesktopProfile: React.FC = () => {
   const handleImportAll = async () => {
     if (!uniqueFiles || uniqueFiles.length === 0) return;
     try {
-      await window.electron.importIconsFromDesktop();
+      await window.electron.importAllIconsFromDesktop();
 
       const refreshed = await window.electron.getDesktopUniqueFiles(profile);
       setUniqueFiles(refreshed);

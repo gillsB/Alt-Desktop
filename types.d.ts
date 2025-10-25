@@ -299,7 +299,7 @@ interface EventParamMapping {
   swapDesktopIcons: [string, string];
   editIconOffsetUpdate: [number, number];
   openDesktopProfile: [];
-  importIconsFromDesktop: [];
+  importAllIconsFromDesktop: [];
   getDesktopUniqueFiles: [string];
 }
 
@@ -384,7 +384,7 @@ type EventPayloadMapping = {
   swapDesktopIcons: boolean;
   editIconOffsetUpdate: boolean;
   openDesktopProfile: boolean;
-  importIconsFromDesktop: boolean;
+  importAllIconsFromDesktop: boolean;
   getDesktopUniqueFiles: desktopFile[];
 };
 
@@ -545,7 +545,7 @@ interface Window {
     swapDesktopIcons: (id1: string, id2: string) => Promise<boolean>;
     editIconOffsetUpdate: (offsetX: number, offsetY: number) => void;
     openDesktopProfile: () => Promise<boolean>;
-    importIconsFromDesktop: () => Promise<boolean>;
+    importAllIconsFromDesktop: () => Promise<boolean>;
     getDesktopUniqueFiles: (profile: string) => Promise<desktopFile[]>;
   };
 }

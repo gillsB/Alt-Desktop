@@ -1887,7 +1887,7 @@ export async function importDesktopFileAsIcon(
   }
 }
 
-export async function importIconsFromDesktop(
+export async function importAllIconsFromDesktop(
   mainWindow: BrowserWindow,
   profile: string
 ): Promise<boolean> {
