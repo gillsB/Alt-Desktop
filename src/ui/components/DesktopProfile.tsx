@@ -117,12 +117,20 @@ const DesktopProfile: React.FC = () => {
       );
       if (importedIcon) {
         // Refresh the unique files list after import
-        const refreshed = await window.electron.getDesktopUniqueFiles(profile);
-        setUniqueFiles(refreshed);
+        reloadFiles();
         logger.info(`Successfully imported ${file.name}`);
       }
     } catch (error) {
       logger.error(`Failed to import ${file.name}:`, error);
+    }
+  };
+
+  const reloadFiles = async () => {
+    try {
+      const refreshed = await window.electron.getDesktopUniqueFiles(profile);
+      setUniqueFiles(refreshed);
+    } catch (error) {
+      logger.error("Error reloading unique desktop files:", error);
     }
   };
 
@@ -187,6 +195,13 @@ const DesktopProfile: React.FC = () => {
                   onClick={handleImportAll}
                 >
                   Import All
+                </button>
+                <button
+                  type="button"
+                  className="button reload-btn"
+                  onClick={reloadFiles}
+                >
+                  Reload
                 </button>
               </div>
               <div className="desktop-profile-list">
