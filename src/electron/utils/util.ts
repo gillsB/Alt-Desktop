@@ -1753,11 +1753,14 @@ export function saveImageToIconFolder(
 export async function getDesktopUniqueFiles(
   profile: string,
   existingIcons?: DesktopIcon[]
-): Promise<Array<{ name: string; path: string }>> {
+): Promise<{
+  filesToImport: Array<{ name: string; path: string }>;
+  alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+}> {
   const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
   if (!fs.existsSync(desktopPath)) {
     logger.warn(`Desktop path does not exist: ${desktopPath}`);
-    return [];
+    return { filesToImport: [], alreadyImported: [] };
   }
   const files = await fs.promises.readdir(desktopPath);
   logger.info("Files on Desktop:", files);
@@ -1779,10 +1782,13 @@ export async function getDesktopUniqueFiles(
     }
   }
 
-  // Check if icon exists with same name as filePath and program path as programLink
-  function isAlreadyIcon(filePath: string, candidateName: string): boolean {
+  // Find a matching icon for a desktop file (by programLink + name)
+  function findMatchingIcon(
+    filePath: string,
+    candidateName: string
+  ): DesktopIcon | undefined {
     const normFilePath = path.resolve(filePath).toLowerCase();
-    return icons.some(
+    return icons.find(
       (icon) =>
         icon.programLink &&
         path.resolve(icon.programLink).toLowerCase() === normFilePath &&
@@ -1790,16 +1796,28 @@ export async function getDesktopUniqueFiles(
     );
   }
 
-  // Find all files/folders not already imported as icons
   const filesToImport: Array<{ name: string; path: string }> = [];
+  const alreadyImported: Array<{
+    name: string;
+    path: string;
+    icon: DesktopIcon;
+  }> = [];
+  const desktopFiles: Array<{ name: string; path: string }> = [];
+
   for (const file of files) {
     if (file.toLowerCase() === "desktop.ini") continue;
     const candidatePath = path.join(desktopPath, file);
-    if (!isAlreadyIcon(candidatePath, file)) {
+    desktopFiles.push({ name: file, path: candidatePath });
+
+    const match = findMatchingIcon(candidatePath, file);
+    if (match) {
+      alreadyImported.push({ name: file, path: candidatePath, icon: match });
+    } else {
       filesToImport.push({ name: file, path: candidatePath });
     }
   }
-  return filesToImport;
+
+  return { filesToImport, alreadyImported };
 }
 
 export async function importDesktopFileAsIcon(
@@ -1914,7 +1932,10 @@ export async function importAllIconsFromDesktop(
       await loadExistingIconsAndTakenCoords(profile);
     // Fetch current profile's DesktopIconData
 
-    const filesToImport = await getDesktopUniqueFiles(profile, existingIcons);
+    const { filesToImport } = await getDesktopUniqueFiles(
+      profile,
+      existingIcons
+    );
 
     if (!filesToImport.length) {
       logger.warn("No new files found on Desktop to import as icons.");
@@ -1922,6 +1943,7 @@ export async function importAllIconsFromDesktop(
     }
 
     logger.info(`Found ${filesToImport.length} new files to import.`);
+
     const importIcons = await showSmallWindow(
       "Import Desktop Icons",
       `Found ${filesToImport.length} new unique Desktop icon(s).\nWould you like to import them?`,

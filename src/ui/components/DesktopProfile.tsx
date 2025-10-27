@@ -64,7 +64,8 @@ const DesktopProfile: React.FC = () => {
   useEffect(() => {
     const fetchUniqueFiles = async () => {
       try {
-        setUniqueFiles(await window.electron.getDesktopUniqueFiles(profile));
+        const result = await window.electron.getDesktopUniqueFiles(profile);
+        setUniqueFiles(result.filesToImport || []);
       } catch (error) {
         logger.error("Error fetching unique desktop files:", error);
       }
@@ -103,7 +104,7 @@ const DesktopProfile: React.FC = () => {
       await window.electron.importAllIconsFromDesktop();
 
       const refreshed = await window.electron.getDesktopUniqueFiles(profile);
-      setUniqueFiles(refreshed);
+      setUniqueFiles(refreshed.filesToImport);
     } catch (err) {
       logger.error("Failed to import desktop files:", err);
     }
@@ -128,7 +129,8 @@ const DesktopProfile: React.FC = () => {
   const reloadFiles = async () => {
     try {
       const refreshed = await window.electron.getDesktopUniqueFiles(profile);
-      setUniqueFiles(refreshed);
+      setUniqueFiles(refreshed.filesToImport);
+      logger.info("also received data:", refreshed.alreadyImported);
     } catch (error) {
       logger.error("Error reloading unique desktop files:", error);
     }

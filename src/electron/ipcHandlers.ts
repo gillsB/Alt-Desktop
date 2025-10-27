@@ -1923,7 +1923,12 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle(
     "getDesktopUniqueFiles",
-    async (profile: string): Promise<desktopFile[]> => {
+    async (
+      profile: string
+    ): Promise<{
+      filesToImport: desktopFile[];
+      alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+    }> => {
       return await getDesktopUniqueFiles(profile);
     }
   );

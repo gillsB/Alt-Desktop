@@ -386,7 +386,10 @@ type EventPayloadMapping = {
   editIconOffsetUpdate: boolean;
   openDesktopProfile: boolean;
   importAllIconsFromDesktop: boolean;
-  getDesktopUniqueFiles: desktopFile[];
+  getDesktopUniqueFiles: {
+    filesToImport: desktopFile[];
+    alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  };
   importDesktopFile: DesktopIcon | null;
 };
 
@@ -548,7 +551,10 @@ interface Window {
     editIconOffsetUpdate: (offsetX: number, offsetY: number) => void;
     openDesktopProfile: () => Promise<boolean>;
     importAllIconsFromDesktop: () => Promise<boolean>;
-    getDesktopUniqueFiles: (profile: string) => Promise<desktopFile[]>;
+    getDesktopUniqueFiles: (profile: string) => Promise<{
+      filesToImport: desktopFile[];
+      alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+    }>;
     importDesktopFile: (
       file: desktopFile,
       profile: string
