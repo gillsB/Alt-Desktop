@@ -186,3 +186,22 @@
 .import-all-inline {
   margin-left: 0;
 }
+
+.desktop-profile-separator {
+  padding: 12px 4px 8px 4px;
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  border-top: 1px solid #333;
+  margin-top: 8px;
+}
+
+.desktop-profile-file.imported {
+  background: #262626;
+  color: #888;
+  opacity: 0.8;
+}
+
+.desktop-profile-file.imported .desktop-file-content {
+  font-style: italic;
+}

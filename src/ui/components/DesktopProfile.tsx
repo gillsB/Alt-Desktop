@@ -13,6 +13,13 @@ const TABS = [
 
 const DesktopProfile: React.FC = () => {
   const [uniqueFiles, setUniqueFiles] = useState<desktopFile[]>([]);
+  const [alreadyImported, setAlreadyImported] = useState<
+    Array<{
+      name: string;
+      path: string;
+      icon: DesktopIcon;
+    }>
+  >([]);
   const [profile, setProfile] = useState<string>("default");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
@@ -66,6 +73,7 @@ const DesktopProfile: React.FC = () => {
       try {
         const result = await window.electron.getDesktopUniqueFiles(profile);
         setUniqueFiles(result.filesToImport || []);
+        setAlreadyImported(result.alreadyImported || []);
       } catch (error) {
         logger.error("Error fetching unique desktop files:", error);
       }
@@ -208,7 +216,7 @@ const DesktopProfile: React.FC = () => {
               </div>
               <div className="desktop-profile-list">
                 {uniqueFiles.map((file, index) => (
-                  <div key={index} className="desktop-profile-file">
+                  <div key={`new-${index}`} className="desktop-profile-file">
                     <div className="desktop-file-content">
                       {JSON.stringify(file)}
                     </div>
@@ -219,6 +227,24 @@ const DesktopProfile: React.FC = () => {
                     >
                       Import
                     </button>
+                  </div>
+                ))}
+
+                {uniqueFiles.length > 0 && alreadyImported.length > 0 && (
+                  <div className="desktop-profile-separator">
+                    Already Imported Files
+                  </div>
+                )}
+
+                {/* Already imported files */}
+                {alreadyImported.map((file, index) => (
+                  <div
+                    key={`imported-${index}`}
+                    className="desktop-profile-file imported"
+                  >
+                    <div className="desktop-file-content">
+                      {JSON.stringify(file)}
+                    </div>
                   </div>
                 ))}
               </div>
