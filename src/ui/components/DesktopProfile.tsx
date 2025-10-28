@@ -23,6 +23,8 @@ const DesktopProfile: React.FC = () => {
   const [profile, setProfile] = useState<string>("default");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
+  const [alreadyImportedCollapsed, setAlreadyImportedCollapsed] =
+    useState(true);
 
   const handleClose = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "DesktopProfile");
@@ -208,13 +210,6 @@ const DesktopProfile: React.FC = () => {
                 >
                   Import All
                 </button>
-                <button
-                  type="button"
-                  className="button reload-btn"
-                  onClick={reloadFiles}
-                >
-                  Reload
-                </button>
               </div>
               <div className="desktop-profile-list">
                 {uniqueFiles.map((file, index) => (
@@ -232,23 +227,46 @@ const DesktopProfile: React.FC = () => {
                   </div>
                 ))}
 
-                {uniqueFiles.length > 0 && alreadyImported.length > 0 && (
-                  <div className="desktop-profile-separator">
-                    Already Imported Files
+                {alreadyImported.length > 0 && (
+                  <div className="imported-files-section">
+                    <div
+                      className="imported-files-header"
+                      onClick={() =>
+                        setAlreadyImportedCollapsed(!alreadyImportedCollapsed)
+                      }
+                    >
+                      <button
+                        className="tag-toggle-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAlreadyImportedCollapsed(
+                            !alreadyImportedCollapsed
+                          );
+                        }}
+                      >
+                        {alreadyImportedCollapsed ? "▸" : "▾"}
+                      </button>
+                      <span>
+                        Already Imported Files ({alreadyImported.length})
+                      </span>
+                    </div>
+
+                    {!alreadyImportedCollapsed && (
+                      <div className="imported-files-content">
+                        {alreadyImported.map((file, index) => (
+                          <div
+                            key={`imported-${index}`}
+                            className="desktop-profile-file imported"
+                          >
+                            <div className="desktop-file-content">
+                              {JSON.stringify(file)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
-
-                {/* Already imported files */}
-                {alreadyImported.map((file, index) => (
-                  <div
-                    key={`imported-${index}`}
-                    className="desktop-profile-file imported"
-                  >
-                    <div className="desktop-file-content">
-                      {JSON.stringify(file)}
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           )}

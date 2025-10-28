@@ -39,7 +39,7 @@
   padding: 0 18px 18px 18px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  min-height: 0;
 }
 
 .import-icons-header {
@@ -97,7 +97,7 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  overflow: hidden;
 }
 
 .desktop-profile-count {
@@ -120,10 +120,10 @@
 .desktop-profile-list {
   flex: 1;
   overflow-y: auto;
-  max-height: calc(100vh - 250px);
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-top: 8px;
 }
 
 .desktop-profile-file {
@@ -204,4 +204,66 @@
 
 .desktop-profile-file.imported .desktop-file-content {
   font-style: italic;
+}
+
+.imported-files-section {
+  border-top: 1px solid #333;
+}
+
+.imported-files-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 2px;
+  color: #bbb;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.imported-files-header:hover {
+  color: #fff;
+}
+
+.imported-files-header .tag-toggle-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  transition: color 0.2s;
+}
+
+.imported-files-content {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.desktop-profile-bottom {
+  flex-grow: 1;
+  padding: 0 18px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.import-icons-tab-content {
+  background: #232323;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.import-icons-desktop {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }

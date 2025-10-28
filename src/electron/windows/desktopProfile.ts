@@ -6,7 +6,7 @@ export function openDesktopProfileWindow() {
   const defaultWidth = 600;
   const defaultHeight = 660;
   const minWidth = 465;
-  const minHeight = 300;
+  const minHeight = 425;
 
   const { actualWidth: calculatedWidth, actualHeight: calculatedHeight } =
     calculateSubWindowDimensions(defaultWidth, defaultHeight);
