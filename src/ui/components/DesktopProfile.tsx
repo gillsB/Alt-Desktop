@@ -20,7 +20,7 @@ const DesktopProfile: React.FC = () => {
       icon: DesktopIcon;
     }>
   >([]);
-  const [profile, setProfile] = useState<string>("default");
+  const [profile, setProfile] = useState<string>("");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
   const [alreadyImportedCollapsed, setAlreadyImportedCollapsed] =
@@ -72,12 +72,14 @@ const DesktopProfile: React.FC = () => {
 
   useEffect(() => {
     const fetchUniqueFiles = async () => {
-      try {
-        const result = await window.electron.getDesktopUniqueFiles(profile);
-        setUniqueFiles(result.filesToImport || []);
-        setAlreadyImported(result.alreadyImported || []);
-      } catch (error) {
-        logger.error("Error fetching unique desktop files:", error);
+      if (profile) {
+        try {
+          const result = await window.electron.getDesktopUniqueFiles(profile);
+          setUniqueFiles(result.filesToImport || []);
+          setAlreadyImported(result.alreadyImported || []);
+        } catch (error) {
+          logger.error("Error fetching unique desktop files:", error);
+        }
       }
     };
     fetchUniqueFiles();
