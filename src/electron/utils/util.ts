@@ -1786,14 +1786,44 @@ export async function getDesktopUniqueFiles(
   function findMatchingIcon(
     filePath: string,
     candidateName: string
-  ): DesktopIcon | undefined {
+  ): { exact?: DesktopIcon; nameOnly?: DesktopIcon; pathOnly?: DesktopIcon } {
     const normFilePath = path.resolve(filePath).toLowerCase();
-    return icons.find(
-      (icon) =>
-        icon.programLink &&
-        path.resolve(icon.programLink).toLowerCase() === normFilePath &&
-        icon.name === candidateName
-    );
+
+    let exact: DesktopIcon | undefined;
+    let nameOnly: DesktopIcon | undefined;
+    let pathOnly: DesktopIcon | undefined;
+
+    for (const icon of icons) {
+      const iconPath = icon.programLink
+        ? path.resolve(icon.programLink).toLowerCase()
+        : "";
+      const nameMatches = icon.name === candidateName;
+      const pathMatches = iconPath === normFilePath;
+
+      if (nameMatches && pathMatches) {
+        exact = icon;
+      } else if (nameMatches && !pathMatches) {
+        nameOnly = icon;
+      } else if (!nameMatches && pathMatches) {
+        pathOnly = icon;
+      }
+    }
+
+    if (nameOnly || pathOnly) {
+      logger.info(
+        `Partial match found for "${candidateName}" (${filePath}):`,
+        JSON.stringify({
+          nameOnlyMatch: nameOnly
+            ? `Icon: ${nameOnly.name} (${nameOnly.programLink})`
+            : undefined,
+          pathOnlyMatch: pathOnly
+            ? `Icon: ${pathOnly.name} (${pathOnly.programLink})`
+            : undefined,
+        })
+      );
+    }
+
+    return { exact, nameOnly, pathOnly };
   }
 
   const filesToImport: Array<{ name: string; path: string }> = [];
@@ -1809,9 +1839,13 @@ export async function getDesktopUniqueFiles(
     const candidatePath = path.join(desktopPath, file);
     desktopFiles.push({ name: file, path: candidatePath });
 
-    const match = findMatchingIcon(candidatePath, file);
-    if (match) {
-      alreadyImported.push({ name: file, path: candidatePath, icon: match });
+    const matches = findMatchingIcon(candidatePath, file);
+    if (matches.exact) {
+      alreadyImported.push({
+        name: file,
+        path: candidatePath,
+        icon: matches.exact,
+      });
     } else {
       filesToImport.push({ name: file, path: candidatePath });
     }
