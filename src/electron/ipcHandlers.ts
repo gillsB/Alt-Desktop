@@ -1928,6 +1928,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     ): Promise<{
       filesToImport: desktopFile[];
       alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+      nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+      pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
     }> => {
       return await getDesktopUniqueFiles(profile);
     }

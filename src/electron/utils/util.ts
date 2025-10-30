@@ -1756,11 +1756,18 @@ export async function getDesktopUniqueFiles(
 ): Promise<{
   filesToImport: Array<{ name: string; path: string }>;
   alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
 }> {
   const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
   if (!fs.existsSync(desktopPath)) {
     logger.warn(`Desktop path does not exist: ${desktopPath}`);
-    return { filesToImport: [], alreadyImported: [] };
+    return {
+      filesToImport: [],
+      alreadyImported: [],
+      nameOnlyMatches: [],
+      pathOnlyMatches: [],
+    };
   }
   const files = await fs.promises.readdir(desktopPath);
   logger.info("Files on Desktop:", files);
@@ -1832,6 +1839,16 @@ export async function getDesktopUniqueFiles(
     path: string;
     icon: DesktopIcon;
   }> = [];
+  const nameOnlyMatches: Array<{
+    name: string;
+    path: string;
+    icon: DesktopIcon;
+  }> = [];
+  const pathOnlyMatches: Array<{
+    name: string;
+    path: string;
+    icon: DesktopIcon;
+  }> = [];
   const desktopFiles: Array<{ name: string; path: string }> = [];
 
   for (const file of files) {
@@ -1840,18 +1857,31 @@ export async function getDesktopUniqueFiles(
     desktopFiles.push({ name: file, path: candidatePath });
 
     const matches = findMatchingIcon(candidatePath, file);
+
     if (matches.exact) {
       alreadyImported.push({
         name: file,
         path: candidatePath,
         icon: matches.exact,
       });
+    } else if (matches.nameOnly) {
+      nameOnlyMatches.push({
+        name: file,
+        path: candidatePath,
+        icon: matches.nameOnly,
+      });
+    } else if (matches.pathOnly) {
+      pathOnlyMatches.push({
+        name: file,
+        path: candidatePath,
+        icon: matches.pathOnly,
+      });
     } else {
       filesToImport.push({ name: file, path: candidatePath });
     }
   }
 
-  return { filesToImport, alreadyImported };
+  return { filesToImport, alreadyImported, nameOnlyMatches, pathOnlyMatches };
 }
 
 export async function importDesktopFileAsIcon(

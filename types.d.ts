@@ -389,6 +389,8 @@ type EventPayloadMapping = {
   getDesktopUniqueFiles: {
     filesToImport: desktopFile[];
     alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+    nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+    pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
   };
   importDesktopFile: DesktopIcon | null;
 };
@@ -554,6 +556,8 @@ interface Window {
     getDesktopUniqueFiles: (profile: string) => Promise<{
       filesToImport: desktopFile[];
       alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+      nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+      pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
     }>;
     importDesktopFile: (
       file: desktopFile,
