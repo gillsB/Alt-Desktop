@@ -20,11 +20,19 @@ const DesktopProfile: React.FC = () => {
       icon: DesktopIcon;
     }>
   >([]);
+  const [nameOnlyMatches, setNameOnlyMatches] = useState<
+    Array<{
+      name: string;
+      path: string;
+      icon: DesktopIcon;
+    }>
+  >([]);
   const [profile, setProfile] = useState<string>("");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
   const [alreadyImportedCollapsed, setAlreadyImportedCollapsed] =
     useState(true);
+  const [partialMatchesCollapsed, setPartialMatchesCollapsed] = useState(false);
 
   const handleClose = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "DesktopProfile");
@@ -77,6 +85,7 @@ const DesktopProfile: React.FC = () => {
           const result = await window.electron.getDesktopUniqueFiles(profile);
           setUniqueFiles(result.filesToImport || []);
           setAlreadyImported(result.alreadyImported || []);
+          setNameOnlyMatches(result.nameOnlyMatches || []);
         } catch (error) {
           logger.error("Error fetching unique desktop files:", error);
         }
@@ -118,6 +127,7 @@ const DesktopProfile: React.FC = () => {
       const refreshed = await window.electron.getDesktopUniqueFiles(profile);
       setUniqueFiles(refreshed.filesToImport || []);
       setAlreadyImported(refreshed.alreadyImported || []);
+      setNameOnlyMatches(refreshed.nameOnlyMatches || []);
     } catch (err) {
       logger.error("Failed to import desktop files:", err);
     }
@@ -144,6 +154,7 @@ const DesktopProfile: React.FC = () => {
       const refreshed = await window.electron.getDesktopUniqueFiles(profile);
       setUniqueFiles(refreshed.filesToImport || []);
       setAlreadyImported(refreshed.alreadyImported || []);
+      setNameOnlyMatches(refreshed.nameOnlyMatches || []);
       logger.info("also received data:", refreshed.alreadyImported);
     } catch (error) {
       logger.error("Error reloading unique desktop files:", error);
@@ -199,6 +210,7 @@ const DesktopProfile: React.FC = () => {
           ))}
         </div>
         <div className="import-icons-tab-content">
+          {/* Not imported */}
           {activeTab === "desktop" && (
             <div className="import-icons-desktop">
               <div className="desktop-profile-count-row">
@@ -229,6 +241,44 @@ const DesktopProfile: React.FC = () => {
                   </div>
                 ))}
 
+                {/* Partial matches */}
+                {nameOnlyMatches.length > 0 && (
+                  <div className="partial-files-section">
+                    <div
+                      className="partial-files-header"
+                      onClick={() =>
+                        setPartialMatchesCollapsed(!partialMatchesCollapsed)
+                      }
+                    >
+                      <button
+                        className="tag-toggle-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPartialMatchesCollapsed(!partialMatchesCollapsed);
+                        }}
+                      >
+                        {partialMatchesCollapsed ? "▸" : "▾"}
+                      </button>
+                      <span>Partial Matches ({nameOnlyMatches.length})</span>
+                    </div>
+
+                    {!partialMatchesCollapsed && (
+                      <div className="partial-files-content">
+                        {nameOnlyMatches.map((file, index) => (
+                          <div
+                            key={`partial-${index}`}
+                            className="desktop-profile-file partial"
+                          >
+                            <div className="desktop-file-content">
+                              {JSON.stringify(file)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* Already imported */}
                 {alreadyImported.length > 0 && (
                   <div className="imported-files-section">
                     <div
