@@ -27,6 +27,13 @@ const DesktopProfile: React.FC = () => {
       icon: DesktopIcon;
     }>
   >([]);
+  const [pathOnlyMatches, setPathOnlyMatches] = useState<
+    Array<{
+      name: string;
+      path: string;
+      icon: DesktopIcon;
+    }>
+  >([]);
   const [profile, setProfile] = useState<string>("");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
@@ -82,10 +89,7 @@ const DesktopProfile: React.FC = () => {
     const fetchUniqueFiles = async () => {
       if (profile) {
         try {
-          const result = await window.electron.getDesktopUniqueFiles(profile);
-          setUniqueFiles(result.filesToImport || []);
-          setAlreadyImported(result.alreadyImported || []);
-          setNameOnlyMatches(result.nameOnlyMatches || []);
+          reloadFiles();
         } catch (error) {
           logger.error("Error fetching unique desktop files:", error);
         }
@@ -124,10 +128,7 @@ const DesktopProfile: React.FC = () => {
     try {
       await window.electron.importAllIconsFromDesktop();
 
-      const refreshed = await window.electron.getDesktopUniqueFiles(profile);
-      setUniqueFiles(refreshed.filesToImport || []);
-      setAlreadyImported(refreshed.alreadyImported || []);
-      setNameOnlyMatches(refreshed.nameOnlyMatches || []);
+      reloadFiles();
     } catch (err) {
       logger.error("Failed to import desktop files:", err);
     }
@@ -155,6 +156,7 @@ const DesktopProfile: React.FC = () => {
       setUniqueFiles(refreshed.filesToImport || []);
       setAlreadyImported(refreshed.alreadyImported || []);
       setNameOnlyMatches(refreshed.nameOnlyMatches || []);
+      setPathOnlyMatches(refreshed.pathOnlyMatches || []);
       logger.info("also received data:", refreshed.alreadyImported);
     } catch (error) {
       logger.error("Error reloading unique desktop files:", error);
@@ -242,7 +244,7 @@ const DesktopProfile: React.FC = () => {
                 ))}
 
                 {/* Partial matches */}
-                {nameOnlyMatches.length > 0 && (
+                {nameOnlyMatches.length + pathOnlyMatches.length > 0 && (
                   <div className="partial-files-section">
                     <div
                       className="partial-files-header"
@@ -259,14 +261,28 @@ const DesktopProfile: React.FC = () => {
                       >
                         {partialMatchesCollapsed ? "▸" : "▾"}
                       </button>
-                      <span>Partial Matches ({nameOnlyMatches.length})</span>
+                      <span>
+                        Partial Matches (
+                        {nameOnlyMatches.length + pathOnlyMatches.length})
+                      </span>
                     </div>
 
                     {!partialMatchesCollapsed && (
                       <div className="partial-files-content">
                         {nameOnlyMatches.map((file, index) => (
                           <div
-                            key={`partial-${index}`}
+                            key={`partial-name-${index}`}
+                            className="desktop-profile-file partial"
+                          >
+                            <div className="desktop-file-content">
+                              {JSON.stringify(file)}
+                            </div>
+                          </div>
+                        ))}
+
+                        {pathOnlyMatches.map((file, index) => (
+                          <div
+                            key={`partial-path-${index}`}
                             className="desktop-profile-file partial"
                           >
                             <div className="desktop-file-content">
