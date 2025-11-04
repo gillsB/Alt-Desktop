@@ -190,7 +190,7 @@ const DesktopProfile: React.FC = () => {
     try {
       const mimeType = await window.electron.getFileType(path);
       if (mimeType) {
-        if (mimeType === "inode/directory") {
+        if (mimeType.endsWith("directory")) {
           return "(folder)";
         }
         // Get the general type from mimetype (last part after '/')
@@ -273,7 +273,11 @@ const DesktopProfile: React.FC = () => {
                 {desktopFiles.uniqueFiles.map((file, index) => (
                   <div key={`new-${index}`} className="desktop-profile-file">
                     <div className="desktop-file-content">
-                      <span className="file-name">{file.name}</span>
+                      <span className="file-name">
+                        {file.name.includes(".")
+                          ? file.name.split(".").slice(0, -1).join(".")
+                          : file.name}
+                      </span>
                       <span className="file-path">
                         {formattedPaths[file.path] || "..."}
                       </span>
