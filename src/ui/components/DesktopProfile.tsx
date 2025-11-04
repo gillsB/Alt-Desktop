@@ -11,29 +11,20 @@ const TABS = [
   { key: "other", label: "Other Profiles" },
 ];
 
+interface DesktopFileState {
+  uniqueFiles: desktopFile[];
+  alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+}
+
 const DesktopProfile: React.FC = () => {
-  const [uniqueFiles, setUniqueFiles] = useState<desktopFile[]>([]);
-  const [alreadyImported, setAlreadyImported] = useState<
-    Array<{
-      name: string;
-      path: string;
-      icon: DesktopIcon;
-    }>
-  >([]);
-  const [nameOnlyMatches, setNameOnlyMatches] = useState<
-    Array<{
-      name: string;
-      path: string;
-      icon: DesktopIcon;
-    }>
-  >([]);
-  const [pathOnlyMatches, setPathOnlyMatches] = useState<
-    Array<{
-      name: string;
-      path: string;
-      icon: DesktopIcon;
-    }>
-  >([]);
+  const [desktopFiles, setDesktopFiles] = useState<DesktopFileState>({
+    uniqueFiles: [],
+    alreadyImported: [],
+    nameOnlyMatches: [],
+    pathOnlyMatches: [],
+  });
   const [profile, setProfile] = useState<string>("");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
@@ -101,28 +92,6 @@ const DesktopProfile: React.FC = () => {
     fetchUniqueFiles();
   }, [profile]);
 
-  useEffect(() => {
-    const formatPaths = async () => {
-      const paths: Record<string, string> = {};
-
-      // Format paths for all file types
-      const allFiles = [
-        ...uniqueFiles,
-        ...nameOnlyMatches,
-        ...pathOnlyMatches,
-        ...alreadyImported,
-      ];
-
-      for (const file of allFiles) {
-        paths[file.path] = await formatFilePath(file.path);
-      }
-
-      setFormattedPaths(paths);
-    };
-
-    formatPaths();
-  }, [uniqueFiles, nameOnlyMatches, pathOnlyMatches, alreadyImported]);
-
   const handleProfileChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -149,7 +118,8 @@ const DesktopProfile: React.FC = () => {
   };
 
   const handleImportAll = async () => {
-    if (!uniqueFiles || uniqueFiles.length === 0) return;
+    if (!desktopFiles.uniqueFiles || desktopFiles.uniqueFiles.length === 0)
+      return;
     try {
       await window.electron.importAllIconsFromDesktop();
 
@@ -178,15 +148,36 @@ const DesktopProfile: React.FC = () => {
   const reloadFiles = async () => {
     try {
       const refreshed = await window.electron.getDesktopUniqueFiles(profile);
-      setUniqueFiles(refreshed.filesToImport || []);
-      setAlreadyImported(refreshed.alreadyImported || []);
-      setNameOnlyMatches(refreshed.nameOnlyMatches || []);
-      setPathOnlyMatches(refreshed.pathOnlyMatches || []);
-      logger.info("also received data:", refreshed.alreadyImported);
+      setDesktopFiles({
+        uniqueFiles: refreshed.filesToImport || [],
+        alreadyImported: refreshed.alreadyImported || [],
+        nameOnlyMatches: refreshed.nameOnlyMatches || [],
+        pathOnlyMatches: refreshed.pathOnlyMatches || [],
+      });
     } catch (error) {
       logger.error("Error reloading unique desktop files:", error);
     }
   };
+
+  useEffect(() => {
+    const formatPaths = async () => {
+      const paths: Record<string, string> = {};
+      const allFiles = [
+        ...desktopFiles.uniqueFiles,
+        ...desktopFiles.nameOnlyMatches,
+        ...desktopFiles.pathOnlyMatches,
+        ...desktopFiles.alreadyImported,
+      ];
+
+      for (const file of allFiles) {
+        paths[file.path] = await formatFilePath(file.path);
+      }
+
+      setFormattedPaths(paths);
+    };
+
+    formatPaths();
+  }, [desktopFiles]);
 
   const formatFilePath = async (path: string) => {
     // Check for extension first
@@ -199,8 +190,7 @@ const DesktopProfile: React.FC = () => {
     try {
       const mimeType = await window.electron.getFileType(path);
       if (mimeType) {
-        logger.info(`MIME type for ${path}: ${mimeType}`);
-        if (mimeType === "directory") {
+        if (mimeType === "inode/directory") {
           return "(folder)";
         }
         // Get the general type from mimetype (last part after '/')
@@ -268,7 +258,8 @@ const DesktopProfile: React.FC = () => {
             <div className="import-icons-desktop">
               <div className="desktop-profile-count-row">
                 <div className="desktop-profile-count">
-                  Total unique DesktopFiles found: {uniqueFiles.length}
+                  Total unique DesktopFiles found:{" "}
+                  {desktopFiles.uniqueFiles.length}
                 </div>
                 <button
                   type="button"
@@ -279,7 +270,7 @@ const DesktopProfile: React.FC = () => {
                 </button>
               </div>
               <div className="desktop-profile-list">
-                {uniqueFiles.map((file, index) => (
+                {desktopFiles.uniqueFiles.map((file, index) => (
                   <div key={`new-${index}`} className="desktop-profile-file">
                     <div className="desktop-file-content">
                       <span className="file-name">{file.name}</span>
@@ -298,7 +289,9 @@ const DesktopProfile: React.FC = () => {
                 ))}
 
                 {/* Partial matches */}
-                {nameOnlyMatches.length + pathOnlyMatches.length > 0 && (
+                {desktopFiles.nameOnlyMatches.length +
+                  desktopFiles.pathOnlyMatches.length >
+                  0 && (
                   <div className="partial-files-section">
                     <div
                       className="partial-files-header"
@@ -317,13 +310,15 @@ const DesktopProfile: React.FC = () => {
                       </button>
                       <span>
                         Partial Matches (
-                        {nameOnlyMatches.length + pathOnlyMatches.length})
+                        {desktopFiles.nameOnlyMatches.length +
+                          desktopFiles.pathOnlyMatches.length}
+                        )
                       </span>
                     </div>
 
                     {!partialMatchesCollapsed && (
                       <div className="partial-files-content">
-                        {nameOnlyMatches.map((file, index) => (
+                        {desktopFiles.nameOnlyMatches.map((file, index) => (
                           <div
                             key={`partial-name-${index}`}
                             className="desktop-profile-file partial"
@@ -334,7 +329,7 @@ const DesktopProfile: React.FC = () => {
                           </div>
                         ))}
 
-                        {pathOnlyMatches.map((file, index) => (
+                        {desktopFiles.pathOnlyMatches.map((file, index) => (
                           <div
                             key={`partial-path-${index}`}
                             className="desktop-profile-file partial"
@@ -349,7 +344,7 @@ const DesktopProfile: React.FC = () => {
                   </div>
                 )}
                 {/* Already imported */}
-                {alreadyImported.length > 0 && (
+                {desktopFiles.alreadyImported.length > 0 && (
                   <div className="imported-files-section">
                     <div
                       className="imported-files-header"
@@ -369,13 +364,14 @@ const DesktopProfile: React.FC = () => {
                         {alreadyImportedCollapsed ? "▸" : "▾"}
                       </button>
                       <span>
-                        Already Imported Files ({alreadyImported.length})
+                        Already Imported Files (
+                        {desktopFiles.alreadyImported.length})
                       </span>
                     </div>
 
                     {!alreadyImportedCollapsed && (
                       <div className="imported-files-content">
-                        {alreadyImported.map((file, index) => (
+                        {desktopFiles.alreadyImported.map((file, index) => (
                           <div
                             key={`imported-${index}`}
                             className="desktop-profile-file imported"
