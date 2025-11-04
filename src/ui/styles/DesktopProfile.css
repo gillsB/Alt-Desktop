@@ -93,7 +93,6 @@
   background: #232323;
   border-radius: 0 0 4px 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  min-height: 180px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -143,6 +142,20 @@
 .desktop-file-content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.file-name {
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.file-path {
+  color: #cecece;
+  font-size: 1em;
+  opacity: 0.8;
 }
 
 .import-file-btn {

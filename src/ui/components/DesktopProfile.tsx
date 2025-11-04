@@ -40,6 +40,9 @@ const DesktopProfile: React.FC = () => {
   const [alreadyImportedCollapsed, setAlreadyImportedCollapsed] =
     useState(true);
   const [partialMatchesCollapsed, setPartialMatchesCollapsed] = useState(false);
+  const [formattedPaths, setFormattedPaths] = useState<Record<string, string>>(
+    {}
+  );
 
   const handleClose = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "DesktopProfile");
@@ -97,6 +100,28 @@ const DesktopProfile: React.FC = () => {
     };
     fetchUniqueFiles();
   }, [profile]);
+
+  useEffect(() => {
+    const formatPaths = async () => {
+      const paths: Record<string, string> = {};
+
+      // Format paths for all file types
+      const allFiles = [
+        ...uniqueFiles,
+        ...nameOnlyMatches,
+        ...pathOnlyMatches,
+        ...alreadyImported,
+      ];
+
+      for (const file of allFiles) {
+        paths[file.path] = await formatFilePath(file.path);
+      }
+
+      setFormattedPaths(paths);
+    };
+
+    formatPaths();
+  }, [uniqueFiles, nameOnlyMatches, pathOnlyMatches, alreadyImported]);
 
   const handleProfileChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -161,6 +186,32 @@ const DesktopProfile: React.FC = () => {
     } catch (error) {
       logger.error("Error reloading unique desktop files:", error);
     }
+  };
+
+  const formatFilePath = async (path: string) => {
+    // Check for extension first
+    const extension = path.split(".").pop();
+    if (extension && extension !== path) {
+      return `.${extension.toLowerCase()}`;
+    }
+
+    // If no extension, get mimetype
+    try {
+      const mimeType = await window.electron.getFileType(path);
+      if (mimeType) {
+        logger.info(`MIME type for ${path}: ${mimeType}`);
+        if (mimeType === "directory") {
+          return "(folder)";
+        }
+        // Get the general type from mimetype (last part after '/')
+        const type = mimeType.split("/")[0];
+        return `(${type})`;
+      }
+    } catch (err) {
+      logger.warn(`Could not determine file type for ${path}:`, err);
+    }
+
+    return "(unknown)";
   };
 
   return (
@@ -231,7 +282,10 @@ const DesktopProfile: React.FC = () => {
                 {uniqueFiles.map((file, index) => (
                   <div key={`new-${index}`} className="desktop-profile-file">
                     <div className="desktop-file-content">
-                      {JSON.stringify(file)}
+                      <span className="file-name">{file.name}</span>
+                      <span className="file-path">
+                        {formattedPaths[file.path] || "..."}
+                      </span>
                     </div>
                     <button
                       type="button"
