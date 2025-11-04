@@ -268,6 +268,13 @@ const DesktopProfile: React.FC = () => {
                 >
                   Import All
                 </button>
+                <button
+                  type="button"
+                  className="button reload-btn"
+                  onClick={reloadFiles}
+                >
+                  Reload
+                </button>
               </div>
               <div className="desktop-profile-list">
                 {desktopFiles.uniqueFiles.map((file, index) => (
