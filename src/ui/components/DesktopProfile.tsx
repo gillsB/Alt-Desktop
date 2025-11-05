@@ -31,6 +31,7 @@ const DesktopProfile: React.FC = () => {
   const [alreadyImportedCollapsed, setAlreadyImportedCollapsed] =
     useState(true);
   const [partialMatchesCollapsed, setPartialMatchesCollapsed] = useState(false);
+  const [notImportedCollapsed, setNotImportedCollapsed] = useState(false);
   const [formattedPaths, setFormattedPaths] = useState<Record<string, string>>(
     {}
   );
@@ -277,27 +278,57 @@ const DesktopProfile: React.FC = () => {
                 </button>
               </div>
               <div className="desktop-profile-list">
-                {desktopFiles.uniqueFiles.map((file, index) => (
-                  <div key={`new-${index}`} className="desktop-profile-file">
-                    <div className="desktop-file-content">
-                      <span className="file-name">
-                        {file.name.includes(".")
-                          ? file.name.split(".").slice(0, -1).join(".")
-                          : file.name}
-                      </span>
-                      <span className="file-path">
-                        {formattedPaths[file.path] || "..."}
-                      </span>
-                    </div>
+                {/* Not Imported */}
+                <div className="not-imported-section">
+                  <div
+                    className="not-imported-header"
+                    onClick={() =>
+                      setNotImportedCollapsed(!notImportedCollapsed)
+                    }
+                  >
                     <button
-                      type="button"
-                      className="button import-file-btn"
-                      onClick={() => handleImportFile(file)}
+                      className="tag-toggle-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setNotImportedCollapsed(!notImportedCollapsed);
+                      }}
                     >
-                      Import
+                      {notImportedCollapsed ? "▸" : "▾"}
                     </button>
+                    <span>
+                      Not Imported ({desktopFiles.uniqueFiles.length})
+                    </span>
                   </div>
-                ))}
+
+                  {!notImportedCollapsed && (
+                    <div className="not-imported-content">
+                      {desktopFiles.uniqueFiles.map((file, index) => (
+                        <div
+                          key={`new-${index}`}
+                          className="desktop-profile-file"
+                        >
+                          <div className="desktop-file-content">
+                            <span className="file-name">
+                              {file.name.includes(".")
+                                ? file.name.split(".").slice(0, -1).join(".")
+                                : file.name}
+                            </span>
+                            <span className="file-path">
+                              {formattedPaths[file.path] || "..."}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="button import-file-btn"
+                            onClick={() => handleImportFile(file)}
+                          >
+                            Import
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 {/* Partial matches */}
                 {desktopFiles.nameOnlyMatches.length +
