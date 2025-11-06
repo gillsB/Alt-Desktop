@@ -102,7 +102,7 @@
 .desktop-profile-count {
   font-size: 15px;
   color: #ccc;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .desktop-profile-count-row {
@@ -110,10 +110,6 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
-}
-
-.desktop-profile-count {
-  margin-bottom: 0;
 }
 
 .desktop-profile-list {
@@ -175,38 +171,10 @@
   margin-top: 8px;
 }
 
-.desktop-files-container {
-  display: flex;
-  gap: 12px;
-  height: 100%;
-}
-
-.desktop-files-actions {
-  width: 100px;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.desktop-files-actions .button {
-  width: 100%;
-  margin: 0;
-}
-
 /* override global .button left margin for inline placement */
 .desktop-profile-count-row .button,
 .import-all-inline {
   margin-left: 0;
-}
-
-.desktop-profile-separator {
-  padding: 12px 4px 8px 4px;
-  color: #666;
-  font-size: 13px;
-  font-weight: 500;
-  border-top: 1px solid #333;
-  margin-top: 8px;
 }
 
 .desktop-profile-file.imported {
@@ -215,77 +183,11 @@
   opacity: 0.8;
 }
 
-.desktop-profile-file.imported .desktop-file-content {
-  font-style: italic;
-}
-
-.imported-files-section {
-  border-top: 1px solid #333;
-}
-
-.imported-files-header {
-  display: flex;
-  align-items: center;
-  padding: 8px 2px;
-  color: #bbb;
-  cursor: pointer;
-  user-select: none;
-  font-size: 14px;
-  transition: color 0.2s;
-}
-
-.imported-files-header:hover {
-  color: #fff;
-}
-
-.imported-files-header .tag-toggle-button {
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 2px 6px;
-  transition: color 0.2s;
-}
-
-.imported-files-content {
-  margin-top: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.desktop-profile-bottom {
-  flex-grow: 1;
-  padding: 0 18px 18px 18px;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.import-icons-tab-content {
-  background: #232323;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
 .import-icons-desktop {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-}
-
-.not-imported-section {
-  margin-top: 8px;
-  border-top: 1px solid #333;
-  padding-top: 8px;
-  margin-bottom: 8px;
 }
 
 .not-imported-header {
