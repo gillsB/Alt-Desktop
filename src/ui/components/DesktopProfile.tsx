@@ -381,7 +381,7 @@ const DesktopProfile: React.FC = () => {
                 )}
                 {/* Already imported */}
                 {desktopFiles.alreadyImported.length > 0 && (
-                  <div className="imported-files-section">
+                  <>
                     <div
                       className="not-imported-header"
                       onClick={() =>
@@ -419,7 +419,7 @@ const DesktopProfile: React.FC = () => {
                         ))}
                       </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             </div>
