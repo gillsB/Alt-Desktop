@@ -301,6 +301,13 @@ const DesktopProfile: React.FC = () => {
                       <div
                         key={`new-${index}`}
                         className="desktop-profile-file"
+                        title={`View ${file.name} in File Explorer`}
+                        onClick={() =>
+                          window.electron.openInExplorer(
+                            "programLink",
+                            file.path
+                          )
+                        }
                       >
                         <div className="desktop-file-content">
                           <span className="file-name">
@@ -312,13 +319,18 @@ const DesktopProfile: React.FC = () => {
                             {formattedPaths[file.path] || "..."}
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          className="button import-file-btn"
-                          onClick={() => handleImportFile(file)}
-                        >
-                          Import
-                        </button>
+                        <div className="desktop-file-actions">
+                          <button
+                            type="button"
+                            className="button import-file-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImportFile(file);
+                            }}
+                          >
+                            Import
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
