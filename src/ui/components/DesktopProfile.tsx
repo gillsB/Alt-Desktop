@@ -364,65 +364,57 @@ const DesktopProfile: React.FC = () => {
                       </span>
                     </div>
 
-                    {!partialMatchesCollapsed && (
-                      <div className="not-imported-content">
-                        {desktopFiles.nameOnlyMatches.map((file, index) => (
-                          <div
-                            key={`partial-name-${index}`}
-                            className="desktop-profile-file partial"
-                            onClick={() =>
-                              window.electron.openInExplorer(
-                                "programLink",
-                                file.path
-                              )
-                            }
+                    {desktopFiles.nameOnlyMatches.map((file, index) => (
+                      <div
+                        key={`partial-name-${index}`}
+                        className="desktop-profile-file partial"
+                        onClick={() =>
+                          window.electron.openInExplorer(
+                            "programLink",
+                            file.path
+                          )
+                        }
+                      >
+                        <div className="desktop-file-content">
+                          <span
+                            className={`partial-match-name match-highlight`}
                           >
-                            <div className="desktop-file-content">
-                              <span
-                                className={`partial-match-name match-highlight`}
-                              >
-                                {file.name.includes(".")
-                                  ? file.name.split(".").slice(0, -1).join(".")
-                                  : file.name}
-                              </span>
-                              <span
-                                className={`partial-match-path different-highlight`}
-                              >
-                                {formattedPaths[file.path] || "..."}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-
-                        {desktopFiles.pathOnlyMatches.map((file, index) => (
-                          <div
-                            key={`partial-path-${index}`}
-                            className="desktop-profile-file partial"
-                            onClick={() =>
-                              window.electron.openInExplorer(
-                                "programLink",
-                                file.path
-                              )
-                            }
+                            {file.icon.name}
+                          </span>
+                          <span
+                            className={`partial-match-path different-highlight`}
                           >
-                            <div className="desktop-file-content">
-                              <span
-                                className={`partial-match-name different-highlight`}
-                              >
-                                {file.name.includes(".")
-                                  ? file.name.split(".").slice(0, -1).join(".")
-                                  : file.name}
-                              </span>
-                              <span
-                                className={`partial-match-path match-highlight`}
-                              >
-                                {formattedPaths[file.path] || "..."}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                            {file.icon.programLink || "..."}
+                          </span>
+                        </div>
                       </div>
-                    )}
+                    ))}
+
+                    {desktopFiles.pathOnlyMatches.map((file, index) => (
+                      <div
+                        key={`partial-path-${index}`}
+                        className="desktop-profile-file partial"
+                        onClick={() =>
+                          window.electron.openInExplorer(
+                            "programLink",
+                            file.path
+                          )
+                        }
+                      >
+                        <div className="desktop-file-content">
+                          <span
+                            className={`partial-match-name different-highlight`}
+                          >
+                            {file.icon.name}
+                          </span>
+                          <span
+                            className={`partial-match-path match-highlight`}
+                          >
+                            {file.icon.programLink || "..."}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
                 {/* Already imported */}
