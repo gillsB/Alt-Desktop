@@ -370,9 +370,26 @@ const DesktopProfile: React.FC = () => {
                           <div
                             key={`partial-name-${index}`}
                             className="desktop-profile-file partial"
+                            onClick={() =>
+                              window.electron.openInExplorer(
+                                "programLink",
+                                file.path
+                              )
+                            }
                           >
                             <div className="desktop-file-content">
-                              {JSON.stringify(file)}
+                              <span
+                                className={`partial-match-name match-highlight`}
+                              >
+                                {file.name.includes(".")
+                                  ? file.name.split(".").slice(0, -1).join(".")
+                                  : file.name}
+                              </span>
+                              <span
+                                className={`partial-match-path different-highlight`}
+                              >
+                                {formattedPaths[file.path] || "..."}
+                              </span>
                             </div>
                           </div>
                         ))}
@@ -381,9 +398,26 @@ const DesktopProfile: React.FC = () => {
                           <div
                             key={`partial-path-${index}`}
                             className="desktop-profile-file partial"
+                            onClick={() =>
+                              window.electron.openInExplorer(
+                                "programLink",
+                                file.path
+                              )
+                            }
                           >
                             <div className="desktop-file-content">
-                              {JSON.stringify(file)}
+                              <span
+                                className={`partial-match-name different-highlight`}
+                              >
+                                {file.name.includes(".")
+                                  ? file.name.split(".").slice(0, -1).join(".")
+                                  : file.name}
+                              </span>
+                              <span
+                                className={`partial-match-path match-highlight`}
+                              >
+                                {formattedPaths[file.path] || "..."}
+                              </span>
                             </div>
                           </div>
                         ))}

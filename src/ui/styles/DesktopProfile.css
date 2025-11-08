@@ -221,3 +221,26 @@
   gap: 6px;
   padding-bottom: 8px;
 }
+
+.partial-match-name {
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.partial-match-path {
+  color: #888;
+  font-size: 0.9em;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.match-highlight {
+  background: rgba(35, 134, 54, 0.2);
+  color: #3fb950;
+}
+
+.different-highlight {
+  background: rgba(177, 134, 1, 0.2);
+  color: #d29922;
+}
