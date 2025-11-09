@@ -252,13 +252,3 @@
   gap: 0;
   color: #888;
 }
-
-.highlighted-path .match-highlight {
-  background: rgba(35, 134, 54, 0.2);
-  color: #3fb950;
-}
-
-.highlighted-path .different-highlight {
-  background: rgba(177, 134, 1, 0.2);
-  color: #d29922;
-}

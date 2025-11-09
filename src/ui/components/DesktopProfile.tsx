@@ -424,10 +424,8 @@ const DesktopProfile: React.FC = () => {
                         }
                       >
                         <div className="desktop-file-content">
-                          <span
-                            className={`partial-match-name match-highlight`}
-                          >
-                            {file.icon.name}
+                          <span className={`partial-match-name`}>
+                            {renderHighlightedPath(file.icon.name, file.name)}
                           </span>
                           <span className="partial-match-path">
                             {renderHighlightedPath(
@@ -451,10 +449,8 @@ const DesktopProfile: React.FC = () => {
                         }
                       >
                         <div className="desktop-file-content">
-                          <span
-                            className={`partial-match-name different-highlight`}
-                          >
-                            {file.icon.name}
+                          <span className={`partial-match-name`}>
+                            {renderHighlightedPath(file.icon.name, file.name)}
                           </span>
                           <span className="partial-match-path">
                             {renderHighlightedPath(
