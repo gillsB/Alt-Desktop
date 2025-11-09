@@ -205,6 +205,54 @@ const DesktopProfile: React.FC = () => {
     return "(unknown)";
   };
 
+  const findCommonPrefixCut = (a: string, b: string) => {
+    const minLen = Math.min(a.length, b.length);
+    let i = 0;
+    while (i < minLen && a[i] === b[i]) i++;
+    if (i === minLen) return i;
+
+    const sepPos = Math.max(
+      a.lastIndexOf("\\", i - 1),
+      a.lastIndexOf("/", i - 1)
+    );
+    if (sepPos >= 0) return sepPos + 1;
+    return i;
+  };
+
+  // Render highlighted path: common prefix green, differing tail yellow
+  const renderHighlightedPath = (
+    iconPath: string | undefined,
+    filePath: string
+  ) => {
+    const ip = (iconPath || "") as string;
+
+    if (!ip) {
+      logger.info("renderHighlightedPath - no iconPath", { filePath });
+      return (
+        <span className="partial-match-path different-highlight">
+          (no path)
+        </span>
+      );
+    }
+
+    const ipLower = ip.toLowerCase();
+    const fpLower = filePath.toLowerCase();
+    const cut = findCommonPrefixCut(ipLower, fpLower);
+    const common = ip.slice(0, cut);
+    const diff = ip.slice(cut);
+
+    return (
+      <span
+        className="highlighted-path-inline"
+        title={ip}
+        style={{ fontFamily: "monospace" }}
+      >
+        {common ? <span className="match-highlight">{common}</span> : null}
+        {diff ? <span className="different-highlight">{diff}</span> : null}
+      </span>
+    );
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
@@ -381,10 +429,11 @@ const DesktopProfile: React.FC = () => {
                           >
                             {file.icon.name}
                           </span>
-                          <span
-                            className={`partial-match-path different-highlight`}
-                          >
-                            {file.icon.programLink || "..."}
+                          <span className="partial-match-path">
+                            {renderHighlightedPath(
+                              file.icon.programLink,
+                              file.path
+                            )}
                           </span>
                         </div>
                       </div>
@@ -407,10 +456,11 @@ const DesktopProfile: React.FC = () => {
                           >
                             {file.icon.name}
                           </span>
-                          <span
-                            className={`partial-match-path match-highlight`}
-                          >
-                            {file.icon.programLink || "..."}
+                          <span className="partial-match-path">
+                            {renderHighlightedPath(
+                              file.icon.programLink,
+                              file.path
+                            )}
                           </span>
                         </div>
                       </div>
