@@ -241,12 +241,27 @@ const DesktopProfile: React.FC = () => {
     const common = ip.slice(0, cut);
     const diff = ip.slice(cut);
 
+    // Append ... if iconPath is a substring of filePath
+    if (!diff) {
+      const identical = ipLower === fpLower;
+      logger.info("renderHighlightedPath - no diff", {
+        iconPath: ip,
+        filePath,
+        cut,
+        common,
+        identical,
+      });
+
+      return (
+        <span className="highlighted-path-inline" title={ip}>
+          {common ? <span className="match-highlight">{common}</span> : null}
+          {!identical ? <span className="different-highlight">...</span> : null}
+        </span>
+      );
+    }
+
     return (
-      <span
-        className="highlighted-path-inline"
-        title={ip}
-        style={{ fontFamily: "monospace" }}
-      >
+      <span className="highlighted-path-inline" title={ip}>
         {common ? <span className="match-highlight">{common}</span> : null}
         {diff ? <span className="different-highlight">{diff}</span> : null}
       </span>
