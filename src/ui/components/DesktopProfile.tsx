@@ -512,7 +512,14 @@ const DesktopProfile: React.FC = () => {
                             className="desktop-profile-file imported"
                           >
                             <div className="desktop-file-content">
-                              {JSON.stringify(file)}
+                              <span className="file-name">
+                                {file.name.includes(".")
+                                  ? file.name.split(".").slice(0, -1).join(".")
+                                  : file.name}
+                              </span>
+                              <span className="file-path">
+                                {formattedPaths[file.path] || "..."}
+                              </span>
                             </div>
                           </div>
                         ))}
