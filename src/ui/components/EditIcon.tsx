@@ -318,6 +318,18 @@ const EditIcon: React.FC = () => {
         }
       }
 
+      if ((await window.electron.getFileType(icon.programLink || "")) === "") {
+        const ret = await showSmallWindow(
+          "Error",
+          `Saved program path is invalid.\n${icon.programLink}\nWould you like to continue saving?`,
+          ["Yes", "No"]
+        );
+        if (ret === "No") {
+          logger.info("User cancelled save due to invalid program path.");
+          return;
+        }
+      }
+
       // Save the icon data
       if (!(await window.electron.saveIconData(icon))) {
         logger.error("Failed to reload icon.");
