@@ -67,6 +67,15 @@ export const generateIcon = async (
       fileType = "default";
     }
 
+    // If .url file, try to get its .ico from "IconFile" entry in .url
+    if (fileExtension === ".url") {
+      const icoFromUrl = getIcoFromUrlFile(programLink);
+      if (icoFromUrl) {
+        logger.info(`Found .ico from .url file: ${icoFromUrl}`);
+        foundPaths.push(ensureInTargetDir(icoFromUrl));
+      }
+    }
+
     // Check for .ico files in the same folder as programLink and copy them to targetDir
     const folder = path.dirname(programLink);
     const icoFiles = fs
@@ -235,4 +244,32 @@ function getDefaultBrowserPath(): string | null {
     logger.warn("Could not determine default browser: " + e);
     return null;
   }
+}
+
+function getIcoFromUrlFile(urlFilePath: string): string | null {
+  try {
+    if (
+      !fs.existsSync(urlFilePath) ||
+      path.extname(urlFilePath).toLowerCase() !== ".url"
+    ) {
+      return null;
+    }
+    const content = fs.readFileSync(urlFilePath, "utf-8");
+    const lines = content.split(/\r?\n/);
+    for (const line of lines) {
+      if (line.startsWith("IconFile=")) {
+        const icoPath = line.substring("IconFile=".length).trim();
+        // If path is relative, resolve it against the .url file's directory
+        const resolvedPath = path.isAbsolute(icoPath)
+          ? icoPath
+          : path.resolve(path.dirname(urlFilePath), icoPath);
+        if (fs.existsSync(resolvedPath)) {
+          return resolvedPath;
+        }
+      }
+    }
+  } catch (e) {
+    logger.warn(`Failed to read .url file for icon: ${urlFilePath}`, e);
+  }
+  return null;
 }
