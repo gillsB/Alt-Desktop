@@ -427,55 +427,65 @@ const DesktopProfile: React.FC = () => {
                       </span>
                     </div>
 
-                    {desktopFiles.nameOnlyMatches.map((file, index) => (
-                      <div
-                        key={`partial-name-${index}`}
-                        className="desktop-profile-file partial"
-                        onClick={() =>
-                          window.electron.openInExplorer(
-                            "programLink",
-                            file.path
-                          )
-                        }
-                      >
-                        <div className="desktop-file-content">
-                          <span className={`partial-match-name`}>
-                            {renderHighlightedPath(file.icon.name, file.name)}
-                          </span>
-                          <span className="partial-match-path">
-                            {renderHighlightedPath(
-                              file.icon.programLink,
-                              file.path
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                    {!partialMatchesCollapsed && (
+                      <div className="not-imported-content">
+                        {desktopFiles.nameOnlyMatches.map((file, index) => (
+                          <div
+                            key={`partial-name-${index}`}
+                            className="desktop-profile-file partial"
+                            onClick={() =>
+                              window.electron.openInExplorer(
+                                "programLink",
+                                file.path
+                              )
+                            }
+                          >
+                            <div className="desktop-file-content">
+                              <span className={`partial-match-name`}>
+                                {renderHighlightedPath(
+                                  file.icon.name,
+                                  file.name
+                                )}
+                              </span>
+                              <span className="partial-match-path">
+                                {renderHighlightedPath(
+                                  file.icon.programLink,
+                                  file.path
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
 
-                    {desktopFiles.pathOnlyMatches.map((file, index) => (
-                      <div
-                        key={`partial-path-${index}`}
-                        className="desktop-profile-file partial"
-                        onClick={() =>
-                          window.electron.openInExplorer(
-                            "programLink",
-                            file.path
-                          )
-                        }
-                      >
-                        <div className="desktop-file-content">
-                          <span className={`partial-match-name`}>
-                            {renderHighlightedPath(file.icon.name, file.name)}
-                          </span>
-                          <span className="partial-match-path">
-                            {renderHighlightedPath(
-                              file.icon.programLink,
-                              file.path
-                            )}
-                          </span>
-                        </div>
+                        {desktopFiles.pathOnlyMatches.map((file, index) => (
+                          <div
+                            key={`partial-path-${index}`}
+                            className="desktop-profile-file partial"
+                            onClick={() =>
+                              window.electron.openInExplorer(
+                                "programLink",
+                                file.path
+                              )
+                            }
+                          >
+                            <div className="desktop-file-content">
+                              <span className={`partial-match-name`}>
+                                {renderHighlightedPath(
+                                  file.icon.name,
+                                  file.name
+                                )}
+                              </span>
+                              <span className="partial-match-path">
+                                {renderHighlightedPath(
+                                  file.icon.programLink,
+                                  file.path
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
                 {/* Already imported */}
