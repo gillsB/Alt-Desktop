@@ -35,6 +35,35 @@ const DesktopProfile: React.FC = () => {
   const [formattedPaths, setFormattedPaths] = useState<Record<string, string>>(
     {}
   );
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    file?: desktopFile;
+    section?: "notImported" | "partial" | "imported";
+  }>({ visible: false, x: 0, y: 0 });
+
+  const hideContextMenu = () => {
+    setContextMenu({ visible: false, x: 0, y: 0 });
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const contextMenuElement = document.querySelector(".context-menu");
+      if (
+        contextMenu &&
+        contextMenuElement &&
+        !e.composedPath().includes(contextMenuElement)
+      ) {
+        hideContextMenu();
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [contextMenu]);
 
   const handleClose = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "DesktopProfile");
@@ -371,6 +400,17 @@ const DesktopProfile: React.FC = () => {
                             file.path
                           )
                         }
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setContextMenu({
+                            visible: true,
+                            x: e.clientX,
+                            y: e.clientY,
+                            file: file,
+                            section: "notImported",
+                          });
+                        }}
                       >
                         <div className="desktop-file-content">
                           <span className="file-name">
@@ -439,6 +479,17 @@ const DesktopProfile: React.FC = () => {
                                 file.path
                               )
                             }
+                            onContextMenu={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setContextMenu({
+                                visible: true,
+                                x: e.clientX,
+                                y: e.clientY,
+                                file: file,
+                                section: "partial",
+                              });
+                            }}
                           >
                             <div className="desktop-file-content">
                               <span className={`partial-match-name`}>
@@ -467,6 +518,17 @@ const DesktopProfile: React.FC = () => {
                                 file.path
                               )
                             }
+                            onContextMenu={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setContextMenu({
+                                visible: true,
+                                x: e.clientX,
+                                y: e.clientY,
+                                file: file,
+                                section: "partial",
+                              });
+                            }}
                           >
                             <div className="desktop-file-content">
                               <span className={`partial-match-name`}>
@@ -520,6 +582,17 @@ const DesktopProfile: React.FC = () => {
                           <div
                             key={`imported-${index}`}
                             className="desktop-profile-file imported"
+                            onContextMenu={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setContextMenu({
+                                visible: true,
+                                x: e.clientX,
+                                y: e.clientY,
+                                file: file,
+                                section: "imported",
+                              });
+                            }}
                           >
                             <div className="desktop-file-content">
                               <span className="file-name">
@@ -550,6 +623,35 @@ const DesktopProfile: React.FC = () => {
           )}
         </div>
       </section>
+
+      {contextMenu.visible && (
+        <div
+          className="context-menu"
+          style={{
+            left: `${contextMenu.x}px`,
+            top: `${contextMenu.y}px`,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            role="button"
+            tabIndex={0}
+            className="menu-item"
+            onClick={() => {
+              if (contextMenu.file) {
+                // TODO custom handler for different sections (import/remove etc.)
+                window.electron.openInExplorer(
+                  "programLink",
+                  contextMenu.file.path
+                );
+              }
+              setContextMenu({ visible: false, x: 0, y: 0 });
+            }}
+          >
+            Open file in explorer
+          </div>
+        </div>
+      )}
     </div>
   );
 };
