@@ -302,6 +302,7 @@ interface EventParamMapping {
   importAllIconsFromDesktop: [];
   getDesktopUniqueFiles: [string];
   importDesktopFile: [desktopFile, string];
+  compareProfiles: [string, string];
 }
 
 // The returns from the main process to the renderer
@@ -393,6 +394,12 @@ type EventPayloadMapping = {
     pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
   };
   importDesktopFile: DesktopIcon | null;
+  compareProfiles: {
+    filesToImport: desktopFile[];
+    alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+    nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+    pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  };
 };
 
 type UnsubscribeFunction = () => void;
@@ -563,5 +570,14 @@ interface Window {
       file: desktopFile,
       profile: string
     ) => Promise<DesktopIcon | null>;
+    compareProfiles: (
+      currentProfile: string,
+      otherProfile: string
+    ) => Promise<{
+      filesToImport: desktopFile[];
+      alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+      nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+      pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+    }>;
   };
 }

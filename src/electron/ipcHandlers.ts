@@ -1970,4 +1970,26 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       );
     }
   );
+
+  ipcMainHandle(
+    "compareProfiles",
+    async (
+      currentProfile: string,
+      otherProfile: string
+    ): Promise<{
+      filesToImport: desktopFile[];
+      alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+      nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+      pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+    }> => {
+      //TODO temp just to check ipc works.
+      logger.info(
+        `compareProfiles called with: ${currentProfile}, ${otherProfile}`
+      );
+      logger.info(
+        `for testing only, returning getDesktopUniqueFiles for ${currentProfile}`
+      );
+      return await getDesktopUniqueFiles(currentProfile);
+    }
+  );
 }

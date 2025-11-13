@@ -175,6 +175,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("getDesktopUniqueFiles", profile),
   importDesktopFile: (file: desktopFile, profile: string) =>
     ipcInvoke("importDesktopFile", file, profile),
+  compareProfiles: (currentProfile: string, otherProfile: string) =>
+    ipcInvoke("compareProfiles", currentProfile, otherProfile),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

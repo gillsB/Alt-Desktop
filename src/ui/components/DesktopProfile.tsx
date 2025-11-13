@@ -395,10 +395,7 @@ const DesktopProfile: React.FC = () => {
                         className="desktop-profile-file"
                         title={`View ${file.name} in File Explorer`}
                         onClick={() => {
-                          if (contextMenu.visible) {
-                            hideContextMenu();
-                            return;
-                          }
+                          if (contextMenu.visible) return;
                           window.electron.openInExplorer(
                             "programLink",
                             file.path
@@ -478,10 +475,7 @@ const DesktopProfile: React.FC = () => {
                             key={`partial-name-${index}`}
                             className="desktop-profile-file partial"
                             onClick={() => {
-                              if (contextMenu.visible) {
-                                hideContextMenu();
-                                return;
-                              }
+                              if (contextMenu.visible) return;
                               window.electron.openInExplorer(
                                 "programLink",
                                 file.path
@@ -521,10 +515,7 @@ const DesktopProfile: React.FC = () => {
                             key={`partial-path-${index}`}
                             className="desktop-profile-file partial"
                             onClick={() => {
-                              if (contextMenu.visible) {
-                                hideContextMenu();
-                                return;
-                              }
+                              if (contextMenu.visible) return;
                               window.electron.openInExplorer(
                                 "programLink",
                                 file.path
