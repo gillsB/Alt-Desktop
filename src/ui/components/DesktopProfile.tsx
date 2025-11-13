@@ -394,12 +394,16 @@ const DesktopProfile: React.FC = () => {
                         key={`new-${index}`}
                         className="desktop-profile-file"
                         title={`View ${file.name} in File Explorer`}
-                        onClick={() =>
+                        onClick={() => {
+                          if (contextMenu.visible) {
+                            hideContextMenu();
+                            return;
+                          }
                           window.electron.openInExplorer(
                             "programLink",
                             file.path
-                          )
-                        }
+                          );
+                        }}
                         onContextMenu={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -473,12 +477,16 @@ const DesktopProfile: React.FC = () => {
                           <div
                             key={`partial-name-${index}`}
                             className="desktop-profile-file partial"
-                            onClick={() =>
+                            onClick={() => {
+                              if (contextMenu.visible) {
+                                hideContextMenu();
+                                return;
+                              }
                               window.electron.openInExplorer(
                                 "programLink",
                                 file.path
-                              )
-                            }
+                              );
+                            }}
                             onContextMenu={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -512,12 +520,16 @@ const DesktopProfile: React.FC = () => {
                           <div
                             key={`partial-path-${index}`}
                             className="desktop-profile-file partial"
-                            onClick={() =>
+                            onClick={() => {
+                              if (contextMenu.visible) {
+                                hideContextMenu();
+                                return;
+                              }
                               window.electron.openInExplorer(
                                 "programLink",
                                 file.path
-                              )
-                            }
+                              );
+                            }}
                             onContextMenu={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
