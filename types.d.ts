@@ -81,7 +81,7 @@ interface BackgroundsData {
   names?: Record<string, string[]>;
 }
 
-type desktopFile = {
+type DesktopFile = {
   name: string;
   path: string;
 };
@@ -301,7 +301,7 @@ interface EventParamMapping {
   openDesktopProfile: [];
   importAllIconsFromDesktop: [];
   getDesktopUniqueFiles: [string];
-  importDesktopFile: [desktopFile, string];
+  importDesktopFile: [DesktopFile, string];
   compareProfiles: [string, string];
 }
 
@@ -388,14 +388,14 @@ type EventPayloadMapping = {
   openDesktopProfile: boolean;
   importAllIconsFromDesktop: boolean;
   getDesktopUniqueFiles: {
-    filesToImport: desktopFile[];
+    filesToImport: DesktopFile[];
     alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
     nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
     pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
   };
   importDesktopFile: DesktopIcon | null;
   compareProfiles: {
-    filesToImport: desktopFile[];
+    filesToImport: DesktopFile[];
     alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
     nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
     pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
@@ -561,20 +561,20 @@ interface Window {
     openDesktopProfile: () => Promise<boolean>;
     importAllIconsFromDesktop: () => Promise<boolean>;
     getDesktopUniqueFiles: (profile: string) => Promise<{
-      filesToImport: desktopFile[];
+      filesToImport: DesktopFile[];
       alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
       nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
       pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
     }>;
     importDesktopFile: (
-      file: desktopFile,
+      file: DesktopFile,
       profile: string
     ) => Promise<DesktopIcon | null>;
     compareProfiles: (
       currentProfile: string,
       otherProfile: string
     ) => Promise<{
-      filesToImport: desktopFile[];
+      filesToImport: DesktopFile[];
       alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
       nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
       pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;

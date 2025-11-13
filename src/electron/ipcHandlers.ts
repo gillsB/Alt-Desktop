@@ -1926,7 +1926,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     async (
       profile: string
     ): Promise<{
-      filesToImport: desktopFile[];
+      filesToImport: DesktopFile[];
       alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
       nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
       pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
@@ -1936,7 +1936,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
   ipcMainHandle(
     "importDesktopFile",
-    async (file: desktopFile, profile: string): Promise<DesktopIcon | null> => {
+    async (file: DesktopFile, profile: string): Promise<DesktopIcon | null> => {
       logger.info(`Importing desktop file: ${file.name}`);
 
       const rendererStates = await getRendererStates();
@@ -1977,7 +1977,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       currentProfile: string,
       otherProfile: string
     ): Promise<{
-      filesToImport: desktopFile[];
+      filesToImport: DesktopFile[];
       alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
       nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
       pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;

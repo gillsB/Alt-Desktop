@@ -12,7 +12,7 @@ const TABS = [
 ];
 
 interface DesktopFileState {
-  uniqueFiles: desktopFile[];
+  uniqueFiles: DesktopFile[];
   alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
   nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
   pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
@@ -39,7 +39,7 @@ const DesktopProfile: React.FC = () => {
     visible: boolean;
     x: number;
     y: number;
-    file?: desktopFile;
+    file?: DesktopFile;
     section?: "notImported" | "partial" | "imported";
   }>({ visible: false, x: 0, y: 0 });
 
@@ -159,7 +159,7 @@ const DesktopProfile: React.FC = () => {
     }
   };
 
-  const handleImportFile = async (file: desktopFile) => {
+  const handleImportFile = async (file: DesktopFile) => {
     try {
       const importedIcon = await window.electron.importDesktopFile(
         file,

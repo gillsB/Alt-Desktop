@@ -173,7 +173,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   importAllIconsFromDesktop: () => ipcInvoke("importAllIconsFromDesktop"),
   getDesktopUniqueFiles: (profile: string) =>
     ipcInvoke("getDesktopUniqueFiles", profile),
-  importDesktopFile: (file: desktopFile, profile: string) =>
+  importDesktopFile: (file: DesktopFile, profile: string) =>
     ipcInvoke("importDesktopFile", file, profile),
   compareProfiles: (currentProfile: string, otherProfile: string) =>
     ipcInvoke("compareProfiles", currentProfile, otherProfile),
