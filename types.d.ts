@@ -1,18 +1,3 @@
-// These 3 are inactive (originally used in ElectronResources repository).
-// Originally used as a reference for creating ipc calls.
-// Might use them in the future though so their types are still here.
-type Statistics = {
-  cpuUsage: number;
-  ramUsage: number;
-  storageUsage: number;
-};
-type StaticData = {
-  totalStorage: number;
-  cpuModel: string;
-  totalMemoryGB: number;
-};
-type View = "CPU" | "RAM" | "STORAGE";
-
 type HeaderAction =
   | "MINIMIZE"
   | "MAXIMIZE"
@@ -84,6 +69,20 @@ interface BackgroundsData {
 type DesktopFile = {
   name: string;
   path: string;
+};
+
+type DesktopFileCompare = {
+  filesToImport: DesktopFile[];
+  alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+};
+
+type ProfileIconCompare = {
+  filesToImport: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
 };
 
 type DesktopIconData = {
@@ -387,19 +386,9 @@ type EventPayloadMapping = {
   editIconOffsetUpdate: boolean;
   openDesktopProfile: boolean;
   importAllIconsFromDesktop: boolean;
-  getDesktopUniqueFiles: {
-    filesToImport: DesktopFile[];
-    alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-    nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-    pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  };
+  getDesktopUniqueFiles: DesktopFileCompare;
   importDesktopFile: DesktopIcon | null;
-  compareProfiles: {
-    filesToImport: DesktopFile[];
-    alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-    nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-    pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  };
+  compareProfiles: ProfileIconCompare;
 };
 
 type UnsubscribeFunction = () => void;
@@ -560,12 +549,7 @@ interface Window {
     editIconOffsetUpdate: (offsetX: number, offsetY: number) => void;
     openDesktopProfile: () => Promise<boolean>;
     importAllIconsFromDesktop: () => Promise<boolean>;
-    getDesktopUniqueFiles: (profile: string) => Promise<{
-      filesToImport: DesktopFile[];
-      alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-      nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-      pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-    }>;
+    getDesktopUniqueFiles: (profile: string) => Promise<DesktopFileCompare>;
     importDesktopFile: (
       file: DesktopFile,
       profile: string
@@ -573,11 +557,6 @@ interface Window {
     compareProfiles: (
       currentProfile: string,
       otherProfile: string
-    ) => Promise<{
-      filesToImport: DesktopFile[];
-      alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-      nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-      pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-    }>;
+    ) => Promise<ProfileIconCompare>;
   };
 }

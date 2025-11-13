@@ -1923,14 +1923,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle(
     "getDesktopUniqueFiles",
-    async (
-      profile: string
-    ): Promise<{
-      filesToImport: DesktopFile[];
-      alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-      nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-      pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-    }> => {
+    async (profile: string): Promise<DesktopFileCompare> => {
       return await getDesktopUniqueFiles(profile);
     }
   );
@@ -1976,12 +1969,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     async (
       currentProfile: string,
       otherProfile: string
-    ): Promise<{
-      filesToImport: DesktopFile[];
-      alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-      nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-      pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-    }> => {
+    ): Promise<ProfileIconCompare> => {
       //TODO temp just to check ipc works.
       logger.info(
         `compareProfiles called with: ${currentProfile}, ${otherProfile}`
@@ -1989,7 +1977,25 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       logger.info(
         `for testing only, returning getDesktopUniqueFiles for ${currentProfile}`
       );
-      return await getDesktopUniqueFiles(currentProfile);
+      return {
+        filesToImport: [
+          {
+            name: "example.lnk",
+            path: "C:\\example.lnk",
+            icon: {
+              id: "test",
+              row: 1,
+              col: 2,
+              name: "test_icon",
+              image: "test_image_path",
+              launchDefault: "program",
+            },
+          },
+        ],
+        alreadyImported: [],
+        nameOnlyMatches: [],
+        pathOnlyMatches: [],
+      };
     }
   );
 }
