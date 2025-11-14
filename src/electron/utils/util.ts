@@ -2103,3 +2103,149 @@ export async function ensureUniqueIconId(
   }
   return candidate;
 }
+
+export async function compareProfiles(
+  currentProfile: string,
+  otherProfile: string
+): Promise<ProfileIconCompare> {
+  try {
+    // Load icons from both profiles
+    const currentProfilePath = getProfileJsonPath(currentProfile);
+    const otherProfilePath = getProfileJsonPath(otherProfile);
+
+    let currentIcons: DesktopIcon[] = [];
+    let otherIcons: DesktopIcon[] = [];
+
+    // Load current profile icons
+    if (fs.existsSync(currentProfilePath)) {
+      try {
+        const data = fs.readFileSync(currentProfilePath, "utf-8");
+        const parsedData: DesktopIconData = JSON.parse(data);
+        currentIcons = parsedData.icons || [];
+      } catch (e) {
+        logger.warn(
+          `Failed to read current profile icons from ${currentProfilePath}:`,
+          e
+        );
+      }
+    }
+
+    // Load other profile icons
+    if (fs.existsSync(otherProfilePath)) {
+      try {
+        const data = fs.readFileSync(otherProfilePath, "utf-8");
+        const parsedData: DesktopIconData = JSON.parse(data);
+        otherIcons = parsedData.icons || [];
+      } catch (e) {
+        logger.warn(
+          `Failed to read other profile icons from ${otherProfilePath}:`,
+          e
+        );
+      }
+    }
+
+    // Create sets for comparison (by id)
+    const currentIconIds = new Set(currentIcons.map((icon) => icon.id));
+
+    const filesToImport: Array<{
+      name: string;
+      path: string;
+      icon: DesktopIcon;
+    }> = [];
+    const alreadyImported: Array<{
+      name: string;
+      path: string;
+      icon: DesktopIcon;
+    }> = [];
+    const nameOnlyMatches: Array<{
+      name: string;
+      path: string;
+      icon: DesktopIcon;
+    }> = [];
+    const pathOnlyMatches: Array<{
+      name: string;
+      path: string;
+      icon: DesktopIcon;
+    }> = [];
+
+    // Compare each icon in OTHER profile against CURRENT profile
+    for (const otherIcon of otherIcons) {
+      // Check if icon exists in current profile (exact match by id)
+      if (currentIconIds.has(otherIcon.id)) {
+        alreadyImported.push({
+          name: otherIcon.name,
+          path: otherIcon.programLink || "",
+          icon: otherIcon,
+        });
+      } else {
+        // Icon not in other profile, check for partial matches
+        let nameOnlyMatch: DesktopIcon | undefined;
+        let pathOnlyMatch: DesktopIcon | undefined;
+
+        for (const currentIcon of currentIcons) {
+          const nameMatches = otherIcon.name === currentIcon.name;
+          const pathMatches =
+            otherIcon.programLink &&
+            currentIcon.programLink &&
+            path.resolve(otherIcon.programLink).toLowerCase() ===
+              path.resolve(currentIcon.programLink).toLowerCase();
+
+          if (nameMatches && !pathMatches) {
+            nameOnlyMatch = currentIcon;
+          } else if (!nameMatches && pathMatches) {
+            pathOnlyMatch = currentIcon;
+          }
+        }
+
+        if (nameOnlyMatch) {
+          nameOnlyMatches.push({
+            name: otherIcon.name,
+            path: otherIcon.programLink || "",
+            icon: nameOnlyMatch,
+          });
+        } else if (pathOnlyMatch) {
+          pathOnlyMatches.push({
+            name: otherIcon.name,
+            path: otherIcon.programLink || "",
+            icon: pathOnlyMatch,
+          });
+        } else {
+          // Icon not found in current profile at all
+          filesToImport.push({
+            name: otherIcon.name,
+            path: otherIcon.programLink || "",
+            icon: otherIcon,
+          });
+        }
+      }
+    }
+
+    logger.info(
+      `Profile comparison: ${currentProfile} vs ${otherProfile}`,
+      JSON.stringify({
+        filesToImport: filesToImport.length,
+        alreadyImported: alreadyImported.length,
+        nameOnlyMatches: nameOnlyMatches.length,
+        pathOnlyMatches: pathOnlyMatches.length,
+      })
+    );
+
+    return {
+      filesToImport,
+      alreadyImported,
+      nameOnlyMatches,
+      pathOnlyMatches,
+    };
+  } catch (error) {
+    logger.error(
+      `Error comparing profiles ${currentProfile} and ${otherProfile}:`,
+      error
+    );
+    return {
+      filesToImport: [],
+      alreadyImported: [],
+      nameOnlyMatches: [],
+      pathOnlyMatches: [],
+    };
+  }
+}
