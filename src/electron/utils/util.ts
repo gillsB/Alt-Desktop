@@ -1795,6 +1795,7 @@ export async function getDesktopUniqueFiles(
     candidateName: string
   ): { exact?: DesktopIcon; nameOnly?: DesktopIcon; pathOnly?: DesktopIcon } {
     const normFilePath = path.resolve(filePath).toLowerCase();
+    const standardizedCandidateName = standardizeIconName(candidateName);
 
     let exact: DesktopIcon | undefined;
     let nameOnly: DesktopIcon | undefined;
@@ -1804,7 +1805,8 @@ export async function getDesktopUniqueFiles(
       const iconPath = icon.programLink
         ? path.resolve(icon.programLink).toLowerCase()
         : "";
-      const nameMatches = icon.name === candidateName;
+      const standardizedIconName = standardizeIconName(icon.name);
+      const nameMatches = standardizedIconName === standardizedCandidateName;
       const pathMatches = iconPath === normFilePath;
 
       if (nameMatches && pathMatches) {
@@ -2170,7 +2172,6 @@ export async function compareProfiles(
 
     // Compare each icon in OTHER profile against CURRENT profile
     for (const otherIcon of otherIcons) {
-      // Check if icon exists in current profile (exact match by id)
       if (currentIconIds.has(otherIcon.id)) {
         alreadyImported.push({
           name: otherIcon.name,
@@ -2178,12 +2179,13 @@ export async function compareProfiles(
           icon: otherIcon,
         });
       } else {
-        // Icon not in other profile, check for partial matches
         let nameOnlyMatch: DesktopIcon | undefined;
         let pathOnlyMatch: DesktopIcon | undefined;
+        const standardizedOtherName = standardizeIconName(otherIcon.name);
 
         for (const currentIcon of currentIcons) {
-          const nameMatches = otherIcon.name === currentIcon.name;
+          const standardizedCurrentName = standardizeIconName(currentIcon.name);
+          const nameMatches = standardizedOtherName === standardizedCurrentName;
           const pathMatches =
             otherIcon.programLink &&
             currentIcon.programLink &&
@@ -2210,7 +2212,6 @@ export async function compareProfiles(
             icon: pathOnlyMatch,
           });
         } else {
-          // Icon not found in current profile at all
           filesToImport.push({
             name: otherIcon.name,
             path: otherIcon.programLink || "",
@@ -2248,4 +2249,27 @@ export async function compareProfiles(
       pathOnlyMatches: [],
     };
   }
+}
+
+// Function to solve for file/icon named '2.png' vs icon named '2' (only missing extensions)
+function standardizeIconName(name: string): string {
+  // Split by the last dot to separate name from potential extension
+  const lastDotIndex = name.lastIndexOf(".");
+
+  // If no dot found, return the name
+  if (lastDotIndex === -1) {
+    return name;
+  }
+
+  const potentialExt = name.substring(lastDotIndex + 1).toLowerCase();
+  // Check if it looks like a valid extension:
+  // - > 1 character after '.'
+  // - Only alphanumeric characters (no spaces, special chars)
+  const isValidExtension =
+    potentialExt.length > 0 && /^[a-z0-9]+$/.test(potentialExt);
+
+  if (isValidExtension) {
+    return name.substring(0, lastDotIndex);
+  }
+  return name;
 }
