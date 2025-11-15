@@ -624,9 +624,17 @@ const DesktopGrid: React.FC = () => {
       }
     };
 
+    const handleKeybinds = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        hideContextMenu();
+      }
+    };
+
     document.addEventListener("click", handleClickOutside);
+    document.addEventListener("keydown", handleKeybinds);
     return () => {
       document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener("keydown", handleKeybinds);
     };
   }, [contextMenu]);
 
