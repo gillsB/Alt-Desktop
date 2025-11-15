@@ -353,6 +353,10 @@ const BackgroundSelect: React.FC = () => {
           setShowFilterPanel(false);
           return;
         }
+        if (contextMenu) {
+          setContextMenu(null);
+          return;
+        }
         handleClose();
       }
     };
