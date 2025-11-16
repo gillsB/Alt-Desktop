@@ -563,7 +563,8 @@ const EditBackground: React.FC = () => {
           showAddTagRef.current ||
           showEditCategoriesRef.current ||
           renameModalRef.current ||
-          showAddProfileRef.current
+          showAddProfileRef.current ||
+          tagContextMenu
         ) {
           logger.info(
             "Sub-modal open, closing sub-modal instead of EditBackground"
@@ -572,6 +573,7 @@ const EditBackground: React.FC = () => {
           setShowEditCategories(false);
           setRenameModal(null);
           setShowAddProfile(false);
+          setTagContextMenu(null);
           return;
         }
         logger.info("No sub-modals open, closing EditBackground");
