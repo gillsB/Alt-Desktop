@@ -2159,25 +2159,74 @@ export async function compareProfiles(
       path: string;
       icon: DesktopIcon;
     }> = [];
-    const nameOnlyMatches: Array<{
-      name: string;
-      path: string;
-      icon: DesktopIcon;
-    }> = [];
-    const pathOnlyMatches: Array<{
+    const modified: Array<{
       name: string;
       path: string;
       icon: DesktopIcon;
     }> = [];
 
+    const normalizeIcon = (icon?: DesktopIcon) => {
+      if (!icon) return null;
+      const copy: any = { ...icon };
+      // remove unnecessary fields
+      delete copy.row;
+      delete copy.col;
+      delete copy.offsetX;
+      delete copy.offsetY;
+      // normalize paths and names for stable comparison
+      if (typeof copy.programLink === "string" && copy.programLink) {
+        try {
+          copy.programLink = path.resolve(copy.programLink).toLowerCase();
+        } catch {
+          copy.programLink = (copy.programLink || "").toLowerCase();
+        }
+      }
+      if (typeof copy.name === "string") {
+        copy.name = standardizeIconName(copy.name).toLowerCase();
+      }
+      // ensure deterministic key order when converting to string
+      const ordered: any = {};
+      Object.keys(copy)
+        .sort()
+        .forEach((k) => (ordered[k] = copy[k]));
+      return ordered;
+    };
+
+    const iconsAreEqual = (a?: DesktopIcon, b?: DesktopIcon) => {
+      const na = normalizeIcon(a);
+      const nb = normalizeIcon(b);
+      return JSON.stringify(na) === JSON.stringify(nb);
+    };
+
     // Compare each icon in OTHER profile against CURRENT profile
     for (const otherIcon of otherIcons) {
       if (currentIconIds.has(otherIcon.id)) {
-        alreadyImported.push({
-          name: otherIcon.name,
-          path: otherIcon.programLink || "",
-          icon: otherIcon,
-        });
+        // find the matching icon in current profile by id
+        const currentIcon = currentIcons.find((c) => c.id === otherIcon.id);
+        if (currentIcon) {
+          // if icons are identical (ignoring layout fields) treat as alreadyImported
+          if (iconsAreEqual(currentIcon, otherIcon)) {
+            alreadyImported.push({
+              name: otherIcon.name,
+              path: otherIcon.programLink || "",
+              icon: otherIcon,
+            });
+          } else {
+            // same id but different properties -> modified
+            modified.push({
+              name: otherIcon.name,
+              path: otherIcon.programLink || "",
+              icon: otherIcon,
+            });
+          }
+        } else {
+          // fallback: treat as alreadyImported if no currentIcon found
+          alreadyImported.push({
+            name: otherIcon.name,
+            path: otherIcon.programLink || "",
+            icon: otherIcon,
+          });
+        }
       } else {
         let nameOnlyMatch: DesktopIcon | undefined;
         let pathOnlyMatch: DesktopIcon | undefined;
@@ -2200,17 +2249,35 @@ export async function compareProfiles(
         }
 
         if (nameOnlyMatch) {
-          nameOnlyMatches.push({
-            name: otherIcon.name,
-            path: otherIcon.programLink || "",
-            icon: nameOnlyMatch,
-          });
+          // Compare the partial matches — if different, mark as modified
+          if (iconsAreEqual(nameOnlyMatch, otherIcon)) {
+            alreadyImported.push({
+              name: otherIcon.name,
+              path: otherIcon.programLink || "",
+              icon: nameOnlyMatch,
+            });
+          } else {
+            modified.push({
+              name: otherIcon.name,
+              path: otherIcon.programLink || "",
+              icon: nameOnlyMatch,
+            });
+          }
         } else if (pathOnlyMatch) {
-          pathOnlyMatches.push({
-            name: otherIcon.name,
-            path: otherIcon.programLink || "",
-            icon: pathOnlyMatch,
-          });
+          // Compare the partial matches — if different, mark as modified
+          if (iconsAreEqual(pathOnlyMatch, otherIcon)) {
+            alreadyImported.push({
+              name: otherIcon.name,
+              path: otherIcon.programLink || "",
+              icon: pathOnlyMatch,
+            });
+          } else {
+            modified.push({
+              name: otherIcon.name,
+              path: otherIcon.programLink || "",
+              icon: pathOnlyMatch,
+            });
+          }
         } else {
           filesToImport.push({
             name: otherIcon.name,
@@ -2226,16 +2293,14 @@ export async function compareProfiles(
       JSON.stringify({
         filesToImport: filesToImport.length,
         alreadyImported: alreadyImported.length,
-        nameOnlyMatches: nameOnlyMatches.length,
-        pathOnlyMatches: pathOnlyMatches.length,
+        modified: modified.length,
       })
     );
 
     return {
       filesToImport,
       alreadyImported,
-      nameOnlyMatches,
-      pathOnlyMatches,
+      modified,
     };
   } catch (error) {
     logger.error(
@@ -2245,8 +2310,7 @@ export async function compareProfiles(
     return {
       filesToImport: [],
       alreadyImported: [],
-      nameOnlyMatches: [],
-      pathOnlyMatches: [],
+      modified: [],
     };
   }
 }

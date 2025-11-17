@@ -81,8 +81,7 @@ type DesktopFileCompare = {
 type ProfileIconCompare = {
   filesToImport: Array<{ name: string; path: string; icon: DesktopIcon }>;
   alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  modified: Array<{ name: string; path: string; icon: DesktopIcon }>;
 };
 
 type DesktopIconData = {
