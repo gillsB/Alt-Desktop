@@ -2146,156 +2146,134 @@ export async function compareProfiles(
       }
     }
 
-    // Create sets for comparison (by id)
-    const currentIconIds = new Set(currentIcons.map((icon) => icon.id));
+    // Fields to compare (excluding position/layout fields)
+    const fieldsToCompare: (keyof DesktopIcon)[] = [
+      "name",
+      "width",
+      "height",
+      "image",
+      "programLink",
+      "args",
+      "websiteLink",
+      "fontColor",
+      "fontSize",
+    ];
 
-    const filesToImport: Array<{
-      name: string;
-      path: string;
-      icon: DesktopIcon;
-    }> = [];
-    const alreadyImported: Array<{
-      name: string;
-      path: string;
-      icon: DesktopIcon;
-    }> = [];
-    const modified: Array<{
-      name: string;
-      path: string;
-      icon: DesktopIcon;
-    }> = [];
+    // Helper function to compare two icons and return differences
+    const getIconDifferences = (
+      icon1: DesktopIcon,
+      icon2: DesktopIcon
+    ): string[] => {
+      const differences: string[] = [];
+      for (const field of fieldsToCompare) {
+        const val1 = icon1[field];
+        const val2 = icon2[field];
 
-    const normalizeIcon = (icon?: DesktopIcon) => {
-      if (!icon) return null;
-      const copy: any = { ...icon };
-      // remove unnecessary fields
-      delete copy.row;
-      delete copy.col;
-      delete copy.offsetX;
-      delete copy.offsetY;
-      // normalize paths and names for stable comparison
-      if (typeof copy.programLink === "string" && copy.programLink) {
-        try {
-          copy.programLink = path.resolve(copy.programLink).toLowerCase();
-        } catch {
-          copy.programLink = (copy.programLink || "").toLowerCase();
+        // Deep comparison for arrays
+        if (Array.isArray(val1) && Array.isArray(val2)) {
+          if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+            differences.push(field);
+          }
+        } else if (val1 !== val2) {
+          differences.push(field);
         }
       }
-      if (typeof copy.name === "string") {
-        copy.name = standardizeIconName(copy.name).toLowerCase();
+      return differences;
+    };
+
+    // Helper function to count matching fields (for finding best match)
+    const countMatchingFields = (
+      icon1: DesktopIcon,
+      icon2: DesktopIcon
+    ): number => {
+      let matches = 0;
+      for (const field of fieldsToCompare) {
+        const val1 = icon1[field];
+        const val2 = icon2[field];
+
+        if (Array.isArray(val1) && Array.isArray(val2)) {
+          if (JSON.stringify(val1) === JSON.stringify(val2)) {
+            matches++;
+          }
+        } else if (val1 === val2) {
+          matches++;
+        }
       }
-      // ensure deterministic key order when converting to string
-      const ordered: any = {};
-      Object.keys(copy)
-        .sort()
-        .forEach((k) => (ordered[k] = copy[k]));
-      return ordered;
+      return matches;
     };
 
-    const iconsAreEqual = (a?: DesktopIcon, b?: DesktopIcon) => {
-      const na = normalizeIcon(a);
-      const nb = normalizeIcon(b);
-      return JSON.stringify(na) === JSON.stringify(nb);
-    };
+    // Create lookup maps for current profile icons
+    const currentIconsByNormalizedName = new Map<string, DesktopIcon[]>();
+    const currentIconsByImage = new Map<string, DesktopIcon[]>();
 
-    // Compare each icon in OTHER profile against CURRENT profile
+    for (const icon of currentIcons) {
+      const normalizedName = standardizeIconName(icon.name);
+      if (!currentIconsByNormalizedName.has(normalizedName)) {
+        currentIconsByNormalizedName.set(normalizedName, []);
+      }
+      currentIconsByNormalizedName.get(normalizedName)!.push(icon);
+
+      if (icon.image && !currentIconsByImage.has(icon.image)) {
+        currentIconsByImage.set(icon.image, []);
+      }
+      if (icon.image) {
+        currentIconsByImage.get(icon.image)!.push(icon);
+      }
+    }
+
+    const filesToImport: DesktopIcon[] = [];
+    const alreadyImported: DesktopIcon[] = [];
+    const modified: Array<{ icon: DesktopIcon; differences: string[] }> = [];
+
     for (const otherIcon of otherIcons) {
-      if (currentIconIds.has(otherIcon.id)) {
-        // find the matching icon in current profile by id
-        const currentIcon = currentIcons.find((c) => c.id === otherIcon.id);
-        if (currentIcon) {
-          // if icons are identical (ignoring layout fields) treat as alreadyImported
-          if (iconsAreEqual(currentIcon, otherIcon)) {
-            alreadyImported.push({
-              name: otherIcon.name,
-              path: otherIcon.programLink || "",
-              icon: otherIcon,
-            });
-          } else {
-            // same id but different properties -> modified
-            modified.push({
-              name: otherIcon.name,
-              path: otherIcon.programLink || "",
-              icon: otherIcon,
-            });
-          }
-        } else {
-          // fallback: treat as alreadyImported if no currentIcon found
-          alreadyImported.push({
-            name: otherIcon.name,
-            path: otherIcon.programLink || "",
-            icon: otherIcon,
-          });
-        }
+      const normalizedName = standardizeIconName(otherIcon.name);
+
+      // Find potential matches by name or filepath
+      const nameMatches =
+        currentIconsByNormalizedName.get(normalizedName) || [];
+      const imageMatches = otherIcon.image
+        ? currentIconsByImage.get(otherIcon.image) || []
+        : [];
+
+      // Combine and deduplicate potential matches
+      const potentialMatches = new Map<string, DesktopIcon>();
+      for (const match of [...nameMatches, ...imageMatches]) {
+        potentialMatches.set(match.id, match);
+      }
+
+      const matchArray = Array.from(potentialMatches.values());
+
+      if (matchArray.length === 0) {
+        // No match found - this is a new icon to import
+        filesToImport.push(otherIcon);
       } else {
-        let nameOnlyMatch: DesktopIcon | undefined;
-        let pathOnlyMatch: DesktopIcon | undefined;
-        const standardizedOtherName = standardizeIconName(otherIcon.name);
+        // Find the best match based on number of matching fields
+        let bestMatch = matchArray[0];
+        let bestMatchScore = countMatchingFields(otherIcon, bestMatch);
 
-        for (const currentIcon of currentIcons) {
-          const standardizedCurrentName = standardizeIconName(currentIcon.name);
-          const nameMatches = standardizedOtherName === standardizedCurrentName;
-          const pathMatches =
-            otherIcon.programLink &&
-            currentIcon.programLink &&
-            path.resolve(otherIcon.programLink).toLowerCase() ===
-              path.resolve(currentIcon.programLink).toLowerCase();
-
-          if (nameMatches && !pathMatches) {
-            nameOnlyMatch = currentIcon;
-          } else if (!nameMatches && pathMatches) {
-            pathOnlyMatch = currentIcon;
+        for (let i = 1; i < matchArray.length; i++) {
+          const matchScore = countMatchingFields(otherIcon, matchArray[i]);
+          if (matchScore > bestMatchScore) {
+            bestMatch = matchArray[i];
+            bestMatchScore = matchScore;
           }
         }
 
-        if (nameOnlyMatch) {
-          // Compare the partial matches — if different, mark as modified
-          if (iconsAreEqual(nameOnlyMatch, otherIcon)) {
-            alreadyImported.push({
-              name: otherIcon.name,
-              path: otherIcon.programLink || "",
-              icon: nameOnlyMatch,
-            });
-          } else {
-            modified.push({
-              name: otherIcon.name,
-              path: otherIcon.programLink || "",
-              icon: nameOnlyMatch,
-            });
-          }
-        } else if (pathOnlyMatch) {
-          // Compare the partial matches — if different, mark as modified
-          if (iconsAreEqual(pathOnlyMatch, otherIcon)) {
-            alreadyImported.push({
-              name: otherIcon.name,
-              path: otherIcon.programLink || "",
-              icon: pathOnlyMatch,
-            });
-          } else {
-            modified.push({
-              name: otherIcon.name,
-              path: otherIcon.programLink || "",
-              icon: pathOnlyMatch,
-            });
-          }
+        // Check if there are any differences
+        const differences = getIconDifferences(otherIcon, bestMatch);
+
+        if (differences.length === 0) {
+          // Icons are identical (excluding position fields)
+          alreadyImported.push(otherIcon);
         } else {
-          filesToImport.push({
-            name: otherIcon.name,
-            path: otherIcon.programLink || "",
+          // Icons have differences
+          modified.push({
             icon: otherIcon,
+            differences,
           });
         }
       }
     }
-
-    logger.info(
-      `Profile comparison: ${currentProfile} vs ${otherProfile}`,
-      JSON.stringify({
-        filesToImport: filesToImport.length,
-        alreadyImported: alreadyImported.length,
-        modified: modified.length,
-      })
-    );
 
     return {
       filesToImport,

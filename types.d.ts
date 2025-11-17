@@ -12,6 +12,25 @@ type SubWindowAction = "EDIT_ICON" | "CLOSE_SUBWINDOW";
 
 type WindowType = "WINDOWED" | "BORDERLESS";
 
+// IF you modify this, to add non-visual fields make sure to update fieldsToCompare in compareProfiles (util.ts)
+type DesktopIcon = {
+  id: string;
+  row: number;
+  col: number;
+  name: string;
+  width?: number;
+  height?: number;
+  offsetX?: number;
+  offsetY?: number;
+  image: string;
+  programLink?: string;
+  args?: string[];
+  websiteLink?: string;
+  fontColor?: string;
+  fontSize?: number;
+  launchDefault: "program" | "website";
+};
+
 type BgJson = {
   public?: {
     name?: string;
@@ -79,9 +98,12 @@ type DesktopFileCompare = {
 };
 
 type ProfileIconCompare = {
-  filesToImport: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  modified: Array<{ name: string; path: string; icon: DesktopIcon }>;
+  filesToImport: DesktopIcon[];
+  alreadyImported: DesktopIcon[];
+  modified: Array<{
+    icon: DesktopIcon;
+    differences: string[];
+  }>;
 };
 
 type DesktopIconData = {
@@ -150,24 +172,6 @@ type GetBackgroundPageForIdRequest = {
 type GetBackgroundPageForIdResponse = {
   page: number; // -1 if not found
   summary?: BackgroundSummary;
-};
-
-type DesktopIcon = {
-  id: string;
-  row: number;
-  col: number;
-  name: string;
-  width?: number;
-  height?: number;
-  offsetX?: number;
-  offsetY?: number;
-  image: string;
-  programLink?: string;
-  args?: string[];
-  websiteLink?: string;
-  fontColor?: string;
-  fontSize?: number;
-  launchDefault: "program" | "website";
 };
 
 interface ContextMenu {
