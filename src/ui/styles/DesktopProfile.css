@@ -252,3 +252,24 @@
   gap: 0;
   color: #888;
 }
+
+.import-icons-other {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.import-icons-other .desktop-profile-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.import-icons-other .import-icons-header {
+  padding: 8px 0;
+  margin-bottom: 8px;
+}

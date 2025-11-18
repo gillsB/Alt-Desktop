@@ -18,6 +18,15 @@ interface DesktopFileState {
   pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
 }
 
+interface ProfileCompareState {
+  filesToImport: DesktopIcon[];
+  alreadyImported: DesktopIcon[];
+  modified: Array<{
+    icon: DesktopIcon;
+    differences: string[];
+  }>;
+}
+
 const DesktopProfile: React.FC = () => {
   const [desktopFiles, setDesktopFiles] = useState<DesktopFileState>({
     uniqueFiles: [],
@@ -25,10 +34,20 @@ const DesktopProfile: React.FC = () => {
     nameOnlyMatches: [],
     pathOnlyMatches: [],
   });
+  const [profileCompare, setProfileCompare] = useState<ProfileCompareState>({
+    filesToImport: [],
+    alreadyImported: [],
+    modified: [],
+  });
   const [profile, setProfile] = useState<string>("");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
+  const [compareToProfile, setCompareToProfile] = useState<string>("");
   const [alreadyImportedCollapsed, setAlreadyImportedCollapsed] =
+    useState(true);
+  const [modifiedCollapsed, setModifiedCollapsed] = useState(false);
+  const [compareImportCollapsed, setCompareImportCollapsed] = useState(false);
+  const [compareAlreadyImportedCollapsed, setCompareAlreadyImportedCollapsed] =
     useState(true);
   const [partialMatchesCollapsed, setPartialMatchesCollapsed] = useState(false);
   const [notImportedCollapsed, setNotImportedCollapsed] = useState(false);
@@ -39,6 +58,7 @@ const DesktopProfile: React.FC = () => {
     visible: boolean;
     x: number;
     y: number;
+    icon?: DesktopIcon;
     file?: DesktopFile;
     section?: "notImported" | "partial" | "imported";
   }>({ visible: false, x: 0, y: 0 });
@@ -305,6 +325,29 @@ const DesktopProfile: React.FC = () => {
     );
   };
 
+  const handleCompareProfiles = async (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const selectedProfile = e.target.value;
+    setCompareToProfile(selectedProfile);
+
+    if (selectedProfile && profile) {
+      try {
+        const result = await window.electron.compareProfiles(
+          profile,
+          selectedProfile
+        );
+        setProfileCompare({
+          filesToImport: result.filesToImport || [],
+          alreadyImported: result.alreadyImported || [],
+          modified: result.modified || [],
+        });
+      } catch (error) {
+        logger.error("Error comparing profiles:", error);
+      }
+    }
+  };
+
   return (
     <div className="subwindow-container">
       <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
@@ -354,7 +397,7 @@ const DesktopProfile: React.FC = () => {
           ))}
         </div>
         <div className="import-icons-tab-content">
-          {/* Not imported */}
+          {/* Desktop Files Tab */}
           {activeTab === "desktop" && (
             <div className="import-icons-desktop">
               <div className="desktop-profile-count-row">
@@ -624,12 +667,223 @@ const DesktopProfile: React.FC = () => {
               </div>
             </div>
           )}
+          {/* Other Profiles Tab */}
           {activeTab === "other" && (
             <div className="import-icons-other">
-              {/* TODO: UI for copying from other profiles */}
-              <div className="import-icons-placeholder">
-                Copy icons from other profiles here.
+              <div className="import-icons-header">
+                <label className="desktop-profile-label">
+                  Compare to Profile:
+                </label>
+                <select
+                  className="desktop-profile-select"
+                  value={compareToProfile}
+                  onChange={handleCompareProfiles}
+                >
+                  <option value="">Select a profile...</option>
+                  {profiles
+                    .filter((p) => p !== profile)
+                    .map((p) => (
+                      <option key={p} value={p}>
+                        {p === "default" ? "Default" : p}
+                      </option>
+                    ))}
+                </select>
               </div>
+
+              {compareToProfile && (
+                <div className="desktop-profile-list">
+                  {profileCompare.filesToImport.length > 0 && (
+                    <div className="compare-section">
+                      <div
+                        className="not-imported-header"
+                        onClick={() =>
+                          setCompareImportCollapsed(!compareImportCollapsed)
+                        }
+                      >
+                        <button
+                          className="tag-toggle-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCompareImportCollapsed(!compareImportCollapsed);
+                          }}
+                        >
+                          {compareImportCollapsed ? "▸" : "▾"}
+                        </button>
+                        <span>
+                          To Import ({profileCompare.filesToImport.length})
+                        </span>
+                      </div>
+
+                      {!compareImportCollapsed && (
+                        <div className="not-imported-content">
+                          {profileCompare.filesToImport.map((icon, index) => (
+                            <div
+                              key={`compare-import-${index}`}
+                              className="desktop-profile-file"
+                              onClick={() => {
+                                if (contextMenu.visible) return;
+                                window.electron.openInExplorer(
+                                  "programLink",
+                                  icon.programLink || ""
+                                );
+                              }}
+                              onContextMenu={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setContextMenu({
+                                  visible: true,
+                                  x: e.clientX,
+                                  y: e.clientY,
+                                  icon: icon,
+                                  section: "notImported",
+                                });
+                              }}
+                            >
+                              <div className="desktop-file-content">
+                                <span className="file-name">{icon.name}</span>
+                                <span className="file-path">
+                                  {icon.programLink}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Modified Icons */}
+                  {profileCompare.modified.length > 0 && (
+                    <div className="compare-section">
+                      <div
+                        className="not-imported-header"
+                        onClick={() => setModifiedCollapsed(!modifiedCollapsed)}
+                      >
+                        <button
+                          className="tag-toggle-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setModifiedCollapsed(!modifiedCollapsed);
+                          }}
+                        >
+                          {modifiedCollapsed ? "▸" : "▾"}
+                        </button>
+                        <span>Modified ({profileCompare.modified.length})</span>
+                      </div>
+
+                      {!modifiedCollapsed && (
+                        <div className="not-imported-content">
+                          {profileCompare.modified.map((item, index) => (
+                            <div
+                              key={`compare-modified-${index}`}
+                              className="desktop-profile-file modified"
+                              onClick={() => {
+                                if (contextMenu.visible) return;
+                                window.electron.openInExplorer(
+                                  "programLink",
+                                  item.icon.programLink || ""
+                                );
+                              }}
+                              onContextMenu={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setContextMenu({
+                                  visible: true,
+                                  x: e.clientX,
+                                  y: e.clientY,
+                                  icon: item.icon,
+                                  section: "partial",
+                                });
+                              }}
+                            >
+                              <div className="desktop-file-content">
+                                <span className="file-name">
+                                  {item.icon.name}
+                                </span>
+                                <span className="file-path">
+                                  {renderHighlightedPath(
+                                    item.icon.programLink,
+                                    item.icon.programLink || ""
+                                  )}
+                                </span>
+                                <div className="modified-differences">
+                                  {item.differences.map((diff, diffIndex) => (
+                                    <span
+                                      key={diffIndex}
+                                      className="difference-tag different-highlight"
+                                    >
+                                      {diff}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Already Imported Icons */}
+                  {profileCompare.alreadyImported.length > 0 && (
+                    <div className="compare-section">
+                      <div
+                        className="not-imported-header"
+                        onClick={() =>
+                          setCompareAlreadyImportedCollapsed(
+                            !compareAlreadyImportedCollapsed
+                          )
+                        }
+                      >
+                        <button
+                          className="tag-toggle-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCompareAlreadyImportedCollapsed(
+                              !compareAlreadyImportedCollapsed
+                            );
+                          }}
+                        >
+                          {compareAlreadyImportedCollapsed ? "▸" : "▾"}
+                        </button>
+                        <span>
+                          Already Imported (
+                          {profileCompare.alreadyImported.length})
+                        </span>
+                      </div>
+
+                      {!compareAlreadyImportedCollapsed && (
+                        <div className="not-imported-content">
+                          {profileCompare.alreadyImported.map((icon, index) => (
+                            <div
+                              key={`compare-imported-${index}`}
+                              className="desktop-profile-file imported"
+                              onContextMenu={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setContextMenu({
+                                  visible: true,
+                                  x: e.clientX,
+                                  y: e.clientY,
+                                  icon: icon,
+                                  section: "imported",
+                                });
+                              }}
+                            >
+                              <div className="desktop-file-content">
+                                <span className="file-name">{icon.name}</span>
+                                <span className="file-path">
+                                  {icon.programLink}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
