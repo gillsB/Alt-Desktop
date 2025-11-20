@@ -909,6 +909,15 @@ const DesktopProfile: React.FC = () => {
                   "programLink",
                   contextMenu.file.path
                 );
+              } else if (contextMenu.icon) {
+                if (contextMenu.icon.programLink) {
+                  window.electron.openInExplorer(
+                    "programLink",
+                    contextMenu.icon.programLink
+                  );
+                } else {
+                  logger.error("No programLink found for icon in context menu");
+                }
               }
               setContextMenu({ visible: false, x: 0, y: 0 });
             }}
