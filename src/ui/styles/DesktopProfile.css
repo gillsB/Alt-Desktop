@@ -273,3 +273,18 @@
   padding: 8px 0;
   margin-bottom: 8px;
 }
+
+.modified-differences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.difference-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  font-weight: 500;
+  white-space: nowrap;
+}
