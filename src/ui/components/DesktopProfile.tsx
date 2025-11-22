@@ -22,7 +22,8 @@ interface ProfileCompareState {
   filesToImport: DesktopIcon[];
   alreadyImported: DesktopIcon[];
   modified: Array<{
-    icon: DesktopIcon;
+    otherIcon: DesktopIcon;
+    currentIcon: DesktopIcon;
     differences: string[];
   }>;
 }
@@ -781,7 +782,7 @@ const DesktopProfile: React.FC = () => {
                                 if (contextMenu.visible) return;
                                 window.electron.openInExplorer(
                                   "programLink",
-                                  item.icon.programLink || ""
+                                  item.currentIcon.programLink || ""
                                 );
                               }}
                               onContextMenu={(e) => {
@@ -791,19 +792,19 @@ const DesktopProfile: React.FC = () => {
                                   visible: true,
                                   x: e.clientX,
                                   y: e.clientY,
-                                  icon: item.icon,
+                                  icon: item.currentIcon,
                                   section: "partial",
                                 });
                               }}
                             >
                               <div className="desktop-file-content">
                                 <span className="file-name">
-                                  {item.icon.name}
+                                  {item.currentIcon.name}
                                 </span>
                                 <span className="file-path">
                                   {renderHighlightedPath(
-                                    item.icon.programLink,
-                                    item.icon.programLink || ""
+                                    item.otherIcon.programLink,
+                                    item.currentIcon.programLink || ""
                                   )}
                                 </span>
                                 <div className="modified-differences">

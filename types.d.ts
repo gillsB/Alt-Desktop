@@ -101,7 +101,8 @@ type ProfileIconCompare = {
   filesToImport: DesktopIcon[];
   alreadyImported: DesktopIcon[];
   modified: Array<{
-    icon: DesktopIcon;
+    otherIcon: DesktopIcon;
+    currentIcon: DesktopIcon;
     differences: string[];
   }>;
 };

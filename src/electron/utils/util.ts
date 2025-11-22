@@ -2223,7 +2223,11 @@ export async function compareProfiles(
 
     const filesToImport: DesktopIcon[] = [];
     const alreadyImported: DesktopIcon[] = [];
-    const modified: Array<{ icon: DesktopIcon; differences: string[] }> = [];
+    const modified: Array<{
+      otherIcon: DesktopIcon;
+      currentIcon: DesktopIcon;
+      differences: string[];
+    }> = [];
 
     for (const otherIcon of otherIcons) {
       const normalizedName = standardizeIconName(otherIcon.name);
@@ -2268,7 +2272,8 @@ export async function compareProfiles(
         } else {
           // Icons have differences
           modified.push({
-            icon: otherIcon,
+            otherIcon: otherIcon,
+            currentIcon: bestMatch,
             differences,
           });
         }
