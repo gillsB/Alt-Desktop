@@ -782,7 +782,7 @@ const DesktopProfile: React.FC = () => {
                                 if (contextMenu.visible) return;
                                 window.electron.openInExplorer(
                                   "programLink",
-                                  item.currentIcon.programLink || ""
+                                  item.otherIcon.programLink || ""
                                 );
                               }}
                               onContextMenu={(e) => {
@@ -792,14 +792,14 @@ const DesktopProfile: React.FC = () => {
                                   visible: true,
                                   x: e.clientX,
                                   y: e.clientY,
-                                  icon: item.currentIcon,
+                                  icon: item.otherIcon,
                                   section: "partial",
                                 });
                               }}
                             >
                               <div className="desktop-file-content">
                                 <span className="file-name">
-                                  {item.currentIcon.name}
+                                  {item.otherIcon.name}
                                 </span>
                                 <span className="file-path">
                                   {renderHighlightedPath(
