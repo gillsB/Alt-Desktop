@@ -324,7 +324,7 @@ const EditIcon: React.FC = () => {
           `Saved program path is invalid.\n${icon.programLink}\nWould you like to continue saving?`,
           ["Yes", "No"]
         );
-        if (ret === "No") {
+        if (ret !== "Yes") {
           logger.info("User cancelled save due to invalid program path.");
           return;
         }
