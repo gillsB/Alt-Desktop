@@ -997,6 +997,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           logger.info(`Opened ${type} in Explorer: ${filePath}`);
           return true;
         }
+
         let resolvedPath = filePath;
 
         if (type === "image") {
@@ -1005,31 +1006,65 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           resolvedPath = path.resolve(appDataBasePath, filePath);
         }
 
+        // Check if resolvedPath is a valid file or folder
         if (!fs.existsSync(resolvedPath)) {
           logger.warn(`OpenInExplorer File does not exist: ${resolvedPath}`);
 
+          // Ensure the filePath is a valid
+          const isAbsolutePath = path.isAbsolute(resolvedPath);
+          if (!isAbsolutePath) {
+            // If the path is relative
+            logger.error(
+              `The file path is not an absolute path: ${resolvedPath}`
+            );
+            showSmallWindow(
+              "File Not Found",
+              `Improper file path provided:\n${filePath}\n\nResolved to:\n${resolvedPath}`,
+              ["Okay"]
+            );
+            return false;
+          }
+
           // Attempt to resolve the parent folder
           const parentFolder = path.dirname(resolvedPath);
-          if (fs.existsSync(parentFolder)) {
+
+          // Check if the parent folder exists and is a directory
+          if (
+            fs.existsSync(parentFolder) &&
+            fs.lstatSync(parentFolder).isDirectory()
+          ) {
             logger.info(`Opening parent folder: ${parentFolder}`);
             shell.openPath(parentFolder);
             return true;
           } else {
-            logger.error(`Parent folder does not exist: ${parentFolder}`);
+            logger.error(
+              `Parent folder does not exist or is not a valid directory: ${parentFolder}`
+            );
+            showSmallWindow(
+              "File Not Found",
+              `The file could not be found:\n${resolvedPath}\n\nThe parent folder:\n${parentFolder}\nalso does not exist.`,
+              ["Okay"]
+            );
             return false;
           }
         }
 
-        // Open the file in Explorer
+        // If the file exists, open it in Explorer
         shell.showItemInFolder(resolvedPath);
         logger.info(`Opened ${type} in Explorer: ${resolvedPath}`);
         return true;
       } catch (error) {
         logger.error(`Failed to open ${type} in Explorer: ${error}`);
+        showSmallWindow(
+          "Error Opening Explorer",
+          `Failed to open file in Explorer:\n${error}`,
+          ["Okay"]
+        );
         return false;
       }
     }
   );
+
   ipcMainHandle(
     "showSmallWindow",
     async (
