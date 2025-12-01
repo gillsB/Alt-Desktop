@@ -70,8 +70,9 @@ export function openSubWindow(
       parent: mainWindow, // Set the parent to the main window
       modal: false,
       skipTaskbar: true, // Hide the subwindow from the taskbar
-      backgroundColor: "#00000000", // Fully transparent this must be set or windows will flash white on restore.
+      backgroundColor: "#2c2c2c", // Default gray background color
       show: false, // Don't show the window initially to prevent flashing
+      transparent: false,
       webPreferences: {
         preload: getPreloadPath(),
         webSecurity: true,
@@ -102,14 +103,11 @@ export function openSubWindow(
     addAllowedUrl(subWindowUrl);
 
     activeSubWindow.once("ready-to-show", () => {
-      // Add 200ms delay before showing the window
-      setTimeout(() => {
-        activeSubWindow!.show();
-        activeSubWindow!.focus();
-        if (isDev() && subWindowDevtoolsEnabled()) {
-          activeSubWindow?.webContents.openDevTools({ mode: "detach" });
-        }
-      }, 200);
+      activeSubWindow!.show();
+      activeSubWindow!.focus();
+      if (isDev() && subWindowDevtoolsEnabled()) {
+        activeSubWindow?.webContents.openDevTools({ mode: "detach" });
+      }
     });
 
     logger.info(`Created subwindow with URL: ${subWindowUrl}`);
