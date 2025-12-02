@@ -42,7 +42,7 @@ textarea:focus {
 /* Styling for the context menu */
 .context-menu {
   position: absolute;
-  background-color: #333;
+  background-color: var(--color-bgPrimary);
   color: white;
   border: 1px solid #666;
   z-index: 1000;
@@ -134,7 +134,7 @@ textarea:focus {
   top: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #2c2c2c;
+  background-color: var(--color-bgPrimary);
   border: none;
   color: white;
   z-index: 1000;

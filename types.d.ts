@@ -223,6 +223,40 @@ type RendererStates = {
   visibleCols?: number;
 };
 
+type ThemeName = "dark" | "light" | "system";
+
+interface ThemeColors {
+  // Primary colors
+  primary: string;
+  primaryHover: string;
+  primaryActive: string;
+
+  // Background colors
+  bgPrimary: string;
+  bgSecondary: string;
+  bgTertiary: string;
+  bgHover: string;
+
+  // Text colors
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+
+  // Border colors
+  borderPrimary: string;
+  borderSecondary: string;
+
+  // Status colors
+  success: string;
+  warning: string;
+  error: string;
+  info: string;
+
+  // Highlights
+  highlightGreen: string;
+  highlightYellow: string;
+}
+
 // Items/objects being sent from the renderer to the main process
 interface EventParamMapping {
   statistics: [];
@@ -306,6 +340,10 @@ interface EventParamMapping {
   getDesktopUniqueFiles: [string];
   importDesktopFile: [DesktopFile, string];
   compareProfiles: [string, string];
+  getCurrentTheme: [];
+  getThemeColors: [];
+  setTheme: [string];
+  updateThemeColor: [string, string];
 }
 
 // The returns from the main process to the renderer
@@ -393,6 +431,10 @@ type EventPayloadMapping = {
   getDesktopUniqueFiles: DesktopFileCompare;
   importDesktopFile: DesktopIcon | null;
   compareProfiles: ProfileIconCompare;
+  getCurrentTheme: "dark" | "light" | "system";
+  getThemeColors: ThemeColors;
+  setTheme: "dark" | "light" | "system";
+  updateThemeColor: ThemeColors;
 };
 
 type UnsubscribeFunction = () => void;
@@ -562,5 +604,12 @@ interface Window {
       currentProfile: string,
       otherProfile: string
     ) => Promise<ProfileIconCompare>;
+    getCurrentTheme: () => Promise<"dark" | "light" | "system">;
+    getThemeColors: () => Promise<ThemeColors>;
+    setTheme: (theme: string) => Promise<"dark" | "light" | "system">;
+    updateThemeColor: (
+      colorKey: string,
+      colorValue: string
+    ) => Promise<ThemeColors>;
   };
 }

@@ -7,6 +7,7 @@ import { registerSafeFileProtocol } from "./safeFileProtocol.js";
 import { getSetting } from "./settings.js";
 import { createTray } from "./tray.js";
 import { initializeRendererStatesProfile } from "./utils/rendererStates.js";
+import { initializeThemeManager } from "./utils/themeManager.js";
 import { indexBackgrounds, isDev, setMainWindow } from "./utils/util.js";
 import { registerVideoFileProtocol } from "./videoFileProtocol.js";
 import { getActiveSubWindow } from "./windows/subWindowManager.js";
@@ -38,9 +39,11 @@ protocol.registerSchemesAsPrivileged([
 app.commandLine.appendSwitch("enable-transparent-visuals");
 app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
 
-app.on("ready", () => {
+app.on("ready", async () => {
   ensureAppDataFiles();
   logger.info("App is starting...");
+
+  await initializeThemeManager();
 
   // Register our safe file protocol for loading icons.
   registerSafeFileProtocol("appdata-file");

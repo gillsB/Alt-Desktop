@@ -1,6 +1,7 @@
 import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 import React, { useEffect, useRef, useState } from "react";
 import "../styles/Background.css";
+import { applyThemeVars, initTheme } from "../util/theme";
 import { createLogger, createVideoLogger } from "../util/uiLogger";
 import { isAbsolutePath, showSmallWindow } from "../util/uiUtil";
 
@@ -63,6 +64,8 @@ const Background: React.FC<BackgroundProps> = ({
   const showVideoControlsRef = useRef(showVideoControls); // Persists its state across redraws due to changing backgrounds
   const videoControlsPositionRef = useRef({ x: -100, y: -100 });
   const previousVolumeRef = useRef<number>(1);
+
+  initTheme();
 
   useEffect(() => {
     const fetchRendererStates = async () => {
@@ -898,6 +901,21 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
+
+  useEffect(() => {
+    const onThemeUpdated = (...args: unknown[]) => {
+      const colors = args[1] as Record<string, unknown> | undefined;
+      logger.info("Received theme-updated event with colors:", colors);
+      if (colors && typeof colors === "object") {
+        applyThemeVars(colors);
+      }
+    };
+
+    window.electron.on("theme-updated", onThemeUpdated);
+    return () => {
+      window.electron.off("theme-updated", onThemeUpdated);
+    };
+  }, []);
 
   return (
     <div

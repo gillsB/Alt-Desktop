@@ -177,6 +177,12 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcInvoke("importDesktopFile", file, profile),
   compareProfiles: (currentProfile: string, otherProfile: string) =>
     ipcInvoke("compareProfiles", currentProfile, otherProfile),
+  getCurrentTheme: () => ipcInvoke("getCurrentTheme"),
+  getThemeColors: (): Promise<ThemeColors> =>
+    ipcInvoke("getThemeColors") as Promise<ThemeColors>,
+  setTheme: (theme: string) => ipcInvoke("setTheme", theme),
+  updateThemeColor: (key: string, value: string): Promise<ThemeColors> =>
+    ipcInvoke("updateThemeColor", key, value) as Promise<ThemeColors>,
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

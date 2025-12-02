@@ -46,6 +46,11 @@ import {
 } from "./utils/rendererStates.js";
 import { safeSpawn } from "./utils/safeSpawn.js";
 import {
+  getCurrentColors,
+  getCurrentTheme,
+  updateThemeColor,
+} from "./utils/themeManager.js";
+import {
   changeBackgroundDirectory,
   compareProfiles,
   deleteIconData,
@@ -2010,6 +2015,42 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         `compareProfiles called with: ${currentProfile}, ${otherProfile}`
       );
       return compareProfiles(currentProfile, otherProfile);
+    }
+  );
+  ipcMainHandle(
+    "getCurrentTheme",
+    async (): Promise<"dark" | "light" | "system"> => {
+      return getCurrentTheme();
+    }
+  );
+  ipcMainHandle("getThemeColors", async (): Promise<ThemeColors> => {
+    // Return the ThemeColors object (flat map of color keys -> string)
+    return getCurrentColors();
+  });
+  ipcMainHandle(
+    "updateThemeColor",
+    async (
+      colorKey: keyof ThemeColors,
+      colorValue: string
+    ): Promise<ThemeColors> => {
+      try {
+        updateThemeColor(colorKey, colorValue);
+        const colors = getCurrentColors();
+
+        // Broadcast the update to all renderer windows so they can re-apply vars if desired
+        for (const win of BrowserWindow.getAllWindows()) {
+          try {
+            win.webContents.send("theme-updated", colors);
+          } catch (err) {
+            logger.warn("Failed to notify a renderer of theme update:", err);
+          }
+        }
+
+        return colors;
+      } catch (error) {
+        logger.error(`Error updating theme color ${colorKey}:`, error);
+        throw error;
+      }
     }
   );
 }
