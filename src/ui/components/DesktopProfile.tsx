@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "../styles/DesktopProfile.css";
-import { applyThemeVars, initTheme } from "../util/theme";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
 import { SubWindowHeader } from "./SubWindowHeader";
@@ -64,8 +63,6 @@ const DesktopProfile: React.FC = () => {
     file?: DesktopFile;
     section?: "notImported" | "partial" | "imported";
   }>({ visible: false, x: 0, y: 0 });
-
-  initTheme();
 
   const hideContextMenu = () => {
     setContextMenu({ visible: false, x: 0, y: 0 });
@@ -351,21 +348,6 @@ const DesktopProfile: React.FC = () => {
       }
     }
   };
-
-  useEffect(() => {
-    const onThemeUpdated = (...args: unknown[]) => {
-      const colors = args[1] as Record<string, unknown> | undefined;
-      logger.info("Received theme-updated event with colors:", colors);
-      if (colors && typeof colors === "object") {
-        applyThemeVars(colors);
-      }
-    };
-
-    window.electron.on("theme-updated", onThemeUpdated);
-    return () => {
-      window.electron.off("theme-updated", onThemeUpdated);
-    };
-  }, []);
 
   return (
     <div className="subwindow-container">

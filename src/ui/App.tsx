@@ -12,8 +12,10 @@ import HoverOpacityItem from "./components/HoverOpacityItem";
 import SelectIconWindow from "./components/SelectIconWindow";
 import Settings from "./components/Settings";
 import SmallWindow from "./components/SmallWindow";
+import useThemeListener from "./hooks/useThemeListener";
 
 const App: React.FC = () => {
+  useThemeListener();
   const [videoOpacity, setVideoOpacity] = useState(1);
 
   return (
