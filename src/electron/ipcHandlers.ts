@@ -48,6 +48,7 @@ import { safeSpawn } from "./utils/safeSpawn.js";
 import {
   getCurrentColors,
   getCurrentTheme,
+  setTheme,
   updateThemeColor,
 } from "./utils/themeManager.js";
 import {
@@ -2053,4 +2054,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle("setTheme", async (theme: ThemeName) => {
+    try {
+      setTheme(theme);
+      return true;
+    } catch (error) {
+      logger.error(`Error setting theme to ${theme}:`, error);
+      return false;
+    }
+  });
 }

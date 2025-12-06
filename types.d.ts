@@ -433,7 +433,7 @@ type EventPayloadMapping = {
   compareProfiles: ProfileIconCompare;
   getCurrentTheme: "dark" | "light" | "system";
   getThemeColors: ThemeColors;
-  setTheme: "dark" | "light" | "system";
+  setTheme: boolean;
   updateThemeColor: ThemeColors;
 };
 
@@ -606,7 +606,7 @@ interface Window {
     ) => Promise<ProfileIconCompare>;
     getCurrentTheme: () => Promise<"dark" | "light" | "system">;
     getThemeColors: () => Promise<ThemeColors>;
-    setTheme: (theme: string) => Promise<"dark" | "light" | "system">;
+    setTheme: (theme: ThemeName) => Promise<boolean>;
     updateThemeColor: (
       colorKey: string,
       colorValue: string

@@ -180,7 +180,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   getCurrentTheme: () => ipcInvoke("getCurrentTheme"),
   getThemeColors: (): Promise<ThemeColors> =>
     ipcInvoke("getThemeColors") as Promise<ThemeColors>,
-  setTheme: (theme: string) => ipcInvoke("setTheme", theme),
+  setTheme: (theme: ThemeName) => ipcInvoke("setTheme", theme),
   updateThemeColor: (key: string, value: string): Promise<ThemeColors> =>
     ipcInvoke("updateThemeColor", key, value) as Promise<ThemeColors>,
 } satisfies Window["electron"]);
