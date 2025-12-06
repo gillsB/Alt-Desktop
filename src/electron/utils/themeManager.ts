@@ -100,16 +100,17 @@ export function getCurrentColors(): ThemeColors {
   return currentColors;
 }
 
-export function setTheme(theme: ThemeName) {
+export function setTheme(theme: ThemeName): ThemeColors | null {
   if (theme !== "dark" && theme !== "light") {
     logger.warn(`Invalid theme: ${theme}`);
-    return;
+    return null;
   }
 
   currentTheme = theme;
   currentColors = themes[theme];
   //TODO save settings with new theme
   logger.info(`Theme changed to: ${theme}`);
+  return currentColors;
 }
 
 export function updateThemeColor(

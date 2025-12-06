@@ -2056,8 +2056,19 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   );
   ipcMainHandle("setTheme", async (theme: ThemeName) => {
     try {
-      setTheme(theme);
-      return true;
+      const colors = setTheme(theme);
+      if (colors) {
+        for (const win of BrowserWindow.getAllWindows()) {
+          try {
+            win.webContents.send("theme-updated", colors);
+          } catch (err) {
+            logger.warn("Failed to notify a renderer of theme update:", err);
+          }
+        }
+        return true;
+      }
+      logger.error(`setTheme returned no colors for theme: ${theme}`);
+      return false;
     } catch (error) {
       logger.error(`Error setting theme to ${theme}:`, error);
       return false;
