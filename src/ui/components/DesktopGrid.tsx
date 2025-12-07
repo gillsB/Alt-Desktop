@@ -190,8 +190,17 @@ const DesktopGrid: React.FC = () => {
         setHideIconNames(!!state.hideIconNames);
       }
       if ("profile" in state) {
-        setProfile(state.profile || "default");
-        profileRef.current = state.profile || "default";
+        const newProfile = state.profile || "default";
+
+        // Switching profiles -> clear current icons to avoid redraw attempts on old icons
+        if (newProfile !== profileRef.current) {
+          setIconsById(new Map());
+          setPosIndex(new Map());
+          setReloadTimestamps({});
+        }
+
+        setProfile(newProfile);
+        profileRef.current = newProfile;
       }
     };
     window.electron.on("renderer-state-updated", updateStates);
