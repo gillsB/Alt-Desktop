@@ -1,4 +1,6 @@
+import { nativeTheme } from "electron";
 import { createLoggerForFile } from "../logging.js";
+import { showSmallWindow } from "../windows/subWindowManager.js";
 
 const logger = createLoggerForFile("themeManager.ts");
 
@@ -101,9 +103,23 @@ export function getCurrentColors(): ThemeColors {
 }
 
 export function setTheme(theme: ThemeName): ThemeColors | null {
-  if (theme !== "dark" && theme !== "light") {
-    logger.warn(`Invalid theme: ${theme}`);
-    return null;
+  if (theme === "system") {
+    try {
+      const isDarkMode = nativeTheme.shouldUseDarkColors;
+      theme = isDarkMode ? "dark" : "light";
+      logger.info(`System theme detected: ${theme}`);
+    } catch (error) {
+      showSmallWindow(
+        "Theme Detection Error",
+        "Failed to detect system theme. Defaulting to dark mode.",
+        ["OK"]
+      );
+      logger.warn(
+        "Failed to detect system theme. Defaulting to dark mode. ",
+        error
+      );
+      theme = "dark";
+    }
   }
 
   currentTheme = theme;
