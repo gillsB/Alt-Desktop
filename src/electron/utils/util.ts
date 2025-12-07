@@ -77,6 +77,9 @@ export const getBasePath = (): string => {
 };
 
 export const getIconsFolderPath = (profile: string): string => {
+  if (!profile) {
+    profile = "default";
+  }
   const profilesPath = getProfilesPath();
   const profilePath = path.join(profilesPath, profile);
   return path.join(profilePath, "icons");
