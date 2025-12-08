@@ -1,5 +1,6 @@
 import { nativeTheme } from "electron";
 import { createLoggerForFile } from "../logging.js";
+import { getSetting } from "../settings.js";
 import { showSmallWindow } from "../windows/subWindowManager.js";
 
 const logger = createLoggerForFile("themeManager.ts");
@@ -86,23 +87,15 @@ let currentTheme: ThemeName = "dark";
 let currentColors: ThemeColors = themes.dark;
 
 export async function initializeThemeManager() {
-  const theme = "dark"; //TODO make this load from settings
-  if (theme && (theme === "dark" || theme === "light")) {
-    currentTheme = theme as ThemeName;
-    currentColors = themes[currentTheme];
-    logger.info(`Theme initialized: ${currentTheme}`);
-  }
+  const theme = getSetting("theme") as ThemeName;
+  const resolvedTheme = resolveThemeScheme(theme);
+  currentTheme = resolvedTheme;
+  currentColors = themes[resolvedTheme];
+  logger.info(`Theme initialized: ${resolvedTheme}`);
+  logger.info("current theme = " + currentTheme);
 }
 
-export function getCurrentTheme(): ThemeName {
-  return currentTheme;
-}
-
-export function getCurrentColors(): ThemeColors {
-  return currentColors;
-}
-
-export function setTheme(theme: ThemeName): ThemeColors | null {
+function resolveThemeScheme(theme: ThemeName): ThemeName {
   if (theme === "system") {
     try {
       const isDarkMode = nativeTheme.shouldUseDarkColors;
@@ -120,8 +113,23 @@ export function setTheme(theme: ThemeName): ThemeColors | null {
       );
       theme = "dark";
     }
+  } else if (theme !== "dark" && theme !== "light") {
+    logger.warn(`Unknown theme "${theme}" specified. Defaulting to dark mode.`);
+    theme = "dark";
   }
+  return theme;
+}
 
+export function getCurrentTheme(): ThemeName {
+  return currentTheme;
+}
+
+export function getCurrentColors(): ThemeColors {
+  return currentColors;
+}
+
+export function setTheme(theme: ThemeName): ThemeColors | null {
+  theme = resolveThemeScheme(theme);
   currentTheme = theme;
   currentColors = themes[theme];
   //TODO save settings with new theme

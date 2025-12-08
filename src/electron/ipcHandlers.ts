@@ -48,6 +48,7 @@ import { safeSpawn } from "./utils/safeSpawn.js";
 import {
   getCurrentColors,
   getCurrentTheme,
+  initializeThemeManager,
   setTheme,
   updateThemeColor,
 } from "./utils/themeManager.js";
@@ -446,6 +447,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("reloadWindow", async (): Promise<boolean> => {
     if (mainWindow) {
       mainWindow.reload();
+      initializeThemeManager(); // Required for reloading theme colors from settings
       return true;
     } else {
       return false;
