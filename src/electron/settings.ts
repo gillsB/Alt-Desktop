@@ -33,6 +33,7 @@ export const defaultSettings: SettingsData = {
     show?: boolean;
   },
   localTags: [],
+  theme: "system",
 };
 
 const logger = createLoggerForFile("settings.ts");

@@ -123,8 +123,9 @@ type SettingsData = {
   defaultFontSize?: number;
   defaultFontColor?: string;
   windowType?: WindowType;
-  // Do not appear in Settings window yet.
-  defaultBackgroundPath?: string;
+  defaultBackgroundPath?: string; // location for saving new backgrounds and default:: location
+  // Not yet in settings menu
+  theme?: ThemeName;
   // Do not appear in Settings window
   background?: string;
   newBackgroundID?: number;
