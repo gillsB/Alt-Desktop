@@ -2,8 +2,8 @@
   "compilerOptions": {
     "types": ["./types"],
     "jsx": "react-jsx",
-    "target": "ES2020",
-    "lib": ["dom", "es6", "dom.iterable", "scripthost"],
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -11,7 +11,6 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "incremental": true
