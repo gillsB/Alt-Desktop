@@ -140,12 +140,10 @@ const DesktopProfile: React.FC = () => {
 
   useEffect(() => {
     const fetchUniqueFiles = async () => {
-      if (profile) {
-        try {
-          reloadFiles();
-        } catch (error) {
-          logger.error("Error fetching unique desktop files:", error);
-        }
+      try {
+        reloadFiles();
+      } catch (error) {
+        logger.error("Error fetching unique desktop files:", error);
       }
     };
     fetchUniqueFiles();

@@ -1774,6 +1774,9 @@ export async function getDesktopUniqueFiles(
   }
   const files = await fs.promises.readdir(desktopPath);
   logger.info("Files on Desktop:", files);
+  if (!profile) {
+    profile = "default";
+  }
 
   // Only fetch existingIcons if not provided
   let icons: DesktopIcon[] = [];
