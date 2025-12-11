@@ -1151,6 +1151,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           return false;
         }
 
+        if (updates.id === "fallback") {
+          updates.profile =
+            (getSetting("noBgDesktopProfile") as string) || "default";
+        }
+
         if (mainWindow) {
           mainWindow.webContents.send("preview-background-update", updates);
         }
@@ -1968,7 +1973,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "getDesktopUniqueFiles",
     async (profile?: string): Promise<DesktopFileCompare> => {
-      if(profile){
+      if (profile) {
         return await getDesktopUniqueFiles(profile);
       }
       return await getDesktopUniqueFiles();

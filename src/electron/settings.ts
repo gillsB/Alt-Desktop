@@ -27,6 +27,7 @@ export const defaultSettings: SettingsData = {
   defaultBackgroundPath: "",
   background: "",
   newBackgroundID: 1,
+  noBgDesktopProfile: "default",
   bgSelectIconSize: "medium",
   publicCategories: defaultPublicCategories,
   localCategories: { show: true } as Record<string, boolean> & {
