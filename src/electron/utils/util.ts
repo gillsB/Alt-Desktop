@@ -1754,7 +1754,7 @@ export function saveImageToIconFolder(
 }
 
 export async function getDesktopUniqueFiles(
-  profile: string,
+  profile?: string,
   existingIcons?: DesktopIcon[]
 ): Promise<{
   filesToImport: Array<{ name: string; path: string }>;
@@ -1762,21 +1762,33 @@ export async function getDesktopUniqueFiles(
   nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
   pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
 }> {
+  const failedResult = {
+    filesToImport: [],
+    alreadyImported: [],
+    nameOnlyMatches: [],
+    pathOnlyMatches: [],
+  };
+  if (!profile) {
+    try {
+      profile = await getRendererState("profile");
+      if (!profile) {
+        logger.error("No profile found via getRendererState");
+        return failedResult;
+      }
+    } catch (error) {
+      logger.error("Failed to get profile from getRendererState:", error);
+      return failedResult;
+    }
+  }
+
   const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
   if (!fs.existsSync(desktopPath)) {
     logger.warn(`Desktop path does not exist: ${desktopPath}`);
-    return {
-      filesToImport: [],
-      alreadyImported: [],
-      nameOnlyMatches: [],
-      pathOnlyMatches: [],
-    };
+    return failedResult;
   }
+
   const files = await fs.promises.readdir(desktopPath);
   logger.info("Files on Desktop:", files);
-  if (!profile) {
-    profile = "default";
-  }
 
   // Only fetch existingIcons if not provided
   let icons: DesktopIcon[] = [];

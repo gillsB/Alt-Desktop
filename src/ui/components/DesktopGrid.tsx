@@ -574,7 +574,7 @@ const DesktopGrid: React.FC = () => {
         }
       }
       const data = await window.electron.getDesktopIconData();
-      logger.info("profile fetched = " + JSON.stringify(data));
+      logger.info("profile fetched");
 
       // Create an array of promises for ensuring folders
       const folderPromises = data.icons.map(async (icon: DesktopIcon) => {

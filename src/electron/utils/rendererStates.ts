@@ -15,13 +15,20 @@ let rendererStates: RendererStates = {
 // So when renderers are created they have the correct profile from the start. (prevents default profile flicker)
 export async function initializeRendererStatesProfile() {
   try {
-    // Get the current background ID from settings
     const bgId = getSetting("background") as string;
-    if (!bgId) return "default";
+    if (!bgId) {
+      logger.warn("No background ID found, defaulting to 'default' profile.");
+      return;
+    }
+
     const bgJson = await idToBgJson(bgId);
     if (bgJson && bgJson.local && bgJson.local.profile) {
       logger.info("Initializing renderer profile to:", bgJson.local.profile);
       rendererStates.profile = bgJson.local.profile;
+    } else {
+      logger.warn(
+        "Background JSON or profile not found, defaulting to 'default' profile."
+      );
     }
   } catch (e) {
     logger.error(
@@ -49,6 +56,10 @@ export async function getRendererState<T extends keyof RendererStates>(
   key: T
 ): Promise<RendererStates[T]> {
   if (key in rendererStates) {
+    logger.info(
+      `Getting renderer state for key "${key}":`,
+      rendererStates[key]
+    );
     return rendererStates[key];
   } else {
     logger.warn(`Renderer state key "${key}" does not exist.`);

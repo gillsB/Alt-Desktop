@@ -338,7 +338,7 @@ interface EventParamMapping {
   editIconOffsetUpdate: [number, number];
   openDesktopProfile: [];
   importAllIconsFromDesktop: [];
-  getDesktopUniqueFiles: [string];
+  getDesktopUniqueFiles: [profile?: string];
   importDesktopFile: [DesktopFile, string];
   compareProfiles: [string, string];
   getCurrentTheme: [];
@@ -596,7 +596,7 @@ interface Window {
     editIconOffsetUpdate: (offsetX: number, offsetY: number) => void;
     openDesktopProfile: () => Promise<boolean>;
     importAllIconsFromDesktop: () => Promise<boolean>;
-    getDesktopUniqueFiles: (profile: string) => Promise<DesktopFileCompare>;
+    getDesktopUniqueFiles: (profile?: string) => Promise<DesktopFileCompare>;
     importDesktopFile: (
       file: DesktopFile,
       profile: string

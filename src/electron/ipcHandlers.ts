@@ -1967,8 +1967,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   });
   ipcMainHandle(
     "getDesktopUniqueFiles",
-    async (profile: string): Promise<DesktopFileCompare> => {
-      return await getDesktopUniqueFiles(profile);
+    async (profile?: string): Promise<DesktopFileCompare> => {
+      if(profile){
+        return await getDesktopUniqueFiles(profile);
+      }
+      return await getDesktopUniqueFiles();
     }
   );
   ipcMainHandle(
