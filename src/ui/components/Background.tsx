@@ -142,9 +142,12 @@ const Background: React.FC<BackgroundProps> = ({
       if (!showVideoControlsRef.current) {
         setVolumeFromDefault(id);
       }
-      await window.electron.setRendererStates({
-        profile: loadedBgJson?.local?.profile,
-      });
+      if (loadedBgJson) {
+        // only update on valid bgJson return
+        await window.electron.setRendererStates({
+          profile: loadedBgJson?.local?.profile,
+        });
+      }
     };
     fetchFromSettings();
 
