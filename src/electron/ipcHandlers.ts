@@ -1152,8 +1152,21 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         }
 
         if (updates.id === "fallback") {
-          updates.profile =
+          const fallbackProfile =
             (getSetting("noBgDesktopProfile") as string) || "default";
+          const currentProfiles = await getProfiles();
+          // Only use noBgDesktopProfile setting if it exists as a DesktopProfile
+          if (currentProfiles.includes(fallbackProfile)) {
+            logger.info(`using fallback profile: ${fallbackProfile}`);
+            updates.profile = fallbackProfile;
+          } else {
+            // Otherwise revert to default
+            logger.info(
+              `fallback profile: ${fallbackProfile} not found, using default`
+            );
+            updates.profile = "default";
+            saveSettingsData({ noBgDesktopProfile: "default" });
+          }
         }
 
         if (mainWindow) {
