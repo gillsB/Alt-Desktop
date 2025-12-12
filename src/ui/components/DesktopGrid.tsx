@@ -2344,15 +2344,15 @@ const DesktopGrid: React.FC = () => {
                   : "New Icon"}
               </div>
               <div className="menu-separator" />
+              <div className="menu-item" onClick={handleOpenBackgroundSelect}>
+                Change Background
+              </div>
               <div
                 className="menu-item"
                 onClick={handleOpenDesktopProfile}
                 title="Coming soon"
               >
                 Desktop Profile
-              </div>
-              <div className="menu-item" onClick={handleOpenBackgroundSelect}>
-                Change Background
               </div>
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings
