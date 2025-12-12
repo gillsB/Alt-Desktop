@@ -165,6 +165,10 @@ const DesktopProfile: React.FC = () => {
           id: bgId,
           localProfile: newProfile,
         });
+      } else {
+        await window.electron.saveSettingsData({
+          noBgDesktopProfile: newProfile,
+        });
       }
     } catch (err) {
       logger.error(
