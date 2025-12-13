@@ -329,9 +329,11 @@ const DesktopProfile: React.FC = () => {
   };
 
   const handleCompareProfiles = async (
-    e: React.ChangeEvent<HTMLSelectElement>
+    eOrValue: React.ChangeEvent<HTMLSelectElement> | string
   ) => {
-    const selectedProfile = e.target.value;
+    const selectedProfile =
+      typeof eOrValue === "string" ? eOrValue : eOrValue.target.value;
+
     setCompareToProfile(selectedProfile);
 
     if (selectedProfile && profile) {
@@ -350,6 +352,16 @@ const DesktopProfile: React.FC = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (activeTab !== "other") return;
+    if (!profiles || profiles.length === 0) return;
+    const candidate =
+      compareToProfile || profiles.find((p) => p !== profile) || profiles[0];
+    if (candidate) {
+      handleCompareProfiles(candidate);
+    }
+  }, [activeTab]);
 
   return (
     <div className="subwindow-container">
@@ -682,7 +694,6 @@ const DesktopProfile: React.FC = () => {
                   value={compareToProfile}
                   onChange={handleCompareProfiles}
                 >
-                  <option value="">Select a profile...</option>
                   {profiles
                     .filter((p) => p !== profile)
                     .map((p) => (
