@@ -82,7 +82,11 @@ const DesktopProfile: React.FC = () => {
 
     const handleEscapeKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        hideContextMenu();
+        if (contextMenu.visible) {
+          hideContextMenu();
+        } else {
+          handleClose();
+        }
       }
     };
 
