@@ -2344,13 +2344,17 @@ const DesktopGrid: React.FC = () => {
                   : "New Icon"}
               </div>
               <div className="menu-separator" />
-              <div className="menu-item" onClick={handleOpenBackgroundSelect}>
+              <div
+                className="menu-item"
+                onClick={handleOpenBackgroundSelect}
+                title="Change the desktop background"
+              >
                 Change Background
               </div>
               <div
                 className="menu-item"
                 onClick={handleOpenDesktopProfile}
-                title="Coming soon"
+                title="Change the desktop icon profile for this background"
               >
                 Desktop Profile
               </div>
@@ -2358,7 +2362,10 @@ const DesktopGrid: React.FC = () => {
                 Settings
               </div>
               <div className="menu-separator" />
-              <label className="menu-checkbox">
+              <label
+                className="menu-checkbox"
+                title="A variety of visual cues and tools to help manage your Desktop icons"
+              >
                 Icons Overview
                 <input
                   type="checkbox"
@@ -2394,7 +2401,11 @@ const DesktopGrid: React.FC = () => {
                 </label>
               )}
               <div className="menu-separator" />
-              <div className="menu-item" onClick={handleReloadDesktop}>
+              <div
+                className="menu-item"
+                onClick={handleReloadDesktop}
+                title="Reload all main window components"
+              >
                 Reload Desktop
               </div>
             </>
