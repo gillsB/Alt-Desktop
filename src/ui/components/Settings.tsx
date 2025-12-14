@@ -54,6 +54,14 @@ const Settings: React.FC = () => {
           if (getSpecificChanges(["windowType"])) {
             await window.electron.reloadHeader();
           }
+          if (getSpecificChanges(["theme"])) {
+            const savedTheme = initialSettings?.theme ?? "system";
+            try {
+              await window.electron.setTheme(savedTheme);
+            } catch (err) {
+              logger.error("Failed to revert theme to saved value:", err);
+            }
+          }
           closeWindow();
         }
       } catch (error) {
