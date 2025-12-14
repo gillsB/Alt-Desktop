@@ -492,6 +492,26 @@ const Settings: React.FC = () => {
             <option value="BORDERLESS">Borderless</option>
           </select>
         </div>
+        <div className="subwindow-field dropdown-container">
+          <label htmlFor="theme-select">Theme</label>
+          <select
+            id="theme-select"
+            value={(settings?.theme as ThemeName) || "system"}
+            onChange={async (e) => {
+              const selected = e.target.value as ThemeName;
+              updateSetting("theme", selected);
+              try {
+                await window.electron.setTheme(selected);
+              } catch (err) {
+                logger.error("Failed to set theme:", err);
+              }
+            }}
+          >
+            <option value="system">System</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
+        </div>
       </div>
       <div className="subwindow-footer">
         <button className="save-button" onClick={handleSave}>
