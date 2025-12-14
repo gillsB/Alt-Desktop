@@ -1,11 +1,15 @@
-import { nativeTheme } from "electron";
+import { BrowserWindow, nativeTheme } from "electron";
 import { createLoggerForFile } from "../logging.js";
 import { getSetting } from "../settings.js";
-import { showSmallWindow } from "../windows/subWindowManager.js";
+
+// BinaryTheme used for dark/light themes only
+// Contrast with global type ThemeName which also includes the "system" option
+// Reason for this is Settings can set it to "system", but actual applied theme is always dark or light
+type BinaryTheme = "dark" | "light";
 
 const logger = createLoggerForFile("themeManager.ts");
 
-const themes: Record<ThemeName, ThemeColors> = {
+const themes: Record<BinaryTheme, ThemeColors> = {
   dark: {
     primary: "#007bff",
     primaryHover: "#0056b3",
@@ -56,71 +60,49 @@ const themes: Record<ThemeName, ThemeColors> = {
     highlightGreen: "#4caf50",
     highlightYellow: "#f9a825",
   },
-  system: {
-    primary: "#0056b3",
-    primaryHover: "#003d82",
-    primaryActive: "#002454",
-
-    bgPrimary: "#f5f5f5",
-    bgSecondary: "#ffffff",
-    bgTertiary: "#eeeeee",
-    bgHover: "#e8e8e8",
-
-    textPrimary: "#1a1a1a",
-    textSecondary: "#555555",
-    textTertiary: "#999999",
-
-    borderPrimary: "#d0d0d0",
-    borderSecondary: "#e0e0e0",
-
-    success: "#28a745",
-    warning: "#ff9800",
-    error: "#dc3545",
-    info: "#17a2b8",
-
-    highlightGreen: "#4caf50",
-    highlightYellow: "#f9a825",
-  },
 };
 
-let currentTheme: ThemeName = "dark";
-let currentColors: ThemeColors = themes.dark;
+let currentPreference: ThemeName = "system";
+let currentTheme: BinaryTheme = "dark";
+let currentColors: ThemeColors = themes[currentTheme];
+
+function getSystemTheme(): BinaryTheme {
+  return nativeTheme.shouldUseDarkColors ? "dark" : "light";
+}
+
+function broadcastThemeUpdate() {
+  const colors = getCurrentColors();
+  for (const win of BrowserWindow.getAllWindows()) {
+    try {
+      win.webContents.send("theme-updated", colors);
+    } catch (err) {
+      logger.warn("Failed to send theme-updated to a window:", err);
+    }
+  }
+}
 
 export async function initializeThemeManager() {
-  const theme = getSetting("theme") as ThemeName;
-  const resolvedTheme = resolveThemeScheme(theme);
-  currentTheme = resolvedTheme;
-  currentColors = themes[resolvedTheme];
-  logger.info(`Theme initialized: ${resolvedTheme}`);
-  logger.info("current theme = " + currentTheme);
-}
+  const saved = (await getSetting("theme")) as ThemeName | undefined;
+  currentPreference = saved ?? "system";
+  currentTheme =
+    currentPreference === "system" ? getSystemTheme() : currentPreference;
+  currentColors = themes[currentTheme];
+  logger.info(
+    `Theme initialized: preference=${currentPreference}, resolved=${currentTheme}`
+  );
 
-function resolveThemeScheme(theme: ThemeName): ThemeName {
-  if (theme === "system") {
-    try {
-      const isDarkMode = nativeTheme.shouldUseDarkColors;
-      theme = isDarkMode ? "dark" : "light";
-      logger.info(`System theme detected: ${theme}`);
-    } catch (error) {
-      showSmallWindow(
-        "Theme Detection Error",
-        "Failed to detect system theme. Defaulting to dark mode.",
-        ["OK"]
-      );
-      logger.warn(
-        "Failed to detect system theme. Defaulting to dark mode. ",
-        error
-      );
-      theme = "dark";
+  // Listen for OS theme changes only if preference === "system"
+  nativeTheme.on("updated", () => {
+    if (currentPreference === "system") {
+      currentTheme = getSystemTheme();
+      currentColors = themes[currentTheme];
+      logger.info(`System theme changed, applying: ${currentTheme}`);
+      broadcastThemeUpdate();
     }
-  } else if (theme !== "dark" && theme !== "light") {
-    logger.warn(`Unknown theme "${theme}" specified. Defaulting to dark mode.`);
-    theme = "dark";
-  }
-  return theme;
+  });
 }
 
-export function getCurrentTheme(): ThemeName {
+export function getCurrentTheme(): BinaryTheme {
   return currentTheme;
 }
 
@@ -128,12 +110,18 @@ export function getCurrentColors(): ThemeColors {
   return currentColors;
 }
 
-export function setTheme(theme: ThemeName): ThemeColors | null {
-  theme = resolveThemeScheme(theme);
-  currentTheme = theme;
-  currentColors = themes[theme];
-  //TODO save settings with new theme
-  logger.info(`Theme changed to: ${theme}`);
+export function setTheme(pref: ThemeName): ThemeColors | null {
+  if (pref !== "system" && pref !== "dark" && pref !== "light") {
+    logger.warn(`Invalid theme preference: ${pref}`);
+    return null;
+  }
+
+  currentPreference = pref;
+  currentTheme = pref === "system" ? getSystemTheme() : pref;
+  currentColors = themes[currentTheme];
+
+  logger.info(`Theme preference set: ${pref} -> resolved ${currentTheme}`);
+  broadcastThemeUpdate();
   return currentColors;
 }
 
@@ -143,4 +131,5 @@ export function updateThemeColor(
 ) {
   currentColors[colorKey] = colorValue;
   logger.info(`Theme color updated: ${colorKey} = ${colorValue}`);
+  broadcastThemeUpdate();
 }
