@@ -240,6 +240,7 @@ interface ThemeColors {
   bgHover: string;
 
   // Text colors
+  textArea: string;
   textPrimary: string;
   textSecondary: string;
   textTertiary: string;
@@ -257,6 +258,8 @@ interface ThemeColors {
   // Highlights
   highlightGreen: string;
   highlightYellow: string;
+
+  shadow: string;
 }
 
 // Items/objects being sent from the renderer to the main process

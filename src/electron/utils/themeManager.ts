@@ -11,54 +11,60 @@ const logger = createLoggerForFile("themeManager.ts");
 
 const themes: Record<BinaryTheme, ThemeColors> = {
   dark: {
-    primary: "#007bff",
-    primaryHover: "#0056b3",
-    primaryActive: "#003d82",
+    primary: "0, 123, 255", // #007bff
+    primaryHover: "0, 86, 179", // #0056b3
+    primaryActive: "0, 61, 130", // #003d82
 
-    bgPrimary: "#232323",
-    bgSecondary: "#2c2c2c",
-    bgTertiary: "#1a1a1a",
-    bgHover: "#323232",
+    bgPrimary: "35, 35, 35", // #232323
+    bgSecondary: "44, 44, 44", // #2c2c2c
+    bgTertiary: "26, 26, 26", // #1a1a1a
+    bgHover: "50 50 50", // #323232
 
-    textPrimary: "#ffffff",
-    textSecondary: "#b0b0b0",
-    textTertiary: "#808080",
+    textArea: "18, 18, 18", // #121212
+    textPrimary: "255, 255, 255", // #ffffff
+    textSecondary: "176, 176, 176", // #b0b0b0
+    textTertiary: "128, 128, 128", // #808080
 
-    borderPrimary: "#292929",
-    borderSecondary: "#3a3a3a",
+    borderPrimary: "41, 41, 41", // #292929
+    borderSecondary: "58, 58, 58", // #3a3a3a
 
-    success: "#28a745",
-    warning: "#ffc107",
-    error: "#dc3545",
-    info: "#17a2b8",
+    success: "40, 167, 69", // #28a745
+    warning: "255, 193, 7", // #ffc107
+    error: "220, 53, 69", // #dc3545
+    info: "23, 162, 184", // #17a2b8
 
-    highlightGreen: "#4caf50",
-    highlightYellow: "#d29922",
+    highlightGreen: "76, 175, 80", // #4caf50
+    highlightYellow: "210, 153, 34", // #d29922
+
+    shadow: "255, 255, 255", // #000000
   },
   light: {
-    primary: "#0056b3",
-    primaryHover: "#003d82",
-    primaryActive: "#002454",
+    primary: "0, 86, 179", // #0056b3
+    primaryHover: "0, 61, 130", // #003d82
+    primaryActive: "0, 36, 84", // #002454
 
-    bgPrimary: "#f5f5f5",
-    bgSecondary: "#ffffff",
-    bgTertiary: "#eeeeee",
-    bgHover: "#e8e8e8",
+    bgPrimary: "245, 245, 245", // #f5f5f5
+    bgSecondary: "255, 255, 255", // #ffffff
+    bgTertiary: "238, 238, 238", // #eeeeee
+    bgHover: "232, 232, 232", // #e8e8e8
 
-    textPrimary: "#1a1a1a",
-    textSecondary: "#555555",
-    textTertiary: "#999999",
+    textArea: "226, 226, 226", // #e2e2e2
+    textPrimary: "26, 26, 26", // #1a1a1a
+    textSecondary: "85, 85, 85", // #555555
+    textTertiary: "153, 153, 153", // #999999
 
-    borderPrimary: "#d0d0d0",
-    borderSecondary: "#e0e0e0",
+    borderPrimary: "208, 208, 208", // #d0d0d0
+    borderSecondary: "224, 224, 224", // #e0e0e0
 
-    success: "#28a745",
-    warning: "#ff9800",
-    error: "#dc3545",
-    info: "#17a2b8",
+    success: "40, 167, 69", // #28a745
+    warning: "255, 152, 0", // #ff9800
+    error: "220, 53, 69", // #dc3545
+    info: "23, 162, 184", // #17a2b8
 
-    highlightGreen: "#4caf50",
-    highlightYellow: "#f9a825",
+    highlightGreen: "76, 175, 80", // #4caf50
+    highlightYellow: "249, 168, 37", // #f9a825
+
+    shadow: "0, 0, 0",
   },
 };
 
