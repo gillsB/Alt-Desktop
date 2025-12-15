@@ -101,8 +101,8 @@
   display: inline-block;
 }
 .video-controls button span {
-  line-height: 0; /* Remove extra space around the pause character */
-  padding-top: 2px; /* Fine-tune this if necessary */
+  line-height: 0;
+  padding-top: 2px;
 }
 
 .video-controls button:hover {
@@ -135,13 +135,37 @@
 }
 
 .volume-slider {
-  appearance: vertical;
-  -webkit-appearance: slider-vertical;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Horizontal slider (EditBackground / BackgroundSelect) */
+.volume-slider.horizontal {
+  width: 160px;
+  height: 8px;
+}
+
+/* Vertical slider (VideoControls)*/
+.volume-slider.vertical {
   width: 20px;
   height: 100px;
-  background: transparent;
-  outline: none;
-  cursor: pointer;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+
+.volume-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.volume-slider.vertical::-webkit-slider-runnable-track {
+  width: 8px;
+  height: 100%;
+  border-radius: 4px;
 }
 
 .volume-slider::-webkit-slider-thumb {
@@ -150,32 +174,17 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #fff;
-  cursor: pointer;
+  background: rgb(var(--color-primary));
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  margin-top: -4px;
 }
 
-.volume-slider::-webkit-slider-track {
-  width: 4px;
-  height: 100px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
+.volume-slider.vertical::-webkit-slider-thumb {
+  margin-left: -4px;
+  margin-top: 0;
 }
 
-.volume-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #fff;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.volume-slider::-moz-range-track {
-  width: 4px;
-  height: 100px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-  border: none;
+.volume-slider:hover::-webkit-slider-thumb,
+.volume-slider:active::-webkit-slider-thumb {
+  background: rgba(var(--color-primary), 0.95);
 }

@@ -1037,7 +1037,7 @@ const BackgroundSelect: React.FC = () => {
                     <div className="details-value">
                       <input
                         id="volume-slider"
-                        className={`volume-slider ${showVideoControls ? "red-slider" : ""}`}
+                        className={`volume-slider horizontal ${showVideoControls ? "red-slider" : ""}`}
                         type="range"
                         min={0}
                         max={1}

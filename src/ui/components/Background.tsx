@@ -956,7 +956,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
               onChange={handleVolumeChange}
               onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
-              className="volume-slider"
+              className="volume-slider vertical"
               title="This volume is temporary, change in background select for permanent."
             />
           </div>
