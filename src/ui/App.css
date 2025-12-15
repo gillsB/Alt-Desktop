@@ -16,8 +16,8 @@ body,
 input,
 select,
 textarea {
-  background: #121212;
-  color: #fff;
+  background: rgb(var(--color-textArea));
+  color: rgb(var(--color-textPrimary));
   outline: none;
   box-sizing: border-box;
   border: none;
@@ -29,19 +29,20 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  background: #121212;
-  box-shadow: 0 0 0 2px #007bff88;
+  background: rgb(var(--color-textArea));
+  box-shadow: 0 0 0 2px rgba(var(--color-primary), 0.88);
 }
 
 .menu-separator {
-  border-top: 1px solid #444;
+  border-top: 1px solid rgba(var(--color-primary), 0.88);
   margin: 0.25rem 0;
 }
 
 .context-menu {
   position: absolute;
   background-color: rgb(var(--color-bgPrimary));
-  border: 1px solid #666;
+  border: 1px solid rgba(var(--color-primary), 0.88);
+  color: rgb(var(--color-textPrimary));
   z-index: 1000;
   border-radius: 3px;
   font-size: 14px;
@@ -57,18 +58,17 @@ textarea:focus {
   user-select: none;
 }
 .context-menu .menu-item:hover {
-  background-color: #555;
+  background-color: rgba(var(--color-primary), 0.38);
   cursor: pointer;
 }
 
 .submenu {
   position: absolute;
   top: 0;
-  background-color: #333;
+  background-color: rgb(var(--color-bgPrimary));
   color: white;
-  border: 1px solid #666;
+  border: 1px solid rgba(var(--color-primary), 0.88);
   z-index: 1001;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
   border-radius: 3px;
   font-size: 14px;
   min-width: 120px;
@@ -81,7 +81,7 @@ textarea:focus {
   box-sizing: border-box;
 }
 .submenu .menu-item:hover {
-  background-color: #555;
+  background-color: rgba(var(--color-primary), 0.38);
   cursor: pointer;
 }
 .has-submenu {
@@ -92,7 +92,6 @@ textarea:focus {
   right: 10px;
   top: 35%;
   padding-left: 10px;
-  color: white;
   font-size: 0.5rem;
 }
 .has-submenu:hover .submenu-arrow {
@@ -164,7 +163,7 @@ textarea:focus {
 
 .subwindow-field label {
   font-weight: bold;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   flex: 0 0 150px;
   user-select: none;
 }
@@ -188,8 +187,8 @@ textarea:focus {
   bottom: 0;
   width: 100%;
   height: 60px;
-  background-color: #2c2c2c;
-  box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.2);
+  background-color: rgb(var(--color-bgSecondary));
+  box-shadow: 0px -2px 5px rgba(var(--color-shadow), 0.2);
   box-sizing: border-box;
   z-index: 10;
   gap: 10px;
@@ -203,18 +202,18 @@ textarea:focus {
   font-size: 14px;
   border-radius: 4px;
   flex: 1;
-  background-color: #2c2c2c;
+  background-color: rgb(var(--color-textArea));
   appearance: none;
   cursor: pointer;
 }
 .dropdown-container select:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: rgb(var(--color-primary));
 }
 .dropdown-container select option {
-  background-color: #2c2c2c;
-  color: white;
+  background-color: rgb(var(--color-bgPrimary));
 }
+/* TODO I think select is nulling hover styles, this needs to be made into a different component*/
 .dropdown-container::after {
   content: "▼";
   position: absolute;
@@ -222,7 +221,7 @@ textarea:focus {
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   font-size: 12px;
 }
 
@@ -230,8 +229,7 @@ textarea:focus {
   padding: 10px 20px;
   font-size: 16px;
   font-weight: bold;
-  color: white;
-  background-color: #007bff;
+  background-color: rgb(var(--color-primary));
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -241,7 +239,7 @@ textarea:focus {
   user-select: none;
 }
 .save-button:hover {
-  background-color: #0056b3;
+  background-color: rgb(var(--color-primaryHover));
 }
 
 .context-menu[data-submenu-direction="right"] .submenu {

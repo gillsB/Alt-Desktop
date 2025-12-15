@@ -36,7 +36,7 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     highlightGreen: "76, 175, 80", // #4caf50
     highlightYellow: "210, 153, 34", // #d29922
 
-    shadow: "255, 255, 255", // #000000
+    shadow: "0, 0, 0", // #000000
   },
   light: {
     primary: "0, 86, 179", // #0056b3
