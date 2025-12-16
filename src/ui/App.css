@@ -298,7 +298,7 @@ textarea:focus {
 
 .drag-text {
   font-size: 24px;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   font-weight: bold;
   margin-bottom: 10px;
 }
@@ -306,7 +306,7 @@ textarea:focus {
 .custom-folder-icon {
   width: 24px;
   height: 100%;
-  color: yellow;
+  color: rgb(var(--color-warning));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -330,7 +330,7 @@ textarea:focus {
   color: gray;
 }
 .custom-magnifying-glass-icon.hovered {
-  color: white;
+  color: rgb(var(--color-textPrimary));
   outline: 2px solid grey;
 }
 
@@ -345,7 +345,7 @@ textarea:focus {
   height: 24px;
   border: 1px solid #ccc;
   cursor: pointer;
-  background: #fff;
+  background: rgb(var(--color-textPrimary));
   position: relative;
   display: inline-block;
 }
@@ -365,7 +365,7 @@ textarea:focus {
   padding: 2px 5px;
   font-size: 14px;
   font-weight: bold;
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   background: transparent;
   border: 2px solid #707070;
   border-radius: 4px;
@@ -382,7 +382,7 @@ textarea:focus {
 .default-font-color-btn:hover,
 .default-font-color-btn:focus {
   background: #707070;
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   border-color: #707070;
 }
 
@@ -391,8 +391,8 @@ textarea:focus {
   margin-left: 5px;
   font-size: 16px;
   font-weight: bold;
-  color: white;
-  background-color: #007bff;
+  color: rgb(var(--color-textPrimary));
+  background-color: rgb(var(--color-primary));
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -401,7 +401,7 @@ textarea:focus {
   user-select: none;
 }
 .button:hover {
-  background-color: #0056b3;
+  background-color: rgb(var(--color-primaryHover));
 }
 
 .modal-window-content {
@@ -409,9 +409,9 @@ textarea:focus {
   min-height: 220px;
   max-width: 90vw;
   max-height: 80vh;
-  background: #232323;
+  background: rgb(var(--color-bgPrimary));
   border-radius: 0px;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 32px rgba(var(--color-textPrimary), 0.4);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -438,7 +438,7 @@ textarea:focus {
   justify-content: center;
   align-items: center;
   padding: 12px 18px 12px 18px;
-  border-top: 1px solid #292929;
-  background: #232323;
+  border-top: 1px solid rgb(var(--color-bgSecondary));
+  background: rgb(var(--color-bgPrimary));
   gap: 16px;
 }
