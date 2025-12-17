@@ -230,8 +230,10 @@ type ThemeName = "dark" | "light" | "system";
 interface ThemeColors {
   // Primary colors
   primary: string;
+  primaryLight: string;
   primaryHover: string;
-  primaryActive: string;
+  primaryDark: string;
+  primaryGray: string;
 
   // Background colors
   bgPrimary: string;
