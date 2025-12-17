@@ -1,11 +1,11 @@
 .bgfilter-category-title {
   font-weight: 700;
   font-size: 0.9rem;
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #33333d;
+  background-color: rgb(var(--color-bgPrimary));
   padding: 0px 15px;
   border-radius: 8px;
   user-select: none;
@@ -13,7 +13,10 @@
   transition:
     background 0.18s,
     color 0.18s;
-  box-shadow: 0 2px 8px rgba(0, 64, 128, 0.1);
+  box-shadow: 0 2px 8px rgba(var(--color-shadow), 0.2);
+}
+.bgfilter-category-title:hover {
+  background-color: rgba(var(--color-primary), 0.38);
 }
 
 .bgfilter-category-block {
@@ -27,7 +30,7 @@
   gap: 8px;
   padding: 0px 25px;
   font-size: 0.9rem;
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   cursor: pointer;
   border-radius: 16px;
   transition:
@@ -36,17 +39,17 @@
 }
 
 .bgfilter-tag-label input[type="checkbox"] {
-  accent-color: #007bff;
+  accent-color: rgb(var(--color-primary));
 }
 
 .bgfilter-tag-label:hover {
-  background: #232346;
-  color: #fff;
+  background-color: rgba(var(--color-primary), 0.38);
+  color: rgb(var(--color-textPrimary));
 }
 
 .bgfilter-search-panel {
   padding: 12px 12px 12px 12px;
-  background: #33333d;
+  background: rgb(var(--color-bgTertiary));
   border-radius: 8px;
   width: 100%;
   box-sizing: border-box;
@@ -54,7 +57,7 @@
 }
 
 .bgfilter-search-panel h3 {
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   font-size: 1.18rem;
   margin-bottom: 16px;
   font-weight: 700;
@@ -64,11 +67,11 @@
 .bgfilter-section-header {
   font-weight: 700;
   font-size: 0.9rem;
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #33333d;
+  background-color: rgb(var(--color-bgSecondary));
   padding: 0px 14px 0px 0px;
   border-radius: 8px;
   user-select: none;
@@ -76,8 +79,12 @@
   transition:
     background 0.18s,
     color 0.18s;
-  box-shadow: 0 2px 8px rgba(0, 64, 128, 0.1);
+  box-shadow: 0 2px 8px rgba(var(--color-shadow), 0.4);
 }
+.bgfilter-section-header:hover {
+  background-color: rgba(var(--color-primary), 0.38);
+}
+
 .bgfilter-section-label {
   font-size: 1.08rem;
   font-weight: 700;
