@@ -35,6 +35,7 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     error: "220, 53, 69", // #dc3545
     info: "23, 162, 184", // #17a2b8
 
+    highlightBox: "255, 0, 0", // #ff0000
     highlightGreen: "76, 175, 80", // #4caf50
     highlightYellow: "210, 153, 34", // #d29922
 
@@ -65,6 +66,7 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     error: "220, 53, 69", // #dc3545
     info: "23, 162, 184", // #17a2b8
 
+    highlightBox: "255, 0, 0", // #ff0000
     highlightGreen: "76, 175, 80", // #4caf50
     highlightYellow: "249, 168, 37", // #f9a825
 

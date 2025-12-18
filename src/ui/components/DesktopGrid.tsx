@@ -2012,20 +2012,13 @@ const DesktopGrid: React.FC = () => {
               showHighlight = allHighlightsDefault;
             }
 
-            // Color logic
-            let borderColor = "#2196f3";
-            let backgroundColor = "rgba(33,150,243,0.1)";
+            let variant = "default";
+            if (hasOffset && isOversized) variant = "offset-oversized";
+            else if (hasOffset) variant = "offset";
+            else if (isOversized) variant = "oversized";
 
-            if (hasOffset && isOversized) {
-              borderColor = "#9e170dff";
-              backgroundColor = "rgba(158,23,13,0.25)";
-            } else if (hasOffset) {
-              borderColor = "#ff5722";
-              backgroundColor = "rgba(255,87,34,0.25)";
-            } else if (isOversized) {
-              borderColor = "#be8900ff";
-              backgroundColor = "rgba(190,137,0,0.25)";
-            }
+            const homeBoxClass = `multi-highlight-home-box ${variant}`;
+            const iconBoxClass = `multi-highlight-box ${variant}`;
 
             const iconWidth = icon.width || defaultIconSize;
             const iconHeight = icon.height || defaultIconSize;
@@ -2038,22 +2031,12 @@ const DesktopGrid: React.FC = () => {
                   <>
                     {/* Home box */}
                     <div
-                      className={
-                        hasOffset && isOversized
-                          ? "multi-highlight-home-box offset-oversized"
-                          : hasOffset
-                            ? "multi-highlight-home-box offset"
-                            : isOversized
-                              ? "multi-highlight-home-box oversized"
-                              : "multi-highlight-home-box default"
-                      }
+                      className={homeBoxClass}
                       style={{
                         left: homeLeft,
                         top: homeTop,
                         width: iconBox,
                         height: iconBox + ICON_VERTICAL_PADDING,
-                        border: `2px dashed ${borderColor}`,
-                        background: backgroundColor,
                       }}
                       title={
                         hasOffset && isOversized
@@ -2071,8 +2054,6 @@ const DesktopGrid: React.FC = () => {
                       style={{
                         left: homeLeft + 10,
                         top: homeTop + 10,
-                        backgroundColor: borderColor,
-                        border: `2px solid ${borderColor}`,
                         maxWidth: iconBox - 20,
                         maxHeight: iconBox - 20,
                       }}
@@ -2081,14 +2062,12 @@ const DesktopGrid: React.FC = () => {
                     </div>
                     {/* Highlight the actual icon position */}
                     <div
-                      className="multi-highlight-box"
+                      className={iconBoxClass}
                       style={{
                         left: actualLeft,
                         top: actualTop,
                         width: iconWidth,
                         height: iconHeight,
-                        border: `2px solid ${borderColor}`,
-                        background: backgroundColor,
                       }}
                       title={
                         hasOffset && isOversized

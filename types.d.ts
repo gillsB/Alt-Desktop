@@ -258,6 +258,7 @@ interface ThemeColors {
   info: string;
 
   // Highlights
+  highlightBox: string;
   highlightGreen: string;
   highlightYellow: string;
 
