@@ -36,6 +36,9 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     info: "23, 162, 184", // #17a2b8
 
     highlightBox: "255, 0, 0", // #ff0000
+    highlightOffset: "255, 87, 34", // #ff5722
+    highlightOversized: "190, 137, 0", // #be8900
+    highlightOffsetOversized: "158, 23, 13", // #9e170d
     highlightGreen: "76, 175, 80", // #4caf50
     highlightYellow: "210, 153, 34", // #d29922
 
@@ -67,6 +70,9 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     info: "23, 162, 184", // #17a2b8
 
     highlightBox: "255, 0, 0", // #ff0000
+    highlightOffset: "255, 87, 34", // #ff5722
+    highlightOversized: "190, 137, 0", // #be8900
+    highlightOffsetOversized: "158, 23, 13", // #9e170d
     highlightGreen: "76, 175, 80", // #4caf50
     highlightYellow: "249, 168, 37", // #f9a825
 

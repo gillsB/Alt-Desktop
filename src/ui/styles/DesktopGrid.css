@@ -74,24 +74,8 @@
 }
 .multi-highlight-box {
   position: absolute;
-  border: 2px solid rgb(var(--color-primary));
-  background: rgba(33, 150, 243, 0.1);
   pointer-events: none;
-}
-
-.offset {
-  border: 2px solid #ff5722;
-  background: rgba(255, 87, 34, 0.25);
-}
-
-.oversized {
-  border: 2px solid #be8900ff;
-  background: rgba(190, 137, 0, 0.25);
-}
-
-.offset-oversized {
-  border: 2px solid #9e170dff;
-  background: rgba(158, 23, 13, 0.25);
+  z-index: 2;
 }
 
 .multi-highlight-home-box {
@@ -100,12 +84,37 @@
   z-index: 1;
 }
 
+.multi-highlight-box.default,
+.multi-highlight-home-box.default {
+  border: 2px solid rgb(var(--color-primary));
+  background: rgba(var(--color-primary), 0.1);
+}
+
+.multi-highlight-box.offset,
+.multi-highlight-home-box.offset {
+  border: 2px solid rgb(var(--color-highlightOffset));
+  background: rgba(var(--color-highlightOffset), 0.1);
+}
+
+.multi-highlight-box.oversized,
+.multi-highlight-home-box.oversized {
+  border: 2px solid rgb(var(--color-highlightOversized));
+  background: rgba(var(--color-highlightOversized), 0.1);
+}
+
+.multi-highlight-box.offset-oversized,
+.multi-highlight-home-box.offset-oversized {
+  border: 2px solid rgb(var(--color-highlightOffsetOversized));
+  background: rgba(var(--color-highlightOffsetOversized), 0.1);
+}
+
 .multi-highlight-home-label {
   position: absolute;
   font-size: 0.8em;
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   font-weight: bold;
   z-index: 3;
+  padding: 2px 2px;
   pointer-events: none;
   text-align: center;
   border-radius: 4px;
@@ -114,11 +123,17 @@
   word-wrap: "break-word";
 }
 
-.multi-highlight-box {
-  position: absolute;
-  border-radius: 8;
-  pointer-events: none;
-  z-index: 2;
+.multi-highlight-home-label.default {
+  background: rgba(var(--color-primary), 0.85);
+}
+.multi-highlight-home-label.offset {
+  background: rgba(var(--color-highlightOffset), 0.85);
+}
+.multi-highlight-home-label.oversized {
+  background: rgba(var(--color-highlightOversized), 0.85);
+}
+.multi-highlight-home-label.offset-oversized {
+  background: rgba(var(--color-highlightOffsetOversized), 0.85);
 }
 
 .show-all-highlights-legend {
@@ -130,10 +145,10 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  background: rgba(30, 30, 30, 0.85);
+  background: rgba(var(--color-bgPrimary), 0.85);
   border-radius: 8px;
   padding: 8px 12px;
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   font-size: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   align-items: center;
@@ -164,10 +179,31 @@
   font-size: 16px;
   font-weight: bold;
 }
+
+.show-all-highlights-legend-circle.default {
+  border: 2px solid rgb(var(--color-primary));
+  background: rgba(var(--color-primary), 0.1);
+}
+
+.show-all-highlights-legend-circle.offset {
+  border: 2px solid rgb(var(--color-highlightOffset));
+  background: rgba(var(--color-highlightOffset), 0.1);
+}
+
+.show-all-highlights-legend-circle.oversized {
+  border: 2px solid rgb(var(--color-highlightOversized));
+  background: rgba(var(--color-highlightOversized), 0.1);
+}
+
+.show-all-highlights-legend-circle.offset-oversized {
+  border: 2px solid rgb(var(--color-highlightOffsetOversized));
+  background: rgba(var(--color-highlightOffsetOversized), 0.1);
+}
+
 .legend-x {
-  border: 2px solid #b71c1c;
-  background: rgba(183, 28, 28, 0.15);
-  color: #b71c1c;
+  border: 2px solid rgb(var(--color-error));
+  background: rgba(var(--color-error), 0.15);
+  color: rgb(var(--color-error));
   position: relative;
 }
 .legend-x::after {
@@ -182,13 +218,8 @@
   line-height: 18px;
   font-size: 16px;
   font-weight: bold;
-  color: #b71c1c;
+  color: rgb(var(--color-error));
   pointer-events: none;
-}
-
-.default {
-  border: 2px solid #2196f3;
-  background: rgba(33, 150, 243, 0.1);
 }
 
 .background-dimmer {
@@ -208,13 +239,13 @@
 }
 
 .swap-highlight {
-  border: 2px dashed #ff9800;
-  box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+  border: 2px dashed rgb(var(--color-highlightYellow));
+  box-shadow: 0 0 10px rgba(var(--color-highlightYellow), 0.5);
 }
 
 .swap-preview {
   opacity: 1;
-  border: 2px solid #ff9800;
+  border: 2px solid rgb(var(--color-highlightYellow));
   box-sizing: border-box;
 }
 
@@ -225,8 +256,8 @@
 
 .offscreen-icons-panel {
   position: fixed;
-  background-color: rgba(40, 40, 40, 0.95);
-  border: 1px solid #666;
+  background-color: rgba(var(--color-bgPrimary), 0.95);
+  border: 1px solid rgb(var(--color-borderPrimary));
   border-radius: 8px;
   padding: 12px;
   z-index: 1000;
@@ -237,12 +268,12 @@
   cursor: default;
 }
 .offscreen-icons-panel-header {
-  color: white;
+  color: rgb(var(--color-textPrimary));
   font-size: 14px;
   font-weight: bold;
   margin-bottom: 8px;
   text-align: center;
-  border-bottom: 1px solid #666;
+  border-bottom: 1px solid rgb(var(--color-borderPrimary));
   padding-bottom: 8px;
   cursor: grab;
   user-select: none;
@@ -259,7 +290,7 @@
   align-items: center;
   padding: 6px;
   margin: 2px 0;
-  background-color: rgba(60, 60, 60, 0.7);
+  background-color: rgb(var(--color-bgSecondary));
   border-radius: 4px;
   cursor: grab;
   border: 1px solid transparent;
@@ -268,8 +299,8 @@
     border-color 0.15s;
 }
 .offscreen-icon-item:hover {
-  background-color: rgba(80, 80, 80, 0.7);
-  border-color: #888;
+  background-color: rgba(var(--color-bgTertiary), 0.7);
+  border-color: rgb(var(--color-borderPrimary));
 }
 .offscreen-icon-image {
   margin-right: 8px;
@@ -280,7 +311,7 @@
   min-width: 0;
 }
 .offscreen-icon-name {
-  color: white;
+  color: rgb(var(--color-textPrimary));
   font-size: 12px;
   font-weight: bold;
   overflow: hidden;
@@ -288,7 +319,7 @@
   white-space: nowrap;
 }
 .offscreen-icon-reason {
-  color: #aaa;
+  color: rgb(var(--color-textSecondary));
   font-size: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -298,8 +329,8 @@
   text-align: center;
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid #666;
-  color: #aaa;
+  border-top: 1px solid rgb(var(--color-borderPrimary));
+  color: rgb(var(--color-textSecondary));
   font-size: 10px;
 }
 
@@ -307,7 +338,7 @@
   margin-left: auto;
   background: transparent;
   border: none;
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   font-weight: bold;
   cursor: pointer;
   font-size: 18px;

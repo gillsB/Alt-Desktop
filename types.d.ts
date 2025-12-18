@@ -259,6 +259,9 @@ interface ThemeColors {
 
   // Highlights
   highlightBox: string;
+  highlightOffset: string;
+  highlightOversized: string;
+  highlightOffsetOversized: string;
   highlightGreen: string;
   highlightYellow: string;
 

@@ -2018,6 +2018,7 @@ const DesktopGrid: React.FC = () => {
             else if (isOversized) variant = "oversized";
 
             const homeBoxClass = `multi-highlight-home-box ${variant}`;
+            const labelBoxClass = `multi-highlight-home-label ${variant}`;
             const iconBoxClass = `multi-highlight-box ${variant}`;
 
             const iconWidth = icon.width || defaultIconSize;
@@ -2050,7 +2051,7 @@ const DesktopGrid: React.FC = () => {
                     />
                     {/* Label */}
                     <div
-                      className="multi-highlight-home-label"
+                      className={labelBoxClass}
                       style={{
                         left: homeLeft + 10,
                         top: homeTop + 10,
