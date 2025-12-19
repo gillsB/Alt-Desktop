@@ -3,13 +3,13 @@
   align-items: center;
   gap: 12px;
   padding: 5px 18px 5px 18px;
-  background: #232323;
-  border-bottom: 1px solid #292929;
+  background: rgb(var(--color-bgPrimary));
+  border-bottom: 1px solid rgb(var(--color-textPrimary));
 }
 
 .desktop-profile-label {
   font-weight: bold;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   font-size: 16px;
   user-select: none;
   min-width: 80px;
@@ -19,19 +19,19 @@
   padding: 8px 10px;
   font-size: 15px;
   border-radius: 4px;
-  background-color: #2c2c2c;
-  color: white;
+  background-color: rgb(var(--color-bgSecondary));
+  color: rgb(var(--color-textPrimary));
   border: none;
   outline: none;
   transition:
     box-shadow 0.2s,
     background 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(var(--color-shadow), 0.08);
 }
 
 .desktop-profile-select:focus {
-  background: #121212;
-  box-shadow: 0 0 0 2px #007bff88;
+  background: rgb(var(--color-bgSecondary));
+  box-shadow: 0 0 0 2px rgb(var(--color-shadow));
 }
 
 .desktop-profile-bottom {
@@ -45,20 +45,20 @@
 .import-icons-header {
   padding-top: 18px;
   padding-bottom: 4px;
-  border-bottom: 1px solid #292929;
+  border-bottom: 1px solid rgb(var(--color-textPrimary));
   margin-bottom: 8px;
 }
 
 .import-icons-header h2 {
   font-size: 18px;
-  color: #fff;
+  color: rgb(var(--color-textPrimary));
   margin: 0;
   font-weight: bold;
 }
 
 .import-icons-subtitle {
   font-size: 14px;
-  color: #bbb;
+  color: rgb(var(--color-textSecondary));
   margin-top: 2px;
   margin-bottom: 2px;
 }
@@ -68,8 +68,8 @@
 }
 
 .import-icons-tab-btn {
-  background: #232323;
-  color: #bbb;
+  background: rgb(var(--color-bgPrimary));
+  color: rgb(var(--color-textPrimary));
   border: none;
   border-radius: 4px 4px 0 0;
   padding: 8px 18px;
@@ -84,15 +84,15 @@
 }
 
 .import-icons-tab-btn.active {
-  background: #292929;
-  color: #fff;
-  border-bottom: 2px solid #007bff;
+  background: rgb(var(--color-bgPrimary));
+  color: rgb(var(--color-textPrimary));
+  border-bottom: 2px solid rgb(var(--color-primary));
 }
 
 .import-icons-tab-content {
-  background: #232323;
+  background: rgb(var(--color-bgPrimary));
   border-radius: 0 0 4px 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(var(--color-shadow), 0.08);
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -101,7 +101,7 @@
 
 .desktop-profile-count {
   font-size: 15px;
-  color: #ccc;
+  color: rgb(var(--color-textSecondary));
   margin-bottom: 0;
 }
 
@@ -122,13 +122,13 @@
 }
 
 .desktop-profile-file {
-  background: #292929;
-  color: #fff;
+  background: rgb(var(--color-bgSecondary));
+  color: rgb(var(--color-textPrimary));
   padding: 8px 12px;
   border-radius: 4px;
   font-size: 13px;
   word-break: break-all;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(var(--color-shadow), 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -149,7 +149,7 @@
 }
 
 .file-path {
-  color: #cecece;
+  color: rgb(var(--color-textSecondary));
   font-size: 1em;
   opacity: 0.8;
 }
@@ -163,10 +163,10 @@
 }
 
 .import-icons-placeholder {
-  color: #888;
+  color: rgb(var(--color-textSecondary));
   font-size: 15px;
   padding: 12px;
-  background: #292929;
+  background: rgb(var(--color-bgSecondary));
   border-radius: 4px;
   margin-top: 8px;
 }
@@ -178,8 +178,8 @@
 }
 
 .desktop-profile-file.imported {
-  background: #262626;
-  color: #888;
+  background: rgb(var(--color-bgSecondary));
+  color: rgb(var(--color-textSecondary));
   opacity: 0.8;
 }
 
@@ -194,7 +194,7 @@
   display: flex;
   align-items: center;
   padding: 4px 2px;
-  color: #cfcfcf;
+  color: rgb(var(--color-textPrimary));
   cursor: pointer;
   user-select: none;
   font-size: 14px;
@@ -202,7 +202,7 @@
 }
 
 .not-imported-header:hover {
-  color: #fff;
+  color: rgb(var(--color-textSecondary));
 }
 
 .not-imported-header .tag-toggle-button {
@@ -229,20 +229,20 @@
 }
 
 .partial-match-path {
-  color: #888;
+  color: rgb(var(--color-textSecondary));
   font-size: 0.9em;
   padding: 2px 6px;
   border-radius: 3px;
 }
 
 .match-highlight {
-  background: rgba(35, 134, 54, 0.2);
-  color: #3fb950;
+  background: rgba(var(--color-success), 0.2);
+  color: rgb(var(--color-success));
 }
 
 .different-highlight {
-  background: rgba(177, 134, 1, 0.2);
-  color: #d29922;
+  background: rgba(var(--color-warning), 0.2);
+  color: rgb(var(--color-warning));
 }
 
 .highlighted-path {
@@ -250,7 +250,7 @@
   font-size: 0.9em;
   display: inline-flex;
   gap: 0;
-  color: #888;
+  color: rgb(var(--color-textSecondary));
 }
 
 .import-icons-other {
