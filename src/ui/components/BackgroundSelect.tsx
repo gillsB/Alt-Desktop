@@ -825,7 +825,7 @@ const BackgroundSelect: React.FC = () => {
               }}
             />
 
-            <button className="filter-button" onClick={handleFilterClick}>
+            <button className="button" onClick={handleFilterClick}>
               Filter Search
             </button>
             <button className="button" onClick={handleAddBackgroundClick}>

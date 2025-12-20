@@ -26,6 +26,7 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     textPrimary: "255, 255, 255", // #ffffff
     textSecondary: "176, 176, 176", // #b0b0b0
     textTertiary: "128, 128, 128", // #808080
+    textButton: "255, 255, 255", // #ffffff
 
     borderPrimary: "41, 41, 41", // #292929
     borderSecondary: "58, 58, 58", // #3a3a3a
@@ -60,6 +61,7 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     textPrimary: "26, 26, 26", // #1a1a1a
     textSecondary: "85, 85, 85", // #555555
     textTertiary: "153, 153, 153", // #999999
+    textButton: "255, 255, 255", // #ffffff
 
     borderPrimary: "208, 208, 208", // #d0d0d0
     borderSecondary: "224, 224, 224", // #e0e0e0

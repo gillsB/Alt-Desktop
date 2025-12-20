@@ -246,6 +246,7 @@ interface ThemeColors {
   textPrimary: string;
   textSecondary: string;
   textTertiary: string;
+  textButton: string;
 
   // Border colors
   borderPrimary: string;

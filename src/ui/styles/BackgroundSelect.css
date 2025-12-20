@@ -254,8 +254,8 @@
 }
 
 .background-paging-bar button {
-  background: rgb(var(--color-primary));
-  color: rgb(var(--color-textPrimary));
+  background: rgb(var(--color-primaryDark));
+  color: rgb(var(--color-textButton));
   border: none;
   border-radius: 6px;
   padding: 6px 8px;
@@ -265,56 +265,30 @@
   transition:
     background 0.15s,
     box-shadow 0.15s;
-  box-shadow: 0 2px 8px rgba(var(--color-shadow), 0.5);
-}
-
-.background-paging-bar button.paging-current {
-  background: rgb(var(--color-primaryLight));
-  color: rgb(var(--color-textPrimary));
-  font-weight: bold;
-  box-shadow: 0 0 8px rgb(var(--color-primary), 0.5);
-}
-
-.background-paging-bar button.paging-nav {
-  background: rgb(var(--color-primaryGray));
-  color: rgb(var(--color-textPrimary));
-  opacity: 1;
-}
-.background-paging-bar button.paging-nav.inactive {
-  background: rgba(var(--color-primary), 0.25);
-  color: rgb(var(--color-textPrimary));
-  cursor: default;
-  box-shadow: none;
-}
-
-.background-paging-bar button {
-  background: rgb(var(--color-primaryGray));
-  box-shadow: 0 2px 12px rgba(var(--color-primary), 0.6);
+  box-shadow: 0 2px 8px rgba(var(--color-shadow), 0.4);
 }
 .background-paging-bar button:hover {
   background: rgb(var(--color-primaryHover));
   box-shadow: 0 2px 12px rgba(var(--color-primary), 0.6);
 }
 
-.filter-button {
-  padding: 3px;
-  margin-left: 5px;
-  font-size: 16px;
+.background-paging-bar button.paging-current {
+  background: rgb(var(--color-primary));
+  color: rgb(var(--color-textButton));
   font-weight: bold;
-  color: rgb(var(--color-textPrimary));
-  background-color: rgb(var(--color-primary));
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-sizing: border-box;
-  user-select: none;
-  align-self: center;
-  height: 30px;
-  min-width: 40px;
+  box-shadow: 0 0 8px rgb(var(--color-primary), 0.5);
 }
-.filter-button:hover {
-  background-color: rgb(var(--color-primaryHover));
+
+.background-paging-bar button.paging-nav {
+  background: rgb(var(--color-primaryGray));
+  color: rgb(var(--color-textButton));
+  opacity: 1;
+}
+.background-paging-bar button.paging-nav.inactive {
+  background: rgba(var(--color-primary), 0.25);
+  color: rgb(var(--color-textButton));
+  cursor: default;
+  box-shadow: none;
 }
 
 .background-details-panel .button-center {
