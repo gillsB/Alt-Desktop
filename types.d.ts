@@ -235,6 +235,8 @@ interface ThemeColors {
   primaryDark: string;
   primaryGray: string;
 
+  header: string;
+
   // Background colors
   bgPrimary: string;
   bgSecondary: string;

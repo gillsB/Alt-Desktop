@@ -3,7 +3,7 @@
   top: 0;
   right: 0;
   height: 2rem;
-  background-color: #181818;
+  background-color: rgb(var(--color-header));
   -webkit-app-region: drag;
   display: flex;
   justify-content: flex-end;
@@ -22,7 +22,7 @@
   top: 0;
   right: 0;
   height: 2rem;
-  background-color: #181818;
+  background-color: rgb(var(--color-header));
   -webkit-app-region: drag;
   display: flex;
   justify-content: flex-end;
@@ -38,7 +38,7 @@
   text-align: right;
   padding: 0;
   box-sizing: border-box;
-  background-color: #2c2c2c;
+  background-color: rgb(var(--color-header));
   -webkit-app-region: drag;
   z-index: 10;
   display: flex;
@@ -49,7 +49,7 @@
 
 .header-title {
   font-size: 1rem;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   margin-left: 0.5rem;
   text-align: left;
   flex-grow: 1;
@@ -79,7 +79,7 @@
 .menu-button {
   background: none;
   border: none;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   font-size: 1rem;
   cursor: pointer;
   padding: 0.5rem 1rem;
@@ -93,11 +93,11 @@
   position: absolute;
   top: 2.5rem;
   left: 0;
-  background: #222;
-  color: white;
+  background: rgb(var(--color-bgSecondary));
+  color: rgb(var(--color-textPrimary));
   display: flex;
   flex-direction: column;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 5px rgba(var(--color-shadow), 0.2);
   border-radius: 0;
   overflow: hidden;
   z-index: 1000;
@@ -106,14 +106,14 @@
 .dropdown-menu button {
   background: none;
   border: none;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   padding: 0.5rem 1rem;
   text-align: left;
   width: 85%;
   cursor: pointer;
 }
 .dropdown-menu button:hover {
-  background: #333;
+  background: rgb(var(--color-bgTertiary));
 }
 .checkbox-container {
   display: flex;
@@ -126,7 +126,7 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   cursor: pointer;
   flex-grow: 1;
 }
@@ -143,7 +143,7 @@
 .window-controls button {
   background: none;
   border: none;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   width: 2rem;
   height: 2rem;
   cursor: pointer;
@@ -156,8 +156,8 @@
   user-select: none;
 }
 #close:hover {
-  background-color: red;
-  color: white;
+  background-color: rgb(var(--color-error));
+  color: rgb(var(--color-textPrimary));
 }
 #minimize:hover,
 #maximize:hover {
@@ -177,7 +177,7 @@
 .maximize-icon {
   width: 11px;
   height: 11px;
-  border: 1px solid white;
+  border: 1px solid rgb(var(--color-textPrimary));
   box-sizing: border-box;
   background: none;
   position: absolute;

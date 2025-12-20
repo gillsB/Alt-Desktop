@@ -10,12 +10,15 @@ type BinaryTheme = "dark" | "light";
 const logger = createLoggerForFile("themeManager.ts");
 
 const themes: Record<BinaryTheme, ThemeColors> = {
+  // Any edits in these require hard restart of program (vite doesn't reload .ts)
   dark: {
     primary: "0, 123, 255", // #007bff
     primaryLight: "51, 153, 255", // #3399ff
     primaryHover: "0, 86, 179", // #0056b3
     primaryDark: "0, 75, 160", // #004ba0
     primaryGray: "91, 120, 153", // #5b7899
+
+    header: "26, 26, 26", // #1a1a1a"
 
     bgPrimary: "35, 35, 35", // #232323
     bgSecondary: "44, 44, 44", // #2c2c2c
@@ -51,6 +54,8 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     primaryHover: "0, 86, 179", // #0056b3
     primaryDark: "0, 75, 160", // #004ba0
     primaryGray: "91, 120, 153", // #5b7899
+
+    header: "238, 238, 238", // #eeeeee
 
     bgPrimary: "245, 245, 245", // #f5f5f5
     bgSecondary: "255, 255, 255", // #ffffff
