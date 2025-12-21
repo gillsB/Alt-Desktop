@@ -34,7 +34,7 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     borderPrimary: "41, 41, 41", // #292929
     borderSecondary: "58, 58, 58", // #3a3a3a
 
-    success: "40, 167, 69", // #28a745
+    success: "54, 209, 90", // #36d15a
     warning: "255, 193, 7", // #ffc107
     error: "220, 53, 69", // #dc3545
     info: "23, 162, 184", // #17a2b8
@@ -71,7 +71,7 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     borderPrimary: "208, 208, 208", // #d0d0d0
     borderSecondary: "224, 224, 224", // #e0e0e0
 
-    success: "40, 167, 69", // #28a745
+    success: "54, 209, 90", // #36d15a
     warning: "255, 152, 0", // #ff9800
     error: "220, 53, 69", // #dc3545
     info: "23, 162, 184", // #17a2b8
