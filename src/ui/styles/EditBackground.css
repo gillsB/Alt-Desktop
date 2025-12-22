@@ -16,13 +16,13 @@
 
 .tag-selected {
   background: rgb(var(--color-primary));
-  color: rgb(var(--color-textPrimary));
+  color: rgb(var(--color-textButton));
   font-weight: 600;
 }
 
 .tag:hover:not(.tag-selected) {
   background: rgb(var(--color-primaryDark));
-  color: rgb(var(--color-textPrimary));
+  color: rgb(var(--color-textButton));
 }
 
 .tag-row {
@@ -74,7 +74,7 @@
 
 .tag-checkbox-row.selected {
   background: rgb(var(--color-primary));
-  color: rgb(var(--color-textPrimary));
+  color: rgb(var(--color-textButton));
   border: none;
 }
 
@@ -85,7 +85,7 @@
 
 .tag-checkbox-row:hover:not(.selected) {
   background: rgb(var(--color-primaryDark));
-  color: rgb(var(--color-textPrimary));
+  color: rgb(var(--color-textButton));
 }
 
 .tag-checkbox {
@@ -93,7 +93,6 @@
 }
 
 .tag-name {
-  color: rgb(var(--color-textPrimary));
   width: unset;
   font-size: 0.95rem;
   white-space: nowrap;
