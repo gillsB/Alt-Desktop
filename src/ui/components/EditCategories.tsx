@@ -385,13 +385,20 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                 {/* Confirm dialog */}
                 {pendingDeleteIndex === index && (
                   <div className="category-delete-confirm">
-                    <span>Delete &quot;{cat || <em>(empty)</em>}&quot;?</span>
-                    <button className="button" onClick={handleConfirmDelete}>
-                      Delete
-                    </button>
-                    <button className="button" onClick={handleCancelDelete}>
-                      Cancel
-                    </button>
+                    <span
+                      className="category-delete-name"
+                      title={cat || "(empty)"}
+                    >
+                      {cat || <em>(empty)</em>}
+                    </span>
+                    <div className="category-delete-actions">
+                      <button className="button" onClick={handleConfirmDelete}>
+                        Delete
+                      </button>
+                      <button className="button" onClick={handleCancelDelete}>
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 )}
               </li>
