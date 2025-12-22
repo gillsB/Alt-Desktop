@@ -473,6 +473,8 @@
 }
 
 .edit-background-panel input[type="range"].red-slider {
+  pointer-events: none;
+  -webkit-user-drag: false;
   background: linear-gradient(
     to right,
     rgb(var(--color-error)) 0%,
