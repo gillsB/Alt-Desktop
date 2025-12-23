@@ -19,7 +19,15 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditBackground.tsx");
 
-const EditBackground: React.FC = () => {
+interface EditBackgroundProps {
+  initialSummary?: Partial<BackgroundSummary> | null;
+  onClose?: (saved?: boolean, updatedId?: string) => void;
+}
+
+const EditBackground: React.FC<EditBackgroundProps> = ({
+  initialSummary: propInitialSummary = null,
+  onClose,
+}) => {
   const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g; // Sanitize folder names
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -39,19 +47,28 @@ const EditBackground: React.FC = () => {
     !Array.isArray(parsedSummary) &&
     Object.keys(parsedSummary).length > 0;
 
-  const initialSummary: BackgroundSummary = isNonEmptyObject
+  const fromLocation: Partial<BackgroundSummary> | null = isNonEmptyObject
     ? (parsedSummary as BackgroundSummary)
-    : {
-        id: "",
-        name: "",
-        description: "",
-        iconPath: "",
-        bgFile: "",
-        tags: [],
-        localProfile: "default",
-        localVolume: 0.5,
-        localTags: [],
-      };
+    : null;
+
+  const defaultSummary: BackgroundSummary = {
+    id: "",
+    name: "",
+    description: "",
+    iconPath: "",
+    bgFile: "",
+    tags: [],
+    localProfile: "default",
+    localVolume: 0.5,
+    localTags: [],
+  };
+
+  // Merge partial summary with defaults for proper BackgroundSummary type.
+  const initialSummary: BackgroundSummary = {
+    ...defaultSummary,
+    ...(fromLocation ?? {}),
+    ...(propInitialSummary ?? {}),
+  } as BackgroundSummary;
 
   const originalSummary = useRef<BackgroundSummary>(initialSummary);
 
@@ -548,10 +565,16 @@ const EditBackground: React.FC = () => {
         return;
       }
     }
-    close();
+    if (onClose) {
+      onClose(false);
+    } else {
+      close();
+    }
   };
 
   const close = async () => {
+    // Default behavior: reload + open BackgroundSelect window. If embedded via
+    // `onClose` prop is provided, that handler will manage closing.
     window.electron.reloadBackground();
     window.electron.openBackgroundSelect();
   };
@@ -781,7 +804,11 @@ const EditBackground: React.FC = () => {
           background: updatedSummary.id,
         });
       }
-      close();
+      if (onClose) {
+        onClose(true, updatedSummary.id);
+      } else {
+        close();
+      }
     } else {
       logger.error("Failed to save background.");
     }

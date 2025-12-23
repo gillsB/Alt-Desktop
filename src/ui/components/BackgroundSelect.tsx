@@ -7,6 +7,7 @@ import { createLogger } from "../util/uiLogger";
 import { fileNameNoExt, parseAdvancedSearch } from "../util/uiUtil";
 import BackgroundFilterPanel from "./BackgroundFilterPanel";
 import ClearableInput from "./ClearableInput";
+import EditBackground from "./EditBackground";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -81,6 +82,8 @@ const BackgroundSelect: React.FC = () => {
   } | null>(null);
 
   const [isLoadingPage, setIsLoadingPage] = useState(false);
+  const [editingSummary, setEditingSummary] =
+    useState<BackgroundSummary | null>(null);
 
   useEffect(() => {
     const fetchRendererStates = async () => {
@@ -439,15 +442,34 @@ const BackgroundSelect: React.FC = () => {
 
   const handleEditBackground = async (backgroundId?: string) => {
     if (!backgroundId) {
-      await window.electron.openEditBackground({} as BackgroundSummary);
+      setEditingSummary({
+        id: "",
+        name: "",
+        description: "",
+        iconPath: "",
+        bgFile: "",
+        tags: [],
+        localProfile: "default",
+        localVolume: 0.5,
+        localTags: [],
+      });
       return;
     }
     const bg = summaries.find((bg) => bg.id === backgroundId);
     logger.info("background = ", bg);
     if (bg) {
-      await window.electron.openEditBackground(bg);
+      setEditingSummary(bg);
     } else {
       logger.warn(`Background with id ${backgroundId} not found in summaries`);
+      // fallback fetch it by id
+      const response = await window.electron.getBackgroundSummaries({
+        offset: 0,
+        limit: 1,
+        search: "id:" + backgroundId,
+        includeTags: [],
+        excludeTags: [],
+      });
+      if (response.results.length > 0) setEditingSummary(response.results[0]);
     }
   };
 
@@ -596,10 +618,16 @@ const BackgroundSelect: React.FC = () => {
     logger.info("Dropped file path:", filePath);
     logger.info(await window.electron.getFileType(filePath));
 
-    await window.electron.openEditBackground({
+    setEditingSummary({
       id: "",
       name: fileNameNoExt(filePath),
       bgFile: filePath,
+      description: "",
+      iconPath: "",
+      tags: [],
+      localProfile: "default",
+      localVolume: 0.5,
+      localTags: [],
     });
   };
 
@@ -617,7 +645,17 @@ const BackgroundSelect: React.FC = () => {
   };
 
   const handleAddBackgroundClick = () => {
-    window.electron.openEditBackground({} as BackgroundSummary);
+    setEditingSummary({
+      id: "",
+      name: "",
+      description: "",
+      iconPath: "",
+      bgFile: "",
+      tags: [],
+      localProfile: "default",
+      localVolume: 0.5,
+      localTags: [],
+    });
   };
 
   const handleJumpToClick = async () => {
@@ -754,6 +792,57 @@ const BackgroundSelect: React.FC = () => {
     setContextMenu(null);
     window.electron.saveSettingsData({ bgSelectIconSize: size });
   };
+
+  // Handler for closing the embedded EditBackground component
+  const handleEditClose = (saved?: boolean, updatedId?: string) => {
+    setEditingSummary(null);
+    if (saved) {
+      (async () => {
+        // Re-index and refresh list
+        await window.electron.indexBackgrounds();
+        // Try to fetch updated summary for the saved id and update UI
+        if (updatedId) {
+          try {
+            const response = await window.electron.getBackgroundSummaries({
+              offset: 0,
+              limit: 1,
+              search: "id:" + updatedId,
+              includeTags: [],
+              excludeTags: [],
+            });
+            if (response.results && response.results.length > 0) {
+              const updated = response.results[0];
+              setSelectedBg(updated);
+              setSummaries((prev) =>
+                prev.map((s) => (s.id === updated.id ? updated : s))
+              );
+              // Update preview to reflect new settings
+              await window.electron.previewBackgroundUpdate({
+                id: updated.id,
+                profile: updated.localProfile ?? "default",
+              });
+            }
+          } catch (err) {
+            logger.error("Failed to fetch updated background:", err);
+          }
+        }
+
+        setPage(0);
+        fetchPage();
+      })();
+    }
+  };
+
+  if (editingSummary) {
+    return (
+      <div className="background-select-root">
+        <EditBackground
+          initialSummary={editingSummary}
+          onClose={handleEditClose}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
