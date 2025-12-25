@@ -802,14 +802,22 @@ const BackgroundSelect: React.FC = () => {
   };
 
   // Handler for closing the embedded EditBackground component
-  const handleEditClose = async (saved?: boolean, updatedId?: string) => {
+  const handleEditClose = async (
+    saved?: boolean,
+    updatedId?: string,
+    applied?: boolean
+  ) => {
     setEditingSummary(null);
 
     try {
-      if (saved) {
+      if (saved && applied) {
         // Re-index and refresh list
         await window.electron.indexBackgrounds();
-        // Try to fetch updated summary for the saved id and update UI
+        let updated: BackgroundSummary | null = null;
+        /* This reloads the edited background summary on save
+         even if applied is not set, we still update it as if the user selects the background
+         it would not show updated fields unless we change pages then return. 
+         */
         if (updatedId) {
           try {
             const response = await window.electron.getBackgroundSummaries({
@@ -820,31 +828,39 @@ const BackgroundSelect: React.FC = () => {
               excludeTags: [],
             });
             if (response.results && response.results.length > 0) {
-              const updated = response.results[0];
-              setSelectedBg(updated);
+              updated = response.results[0];
               setSummaries((prev) =>
-                prev.map((s) => (s.id === updated.id ? updated : s))
+                prev.map((s) => (s.id === updated!.id ? updated! : s))
               );
-              // Update preview to reflect new settings
-              await window.electron.previewBackgroundUpdate({
-                id: updated.id,
-                profile: updated.localProfile ?? "default",
-              });
             }
           } catch (err) {
             logger.error("Failed to fetch updated background:", err);
           }
         }
 
+        // If the save & apply return from EditBackground, fully select it
+        if (applied && updated) {
+          setSelectedIds([updated.id]);
+          setSelectedBg(updated);
+          await window.electron.previewBackgroundUpdate({
+            id: updated.id,
+            profile: updated.localProfile ?? "default",
+          });
+        } else {
+          // Saved but not applied
+          await window.electron.reloadBackground();
+        }
+
         setPage(0);
         await fetchPage();
       } else {
+        // Closed without saving -> restore previous preview
         await window.electron.reloadBackground();
       }
     } catch (err) {
       logger.error("Error finalizing edit close:", err);
     } finally {
-      // Restore selection/scroll using scrollTarget (prefer updatedId if saved)
+      // Restore page/scroll location using scrollTarget (prefer updatedId if saved)
       const targetId = saved && updatedId ? updatedId : editingBgId.current;
       editingBgId.current = null;
       if (targetId) {

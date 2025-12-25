@@ -21,7 +21,7 @@ const logger = createLogger("EditBackground.tsx");
 
 interface EditBackgroundProps {
   initialSummary?: Partial<BackgroundSummary> | null;
-  onClose?: (saved?: boolean, updatedId?: string) => void;
+  onClose?: (saved?: boolean, updatedId?: string, applied?: boolean) => void;
 }
 
 const EditBackground: React.FC<EditBackgroundProps> = ({
@@ -805,7 +805,7 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
         });
       }
       if (onClose) {
-        onClose(true, updatedSummary.id);
+        onClose(true, updatedSummary.id, applyBg);
       } else {
         close();
       }
