@@ -59,6 +59,7 @@ const BackgroundSelect: React.FC = () => {
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
+  const editingBgId = useRef<string | null>(null);
 
   // Volume Slider references
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -79,6 +80,7 @@ const BackgroundSelect: React.FC = () => {
   const [scrollTarget, setScrollTarget] = useState<{
     backgroundId: string;
     shouldScroll: boolean;
+    setSummary?: boolean;
   } | null>(null);
 
   const [isLoadingPage, setIsLoadingPage] = useState(false);
@@ -298,8 +300,11 @@ const BackgroundSelect: React.FC = () => {
       (bg) => bg.id === scrollTarget.backgroundId
     );
     if (targetSummary) {
-      setSelectedIds([targetSummary.id]);
-      setSelectedBg(targetSummary);
+      const shouldSetSummary = scrollTarget.setSummary !== false;
+      if (shouldSetSummary) {
+        setSelectedIds([targetSummary.id]);
+        setSelectedBg(targetSummary);
+      }
 
       if (scrollTarget.shouldScroll) {
         // Use requestAnimationFrame to ensure DOM is updated
@@ -441,6 +446,9 @@ const BackgroundSelect: React.FC = () => {
   };
 
   const handleEditBackground = async (backgroundId?: string) => {
+    // remember right clicked background for restoring page/scroll location after edit
+    editingBgId.current = backgroundId ?? selectedBg?.id ?? null;
+
     if (!backgroundId) {
       setEditingSummary({
         id: "",
@@ -794,10 +802,11 @@ const BackgroundSelect: React.FC = () => {
   };
 
   // Handler for closing the embedded EditBackground component
-  const handleEditClose = (saved?: boolean, updatedId?: string) => {
+  const handleEditClose = async (saved?: boolean, updatedId?: string) => {
     setEditingSummary(null);
-    if (saved) {
-      (async () => {
+
+    try {
+      if (saved) {
         // Re-index and refresh list
         await window.electron.indexBackgrounds();
         // Try to fetch updated summary for the saved id and update UI
@@ -828,8 +837,38 @@ const BackgroundSelect: React.FC = () => {
         }
 
         setPage(0);
-        fetchPage();
-      })();
+        await fetchPage();
+      } else {
+        await window.electron.reloadBackground();
+      }
+    } catch (err) {
+      logger.error("Error finalizing edit close:", err);
+    } finally {
+      // Restore selection/scroll using scrollTarget (prefer updatedId if saved)
+      const targetId = saved && updatedId ? updatedId : editingBgId.current;
+      editingBgId.current = null;
+      if (targetId) {
+        try {
+          const { page: bgPage } = await getBackgroundPage(targetId);
+          if (bgPage !== -1) {
+            setScrollTarget({
+              backgroundId: targetId,
+              shouldScroll: true,
+              setSummary: false,
+            });
+            setPage(bgPage);
+          } else {
+            logger.warn("failed to find background page for scroll restore");
+            setScrollTarget({
+              backgroundId: targetId,
+              shouldScroll: true,
+              setSummary: false,
+            });
+          }
+        } catch (e) {
+          logger.error("Failed to locate background for scroll restore:", e);
+        }
+      }
     }
   };
 
