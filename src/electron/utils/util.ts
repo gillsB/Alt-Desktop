@@ -846,25 +846,45 @@ export async function saveBgJsonFile(
 
     // Merge fields: use provided summary fields, otherwise fall back to oldBg, then default
     const publicData = {
-      name: summary.name ?? oldBg.public?.name ?? "",
-      bgFile: summary.bgFile ?? oldBg.public?.bgFile ?? "",
-      icon: summary.iconPath
-        ? path.basename(summary.iconPath)
-        : (oldBg.public?.icon ?? ""),
-      description: summary.description ?? oldBg.public?.description ?? "",
-      tags: summary.tags ?? oldBg.public?.tags ?? [],
+      name:
+        summary.name !== undefined ? summary.name : (oldBg.public?.name ?? ""),
+      bgFile:
+        summary.bgFile !== undefined
+          ? summary.bgFile
+          : (oldBg.public?.bgFile ?? ""),
+      icon:
+        summary.iconPath !== undefined
+          ? summary.iconPath
+            ? path.basename(summary.iconPath)
+            : ""
+          : (oldBg.public?.icon ?? ""),
+      description:
+        summary.description !== undefined
+          ? summary.description
+          : (oldBg.public?.description ?? ""),
+      tags:
+        summary.tags !== undefined ? summary.tags : (oldBg.public?.tags ?? []),
     };
 
     // Handle local.indexed logic
     const indexed: number | undefined =
-      summary.localIndexed ??
-      oldBg.local?.indexed ??
-      Math.floor(Date.now() / 1000);
+      summary.localIndexed !== undefined
+        ? summary.localIndexed
+        : (oldBg.local?.indexed ?? Math.floor(Date.now() / 1000));
 
     const localData = {
-      profile: summary.localProfile ?? oldBg.local?.profile ?? "default",
-      volume: summary.localVolume ?? oldBg.local?.volume ?? 0.5,
-      tags: summary.localTags ?? oldBg.local?.tags ?? [],
+      profile:
+        summary.localProfile !== undefined
+          ? summary.localProfile
+          : (oldBg.local?.profile ?? "default"),
+      volume:
+        summary.localVolume !== undefined
+          ? summary.localVolume
+          : (oldBg.local?.volume ?? 0.5),
+      tags:
+        summary.localTags !== undefined
+          ? summary.localTags
+          : (oldBg.local?.tags ?? []),
       indexed,
     };
 
