@@ -147,9 +147,23 @@ const SafeImageComponent: React.FC<{
 
   useEffect(() => {
     let cancelled = false;
-    if (profile === undefined) {
+
+    const needsProfile = () => {
+      if (profile !== undefined) return false;
+      if (!imagePath) return false;
+      if (isSpecialCase(imagePath)) return false;
+      if (imagePath.startsWith("appdata-file://")) return false;
+      if (imagePath.startsWith("src/assets/")) return false;
+      if (/^[a-zA-Z]:[\\/]/.test(imagePath)) return false;
+      return true;
+    };
+
+    if (needsProfile()) {
+      // leaving this here for debugging, ideally this should never call
+      logger.info("called with profile:", profile);
+      logger.info("called with imagePath:", imagePath);
       logger.warn(
-        "SafeImageComponent Profile is undefined, fetching from renderer state"
+        "SafeImageComponent Profile is undefined and required, fetching from renderer state"
       );
       window.electron.getRendererStates().then((states: RendererStates) => {
         if (!cancelled) setResolvedProfile(states.profile || "default");
@@ -157,10 +171,11 @@ const SafeImageComponent: React.FC<{
     } else {
       setResolvedProfile(profile);
     }
+
     return () => {
       cancelled = true;
     };
-  }, [profile]);
+  }, [profile, imagePath]);
 
   useEffect(() => {
     setImageError(false);
