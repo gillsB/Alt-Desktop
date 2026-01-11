@@ -13,6 +13,7 @@
   object-fit: contain;
   object-position: bottom;
   display: block;
+  -webkit-user-drag: none;
 }
 
 .desktop-icon-image {

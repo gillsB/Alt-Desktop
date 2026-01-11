@@ -589,7 +589,22 @@ const BackgroundSelect: React.FC = () => {
     setContextMenu(null);
   };
 
+  const isExternalFileDrag = (event: React.DragEvent) => {
+    try {
+      const types = event.dataTransfer?.types;
+      if (!types) return false;
+      const t = Array.from(types);
+      if (t.includes("Files")) return true;
+      if (event.dataTransfer?.files && event.dataTransfer.files.length > 0)
+        return true;
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isExternalFileDrag(event)) return;
     event.preventDefault();
     event.stopPropagation();
     dragCounter.current--;
@@ -599,11 +614,13 @@ const BackgroundSelect: React.FC = () => {
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isExternalFileDrag(event)) return;
     event.preventDefault();
     event.stopPropagation();
   };
 
   const handleFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isExternalFileDrag(event)) return;
     event.preventDefault();
     event.stopPropagation();
     dragCounter.current = 0;
@@ -640,6 +657,7 @@ const BackgroundSelect: React.FC = () => {
   };
 
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!isExternalFileDrag(event)) return;
     event.preventDefault();
     event.stopPropagation();
     dragCounter.current++;
