@@ -1230,12 +1230,14 @@ const BackgroundSelect: React.FC = () => {
                     </div>
                   </div>
                 )}
-                <div className="details-row">
-                  <label>Description</label>
-                  <div className="details-value">
-                    {selectedBg.description || <em>No description</em>}
+                {selectedBg.description && (
+                  <div className="details-row">
+                    <label>Description</label>
+                    <div className="details-value">
+                      {selectedBg.description}
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="details-row">
                   <label>Tags</label>
                   <div className="details-value">
