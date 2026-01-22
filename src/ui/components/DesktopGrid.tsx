@@ -2050,17 +2050,20 @@ const DesktopGrid: React.FC = () => {
                       }
                     />
                     {/* Label */}
-                    <div
-                      className={labelBoxClass}
-                      style={{
-                        left: homeLeft + 10,
-                        top: homeTop + 10,
-                        maxWidth: iconBox - 20,
-                        maxHeight: iconBox - 20,
-                      }}
-                    >
-                      {icon.name}
-                    </div>
+                    {(variant === "offset" ||
+                      variant === "offset-oversized") && (
+                      <div
+                        className={labelBoxClass}
+                        style={{
+                          left: homeLeft + 10,
+                          top: homeTop + 10,
+                          maxWidth: iconBox - 20,
+                          maxHeight: iconBox - 20,
+                        }}
+                      >
+                        {icon.name}
+                      </div>
+                    )}
                     {/* Highlight the actual icon position */}
                     <div
                       className={iconBoxClass}
