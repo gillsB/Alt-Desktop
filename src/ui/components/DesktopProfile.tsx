@@ -160,6 +160,34 @@ const DesktopProfile: React.FC = () => {
     setProfile(newProfile);
     window.electron.setRendererStates({ profile: newProfile });
 
+    if (activeTab === "other") {
+      let updatedCompareToProfile = compareToProfile;
+      if (!compareToProfile || compareToProfile === newProfile) {
+        updatedCompareToProfile = profiles.find((p) => p !== newProfile) || "";
+        setCompareToProfile(updatedCompareToProfile);
+      }
+      setProfileCompare({
+        filesToImport: [],
+        alreadyImported: [],
+        modified: [],
+      });
+      if (updatedCompareToProfile) {
+        try {
+          const result = await window.electron.compareProfiles(
+            newProfile,
+            updatedCompareToProfile
+          );
+          setProfileCompare({
+            filesToImport: result.filesToImport || [],
+            alreadyImported: result.alreadyImported || [],
+            modified: result.modified || [],
+          });
+        } catch (error) {
+          logger.error("Error comparing profiles:", error);
+        }
+      }
+    }
+
     // Save the current background with the new profile
     try {
       // Get the current background ID from settings
@@ -308,13 +336,6 @@ const DesktopProfile: React.FC = () => {
     // Append ... if iconPath is a substring of filePath
     if (!diff) {
       const identical = ipLower === fpLower;
-      logger.info("renderHighlightedPath - no diff", {
-        iconPath: ip,
-        filePath,
-        cut,
-        common,
-        identical,
-      });
 
       return (
         <span className="highlighted-path-inline" title={ip}>
