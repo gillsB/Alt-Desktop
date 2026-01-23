@@ -361,7 +361,14 @@ const DesktopProfile: React.FC = () => {
 
     setCompareToProfile(selectedProfile);
 
-    if (selectedProfile && profile) {
+    if (
+      selectedProfile &&
+      profile &&
+      (selectedProfile !== compareToProfile ||
+        (profileCompare.filesToImport.length === 0 &&
+          profileCompare.alreadyImported.length === 0 &&
+          profileCompare.modified.length === 0))
+    ) {
       try {
         const result = await window.electron.compareProfiles(
           profile,
