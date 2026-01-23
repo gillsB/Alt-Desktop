@@ -274,17 +274,77 @@
   margin-bottom: 8px;
 }
 
+.modified-icon-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  width: 200px;
+  max-height: 120px;
+  overflow: hidden;
+  padding: 8px;
+  background: rgb(var(--color-bgSecondary));
+  border-radius: 4px;
+}
+
 .modified-differences {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex: 1;
 }
 
 .difference-tag {
-  display: inline-block;
-  padding: 4px 10px;
+  background: rgba(var(--color-warning), 0.9);
+  color: black;
+  padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.85em;
-  font-weight: 500;
+  font-size: 10px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+
+.difference-tag:hover {
+  background: rgba(var(--color-highlightYellow), 1);
+  transform: scale(1.05);
+}
+
+.small-icon-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+}
+
+.small-icon-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60px;
+  height: 80px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.small-icon-box:hover {
+  transform: scale(1.05);
+}
+
+.small-icon-name {
+  font-size: 10px;
+  color: white;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  margin-top: 4px;
 }

@@ -44,7 +44,7 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     highlightOversized: "190, 137, 0", // #be8900
     highlightOffsetOversized: "158, 23, 13", // #9e170d
     highlightGreen: "76, 175, 80", // #4caf50
-    highlightYellow: "210, 153, 34", // #d29922
+    highlightYellow: "255, 255, 0", // #ffff00
 
     shadow: "0, 0, 0", // #000000
   },
