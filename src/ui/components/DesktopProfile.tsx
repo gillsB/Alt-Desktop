@@ -794,17 +794,23 @@ const DesktopProfile: React.FC = () => {
                 <div className="desktop-profile-list">
                   {profileCompare.filesToImport.length > 0 && (
                     <div className="compare-section">
-                      <div className="not-imported-header">
+                      <div
+                        className="not-imported-header"
+                        onClick={() =>
+                          setCompareImportCollapsed(!compareImportCollapsed)
+                        }
+                      >
                         <button
                           className="tag-toggle-button"
-                          onClick={() =>
-                            setCompareImportCollapsed(!compareImportCollapsed)
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCompareImportCollapsed(!compareImportCollapsed);
+                          }}
                         >
                           {compareImportCollapsed ? "▸" : "▾"}
                         </button>
                         <span>
-                          To Import ({profileCompare.filesToImport.length})
+                          Not Imported ({profileCompare.filesToImport.length})
                         </span>
                       </div>
                       {!compareImportCollapsed && (
@@ -821,7 +827,10 @@ const DesktopProfile: React.FC = () => {
                   {/* Modified Icons */}
                   {profileCompare.modified.length > 0 && (
                     <div className="compare-section">
-                      <div className="not-imported-header">
+                      <div
+                        className="not-imported-header"
+                        onClick={() => setModifiedCollapsed(!modifiedCollapsed)}
+                      >
                         <button
                           className="tag-toggle-button"
                           onClick={() =>
@@ -862,7 +871,14 @@ const DesktopProfile: React.FC = () => {
                   {/* Already Imported Icons */}
                   {profileCompare.alreadyImported.length > 0 && (
                     <div className="compare-section">
-                      <div className="not-imported-header">
+                      <div
+                        className="not-imported-header"
+                        onClick={() =>
+                          setCompareAlreadyImportedCollapsed(
+                            !compareAlreadyImportedCollapsed
+                          )
+                        }
+                      >
                         <button
                           className="tag-toggle-button"
                           onClick={() =>
