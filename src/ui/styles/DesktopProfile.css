@@ -324,12 +324,16 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
-  transition: transform 0.2s;
+  position: relative;
+}
+
+.small-icon-box:hover {
+  background: rgb(var(--color-bgTertiary));
 }
 
 .small-icon-name {
   font-size: 10px;
-  color: white;
+  color: rgb(var(--color-textPrimary));
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -337,4 +341,34 @@
   max-width: 100%;
   margin-top: 4px;
   user-select: none;
+}
+
+.import-hover-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    background-color 0.3s ease;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  color: rgb(var(--color-textButton));
+  background-color: rgb(var(--color-primary));
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 10;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.small-icon-box:hover .import-hover-button {
+  opacity: 1;
+}
+
+.import-hover-button:hover {
+  background-color: rgb(var(--color-primaryHover));
 }

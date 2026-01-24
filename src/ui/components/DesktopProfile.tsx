@@ -439,12 +439,23 @@ const DesktopProfile: React.FC = () => {
           className="small-icon-name"
           title={icon.name}
           style={{
-            color: icon.fontColor || "white",
+            color: icon.fontColor,
             fontSize: icon.fontSize || 12,
           }}
         >
           {icon.name}
         </div>
+        {section === "notImported" && (
+          <button
+            className="import-hover-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              logger.info(`${icon.name} import clicked`);
+            }}
+          >
+            Import
+          </button>
+        )}
       </div>
     );
   };
