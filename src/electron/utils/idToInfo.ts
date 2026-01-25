@@ -1,5 +1,4 @@
 import fs from "fs";
-import mime from "mime-types";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
 import { getSetting } from "../settings.js";
@@ -7,6 +6,7 @@ import {
   getBackgroundFilePath,
   getBasePath,
   getExternalPath,
+  getMimeType,
   resolveShortcut,
 } from "./util.js";
 
@@ -93,7 +93,7 @@ export const idToBackgroundFileType = async (
         logger.warn(`No valid path found for background id: ${id}`);
         return "image";
       }
-      const fileType = mime.lookup(truePath) || "";
+      const fileType = getMimeType(truePath) || "";
       if (fileType.startsWith("video")) {
         return "video";
       }

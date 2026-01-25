@@ -1948,7 +1948,7 @@ export async function importDesktopFileAsIcon(
     }
 
     let image = "";
-    let mimeType = mime.lookup(file.path);
+    let mimeType = getMimeType(file.path);
 
     if (!mimeType) {
       logger.warn(`Could not determine MIME type for file: ${file.path}`);
@@ -2357,4 +2357,13 @@ function standardizeIconName(name: string): string {
     return name.substring(0, lastDotIndex);
   }
   return name;
+}
+
+// Manual addition of .url MIME type otherwise it returns ""
+export function getMimeType(filePath: string): string | false {
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext === ".url") {
+    return "application/x-url";
+  }
+  return mime.lookup(filePath);
 }

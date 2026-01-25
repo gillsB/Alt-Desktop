@@ -1,8 +1,8 @@
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
-import mime from "mime-types";
 import sharp from "sharp";
 import { createLoggerForFile } from "../logging.js";
+import { getMimeType } from "./util.js";
 
 const logger = createLoggerForFile("bgPathToInfo.ts");
 
@@ -63,7 +63,7 @@ export const bgPathToResolution = async (
   path: string
 ): Promise<[number | null, number | null] | null> => {
   try {
-    const mimeType = mime.lookup(path);
+    const mimeType = getMimeType(path);
 
     if (!mimeType) {
       logger.warn(`Could not determine MIME type for file: ${path}`);

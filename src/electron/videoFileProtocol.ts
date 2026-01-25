@@ -1,9 +1,9 @@
 import { protocol } from "electron";
 import fs from "fs";
-import mime from "mime-types";
 import path from "path";
 import { URL } from "url";
 import { createVideoLoggerForFile } from "./logging.js";
+import { getMimeType } from "./utils/util.js";
 
 const logger = createVideoLoggerForFile("videoFileProtocol.ts");
 
@@ -132,7 +132,7 @@ export function registerVideoFileProtocol(
       const fileSize = stat.size;
 
       // Get content type based on file extension
-      let contentType = mime.lookup(ext) || "video/mp4";
+      let contentType = getMimeType(ext) || "video/mp4";
 
       // Ensure proper content type for common video formats
       if (ext === ".mp4" || ext === ".m4v") contentType = "video/mp4";

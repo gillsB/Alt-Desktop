@@ -1,11 +1,10 @@
 import { protocol } from "electron";
 import fs from "fs";
-import mime from "mime-types";
 import path from "path";
 import { URL } from "url";
 import { createLoggerForFile } from "./logging.js";
 import { getAssetPath } from "./pathResolver.js";
-import { getAppDataPath, resolveShortcut } from "./utils/util.js";
+import { getAppDataPath, getMimeType, resolveShortcut } from "./utils/util.js";
 
 const logger = createLoggerForFile("safeFileProtocol.ts");
 
@@ -63,7 +62,7 @@ export function registerSafeFileProtocol(
       return new Response(new Uint8Array(fileContent), {
         status: 200,
         headers: {
-          "Content-Type": mime.lookup(fullPath) || "application/octet-stream",
+          "Content-Type": getMimeType(fullPath) || "application/octet-stream",
         },
       });
     } catch (error) {
@@ -109,7 +108,7 @@ function fileNotExist(fullPath: string, reason?: string) {
   }
 
   // Check if the requested file is an image based on the MIME type or fallback to unknown.svg
-  const mimeType = mime.lookup(fullPath);
+  const mimeType = getMimeType(fullPath);
   if (!mimeType || mimeType.startsWith("image/")) {
     return getUnknownImageResponse();
   } else {
@@ -130,7 +129,7 @@ export function getUnknownImageResponse(): Response {
       status: 200,
       headers: {
         "Content-Type":
-          mime.lookup(fallbackImagePath) || "application/octet-stream",
+          getMimeType(fallbackImagePath) || "application/octet-stream",
       },
     });
   } catch (error) {

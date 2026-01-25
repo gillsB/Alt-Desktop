@@ -3,7 +3,6 @@ import { BrowserWindow, dialog, screen, shell } from "electron";
 import ffprobeStatic from "ffprobe-static";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
-import mime from "mime-types";
 import path from "path";
 import { baseLogger, createLoggerForFile, videoLogger } from "./logging.js";
 import { getScriptsPath } from "./pathResolver.js";
@@ -70,6 +69,7 @@ import {
   getDesktopUniqueFiles,
   getIconsFolderPath,
   getLogsFolderPath,
+  getMimeType,
   getProfileJsonPath,
   getProfiles,
   getProfilesPath,
@@ -888,7 +888,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         return "directory";
       }
 
-      const mimeType = mime.lookup(filePath);
+      const mimeType = getMimeType(filePath);
       if (!mimeType) {
         logger.warn(`Could not determine file type for: ${filePath}`);
         return "";
