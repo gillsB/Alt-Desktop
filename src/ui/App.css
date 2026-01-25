@@ -66,7 +66,7 @@ textarea:focus {
   position: absolute;
   top: 0;
   background-color: rgb(var(--color-bgPrimary));
-  color: white;
+  color: rgb(var(--color-textPrimary));
   border: 1px solid rgba(var(--color-primary), 0.88);
   z-index: 1001;
   border-radius: 3px;
@@ -282,10 +282,10 @@ textarea:focus {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 3px dashed #7a7a7a;
+  border: 3px dashed rgb(var(--color-borderSecondary));
   border-radius: 8px;
   padding: 40px;
-  background-color: rgba(60, 60, 60, 0.7);
+  background-color: rgba(var(--color-shadow), 0.2);
   width: 70%;
   max-width: 400px;
   height: 200px;
@@ -293,13 +293,13 @@ textarea:focus {
 
 .drag-icon {
   font-size: 50px;
-  color: #007bff;
+  color: rgb(var(--color-primary));
   margin-bottom: 15px;
 }
 
 .drag-text {
   font-size: 24px;
-  color: rgb(var(--color-textPrimary));
+  color: rgb(var(--color-textButton));
   font-weight: bold;
   margin-bottom: 10px;
 }

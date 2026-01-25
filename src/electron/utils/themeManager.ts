@@ -32,7 +32,7 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     textButton: "255, 255, 255", // #ffffff
 
     borderPrimary: "41, 41, 41", // #292929
-    borderSecondary: "58, 58, 58", // #3a3a3a
+    borderSecondary: "224, 224, 224", // #e0e0e0
 
     success: "54, 209, 90", // #36d15a
     warning: "255, 193, 7", // #ffc107
