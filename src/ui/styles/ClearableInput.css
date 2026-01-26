@@ -45,6 +45,10 @@
   display: flex;
 }
 
+.subwindow-field .clearable-input {
+  padding-right: 30px;
+}
+
 .flex-input-wrapper {
   display: flex;
   flex: 1 1 auto;
@@ -52,10 +56,10 @@
   max-width: 100%;
 }
 
-.flex-input {
+.subwindow-field .flex-input {
   display: flex;
   flex: 1 1 auto;
-  padding: 4px;
+  padding: 8px 30px 8px 8px;
   font-size: 14px;
   width: 100%;
   box-sizing: border-box;

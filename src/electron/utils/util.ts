@@ -2359,7 +2359,7 @@ function standardizeIconName(name: string): string {
   return name;
 }
 
-// Manual addition of .url MIME type otherwise it returns ""
+// Manual addition of .url MIME type otherwise mime.lookup returns ""
 export function getMimeType(filePath: string): string | false {
   const ext = path.extname(filePath).toLowerCase();
   if (ext === ".url") {
