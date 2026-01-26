@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import "../styles/ClearableInput.css";
 import { createLogger } from "../util/uiLogger";
 
@@ -12,6 +12,7 @@ type ClearableInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   inputClassName?: string;
   className?: string;
   flex?: boolean;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
 };
 
 const ClearableInput: React.FC<ClearableInputProps> = ({
@@ -32,6 +33,12 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
   const isControlled = value !== undefined;
 
   const inputValue = isControlled ? value : internalValue;
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.scrollLeft = inputRef.current.scrollWidth;
+    }
+  }, [inputValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isControlled) {
@@ -68,6 +75,11 @@ const ClearableInput: React.FC<ClearableInputProps> = ({
           className={`clearable-input ${inputClassName}`}
           value={inputValue}
           onChange={handleChange}
+          onBlur={(e) => {
+            if (inputRef.current)
+              inputRef.current.scrollLeft = inputRef.current.scrollWidth;
+            props.onBlur?.(e);
+          }}
           placeholder={placeholder}
           {...props}
         />
