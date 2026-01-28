@@ -368,7 +368,7 @@
   flex-shrink: 0;
 }
 
-.not-imported-header {
+.desktop-profile-section-header {
   padding: 12px;
   border-bottom: 1px solid rgb(var(--color-border));
   background: rgb(var(--color-bgTertiary));
@@ -383,17 +383,17 @@
   transition: background-color 0.2s;
 }
 
-.not-imported-header:hover {
+.desktop-profile-section-header:hover {
   background: rgb(var(--color-bgSecondary));
 }
 
-.not-imported-header span {
+.desktop-profile-section-header span {
   font-weight: 600;
   font-size: 0.95rem;
   color: rgb(var(--color-textPrimary));
 }
 
-.not-imported-header .tag-toggle-button {
+.desktop-profile-section-header .tag-toggle-button {
   background: none;
   border: none;
   color: inherit;

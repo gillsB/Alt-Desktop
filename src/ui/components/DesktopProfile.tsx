@@ -474,7 +474,7 @@ const DesktopProfile: React.FC = () => {
               <div className="desktop-profile-list">
                 {/* Not Imported */}
                 <div
-                  className="not-imported-header"
+                  className="desktop-profile-section-header"
                   onClick={() => setNotImportedCollapsed(!notImportedCollapsed)}
                 >
                   <button
@@ -546,120 +546,112 @@ const DesktopProfile: React.FC = () => {
                 {desktopFiles.nameOnlyMatches.length +
                   desktopFiles.pathOnlyMatches.length >
                   0 && (
-                  <div className="partial-files-section">
-                    <div
-                      className="not-imported-header"
-                      onClick={() =>
-                        setPartialMatchesCollapsed(!partialMatchesCollapsed)
-                      }
+                  <div
+                    className="desktop-profile-section-header"
+                    onClick={() =>
+                      setPartialMatchesCollapsed(!partialMatchesCollapsed)
+                    }
+                  >
+                    <button
+                      className="tag-toggle-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPartialMatchesCollapsed(!partialMatchesCollapsed);
+                      }}
                     >
-                      <button
-                        className="tag-toggle-button"
-                        onClick={(e) => {
+                      {partialMatchesCollapsed ? "▸" : "▾"}
+                    </button>
+                    <span>
+                      Partial Matches (
+                      {desktopFiles.nameOnlyMatches.length +
+                        desktopFiles.pathOnlyMatches.length}
+                      )
+                    </span>
+                  </div>
+                )}
+
+                {!partialMatchesCollapsed && (
+                  <div className="not-imported-content">
+                    {desktopFiles.nameOnlyMatches.map((file, index) => (
+                      <div
+                        key={`partial-name-${index}`}
+                        className="desktop-profile-file partial"
+                        onClick={() => {
+                          if (contextMenu.visible) return;
+                          window.electron.openInExplorer(
+                            "programLink",
+                            file.path
+                          );
+                        }}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
-                          setPartialMatchesCollapsed(!partialMatchesCollapsed);
+                          setContextMenu({
+                            visible: true,
+                            x: e.clientX,
+                            y: e.clientY,
+                            file: file,
+                            section: "partial",
+                          });
                         }}
                       >
-                        {partialMatchesCollapsed ? "▸" : "▾"}
-                      </button>
-                      <span>
-                        Partial Matches (
-                        {desktopFiles.nameOnlyMatches.length +
-                          desktopFiles.pathOnlyMatches.length}
-                        )
-                      </span>
-                    </div>
-
-                    {!partialMatchesCollapsed && (
-                      <div className="not-imported-content">
-                        {desktopFiles.nameOnlyMatches.map((file, index) => (
-                          <div
-                            key={`partial-name-${index}`}
-                            className="desktop-profile-file partial"
-                            onClick={() => {
-                              if (contextMenu.visible) return;
-                              window.electron.openInExplorer(
-                                "programLink",
-                                file.path
-                              );
-                            }}
-                            onContextMenu={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setContextMenu({
-                                visible: true,
-                                x: e.clientX,
-                                y: e.clientY,
-                                file: file,
-                                section: "partial",
-                              });
-                            }}
-                          >
-                            <div className="desktop-file-content">
-                              <span className={`partial-match-name`}>
-                                {renderHighlightedPath(
-                                  file.icon.name,
-                                  file.name
-                                )}
-                              </span>
-                              <span className="partial-match-path">
-                                {renderHighlightedPath(
-                                  file.icon.programLink,
-                                  file.path
-                                )}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-
-                        {desktopFiles.pathOnlyMatches.map((file, index) => (
-                          <div
-                            key={`partial-path-${index}`}
-                            className="desktop-profile-file partial"
-                            onClick={() => {
-                              if (contextMenu.visible) return;
-                              window.electron.openInExplorer(
-                                "programLink",
-                                file.path
-                              );
-                            }}
-                            onContextMenu={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setContextMenu({
-                                visible: true,
-                                x: e.clientX,
-                                y: e.clientY,
-                                file: file,
-                                section: "partial",
-                              });
-                            }}
-                          >
-                            <div className="desktop-file-content">
-                              <span className={`partial-match-name`}>
-                                {renderHighlightedPath(
-                                  file.icon.name,
-                                  file.name
-                                )}
-                              </span>
-                              <span className="partial-match-path">
-                                {renderHighlightedPath(
-                                  file.icon.programLink,
-                                  file.path
-                                )}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                        <div className="desktop-file-content">
+                          <span className={`partial-match-name`}>
+                            {renderHighlightedPath(file.icon.name, file.name)}
+                          </span>
+                          <span className="partial-match-path">
+                            {renderHighlightedPath(
+                              file.icon.programLink,
+                              file.path
+                            )}
+                          </span>
+                        </div>
                       </div>
-                    )}
+                    ))}
+
+                    {desktopFiles.pathOnlyMatches.map((file, index) => (
+                      <div
+                        key={`partial-path-${index}`}
+                        className="desktop-profile-file partial"
+                        onClick={() => {
+                          if (contextMenu.visible) return;
+                          window.electron.openInExplorer(
+                            "programLink",
+                            file.path
+                          );
+                        }}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setContextMenu({
+                            visible: true,
+                            x: e.clientX,
+                            y: e.clientY,
+                            file: file,
+                            section: "partial",
+                          });
+                        }}
+                      >
+                        <div className="desktop-file-content">
+                          <span className={`partial-match-name`}>
+                            {renderHighlightedPath(file.icon.name, file.name)}
+                          </span>
+                          <span className="partial-match-path">
+                            {renderHighlightedPath(
+                              file.icon.programLink,
+                              file.path
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
                 {/* Already imported */}
                 {desktopFiles.alreadyImported.length > 0 && (
                   <>
                     <div
-                      className="not-imported-header"
+                      className="desktop-profile-section-header"
                       onClick={() =>
                         setAlreadyImportedCollapsed(!alreadyImportedCollapsed)
                       }
@@ -746,7 +738,7 @@ const DesktopProfile: React.FC = () => {
                   {profileCompare.filesToImport.length > 0 && (
                     <div className="icon-grid-section">
                       <div
-                        className="not-imported-header"
+                        className="desktop-profile-section-header"
                         onClick={() =>
                           setCompareImportCollapsed(!compareImportCollapsed)
                         }
@@ -812,7 +804,7 @@ const DesktopProfile: React.FC = () => {
                   {profileCompare.modified.length > 0 && (
                     <div className="icon-grid-section">
                       <div
-                        className="not-imported-header"
+                        className="desktop-profile-section-header"
                         onClick={() =>
                           setCompareModifiedCollapsed(!compareModifiedCollapsed)
                         }
@@ -865,7 +857,7 @@ const DesktopProfile: React.FC = () => {
                   {profileCompare.alreadyImported.length > 0 && (
                     <div className="icon-grid-section">
                       <div
-                        className="not-imported-header"
+                        className="desktop-profile-section-header"
                         onClick={() =>
                           setCompareAlreadyImportedCollapsed(
                             !compareAlreadyImportedCollapsed
