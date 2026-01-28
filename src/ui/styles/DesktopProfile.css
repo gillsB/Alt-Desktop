@@ -40,6 +40,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 }
 
 .import-icons-header {
@@ -190,30 +191,6 @@
   overflow: hidden;
 }
 
-.not-imported-header {
-  display: flex;
-  align-items: center;
-  padding: 4px 2px;
-  color: rgb(var(--color-textPrimary));
-  cursor: pointer;
-  user-select: none;
-  font-size: 14px;
-  gap: 8px;
-}
-
-.not-imported-header:hover {
-  color: rgb(var(--color-textSecondary));
-}
-
-.not-imported-header .tag-toggle-button {
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 2px 6px;
-}
-
 .not-imported-content {
   margin-top: 8px;
   display: flex;
@@ -272,6 +249,7 @@
 .import-icons-other .import-icons-header {
   padding: 8px 0;
   margin-bottom: 8px;
+  flex: 0 0 auto;
 }
 
 .modified-icon-container {
@@ -371,4 +349,164 @@
 
 .import-hover-button:hover {
   background-color: rgb(var(--color-primaryHover));
+}
+
+.compare-grid-container {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.icon-grid-section {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.not-imported-header {
+  padding: 12px;
+  border-bottom: 1px solid rgb(var(--color-border));
+  background: rgb(var(--color-bgTertiary));
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  transition: background-color 0.2s;
+}
+
+.not-imported-header:hover {
+  background: rgb(var(--color-bgSecondary));
+}
+
+.not-imported-header span {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: rgb(var(--color-textPrimary));
+}
+
+.not-imported-header .tag-toggle-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.desktop-profile-icons-grid {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: rgb(var(--color-bgPrimary));
+  align-items: start;
+  grid-auto-rows: min-content;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.desktop-profile-icon-item {
+  background: rgb(var(--color-bgSecondary));
+  box-shadow: 0 2px 8px rgba(var(--color-shadow), 0.5);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.15s;
+  user-select: none;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  position: relative;
+}
+
+.desktop-profile-icon-item:hover {
+  border-color: rgb(var(--color-primary));
+  box-shadow: 0 2px 12px rgba(var(--color-primary), 0.25);
+  transform: translateY(-2px);
+}
+
+.desktop-profile-icon-item.with-import-button {
+  position: relative;
+}
+
+.desktop-profile-icon-item .import-hover-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    background-color 0.2s ease;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgb(var(--color-textButton));
+  background-color: rgb(var(--color-primary));
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 10;
+  box-sizing: border-box;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.desktop-profile-icon-item.with-import-button:hover .import-hover-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.desktop-profile-icon-item .import-hover-button:hover {
+  background-color: rgb(var(--color-primaryHover));
+}
+
+.desktop-profile-icon-item.selected {
+  border: 3px solid rgb(var(--color-primary));
+  box-shadow: 0 2px 12px rgba(var(--color-primary), 0.25);
+  background: rgb(var(--color-bgTertiary));
+  padding: 3px;
+}
+
+.desktop-profile-icon-name {
+  margin: 4px 0 0 0;
+  font-size: 0.75rem;
+  text-align: center;
+  color: rgb(var(--color-textPrimary));
+  font-weight: 500;
+  width: 100%;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-bottom: 2px;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  line-height: 1.2;
+  box-sizing: border-box;
+  word-break: break-word;
+}
+
+.icon-grid-section + .icon-grid-section {
+  margin-top: 5px;
+  border-top: 2px solid rgb(var(--color-border));
 }

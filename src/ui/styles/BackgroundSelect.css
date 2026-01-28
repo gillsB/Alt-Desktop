@@ -450,6 +450,11 @@
   margin-left: auto;
 }
 
+.background-grid-item:hover {
+  border-color: rgb(var(--color-primary));
+  box-shadow: 0 2px 12px rgba(var(--color-primary), 0.25);
+}
+
 .background-grid-item.loading {
   pointer-events: none;
 }

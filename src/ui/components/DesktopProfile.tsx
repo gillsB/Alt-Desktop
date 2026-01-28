@@ -47,12 +47,13 @@ const DesktopProfile: React.FC = () => {
   const [compareToProfile, setCompareToProfile] = useState<string>("");
   const [alreadyImportedCollapsed, setAlreadyImportedCollapsed] =
     useState(true);
-  const [modifiedCollapsed, setModifiedCollapsed] = useState(false);
-  const [compareImportCollapsed, setCompareImportCollapsed] = useState(false);
-  const [compareAlreadyImportedCollapsed, setCompareAlreadyImportedCollapsed] =
-    useState(true);
   const [partialMatchesCollapsed, setPartialMatchesCollapsed] = useState(false);
   const [notImportedCollapsed, setNotImportedCollapsed] = useState(false);
+  const [compareImportCollapsed, setCompareImportCollapsed] = useState(false);
+  const [compareModifiedCollapsed, setCompareModifiedCollapsed] =
+    useState(false);
+  const [compareAlreadyImportedCollapsed, setCompareAlreadyImportedCollapsed] =
+    useState(true);
   const [formattedPaths, setFormattedPaths] = useState<Record<string, string>>(
     {}
   );
@@ -64,7 +65,6 @@ const DesktopProfile: React.FC = () => {
     file?: DesktopFile;
     section?: "notImported" | "partial" | "imported";
   }>({ visible: false, x: 0, y: 0 });
-  const [reloadTimestamps] = useState<Record<string, number>>({});
 
   const hideContextMenu = () => {
     setContextMenu({ visible: false, x: 0, y: 0 });
@@ -398,67 +398,6 @@ const DesktopProfile: React.FC = () => {
   }, [activeTab]);
 
   //TODO this needs a lot of testing with different size texts etc.
-  const renderSmallIconBox = (
-    icon: DesktopIcon,
-    section: "notImported" | "partial" | "imported"
-  ) => {
-    const reloadTimestamp = reloadTimestamps[icon.id] || 0;
-    return (
-      <div
-        key={`small-icon-${icon.id}`}
-        className="small-icon-box"
-        title={`View ${icon.name} in File Explorer`}
-        onClick={() => {
-          if (contextMenu.visible) return;
-          window.electron.openInExplorer("programLink", icon.programLink || "");
-        }}
-        onContextMenu={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setContextMenu({
-            visible: true,
-            x: e.clientX,
-            y: e.clientY,
-            icon: icon,
-            section: section,
-          });
-        }}
-      >
-        <SafeImage
-          profile={compareToProfile}
-          id={icon.id}
-          row={icon.row}
-          col={icon.col}
-          imagePath={icon.image}
-          width={48}
-          height={48}
-          highlighted={false}
-          forceReload={reloadTimestamp}
-        />
-        <div
-          className="small-icon-name"
-          title={icon.name}
-          style={{
-            color: icon.fontColor,
-            fontSize: icon.fontSize || 12,
-          }}
-        >
-          {icon.name}
-        </div>
-        {section === "notImported" && (
-          <button
-            className="import-hover-button"
-            onClick={(e) => {
-              e.stopPropagation();
-              logger.info(`${icon.name} import clicked`);
-            }}
-          >
-            Import
-          </button>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className="subwindow-container">
@@ -802,9 +741,10 @@ const DesktopProfile: React.FC = () => {
               </div>
 
               {compareToProfile && (
-                <div className="desktop-profile-list">
+                <div className="compare-grid-container">
+                  {/* Not Imported Section */}
                   {profileCompare.filesToImport.length > 0 && (
-                    <div className="compare-section">
+                    <div className="icon-grid-section">
                       <div
                         className="not-imported-header"
                         onClick={() =>
@@ -817,6 +757,9 @@ const DesktopProfile: React.FC = () => {
                             e.stopPropagation();
                             setCompareImportCollapsed(!compareImportCollapsed);
                           }}
+                          aria-label={
+                            compareImportCollapsed ? "Expand" : "Collapse"
+                          }
                         >
                           {compareImportCollapsed ? "▸" : "▾"}
                         </button>
@@ -825,52 +768,91 @@ const DesktopProfile: React.FC = () => {
                         </span>
                       </div>
                       {!compareImportCollapsed && (
-                        <div className="small-icon-list">
-                          {" "}
-                          {profileCompare.filesToImport.map((icon) =>
-                            renderSmallIconBox(icon, "notImported")
-                          )}
+                        <div className="desktop-profile-icons-grid">
+                          {profileCompare.filesToImport.map((icon) => (
+                            <div
+                              key={`not-imported-${icon.id}`}
+                              className="desktop-profile-icon-item with-import-button"
+                              title={icon.name}
+                            >
+                              <SafeImage
+                                profile={compareToProfile}
+                                id={icon.id}
+                                row={icon.row}
+                                col={icon.col}
+                                imagePath={icon.image}
+                                width={84}
+                                height={84}
+                                highlighted={false}
+                              />
+                              <div className="desktop-profile-icon-name">
+                                {icon.name}
+                              </div>
+                              <button
+                                className="import-hover-button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  logger.info(
+                                    `Importing ${icon.name} from ${compareToProfile}`
+                                  );
+                                  // TODO: Implement import from other profile
+                                }}
+                                aria-label={`Import ${icon.name}`}
+                              >
+                                Import
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
                   )}
 
-                  {/* Modified Icons */}
+                  {/* Modified Section */}
                   {profileCompare.modified.length > 0 && (
-                    <div className="compare-section">
+                    <div className="icon-grid-section">
                       <div
                         className="not-imported-header"
-                        onClick={() => setModifiedCollapsed(!modifiedCollapsed)}
+                        onClick={() =>
+                          setCompareModifiedCollapsed(!compareModifiedCollapsed)
+                        }
                       >
                         <button
                           className="tag-toggle-button"
-                          onClick={() =>
-                            setModifiedCollapsed(!modifiedCollapsed)
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCompareModifiedCollapsed(
+                              !compareModifiedCollapsed
+                            );
+                          }}
+                          aria-label={
+                            compareModifiedCollapsed ? "Expand" : "Collapse"
                           }
                         >
-                          {modifiedCollapsed ? "▸" : "▾"}
+                          {compareModifiedCollapsed ? "▸" : "▾"}
                         </button>
                         <span>Modified ({profileCompare.modified.length})</span>
                       </div>
-
-                      {!modifiedCollapsed && (
-                        <div className="small-icon-list">
+                      {!compareModifiedCollapsed && (
+                        <div className="desktop-profile-icons-grid">
                           {profileCompare.modified.map((item) => (
                             <div
                               key={`modified-${item.otherIcon.id}`}
-                              className="modified-icon-container"
+                              className="desktop-profile-icon-item"
+                              title={item.otherIcon.name}
                             >
-                              {renderSmallIconBox(item.otherIcon, "partial")}
-                              <div className="modified-differences">
-                                {item.differences.map((diff, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="difference-tag"
-                                    title={diff + " todo"}
-                                  >
-                                    {diff}
-                                  </span>
-                                ))}
+                              <SafeImage
+                                profile={compareToProfile}
+                                id={item.otherIcon.id}
+                                row={item.otherIcon.row}
+                                col={item.otherIcon.col}
+                                imagePath={item.otherIcon.image}
+                                width={84}
+                                height={84}
+                                highlighted={false}
+                              />
+                              <div className="desktop-profile-icon-name">
+                                {item.otherIcon.name}
                               </div>
                             </div>
                           ))}
@@ -879,9 +861,9 @@ const DesktopProfile: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Already Imported Icons */}
+                  {/* Already Imported Section */}
                   {profileCompare.alreadyImported.length > 0 && (
-                    <div className="compare-section">
+                    <div className="icon-grid-section">
                       <div
                         className="not-imported-header"
                         onClick={() =>
@@ -892,10 +874,16 @@ const DesktopProfile: React.FC = () => {
                       >
                         <button
                           className="tag-toggle-button"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setCompareAlreadyImportedCollapsed(
                               !compareAlreadyImportedCollapsed
-                            )
+                            );
+                          }}
+                          aria-label={
+                            compareAlreadyImportedCollapsed
+                              ? "Expand"
+                              : "Collapse"
                           }
                         >
                           {compareAlreadyImportedCollapsed ? "▸" : "▾"}
@@ -905,12 +893,29 @@ const DesktopProfile: React.FC = () => {
                           {profileCompare.alreadyImported.length})
                         </span>
                       </div>
-
                       {!compareAlreadyImportedCollapsed && (
-                        <div className="small-icon-list">
-                          {profileCompare.alreadyImported.map((icon) =>
-                            renderSmallIconBox(icon, "imported")
-                          )}
+                        <div className="desktop-profile-icons-grid">
+                          {profileCompare.alreadyImported.map((icon) => (
+                            <div
+                              key={`already-imported-${icon.id}`}
+                              className="desktop-profile-icon-item"
+                              title={icon.name}
+                            >
+                              <SafeImage
+                                profile={compareToProfile}
+                                id={icon.id}
+                                row={icon.row}
+                                col={icon.col}
+                                imagePath={icon.image}
+                                width={84}
+                                height={84}
+                                highlighted={false}
+                              />
+                              <div className="desktop-profile-icon-name">
+                                {icon.name}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
