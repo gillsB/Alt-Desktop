@@ -2097,4 +2097,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return false;
     }
   });
+  ipcMainHandle(
+    "importIconFromProfile",
+    async (currentProfile: string, fromProfile: string, icon?: DesktopIcon) => {
+      logger.info(
+        `importIconFromProfile called with: ${currentProfile}, ${fromProfile}, ${icon?.id}`
+      );
+      return null;
+    }
+  );
 }
