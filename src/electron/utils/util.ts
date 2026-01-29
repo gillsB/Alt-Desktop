@@ -2506,12 +2506,15 @@ export async function importIconFromProfile(
       );
 
       // Send reload notification to main window
-      const mainWindow = getMainWindow();
       if (mainWindow) {
         mainWindow.webContents.send("reload-icon", {
           id: newIcon.id,
           icon: newIcon,
         });
+      } else {
+        logger.error(
+          "mainWindow is not defined, cannot send reload-icon message"
+        );
       }
     } catch (e) {
       logger.error(

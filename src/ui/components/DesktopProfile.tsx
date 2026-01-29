@@ -240,6 +240,25 @@ const DesktopProfile: React.FC = () => {
     }
   };
 
+  const importFromProfile = async (icon: DesktopIcon) => {
+    try {
+      const importedIcon = await window.electron.importIconFromProfile(
+        profile,
+        compareToProfile,
+        icon
+      );
+      if (!importedIcon) {
+        logger.error("Failed to import icon from profile:", {
+          icon,
+          compareToProfile,
+          profile,
+        });
+      }
+    } catch (error) {
+      logger.error("Error importing icon from profile:", error);
+    }
+  };
+
   const reloadFiles = async () => {
     try {
       const refreshed = await window.electron.getDesktopUniqueFiles(profile);
@@ -784,10 +803,7 @@ const DesktopProfile: React.FC = () => {
                                 className="import-hover-button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  logger.info(
-                                    `Importing ${icon.name} from ${compareToProfile}`
-                                  );
-                                  // TODO: Implement import from other profile
+                                  importFromProfile(icon);
                                 }}
                                 aria-label={`Import ${icon.name}`}
                               >

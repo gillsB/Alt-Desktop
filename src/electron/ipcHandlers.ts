@@ -2101,6 +2101,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "importIconFromProfile",
     async (currentProfile: string, fromProfile: string, icon?: DesktopIcon) => {
+      if (!icon) {
+        logger.error("importIconFromProfile called without an icon");
+        return null;
+      }
       return await importIconFromProfile(currentProfile, fromProfile, icon);
     }
   );
