@@ -19,7 +19,7 @@ import {
 } from "../windows/subWindowManager.js";
 import { generateIcon } from "./generateIcon.js";
 import { idToBgJsonPath } from "./idToInfo.js";
-import { getRendererState } from "./rendererStates.js";
+import { getRendererState, getRendererStates } from "./rendererStates.js";
 
 const logger = createLoggerForFile("util.ts");
 
@@ -2366,4 +2366,164 @@ export function getMimeType(filePath: string): string | false {
     return "application/x-url";
   }
   return mime.lookup(filePath);
+}
+
+export async function importIconFromProfile(
+  currentProfile: string,
+  fromProfile: string,
+  icon?: DesktopIcon
+): Promise<DesktopIcon | null> {
+  try {
+    if (!icon) {
+      logger.warn("No icon provided to import");
+      return null;
+    }
+
+    // Load the icon from the fromProfile
+    const fromProfilePath = getProfileJsonPath(fromProfile);
+    if (!fs.existsSync(fromProfilePath)) {
+      logger.error(`Profile file does not exist: ${fromProfilePath}`);
+      return null;
+    }
+
+    let fromProfileData: DesktopIconData | null = null;
+    try {
+      const data = fs.readFileSync(fromProfilePath, "utf-8");
+      fromProfileData = JSON.parse(data);
+    } catch (e) {
+      logger.error(`Failed to read profile file: ${fromProfilePath}`, e);
+      return null;
+    }
+
+    if (!fromProfileData || !fromProfileData.icons) {
+      logger.warn("No icons found in from profile");
+      return null;
+    }
+
+    // Find the icon in the fromProfile
+    const sourceIcon = fromProfileData.icons.find((i) => i.id === icon.id);
+
+    if (!sourceIcon) {
+      logger.error(`Icon not found in source profile: ${icon.name}`);
+      return null;
+    }
+
+    // Load current profile to check for taken coordinates
+    const currentProfilePath = getProfileJsonPath(currentProfile);
+    let currentProfileData: DesktopIconData = {
+      icons: [],
+    };
+
+    if (fs.existsSync(currentProfilePath)) {
+      try {
+        const data = fs.readFileSync(currentProfilePath, "utf-8");
+        currentProfileData = JSON.parse(data);
+      } catch (e) {
+        logger.warn(
+          `Failed to read current profile file: ${currentProfilePath}`,
+          e
+        );
+      }
+    }
+
+    // Get taken coordinates
+    const takenCoords = new Set(
+      (currentProfileData.icons || []).map((i) => `${i.row},${i.col}`)
+    );
+
+    // Generate a unique ID for this icon in the current profile
+    const newIconId = await ensureUniqueIconId(currentProfile, sourceIcon.name);
+    if (!newIconId) {
+      logger.error("Failed to generate unique icon ID");
+      return null;
+    }
+
+    // Copy the image folder from source profile to current profile
+    const sourceIconFolder = path.join(
+      getIconsFolderPath(fromProfile),
+      sourceIcon.id
+    );
+    const targetIconFolder = path.join(
+      getIconsFolderPath(currentProfile),
+      newIconId
+    );
+
+    if (fs.existsSync(sourceIconFolder)) {
+      // Ensure target folder exists
+      if (!fs.existsSync(targetIconFolder)) {
+        fs.mkdirSync(targetIconFolder, { recursive: true });
+      }
+
+      // Copy all image files from source to target
+      const files = fs.readdirSync(sourceIconFolder);
+      for (const file of files) {
+        const sourceFile = path.join(sourceIconFolder, file);
+        const targetFile = path.join(targetIconFolder, file);
+        if (fs.statSync(sourceFile).isFile()) {
+          fs.copyFileSync(sourceFile, targetFile);
+        }
+      }
+    }
+
+    // Find next available coordinate for the new icon
+    let row = 0;
+    let col = 0;
+    const rendererStates = await getRendererStates();
+    const maxRows = rendererStates.visibleRows || 10;
+
+    while (takenCoords.has(`${row},${col}`)) {
+      row++;
+      if (row >= maxRows) {
+        row = 0;
+        col++;
+      }
+    }
+
+    // Create the new icon with the current profile's row/col
+    const newIcon: DesktopIcon = {
+      ...sourceIcon,
+      id: newIconId,
+      row,
+      col,
+    };
+
+    // Add the icon to the current profile
+    if (!currentProfileData.icons) {
+      currentProfileData.icons = [];
+    }
+
+    currentProfileData.icons.push(newIcon);
+
+    // Save the updated profile
+    try {
+      fs.writeFileSync(
+        currentProfilePath,
+        JSON.stringify(currentProfileData, null, 2),
+        "utf-8"
+      );
+      logger.info(
+        `Successfully imported icon ${newIconId} from profile ${fromProfile}`
+      );
+
+      // Send reload notification to main window
+      const mainWindow = getMainWindow();
+      if (mainWindow) {
+        mainWindow.webContents.send("reload-icon", {
+          id: newIcon.id,
+          icon: newIcon,
+        });
+      }
+    } catch (e) {
+      logger.error(
+        `Failed to save current profile file: ${currentProfilePath}`,
+        e
+      );
+      return null;
+    }
+
+    return newIcon;
+  } catch (error) {
+    logger.error("Error importing icon from profile:", error);
+    return null;
+  }
 }

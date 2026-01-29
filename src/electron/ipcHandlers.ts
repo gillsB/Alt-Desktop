@@ -77,6 +77,7 @@ import {
   getSettingsFilePath,
   importAllIconsFromDesktop,
   importDesktopFileAsIcon,
+  importIconFromProfile,
   indexBackgrounds,
   ipcMainHandle,
   ipcMainOn,
@@ -2100,10 +2101,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "importIconFromProfile",
     async (currentProfile: string, fromProfile: string, icon?: DesktopIcon) => {
-      logger.info(
-        `importIconFromProfile called with: ${currentProfile}, ${fromProfile}, ${icon?.id}`
-      );
-      return null;
+      return await importIconFromProfile(currentProfile, fromProfile, icon);
     }
   );
 }
