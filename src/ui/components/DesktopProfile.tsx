@@ -253,6 +253,8 @@ const DesktopProfile: React.FC = () => {
           compareToProfile,
           profile,
         });
+      } else {
+        handleCompareProfiles(compareToProfile, true);
       }
     } catch (error) {
       logger.error("Error importing icon from profile:", error);
@@ -375,7 +377,8 @@ const DesktopProfile: React.FC = () => {
   };
 
   const handleCompareProfiles = async (
-    eOrValue: React.ChangeEvent<HTMLSelectElement> | string
+    eOrValue: React.ChangeEvent<HTMLSelectElement> | string,
+    force: boolean = false
   ) => {
     const selectedProfile =
       typeof eOrValue === "string" ? eOrValue : eOrValue.target.value;
@@ -385,7 +388,8 @@ const DesktopProfile: React.FC = () => {
     if (
       selectedProfile &&
       profile &&
-      (selectedProfile !== compareToProfile ||
+      (force ||
+        selectedProfile !== compareToProfile ||
         (profileCompare.filesToImport.length === 0 &&
           profileCompare.alreadyImported.length === 0 &&
           profileCompare.modified.length === 0))
