@@ -2432,7 +2432,16 @@ export async function importIconFromProfile(
     );
 
     // Generate a unique ID for this icon in the current profile
-    const newIconId = await ensureUniqueIconId(currentProfile, sourceIcon.name);
+    let iconName = sourceIcon.name;
+    if (
+      sourceIcon.name === undefined ||
+      sourceIcon.name === null ||
+      sourceIcon.name.trim() === ""
+    ) {
+      iconName = "unknownIcon";
+    }
+
+    const newIconId = await ensureUniqueIconId(currentProfile, iconName);
     if (!newIconId) {
       logger.error("Failed to generate unique icon ID");
       return null;
