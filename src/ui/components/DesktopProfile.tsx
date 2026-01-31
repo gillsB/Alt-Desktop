@@ -275,6 +275,10 @@ const DesktopProfile: React.FC = () => {
     }
   };
 
+  const reloadOtherProfiles = async () => {
+    handleCompareProfiles(compareToProfile, true);
+  };
+
   useEffect(() => {
     const formatPaths = async () => {
       const paths: Record<string, string> = {};
@@ -758,6 +762,13 @@ const DesktopProfile: React.FC = () => {
                       </option>
                     ))}
                 </select>
+                <button
+                  type="button"
+                  className="button reload-btn"
+                  onClick={reloadOtherProfiles}
+                >
+                  Reload
+                </button>
               </div>
 
               {compareToProfile && (
