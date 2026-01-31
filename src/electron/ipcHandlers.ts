@@ -934,48 +934,11 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         fs.writeFileSync(filePath, JSON.stringify(desktopData, null, 2));
         logger.info(`Successfully deleted icon: ${id}`);
 
-        try {
-          const profilesPath = getProfilesPath();
-          const profileFolders = fs
-            .readdirSync(profilesPath, { withFileTypes: true })
-            .filter((dirent) => dirent.isDirectory())
-            .map((dirent) => dirent.name);
-
-          for (const folder of profileFolders) {
-            // Skip current profile
-            if (folder === profile) continue;
-            const profileJsonPath = path.join(
-              profilesPath,
-              folder,
-              "profile.json"
-            );
-            if (fs.existsSync(profileJsonPath)) {
-              try {
-                const data = fs.readFileSync(profileJsonPath, "utf-8");
-                const parsed: DesktopIconData = JSON.parse(data);
-                if (Array.isArray(parsed.icons)) {
-                  if (parsed.icons.some((icon) => icon.id === id)) {
-                    logger.info(
-                      `icon found in profile: ${folder}, keeping data folder`
-                    );
-                    return true; // Early return if found in another profile
-                  }
-                }
-              } catch (err) {
-                logger.error(
-                  `Failed to read or parse ${profileJsonPath}: ${err}`
-                );
-              }
-            }
-          }
-
-          // Icon is unique to this profile, delete its data folder
-          await deleteIconData(profile, id);
-          logger.info(
-            `Icon ${id} was unique to profile ${profile}, deleted its data folder.`
-          );
-        } catch (err) {
-          logger.error(`Error checking icon usage in other profiles: ${err}`);
+        logger.info(`Sending Icon: ${id} from ${profile}, to the recycle bin`);
+        const deleted = await deleteIconData(profile, id);
+        if (!deleted) {
+          logger.warn(`Failed to delete icon data for: ${id}`);
+          return false;
         }
 
         return true;
