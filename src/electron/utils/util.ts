@@ -2091,6 +2091,11 @@ export async function ensureUniqueIconId(
 ): Promise<string | null> {
   logger.info("ensureUniqueIconId called with: ", name);
 
+  if (name === undefined || name === null || name.trim() === "") {
+    logger.warn("Icon name is empty after trimming, setting to 'unknownIcon'");
+    name = "unknownIcon";
+  }
+
   const baseName = name;
   const dataFolder = getIconsFolderPath(profile);
 
@@ -2431,17 +2436,7 @@ export async function importIconFromProfile(
       (currentProfileData.icons || []).map((i) => `${i.row},${i.col}`)
     );
 
-    // Generate a unique ID for this icon in the current profile
-    let iconName = sourceIcon.name;
-    if (
-      sourceIcon.name === undefined ||
-      sourceIcon.name === null ||
-      sourceIcon.name.trim() === ""
-    ) {
-      iconName = "unknownIcon";
-    }
-
-    const newIconId = await ensureUniqueIconId(currentProfile, iconName);
+    const newIconId = await ensureUniqueIconId(currentProfile, sourceIcon.name);
     if (!newIconId) {
       logger.error("Failed to generate unique icon ID");
       return null;
