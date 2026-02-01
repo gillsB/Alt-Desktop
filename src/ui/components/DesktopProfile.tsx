@@ -862,25 +862,45 @@ const DesktopProfile: React.FC = () => {
                         <span>Modified ({profileCompare.modified.length})</span>
                       </div>
                       {!compareModifiedCollapsed && (
-                        <div className="desktop-profile-icons-grid">
+                        <div className="desktop-profile-icons-grid-modified">
                           {profileCompare.modified.map((item) => (
                             <div
                               key={`modified-${item.otherIcon.id}`}
-                              className="desktop-profile-icon-item"
+                              className="desktop-profile-icon-item modified-item"
                               title={item.otherIcon.name}
                             >
-                              <SafeImage
-                                profile={compareToProfile}
-                                id={item.otherIcon.id}
-                                row={item.otherIcon.row}
-                                col={item.otherIcon.col}
-                                imagePath={item.otherIcon.image}
-                                width={84}
-                                height={84}
-                                highlighted={false}
-                              />
-                              <div className="desktop-profile-icon-name">
-                                {item.otherIcon.name}
+                              <div className="icon-card">
+                                <SafeImage
+                                  profile={compareToProfile}
+                                  id={item.otherIcon.id}
+                                  row={item.otherIcon.row}
+                                  col={item.otherIcon.col}
+                                  imagePath={item.otherIcon.image}
+                                  width={84}
+                                  height={84}
+                                  highlighted={false}
+                                />
+
+                                <div className="desktop-profile-icon-name">
+                                  {item.otherIcon.name}
+                                </div>
+                              </div>
+
+                              <div
+                                className="difference-box"
+                                aria-hidden={item.differences?.length === 0}
+                              >
+                                <div className="modified-differences">
+                                  {item.differences?.map((diff, idx) => (
+                                    <span
+                                      key={`diff-${item.otherIcon.id}-${idx}`}
+                                      className="difference-tag"
+                                      title={diff}
+                                    >
+                                      {diff}
+                                    </span>
+                                  ))}
+                                </div>
                               </div>
                             </div>
                           ))}
