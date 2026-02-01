@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "../styles/DesktopProfile.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
+import DifferenceViewer from "./DifferenceViewer";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -65,6 +66,15 @@ const DesktopProfile: React.FC = () => {
     file?: DesktopFile;
     section?: "notImported" | "partial" | "imported";
   }>({ visible: false, x: 0, y: 0 });
+  const [differenceViewer, setDifferenceViewer] = useState<{
+    profileName: string;
+    icon: DesktopIcon;
+    fieldName: string;
+    currentValue: unknown;
+    otherProfileName: string;
+    otherIcon: DesktopIcon;
+    otherValue: unknown;
+  } | null>(null);
 
   const hideContextMenu = () => {
     setContextMenu({ visible: false, x: 0, y: 0 });
@@ -286,6 +296,17 @@ const DesktopProfile: React.FC = () => {
     const fieldKey = diff as keyof DesktopIcon;
     const currentValue = item.currentIcon[fieldKey];
     const otherValue = item.otherIcon[fieldKey];
+
+    setDifferenceViewer({
+      profileName: profile,
+      icon: item.currentIcon,
+      fieldName: diff,
+      currentValue,
+      otherProfileName: compareToProfile,
+      otherIcon: item.otherIcon,
+      otherValue,
+    });
+
     logger.info(
       `Profile ${profile} iconId = "${item.currentIcon.id}", ${diff} = "${currentValue}". Profile ${compareToProfile} iconId = "${item.otherIcon.id}", ${diff} = "${otherValue}"`
     );
@@ -1026,6 +1047,19 @@ const DesktopProfile: React.FC = () => {
             Open file in explorer
           </div>
         </div>
+      )}
+
+      {differenceViewer && (
+        <DifferenceViewer
+          profileName={differenceViewer.profileName}
+          icon={differenceViewer.icon}
+          fieldName={differenceViewer.fieldName}
+          currentValue={differenceViewer.currentValue}
+          otherProfileName={differenceViewer.otherProfileName}
+          otherIcon={differenceViewer.otherIcon}
+          otherValue={differenceViewer.otherValue}
+          onClose={() => setDifferenceViewer(null)}
+        />
       )}
     </div>
   );
