@@ -279,6 +279,18 @@ const DesktopProfile: React.FC = () => {
     handleCompareProfiles(compareToProfile, true);
   };
 
+  const handleDifferenceTagClick = (
+    diff: string,
+    item: ProfileCompareState["modified"][0]
+  ) => {
+    const fieldKey = diff as keyof DesktopIcon;
+    const currentValue = item.currentIcon[fieldKey];
+    const otherValue = item.otherIcon[fieldKey];
+    logger.info(
+      `Profile ${profile} iconId = "${item.currentIcon.id}", ${diff} = "${currentValue}". Profile ${compareToProfile} iconId = "${item.otherIcon.id}", ${diff} = "${otherValue}"`
+    );
+  };
+
   useEffect(() => {
     const formatPaths = async () => {
       const paths: Record<string, string> = {};
@@ -892,13 +904,16 @@ const DesktopProfile: React.FC = () => {
                               >
                                 <div className="modified-differences">
                                   {item.differences?.map((diff, idx) => (
-                                    <span
+                                    <button
                                       key={`diff-${item.otherIcon.id}-${idx}`}
                                       className="difference-tag"
                                       title={diff}
+                                      onClick={() => {
+                                        handleDifferenceTagClick(diff, item);
+                                      }}
                                     >
                                       {diff}
-                                    </span>
+                                    </button>
                                   ))}
                                 </div>
                               </div>
