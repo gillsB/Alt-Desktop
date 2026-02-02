@@ -3,6 +3,7 @@ import "../styles/DesktopProfile.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
 import DifferenceViewer from "./DifferenceViewer";
+import IconDifferenceViewer from "./IconDifferenceViewer";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -74,6 +75,13 @@ const DesktopProfile: React.FC = () => {
     otherProfileName: string;
     otherIcon: DesktopIcon;
     otherValue: unknown;
+  } | null>(null);
+  const [iconDifferenceViewer, setIconDifferenceViewer] = useState<{
+    profileName: string;
+    icon: DesktopIcon;
+    otherProfileName: string;
+    otherIcon: DesktopIcon;
+    differences: string[];
   } | null>(null);
 
   const hideContextMenu = () => {
@@ -310,6 +318,18 @@ const DesktopProfile: React.FC = () => {
     logger.info(
       `Profile ${profile} iconId = "${item.currentIcon.id}", ${diff} = "${currentValue}". Profile ${compareToProfile} iconId = "${item.otherIcon.id}", ${diff} = "${otherValue}"`
     );
+  };
+
+  const handleModifiedIconClick = (
+    item: ProfileCompareState["modified"][0]
+  ) => {
+    setIconDifferenceViewer({
+      profileName: profile,
+      icon: item.currentIcon,
+      otherProfileName: compareToProfile,
+      otherIcon: item.otherIcon,
+      differences: item.differences,
+    });
   };
 
   useEffect(() => {
@@ -901,6 +921,10 @@ const DesktopProfile: React.FC = () => {
                               key={`modified-${item.otherIcon.id}`}
                               className="desktop-profile-icon-item modified-item"
                               title={item.otherIcon.name}
+                              onClick={() => {
+                                handleModifiedIconClick(item);
+                              }}
+                              style={{ cursor: "pointer" }}
                             >
                               <div className="icon-card">
                                 <SafeImage
@@ -929,7 +953,8 @@ const DesktopProfile: React.FC = () => {
                                       key={`diff-${item.otherIcon.id}-${idx}`}
                                       className="difference-tag"
                                       title={diff}
-                                      onClick={() => {
+                                      onClick={(e) => {
+                                        e.stopPropagation();
                                         handleDifferenceTagClick(diff, item);
                                       }}
                                     >
@@ -1059,6 +1084,16 @@ const DesktopProfile: React.FC = () => {
           otherIcon={differenceViewer.otherIcon}
           otherValue={differenceViewer.otherValue}
           onClose={() => setDifferenceViewer(null)}
+        />
+      )}
+      {iconDifferenceViewer && (
+        <IconDifferenceViewer
+          profileName={iconDifferenceViewer.profileName}
+          icon={iconDifferenceViewer.icon}
+          otherProfileName={iconDifferenceViewer.otherProfileName}
+          otherIcon={iconDifferenceViewer.otherIcon}
+          differences={iconDifferenceViewer.differences}
+          onClose={() => setIconDifferenceViewer(null)}
         />
       )}
     </div>

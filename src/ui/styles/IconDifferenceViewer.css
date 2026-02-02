@@ -1,0 +1,124 @@
+.icon-difference-viewer-content {
+  max-width: 1000px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.icon-comparison-header {
+  display: grid;
+  grid-template-columns: 30px 120px 1fr;
+  width: 100%;
+  align-items: end;
+}
+
+.icon-comparison-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  grid-column: 3;
+}
+
+.icon-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.comparison-profile-name {
+  font-weight: bold;
+  font-size: 14px;
+  color: rgb(var(--color-textPrimary));
+}
+
+.comparison-icon-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: rgb(var(--color-bgPrimary));
+}
+
+.comparison-icon-id {
+  font-size: 12px;
+  color: rgb(var(--color-textPrimary));
+  word-break: break-all;
+  max-width: 150px;
+  text-align: center;
+}
+
+.icon-fields-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 20px 0 20px;
+}
+
+.icon-field-row {
+  display: grid;
+  grid-template-columns: 30px 120px 1fr;
+  padding: 12px;
+  border-radius: 4px;
+  align-items: center;
+  border: 1px solid transparent;
+  transition: background-color 0.2s;
+}
+
+.icon-field-row.same {
+  background-color: rgb(var(--color-success), 0.1);
+}
+
+.icon-field-row.different {
+  background-color: rgba(var(--color-warning), 0.1);
+}
+
+.icon-field-row:hover {
+  background-color: rgba(var(--color-bgHover), 1);
+}
+
+.field-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.indicator-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  transition: box-shadow 0.2s;
+}
+
+.indicator-dot.green {
+  background-color: #4caf50;
+  box-shadow: 0 0 6px rgba(76, 175, 80, 0.5);
+}
+
+.indicator-dot.yellow {
+  background-color: #ffc107;
+  box-shadow: 0 0 6px rgba(255, 193, 7, 0.7);
+}
+
+.field-name {
+  font-weight: 500;
+  font-size: 13px;
+  color: rgb(var(--color-textPrimary));
+}
+
+.field-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.field-value {
+  padding: 8px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  word-break: break-all;
+  max-height: 100px;
+  overflow-y: auto;
+  background-color: rgba(var(--color-textArea), 1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}

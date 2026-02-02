@@ -3,8 +3,8 @@ import { openSubWindow } from "./subWindowManager.js";
 
 // TODO most of this size copied from settings, so adjust when a style is setup for DesktopProfile.
 export function openDesktopProfileWindow() {
-  const defaultWidth = 600;
-  const defaultHeight = 660;
+  const defaultWidth = 800;
+  const defaultHeight = 888;
   const minWidth = 465;
   const minHeight = 425;
 
