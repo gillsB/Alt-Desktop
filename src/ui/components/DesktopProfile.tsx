@@ -98,12 +98,27 @@ const DesktopProfile: React.FC = () => {
       ) {
         hideContextMenu();
       }
+
+      // If a difference viewer is open, close it when clicking outside
+      if (differenceViewer || iconDifferenceViewer) {
+        const modalWindow = document.querySelector(".modal-window-content");
+        if (modalWindow && !e.composedPath().includes(modalWindow)) {
+          logger.info("Closing difference viewer due to outside click");
+          setDifferenceViewer(null);
+          setIconDifferenceViewer(null);
+          return;
+        }
+      }
     };
 
     const handleEscapeKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        // Close context/DifferenceViewer if either, else close window
         if (contextMenu.visible) {
           hideContextMenu();
+        } else if (differenceViewer || iconDifferenceViewer) {
+          setDifferenceViewer(null);
+          setIconDifferenceViewer(null);
         } else {
           handleClose();
         }
@@ -116,7 +131,7 @@ const DesktopProfile: React.FC = () => {
       document.removeEventListener("click", handleClickOutside);
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [contextMenu]);
+  }, [contextMenu, differenceViewer, iconDifferenceViewer]);
 
   const handleClose = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "DesktopProfile");
@@ -921,7 +936,8 @@ const DesktopProfile: React.FC = () => {
                               key={`modified-${item.otherIcon.id}`}
                               className="desktop-profile-icon-item modified-item"
                               title={item.otherIcon.name}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 handleModifiedIconClick(item);
                               }}
                               style={{ cursor: "pointer" }}
