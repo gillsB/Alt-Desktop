@@ -2192,15 +2192,22 @@ export async function compareProfiles(
     // Fields to compare (excluding position/layout fields)
     const fieldsToCompare: (keyof DesktopIcon)[] = [
       "name",
-      "width",
-      "height",
       "image",
       "programLink",
       "args",
       "websiteLink",
       "fontColor",
-      "fontSize",
     ];
+
+    // Normalize values - treat empty strings and undefined/null as equivalent
+    const normalizeValue = (
+      val: string | string[] | undefined
+    ): string | string[] | null => {
+      if (val === "" || val === undefined || val === null) {
+        return null;
+      }
+      return val;
+    };
 
     // Helper function to compare two icons and return differences
     const getIconDifferences = (
@@ -2212,12 +2219,19 @@ export async function compareProfiles(
         const val1 = icon1[field];
         const val2 = icon2[field];
 
+        const normalized1 = normalizeValue(
+          val1 as string | string[] | undefined
+        );
+        const normalized2 = normalizeValue(
+          val2 as string | string[] | undefined
+        );
+
         // Deep comparison for arrays
-        if (Array.isArray(val1) && Array.isArray(val2)) {
-          if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+        if (Array.isArray(normalized1) && Array.isArray(normalized2)) {
+          if (JSON.stringify(normalized1) !== JSON.stringify(normalized2)) {
             differences.push(field);
           }
-        } else if (val1 !== val2) {
+        } else if (normalized1 !== normalized2) {
           differences.push(field);
         }
       }
@@ -2234,11 +2248,18 @@ export async function compareProfiles(
         const val1 = icon1[field];
         const val2 = icon2[field];
 
-        if (Array.isArray(val1) && Array.isArray(val2)) {
-          if (JSON.stringify(val1) === JSON.stringify(val2)) {
+        const normalized1 = normalizeValue(
+          val1 as string | string[] | undefined
+        );
+        const normalized2 = normalizeValue(
+          val2 as string | string[] | undefined
+        );
+
+        if (Array.isArray(normalized1) && Array.isArray(normalized2)) {
+          if (JSON.stringify(normalized1) === JSON.stringify(normalized2)) {
             matches++;
           }
-        } else if (val1 === val2) {
+        } else if (normalized1 === normalized2) {
           matches++;
         }
       }
