@@ -934,6 +934,10 @@ const DesktopProfile: React.FC = () => {
                                       key={`diff-${item.otherIcon.id}-${idx}`}
                                       className="difference-tag"
                                       title={diff}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleModifiedIconClick(item);
+                                      }}
                                     >
                                       {diff}
                                     </button>

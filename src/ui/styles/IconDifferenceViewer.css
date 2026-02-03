@@ -6,16 +6,16 @@
 
 .icon-comparison-header {
   display: grid;
-  grid-template-columns: 30px 120px 1fr;
+  grid-template-columns: auto 1fr;
   width: 100%;
   align-items: end;
+  gap: 20px;
 }
 
 .icon-comparison-column {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  grid-column: 3;
 }
 
 .icon-container {

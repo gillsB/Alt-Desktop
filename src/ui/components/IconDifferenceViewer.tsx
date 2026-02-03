@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../styles/IconDifferenceViewer.css";
 import { SafeImage } from "./SafeImage";
 
@@ -19,6 +19,8 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   differences,
   onClose,
 }) => {
+  const [showAllFields, setShowAllFields] = useState(false);
+
   const fieldsToCompare: (keyof DesktopIcon)[] = [
     "name",
     "image",
@@ -48,6 +50,15 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         <div className="modal-content icon-difference-viewer-content">
           {/* Icons Display */}
           <div className="icon-comparison-header">
+            <div className="checkbox-container">
+              <input
+                type="checkbox"
+                id="showAllFields"
+                checked={showAllFields}
+                onChange={(e) => setShowAllFields(e.target.checked)}
+              />
+              <label htmlFor="showAllFields">Show all fields</label>
+            </div>
             <div className="icon-comparison-column">
               <div className="icon-container">
                 <div className="comparison-profile-name">{profileName}</div>
@@ -93,6 +104,11 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
               const currentValue = getFieldValue(icon, fieldName);
               const otherValue = getFieldValue(otherIcon, fieldName);
               const isDifferent = isFieldDifferent(fieldName);
+
+              // Only show different fields unless showAllFields is true
+              if (!showAllFields && !isDifferent) {
+                return null;
+              }
 
               return (
                 <div
