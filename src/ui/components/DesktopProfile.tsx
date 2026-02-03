@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import "../styles/DesktopProfile.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
-import DifferenceViewer from "./DifferenceViewer";
 import IconDifferenceViewer from "./IconDifferenceViewer";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
@@ -67,15 +66,6 @@ const DesktopProfile: React.FC = () => {
     file?: DesktopFile;
     section?: "notImported" | "partial" | "imported";
   }>({ visible: false, x: 0, y: 0 });
-  const [differenceViewer, setDifferenceViewer] = useState<{
-    profileName: string;
-    icon: DesktopIcon;
-    fieldName: string;
-    currentValue: unknown;
-    otherProfileName: string;
-    otherIcon: DesktopIcon;
-    otherValue: unknown;
-  } | null>(null);
   const [iconDifferenceViewer, setIconDifferenceViewer] = useState<{
     profileName: string;
     icon: DesktopIcon;
@@ -100,11 +90,10 @@ const DesktopProfile: React.FC = () => {
       }
 
       // If a difference viewer is open, close it when clicking outside
-      if (differenceViewer || iconDifferenceViewer) {
+      if (iconDifferenceViewer) {
         const modalWindow = document.querySelector(".modal-window-content");
         if (modalWindow && !e.composedPath().includes(modalWindow)) {
           logger.info("Closing difference viewer due to outside click");
-          setDifferenceViewer(null);
           setIconDifferenceViewer(null);
           return;
         }
@@ -116,8 +105,7 @@ const DesktopProfile: React.FC = () => {
         // Close context/DifferenceViewer if either, else close window
         if (contextMenu.visible) {
           hideContextMenu();
-        } else if (differenceViewer || iconDifferenceViewer) {
-          setDifferenceViewer(null);
+        } else if (iconDifferenceViewer) {
           setIconDifferenceViewer(null);
         } else {
           handleClose();
@@ -131,7 +119,7 @@ const DesktopProfile: React.FC = () => {
       document.removeEventListener("click", handleClickOutside);
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [contextMenu, differenceViewer, iconDifferenceViewer]);
+  }, [contextMenu, iconDifferenceViewer]);
 
   const handleClose = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "DesktopProfile");
@@ -310,29 +298,6 @@ const DesktopProfile: React.FC = () => {
 
   const reloadOtherProfiles = async () => {
     handleCompareProfiles(compareToProfile, true);
-  };
-
-  const handleDifferenceTagClick = (
-    diff: string,
-    item: ProfileCompareState["modified"][0]
-  ) => {
-    const fieldKey = diff as keyof DesktopIcon;
-    const currentValue = item.currentIcon[fieldKey];
-    const otherValue = item.otherIcon[fieldKey];
-
-    setDifferenceViewer({
-      profileName: profile,
-      icon: item.currentIcon,
-      fieldName: diff,
-      currentValue,
-      otherProfileName: compareToProfile,
-      otherIcon: item.otherIcon,
-      otherValue,
-    });
-
-    logger.info(
-      `Profile ${profile} iconId = "${item.currentIcon.id}", ${diff} = "${currentValue}". Profile ${compareToProfile} iconId = "${item.otherIcon.id}", ${diff} = "${otherValue}"`
-    );
   };
 
   const handleModifiedIconClick = (
@@ -969,10 +934,6 @@ const DesktopProfile: React.FC = () => {
                                       key={`diff-${item.otherIcon.id}-${idx}`}
                                       className="difference-tag"
                                       title={diff}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDifferenceTagClick(diff, item);
-                                      }}
                                     >
                                       {diff}
                                     </button>
@@ -1090,18 +1051,6 @@ const DesktopProfile: React.FC = () => {
         </div>
       )}
 
-      {differenceViewer && (
-        <DifferenceViewer
-          profileName={differenceViewer.profileName}
-          icon={differenceViewer.icon}
-          fieldName={differenceViewer.fieldName}
-          currentValue={differenceViewer.currentValue}
-          otherProfileName={differenceViewer.otherProfileName}
-          otherIcon={differenceViewer.otherIcon}
-          otherValue={differenceViewer.otherValue}
-          onClose={() => setDifferenceViewer(null)}
-        />
-      )}
       {iconDifferenceViewer && (
         <IconDifferenceViewer
           profileName={iconDifferenceViewer.profileName}
