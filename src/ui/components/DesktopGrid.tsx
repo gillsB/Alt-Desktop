@@ -409,6 +409,7 @@ const DesktopGrid: React.FC = () => {
    * @param {number} col - The column position for the highlight box.
    */
   const showHighlightAt = (row: number, col: number, pulse?: boolean) => {
+    logger.info("showHighlightAt called for row=" + row + ", col=" + col);
     setHighlightBox({
       row,
       col,
@@ -672,6 +673,23 @@ const DesktopGrid: React.FC = () => {
       handlePreviewUpdate as (...a: unknown[]) => void
     );
 
+    const ipcHighlight = (_: Electron.IpcRendererEvent, id: string) => {
+      try {
+        const icon = iconsByIdRef.current.get(id);
+        if (icon) {
+          showHighlightAt(icon.row, icon.col, true);
+        } else {
+          logger.warn(`highlightIcon: icon id=${id} not found`);
+        }
+      } catch (err) {
+        logger.error("Error handling highlightIcon IPC:", err);
+      }
+    };
+
+    window.electron.on(
+      "highlightIcon",
+      ipcHighlight as (...a: unknown[]) => void
+    );
     // Cleanup the event listeners on unmount
     return () => {
       window.electron.off(
@@ -682,6 +700,10 @@ const DesktopGrid: React.FC = () => {
       window.electron.off(
         "update-icon-preview",
         handlePreviewUpdate as (...a: unknown[]) => void
+      );
+      window.electron.off(
+        "highlightIcon",
+        ipcHighlight as (...a: unknown[]) => void
       );
     };
   }, []);
