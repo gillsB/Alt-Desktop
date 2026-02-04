@@ -2071,4 +2071,16 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return await importIconFromProfile(currentProfile, fromProfile, icon);
     }
   );
+  ipcMainHandle("highlightIcon", async (id: string): Promise<boolean> => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      try {
+        logger.info(`Sending highlightIcon ${id} to renderer window.`);
+        win.webContents.send("highlightIcon", id);
+        return true;
+      } catch (err) {
+        logger.warn("Failed to highlight icon in renderer:", err);
+      }
+    }
+    return false;
+  });
 }

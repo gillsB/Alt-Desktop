@@ -359,6 +359,7 @@ interface EventParamMapping {
   setTheme: [string];
   updateThemeColor: [string, string];
   importIconFromProfile: [string, string, DesktopIcon?];
+  highlightIcon: [string];
 }
 
 // The returns from the main process to the renderer
@@ -451,6 +452,7 @@ type EventPayloadMapping = {
   setTheme: boolean;
   updateThemeColor: ThemeColors;
   importIconFromProfile: DesktopIcon | null;
+  highlightIcon: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -632,5 +634,6 @@ interface Window {
       fromProfile: string,
       icon?: DesktopIcon
     ) => Promise<DesktopIcon | null>;
+    highlightIcon: (id: string) => Promise<boolean>;
   };
 }
