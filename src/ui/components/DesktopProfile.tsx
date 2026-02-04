@@ -303,6 +303,7 @@ const DesktopProfile: React.FC = () => {
   const handleModifiedIconClick = (
     item: ProfileCompareState["modified"][0]
   ) => {
+    window.electron.highlightIcon(item.currentIcon.id);
     setIconDifferenceViewer({
       profileName: profile,
       icon: item.currentIcon,
