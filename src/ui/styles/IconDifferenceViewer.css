@@ -57,12 +57,14 @@
 
 .icon-field-row {
   display: grid;
-  grid-template-columns: 30px 120px 1fr;
+  grid-template-columns: 30px 120px minmax(220px, 1fr);
+  width: 100%;
   padding: 12px;
   border-radius: 4px;
   align-items: center;
   border: 1px solid transparent;
   transition: background-color 0.2s;
+  box-sizing: border-box;
 }
 
 .icon-field-row.same {
@@ -108,8 +110,9 @@
 
 .field-values {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(172px, 1fr) minmax(172px, 1fr);
   gap: 20px;
+  width: 100%;
 }
 
 .field-value {
