@@ -108,11 +108,18 @@
   color: rgb(var(--color-textPrimary));
 }
 
+.unsaved-indicator {
+  color: rgba(var(--color-warning), 1);
+  font-weight: bold;
+  margin-left: 4px;
+}
+
 .field-values {
   display: grid;
-  grid-template-columns: minmax(152px, 1fr) minmax(152px, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(152px, 1fr) auto minmax(152px, 1fr);
+  gap: 12px;
   width: 100%;
+  align-items: center;
 }
 
 .field-value {
@@ -120,10 +127,45 @@
   border-radius: 3px;
   font-size: 12px;
   word-break: break-all;
-  max-height: 100px;
-  overflow-y: auto;
   background-color: rgba(var(--color-textArea), 1);
   border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.field-value.field-edited {
+  border: 2px solid rgba(var(--color-warning), 0.6);
+}
+
+.field-buttons {
+  display: flex;
+  gap: 0px;
+  justify-content: center;
+}
+
+.field-copy-btn {
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background-color: rgba(var(--color-bgAccent, 0, 122, 255), 0.1);
+  cursor: pointer;
+  font-weight: bold;
+  color: rgb(var(--color-textPrimary));
+  transition:
+    background-color 0.15s,
+    opacity 0.15s;
+  min-width: 14px;
+  text-align: center;
+}
+
+.field-copy-btn:hover:not(:disabled) {
+  background-color: rgba(var(--color-bgAccent, 0, 122, 255), 0.2);
+}
+
+.field-copy-btn:active:not(:disabled) {
+  background-color: rgba(var(--color-bgAccent, 0, 122, 255), 0.3);
+}
+
+.field-copy-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .modal-window-content {
