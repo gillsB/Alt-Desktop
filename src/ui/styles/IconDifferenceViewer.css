@@ -110,7 +110,7 @@
 
 .field-values {
   display: grid;
-  grid-template-columns: minmax(172px, 1fr) minmax(172px, 1fr);
+  grid-template-columns: minmax(152px, 1fr) minmax(152px, 1fr);
   gap: 20px;
   width: 100%;
 }

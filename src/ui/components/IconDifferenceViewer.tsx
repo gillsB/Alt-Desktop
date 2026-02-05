@@ -44,6 +44,32 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     return icon[fieldName];
   };
 
+  const [editedLeft, setEditedLeft] = useState<Record<string, string>>(() => {
+    const map: Record<string, string> = {};
+    fieldsToCompare.forEach((f) => {
+      const v = getFieldValue(icon, f);
+      map[String(f)] = formatValue(v);
+    });
+    return map;
+  });
+
+  const [editedRight, setEditedRight] = useState<Record<string, string>>(() => {
+    const map: Record<string, string> = {};
+    fieldsToCompare.forEach((f) => {
+      const v = getFieldValue(otherIcon, f);
+      map[String(f)] = formatValue(v);
+    });
+    return map;
+  });
+
+  const handleLeftChange = (field: string, value: string) => {
+    setEditedLeft((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleRightChange = (field: string, value: string) => {
+    setEditedRight((prev) => ({ ...prev, [field]: value }));
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-window-content">
@@ -101,8 +127,6 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
           {/* Fields Comparison */}
           <div className="icon-fields-comparison">
             {fieldsToCompare.map((fieldName) => {
-              const currentValue = getFieldValue(icon, fieldName);
-              const otherValue = getFieldValue(otherIcon, fieldName);
               const isDifferent = isFieldDifferent(fieldName);
 
               // Only show different fields unless showAllFields is true
@@ -127,10 +151,22 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                   </div>
                   <div className="field-name">{fieldName}</div>
                   <div className="field-values">
-                    <div className="field-value">
-                      {formatValue(currentValue)}
-                    </div>
-                    <div className="field-value">{formatValue(otherValue)}</div>
+                    <textarea
+                      className="field-value"
+                      value={editedLeft[String(fieldName)]}
+                      onChange={(e) =>
+                        handleLeftChange(String(fieldName), e.target.value)
+                      }
+                      rows={2}
+                    />
+                    <textarea
+                      className="field-value"
+                      value={editedRight[String(fieldName)]}
+                      onChange={(e) =>
+                        handleRightChange(String(fieldName), e.target.value)
+                      }
+                      rows={2}
+                    />
                   </div>
                 </div>
               );
