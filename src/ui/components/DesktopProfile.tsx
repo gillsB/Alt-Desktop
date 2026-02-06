@@ -495,9 +495,6 @@ const DesktopProfile: React.FC = () => {
       <section className="desktop-profile-bottom">
         <div className="import-icons-header">
           <h2>Import Icons</h2>
-          <div className="import-icons-subtitle">
-            Import icons from other sources.
-          </div>
         </div>
         <div className="import-icons-tabs">
           {TABS.map((tab) => (
