@@ -214,24 +214,24 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                         >
                           ↩️
                         </button>
-                      ) : (
+                      ) : !currentMatch ? (
                         <>
                           <button
-                            className="field-copy-btn field-copy-left"
+                            className="button field-copy-left"
                             onClick={() => copyRightToLeft(String(fieldName))}
                             title="Copy right to left"
                           >
                             &lt;
                           </button>
                           <button
-                            className="field-copy-btn field-copy-right"
+                            className="button field-copy-right"
                             onClick={() => copyLeftToRight(String(fieldName))}
                             title="Copy left to right"
                           >
                             &gt;
                           </button>
                         </>
-                      )}
+                      ) : null}
                     </div>
                     <div className="field-value">
                       {editedRight[String(fieldName)]}
