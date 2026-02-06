@@ -5,8 +5,8 @@ import { openSubWindow } from "./subWindowManager.js";
 export function openDesktopProfileWindow() {
   const defaultWidth = 800;
   const defaultHeight = 888;
-  const minWidth = 465;
-  const minHeight = 425;
+  const minWidth = 525;
+  const minHeight = 500;
 
   const { actualWidth: calculatedWidth, actualHeight: calculatedHeight } =
     calculateSubWindowDimensions(defaultWidth, defaultHeight);

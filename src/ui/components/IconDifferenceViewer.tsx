@@ -62,12 +62,36 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     return map;
   });
 
+  const [isLeftEdited, setIsLeftEdited] = useState<Record<string, boolean>>(
+    () => {
+      const map: Record<string, boolean> = {};
+      fieldsToCompare.forEach((f) => {
+        map[String(f)] = false;
+      });
+      return map;
+    }
+  );
+
+  const [isRightEdited, setIsRightEdited] = useState<Record<string, boolean>>(
+    () => {
+      const map: Record<string, boolean> = {};
+      fieldsToCompare.forEach((f) => {
+        map[String(f)] = false;
+      });
+      return map;
+    }
+  );
+
   const copyLeftToRight = (field: string) => {
     setEditedRight((prev) => ({ ...prev, [field]: editedLeft[field] }));
+    setIsRightEdited((prev) => ({ ...prev, [field]: true }));
+    setIsLeftEdited((prev) => ({ ...prev, [field]: false }));
   };
 
   const copyRightToLeft = (field: string) => {
     setEditedLeft((prev) => ({ ...prev, [field]: editedRight[field] }));
+    setIsLeftEdited((prev) => ({ ...prev, [field]: true }));
+    setIsRightEdited((prev) => ({ ...prev, [field]: false }));
   };
 
   const resetField = (field: string) => {
@@ -81,15 +105,8 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         getFieldValue(otherIcon, field as keyof DesktopIcon)
       ),
     }));
-  };
-
-  const isFieldEdited = (field: string, side: "left" | "right"): boolean => {
-    const original =
-      side === "left"
-        ? getFieldValue(icon, field as keyof DesktopIcon)
-        : getFieldValue(otherIcon, field as keyof DesktopIcon);
-    const current = side === "left" ? editedLeft[field] : editedRight[field];
-    return formatValue(original) !== current;
+    setIsLeftEdited((prev) => ({ ...prev, [field]: false }));
+    setIsRightEdited((prev) => ({ ...prev, [field]: false }));
   };
 
   const fieldsMatch = (field: string): boolean => {
@@ -155,8 +172,6 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
             {fieldsToCompare.map((fieldName) => {
               const isDifferent = isFieldDifferent(fieldName);
               const currentMatch = fieldsMatch(String(fieldName));
-              const leftEdited = isFieldEdited(String(fieldName), "left");
-              const rightEdited = isFieldEdited(String(fieldName), "right");
 
               // Only show different fields unless showAllFields is true
               if (!showAllFields && !isDifferent) {
@@ -180,7 +195,8 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                   </div>
                   <div className="field-name">
                     {fieldName}
-                    {(leftEdited || rightEdited) && (
+                    {(isLeftEdited[String(fieldName)] ||
+                      isRightEdited[String(fieldName)]) && (
                       <span className="unsaved-indicator">*</span>
                     )}
                   </div>
@@ -189,28 +205,33 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                       {editedLeft[String(fieldName)]}
                     </div>
                     <div className="field-buttons">
-                      <button
-                        className="field-copy-btn field-copy-left"
-                        onClick={() => copyRightToLeft(String(fieldName))}
-                        title="Copy right to left"
-                      >
-                        &lt;
-                      </button>
-                      <button
-                        className="field-copy-btn field-copy-center"
-                        onClick={() => resetField(String(fieldName))}
-                        title="Reset to original"
-                        disabled={!leftEdited && !rightEdited}
-                      >
-                        o
-                      </button>
-                      <button
-                        className="field-copy-btn field-copy-right"
-                        onClick={() => copyLeftToRight(String(fieldName))}
-                        title="Copy left to right"
-                      >
-                        &gt;
-                      </button>
+                      {isLeftEdited[String(fieldName)] ||
+                      isRightEdited[String(fieldName)] ? (
+                        <button
+                          className="field-copy-btn field-copy-center"
+                          onClick={() => resetField(String(fieldName))}
+                          title="Reset to original"
+                        >
+                          ↩️
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            className="field-copy-btn field-copy-left"
+                            onClick={() => copyRightToLeft(String(fieldName))}
+                            title="Copy right to left"
+                          >
+                            &lt;
+                          </button>
+                          <button
+                            className="field-copy-btn field-copy-right"
+                            onClick={() => copyLeftToRight(String(fieldName))}
+                            title="Copy left to right"
+                          >
+                            &gt;
+                          </button>
+                        </>
+                      )}
                     </div>
                     <div className="field-value">
                       {editedRight[String(fieldName)]}
