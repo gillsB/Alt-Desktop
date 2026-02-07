@@ -48,6 +48,41 @@
   text-align: center;
 }
 
+.icon-save-buttons-row {
+  display: grid;
+  grid-template-columns: fr 1fr 1fr;
+  width: 100%;
+  border-bottom: 1px solid rgba(var(--color-borderPrimary), 0.1);
+}
+
+.icon-save-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background-color: rgba(var(--color-primary), 1);
+  color: rgb(var(--color-textPrimary));
+  cursor: pointer;
+  font-weight: 500;
+  transition:
+    background-color 0.15s,
+    opacity 0.15s,
+    cursor 0.15s;
+  text-align: center;
+}
+
+.icon-save-button:first-of-type {
+  grid-column: 2;
+}
+
+.icon-save-button:last-of-type {
+  grid-column: 3;
+}
+
+.icon-save-button:disabled {
+  cursor: default;
+  background-color: rgba(var(--color-primaryLight), 0.04);
+}
+
 .icon-fields-comparison {
   display: flex;
   flex-direction: column;

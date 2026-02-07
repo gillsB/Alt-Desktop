@@ -113,6 +113,71 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     return editedLeft[field] === editedRight[field];
   };
 
+  const isAnyLeftEdited = (): boolean => {
+    return Object.values(isLeftEdited).some((val) => val);
+  };
+
+  const isAnyRightEdited = (): boolean => {
+    return Object.values(isRightEdited).some((val) => val);
+  };
+
+  const parseFieldValue = (
+    fieldName: keyof DesktopIcon,
+    value: string
+  ): DesktopIcon[keyof DesktopIcon] => {
+    if (fieldName === "args") {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return [];
+      }
+    }
+    if (fieldName === "fontSize") {
+      return parseInt(value, 10);
+    }
+    return value;
+  };
+
+  //TODO DOES NOT SAVE TO FILE ONLY WINDOW
+  const saveLeft = () => {
+    fieldsToCompare.forEach((field) => {
+      if (isLeftEdited[String(field)]) {
+        const newValue = editedLeft[String(field)];
+        const parsedValue = parseFieldValue(field, newValue);
+        icon[field] = parsedValue as never;
+      }
+    });
+    setIsLeftEdited({});
+    setEditedLeft(() => {
+      const map: Record<string, string> = {};
+      fieldsToCompare.forEach((f) => {
+        const v = getFieldValue(icon, f);
+        map[String(f)] = formatValue(v);
+      });
+      return map;
+    });
+  };
+
+  //TODO DOES NOT SAVE TO FILE ONLY WINDOW
+  const saveRight = () => {
+    fieldsToCompare.forEach((field) => {
+      if (isRightEdited[String(field)]) {
+        const newValue = editedRight[String(field)];
+        const parsedValue = parseFieldValue(field, newValue);
+        otherIcon[field] = parsedValue as never;
+      }
+    });
+    setIsRightEdited({});
+    setEditedRight(() => {
+      const map: Record<string, string> = {};
+      fieldsToCompare.forEach((f) => {
+        const v = getFieldValue(otherIcon, f);
+        map[String(f)] = formatValue(v);
+      });
+      return map;
+    });
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-window-content">
@@ -169,6 +234,33 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
 
           {/* Fields Comparison */}
           <div className="icon-fields-comparison">
+            {/* Save Buttons Row */}
+            <div className="icon-save-buttons-row">
+              <button
+                className="button icon-save-button"
+                onClick={saveLeft}
+                disabled={!isAnyLeftEdited()}
+                title={
+                  isAnyLeftEdited()
+                    ? "Save changes to left icon"
+                    : "No changes to save"
+                }
+              >
+                Save {profileName}
+              </button>
+              <button
+                className="button icon-save-button"
+                onClick={saveRight}
+                disabled={!isAnyRightEdited()}
+                title={
+                  isAnyRightEdited()
+                    ? "Save changes to right icon"
+                    : "No changes to save"
+                }
+              >
+                Save {otherProfileName}
+              </button>
+            </div>
             {fieldsToCompare.map((fieldName) => {
               const isDifferent = isFieldDifferent(fieldName);
               const currentMatch = fieldsMatch(String(fieldName));
