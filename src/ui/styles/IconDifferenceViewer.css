@@ -167,6 +167,10 @@
   width: 100%;
   min-width: 0;
 }
+.field-value:empty::before {
+  content: "Empty";
+  color: rgba(var(--color-textPrimary), 0.4);
+}
 
 .field-value.field-edited {
   border: 2px solid rgba(var(--color-warning), 0.6);
