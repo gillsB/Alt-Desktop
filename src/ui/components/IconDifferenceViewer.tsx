@@ -139,7 +139,8 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   };
 
   //TODO DOES NOT SAVE TO FILE ONLY WINDOW
-  const saveLeft = () => {
+  const saveLeft = async () => {
+    const iconBackup = { ...icon };
     fieldsToCompare.forEach((field) => {
       if (isLeftEdited[String(field)]) {
         const newValue = editedLeft[String(field)];
@@ -147,15 +148,20 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         icon[field] = parsedValue as never;
       }
     });
-    setIsLeftEdited({});
-    setEditedLeft(() => {
-      const map: Record<string, string> = {};
-      fieldsToCompare.forEach((f) => {
-        const v = getFieldValue(icon, f);
-        map[String(f)] = formatValue(v);
+    const saved = await window.electron.saveIconData(icon);
+    if (saved) {
+      setIsLeftEdited({});
+      setEditedLeft(() => {
+        const map: Record<string, string> = {};
+        fieldsToCompare.forEach((f) => {
+          const v = getFieldValue(icon, f);
+          map[String(f)] = formatValue(v);
+        });
+        return map;
       });
-      return map;
-    });
+    } else {
+      icon = iconBackup;
+    }
   };
 
   //TODO DOES NOT SAVE TO FILE ONLY WINDOW
