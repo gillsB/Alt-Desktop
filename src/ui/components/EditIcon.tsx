@@ -225,126 +225,79 @@ const EditIcon: React.FC = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "EditIcon");
   };
 
-  const getBaseId = (id: string) => {
-    const match = id.match(/^(.*?)(?:_\d+)?$/);
-    return match ? match[1] : id;
-  };
-
   const handleSave = async () => {
     if (!icon) {
       logger.error("Icon data is missing.");
       return;
     }
+    // TODO need to catch bad_image error from the save attempts and display an error
 
     try {
-      const oldId = icon.id;
-      const iconName = icon.name?.trim() || "";
-      logger.info(`Saving icon with name: "${iconName}" and id: "${oldId}"`);
-      const baseOldId = getBaseId(oldId);
+      const oldIcon = originalIcon.current ?? null;
 
-      let newId: string | null = oldId;
-      let nameChanged: boolean = false;
+      // Attempt to save, but check fields for validity first (Returns success=false if checks fail)
+      const checkFieldSave = await window.electron.saveIcon(
+        oldIcon,
+        icon,
+        profile,
+        true
+      );
+      logger.info(`checkFieldSave results = ${JSON.stringify(checkFieldSave)}`);
 
-      // If this is a new icon and the name is empty, rename to unknownIcon_#
-      if (isNewIcon && !iconName) {
-        newId = await window.electron.ensureUniqueIconId(
-          profile,
-          "unknownIcon"
-        );
-        logger.info(
-          "new icon and no name, setting to unknownIcon with id:  " + newId
-        );
-        nameChanged = true;
-      } else if (iconName && baseOldId !== iconName) {
-        // Only generate a new id if the name is non-empty and changed
-        newId = await window.electron.ensureUniqueIconId(profile, iconName);
-        logger.info("icon name changed, generated new id: " + newId);
-        nameChanged = true;
-      }
-      // Fail to read -> cancel save and warn user. (Avoid giving it an arbitrary id as it could corrupt files)
-      if (newId === null) {
-        await showSmallWindow(
-          "Failed to Read",
-          "Failed to read desktopIcons.json file. Cannot generate unique icon ID.",
-          ["Okay"]
-        );
-        return;
-      }
-      if (nameChanged && newId !== oldId) {
-        logger.info("Renaming folder : " + oldId + " To: " + newId);
-        await window.electron.renameDataFolder(profile, oldId, newId);
-        await window.electron.renameID(oldId, newId);
-      }
-
-      icon.id = newId;
-
-      // Check if the image path looks like a full file path and save if it is.
-      // Otherwise it is a local file path and should already be saved.
-      const driveLetterRegex = /^[a-zA-Z]:[\\/]/;
-      if (driveLetterRegex.test(icon.image)) {
-        const fileType = await window.electron.getFileType(icon.image);
-        if (fileType.startsWith("image/")) {
-          logger.info(`Resolving full file path for image: ${icon.image}`);
-          try {
-            const savedFilePath = await window.electron.saveImageToIconFolder(
-              icon.image,
-              profile,
-              icon.id
-            );
-
-            // Update the icon's image path with the resolved file path
-            icon.image = savedFilePath;
-            logger.info(`Image resolved and saved to: ${savedFilePath}`);
-          } catch (error) {
-            if (
-              error instanceof Error &&
-              error.message.includes("Source file does not exist:")
-            ) {
-              logger.error("Failed to resolve and save image path:", error);
-              showSmallWindow(
-                "Bad Image Path",
-                `Image path: ${icon.image} \nis invalid or does not exist.`,
-                ["Okay"]
-              );
-            } else {
-              logger.error("Unexpected error during save operation:", error);
-            }
-            return; // Stop saving if the image resolution fails
-          }
-        } else {
-          logger.warn(
-            `saveImageToIconFolder failed with ${icon.image}, external drive detected but fileType not image ${fileType}`
+      // Failed validity checks
+      if (!checkFieldSave.success) {
+        // Ask to save with invalid path
+        if (checkFieldSave.checkResults?.programLinkValid === false) {
+          const ret = await showSmallWindow(
+            "Error",
+            `Saved program path is invalid.\n${icon.programLink}\nWould you like to continue saving?`,
+            ["Yes", "No"]
           );
+          if (ret !== "Yes") {
+            logger.info("User cancelled save due to invalid program path.");
+            return;
+          }
         }
-      }
 
-      if ((await window.electron.getFileType(icon.programLink || "")) === "") {
-        const ret = await showSmallWindow(
-          "Error",
-          `Saved program path is invalid.\n${icon.programLink}\nWould you like to continue saving?`,
-          ["Yes", "No"]
+        // Proceed to save without checks (force save)
+        const checklessSave = await window.electron.saveIcon(
+          oldIcon,
+          icon,
+          profile,
+          false
         );
-        if (ret !== "Yes") {
-          logger.info("User cancelled save due to invalid program path.");
+
+        if (!checklessSave.success) {
+          const ret3 = await showSmallWindow(
+            "Error",
+            "Failed to update icon data. Please report this error.\nDo you still want to close?",
+            ["Yes", "No"]
+          );
+          if (ret3 === "Yes") closeWindow();
           return;
         }
+        if (checklessSave.newID) {
+          logger.info(
+            "Icon ID changing from " +
+              icon.id +
+              " to " +
+              checklessSave.newID +
+              " (checkless save)"
+          );
+          icon.id = checklessSave.newID;
+        }
+        closeWindow();
+        return;
       }
 
-      // Save the icon data
-      if (!(await window.electron.saveIconData(icon))) {
-        logger.error("Failed to reload icon.");
-        const ret = await showSmallWindow(
-          "Error",
-          "Failed to update icon data. Please report this error.\nDo you still want to close?",
-          ["Yes", "No"]
+      if (checkFieldSave.newID) {
+        logger.info(
+          "Icon ID changing from " + icon.id + " to " + checkFieldSave.newID
         );
-        if (ret === "Yes") {
-          logger.info("User confirmed to close after error.");
-          closeWindow();
-        }
-      } else {
-        closeWindow();
+        icon.id = checkFieldSave.newID;
       }
+
+      closeWindow();
     } catch (error) {
       logger.error("Error during save operation:", error);
     }

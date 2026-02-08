@@ -282,6 +282,12 @@ interface EventParamMapping {
   ensureDataFolder: [string, string];
   ensureUniqueIconId: [string, string];
   saveIconData: [DesktopIcon];
+  saveIcon: [
+    oldIcon: DesktopIcon | null,
+    newIcon: DesktopIcon,
+    profile?: string,
+    checkFields?: boolean,
+  ];
   renameID: [string, string];
   sendSubWindowAction: [SubWindowAction, DesktopIcon?];
   getDesktopIcon: [string];
@@ -373,6 +379,12 @@ type EventPayloadMapping = {
   ensureDataFolder: boolean;
   ensureUniqueIconId: string | null;
   saveIconData: boolean;
+  saveIcon: {
+    success: boolean;
+    newID?: string;
+    checkResults?: { programLinkValid: boolean };
+    error?: string;
+  };
   renameID: boolean;
   sendSubWindowAction: {
     action: SubWindowAction;
@@ -479,6 +491,17 @@ interface Window {
       name: string
     ) => Promise<string | null>;
     saveIconData: (icon: DesktopIcon) => Promise<boolean>;
+    saveIcon: (
+      oldIcon: DesktopIcon | null,
+      newIcon: DesktopIcon,
+      profile?: string,
+      checkFields?: boolean
+    ) => Promise<{
+      success: boolean;
+      newID?: string;
+      checkResults?: { programLinkValid: boolean };
+      error?: string;
+    }>;
     renameID: (oldId: string, newId: string) => Promise<boolean>;
     sendSubWindowAction: (action: SubWindowAction, title: string) => void;
     getDesktopIcon: (id: string) => Promise<DesktopIcon | null>;
