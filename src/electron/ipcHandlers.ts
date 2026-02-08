@@ -346,6 +346,25 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
           };
         }
 
+        // If name changed and id differs, attempt rename of folder to newId
+        if (nameChanged && newId !== oldId) {
+          try {
+            const dataFolder = getIconsFolderPath(useProfile);
+            const oldPath = path.join(dataFolder, oldId);
+            const newPath = path.join(dataFolder, newId);
+            if (fs.existsSync(oldPath) && !fs.existsSync(newPath)) {
+              fs.renameSync(oldPath, newPath);
+              logger.info(`Renamed data folder ${oldPath} -> ${newPath}`);
+            }
+          } catch (e) {
+            logger.warn(
+              `Failed to rename data folder ${oldId} -> ${newId}:`,
+              e
+            );
+            return { success: false, error: "failed_rename_folder" };
+          }
+        }
+
         // If image is an external path, try to copy it to the icon folder
         const driveLetterRegex = /^[a-zA-Z]:[\\/]/;
         if (newIcon.image && driveLetterRegex.test(newIcon.image)) {
@@ -364,26 +383,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
               newIcon.image = savedFile;
             } catch (e) {
               logger.error("Failed to save image to icon folder:", e);
-              return { success: false, error: "bad_image" };
+              // TODO Not sure if we should return false here, as we already renamed the folder above.
+              // probably just show the error in a small window
             }
-          }
-        }
-
-        // If name changed and id differs, attempt rename of folder
-        if (nameChanged && newId !== oldId) {
-          try {
-            const dataFolder = getIconsFolderPath(useProfile);
-            const oldPath = path.join(dataFolder, oldId);
-            const newPath = path.join(dataFolder, newId);
-            if (fs.existsSync(oldPath) && !fs.existsSync(newPath)) {
-              fs.renameSync(oldPath, newPath);
-              logger.info(`Renamed data folder ${oldPath} -> ${newPath}`);
-            }
-          } catch (e) {
-            logger.warn(
-              `Failed to rename data folder ${oldId} -> ${newId}:`,
-              e
-            );
           }
         }
 
