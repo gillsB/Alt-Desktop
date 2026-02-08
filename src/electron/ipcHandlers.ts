@@ -289,55 +289,45 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     "renameID",
     async (oldId: string, newId: string): Promise<boolean> => {
       try {
-        const profilesPath = getProfilesPath();
-        const profileFolders = fs
-          .readdirSync(profilesPath, { withFileTypes: true })
-          .filter((dirent) => dirent.isDirectory())
-          .map((dirent) => dirent.name);
+        const profileJsonPath = await getSelectedProfilePath();
 
-        let changed = false;
-
-        for (const folder of profileFolders) {
-          const profileJsonPath = path.join(
-            profilesPath,
-            folder,
-            "profile.json"
-          );
-          if (fs.existsSync(profileJsonPath)) {
-            try {
-              const data = fs.readFileSync(profileJsonPath, "utf-8");
-              const parsed: DesktopIconData = JSON.parse(data);
-
-              let updated = false;
-              if (Array.isArray(parsed.icons)) {
-                for (const icon of parsed.icons) {
-                  if (icon.id === oldId) {
-                    icon.id = newId;
-                    updated = true;
-                    changed = true;
-                  }
-                }
-              }
-
-              if (updated) {
-                fs.writeFileSync(
-                  profileJsonPath,
-                  JSON.stringify(parsed, null, 2),
-                  "utf-8"
-                );
-                logger.info(
-                  `Updated icon id in ${profileJsonPath}: ${oldId} -> ${newId}`
-                );
-              }
-            } catch (err) {
-              logger.error(`Failed to update ${profileJsonPath}: ${err}`);
-            }
-          }
+        if (!fs.existsSync(profileJsonPath)) {
+          logger.warn(`Profile file not found: ${profileJsonPath}`);
+          return false;
         }
 
-        return changed;
+        try {
+          const data = fs.readFileSync(profileJsonPath, "utf-8");
+          const parsed: DesktopIconData = JSON.parse(data);
+
+          let updated = false;
+          if (Array.isArray(parsed.icons)) {
+            for (const icon of parsed.icons) {
+              if (icon.id === oldId) {
+                icon.id = newId;
+                updated = true;
+              }
+            }
+          }
+
+          if (updated) {
+            fs.writeFileSync(
+              profileJsonPath,
+              JSON.stringify(parsed, null, 2),
+              "utf-8"
+            );
+            logger.info(
+              `Updated icon id in ${profileJsonPath}: ${oldId} -> ${newId}`
+            );
+          }
+
+          return updated;
+        } catch (err) {
+          logger.error(`Failed to update ${profileJsonPath}: ${err}`);
+          return false;
+        }
       } catch (error) {
-        logger.error(`Failed to rename icon id in profiles: ${error}`);
+        logger.error(`Failed to rename icon id in profile: ${error}`);
         return false;
       }
     }
