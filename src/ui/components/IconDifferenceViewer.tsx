@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../styles/IconDifferenceViewer.css";
+import { showSmallWindow } from "../util/uiUtil";
 import { SafeImage } from "./SafeImage";
 
 interface IconDifferenceViewerProps {
@@ -138,7 +139,6 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     return value;
   };
 
-  //TODO DOES NOT SAVE TO FILE ONLY WINDOW
   const saveLeft = async () => {
     const iconBackup = { ...icon };
     fieldsToCompare.forEach((field) => {
@@ -148,6 +148,35 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         icon[field] = parsedValue as never;
       }
     });
+
+    // If image field was edited, transfer the image from right icon to left icon
+    if (isLeftEdited["image"]) {
+      // If the other icon has an image, attempt to transfer it (skips if right icon is empty)
+      if (otherIcon.image) {
+        const transferredFileName = await window.electron.transferIconImage(
+          otherProfileName,
+          otherIcon.id,
+          profileName,
+          icon.id
+        );
+        if (transferredFileName) {
+          icon.image = transferredFileName;
+        } else {
+          // If transfer fails, restore backup and abort
+          icon = iconBackup;
+          showSmallWindow(
+            "Error",
+            `Failed to transfer image file from profile 
+            \n${otherProfileName}: ${otherIcon.id} ${otherIcon.image}, 
+            \nto ${profileName}: ${icon.id} ${icon.image} 
+            \nChanges not saved.`
+          );
+          return;
+        }
+      }
+    }
+
+    // TODO need to use the updated SaveIcon instead
     const saved = await window.electron.saveIconData(icon);
     if (saved) {
       setIsLeftEdited({});
