@@ -175,10 +175,17 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         }
       }
     }
-
-    // TODO need to use the updated SaveIcon instead
-    const saved = await window.electron.saveIconData(icon);
-    if (saved) {
+    // This saves the icon with updated id if "name" changed
+    const result = await window.electron.saveIcon(
+      iconBackup,
+      icon,
+      profileName
+    );
+    if (result.success) {
+      // Update id if it was changed
+      if (result.newID) {
+        icon.id = result.newID;
+      }
       setIsLeftEdited({});
       setEditedLeft(() => {
         const map: Record<string, string> = {};
