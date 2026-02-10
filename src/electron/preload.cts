@@ -195,6 +195,12 @@ electron.contextBridge.exposeInMainWorld("electron", {
     icon?: DesktopIcon
   ) => ipcInvoke("importIconFromProfile", currentProfile, fromProfile, icon),
   highlightIcon: (id: string) => ipcInvoke("highlightIcon", id),
+  transferIconImage: (
+    sourceProfile: string,
+    sourceID: string,
+    targetProfile: string,
+    targetID: string
+  ) => ipcInvoke("transferIconImage", sourceProfile, sourceID, targetProfile, targetID),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

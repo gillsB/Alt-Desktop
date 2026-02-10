@@ -2211,4 +2211,75 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
     return sent;
   });
+  ipcMainHandle(
+    "transferIconImage",
+    async (
+      sourceProfile: string,
+      sourceID: string,
+      targetProfile: string,
+      targetID: string
+    ): Promise<string | null> => {
+      try {
+        const profileJsonPath = getProfileJsonPath(sourceProfile);
+        if (!fs.existsSync(profileJsonPath)) {
+          logger.error(
+            `transferIconImage: source profile json not found: ${profileJsonPath}`
+          );
+          return null;
+        }
+
+        const raw = fs.readFileSync(profileJsonPath, "utf-8");
+        const parsed: DesktopIconData = JSON.parse(raw);
+
+        const icon = parsed.icons.find((i) => i.id === sourceID);
+        if (!icon) {
+          logger.error(
+            `transferIconImage: icon ${sourceID} not found in profile ${sourceProfile}`
+          );
+          return null;
+        }
+
+        if (!icon.image) {
+          logger.error(`transferIconImage: icon ${sourceID} has no image`);
+          return null;
+        }
+
+        const sourceIconsFolder = getIconsFolderPath(sourceProfile);
+        const sourceFolder = path.join(sourceIconsFolder, sourceID);
+
+        // Prefer a path relative to the icon folder, fall back to absolute or basename
+        let sourceImagePath = path.isAbsolute(icon.image)
+          ? icon.image
+          : path.join(sourceFolder, icon.image);
+
+        if (!fs.existsSync(sourceImagePath)) {
+          const candidate = path.join(sourceFolder, path.basename(icon.image));
+          if (fs.existsSync(candidate)) {
+            sourceImagePath = candidate;
+          } else {
+            logger.error(
+              `transferIconImage: image file not found for icon ${sourceID} at ${sourceImagePath}`
+            );
+            return null;
+          }
+        }
+
+        const targetIconsFolder = getIconsFolderPath(targetProfile);
+        const targetFolder = path.join(targetIconsFolder, targetID);
+        if (!fs.existsSync(targetFolder)) {
+          fs.mkdirSync(targetFolder, { recursive: true });
+        }
+
+        const targetFileName = path.basename(sourceImagePath);
+        const targetPath = path.join(targetFolder, targetFileName);
+
+        fs.copyFileSync(sourceImagePath, targetPath);
+
+        return targetFileName;
+      } catch (error) {
+        logger.error(`transferIconImage failed: ${error}`);
+        return null;
+      }
+    }
+  );
 }
