@@ -200,8 +200,8 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     }
   };
 
-  //TODO DOES NOT SAVE TO FILE ONLY WINDOW
-  const saveRight = () => {
+  const saveRight = async () => {
+    const otherIconBackup = { ...otherIcon };
     fieldsToCompare.forEach((field) => {
       if (isRightEdited[String(field)]) {
         const newValue = editedRight[String(field)];
@@ -209,15 +209,57 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         otherIcon[field] = parsedValue as never;
       }
     });
-    setIsRightEdited({});
-    setEditedRight(() => {
-      const map: Record<string, string> = {};
-      fieldsToCompare.forEach((f) => {
-        const v = getFieldValue(otherIcon, f);
-        map[String(f)] = formatValue(v);
+
+    // If image field was edited, transfer the image from left icon to right icon
+    if (isRightEdited["image"]) {
+      // If the left icon has an image, attempt to transfer it (skips if left icon is empty)
+      if (icon.image) {
+        const transferredFileName = await window.electron.transferIconImage(
+          profileName,
+          icon.id,
+          otherProfileName,
+          otherIcon.id
+        );
+        if (transferredFileName) {
+          otherIcon.image = transferredFileName;
+        } else {
+          // If transfer fails, restore backup and abort
+          otherIcon = otherIconBackup;
+          showSmallWindow(
+            "Error",
+            `Failed to transfer image file from profile 
+            \n${profileName}: ${icon.id} ${icon.image}, 
+            \nto ${otherProfileName}: ${otherIcon.id} ${otherIcon.image} 
+            \nChanges not saved.`
+          );
+          return;
+        }
+      }
+    }
+
+    // This saves the icon with updated id if "name" changed
+    const result = await window.electron.saveIcon(
+      otherIconBackup,
+      otherIcon,
+      otherProfileName
+    );
+    if (result.success) {
+      // Update id if it was changed
+      if (result.newID) {
+        otherIcon.id = result.newID;
+      }
+      setIsRightEdited({});
+      setEditedRight(() => {
+        const map: Record<string, string> = {};
+        fieldsToCompare.forEach((f) => {
+          const v = getFieldValue(otherIcon, f);
+          map[String(f)] = formatValue(v);
+        });
+        return map;
       });
-      return map;
-    });
+    } else {
+      otherIcon = otherIconBackup;
+    }
   };
 
   return (
