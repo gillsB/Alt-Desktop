@@ -195,6 +195,10 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         });
         return map;
       });
+      if (iconBackup.id !== icon.id) {
+        await window.electron.reloadIcon(iconBackup.id);
+      }
+      await window.electron.reloadIcon(icon.id);
     } else {
       icon = iconBackup;
     }
