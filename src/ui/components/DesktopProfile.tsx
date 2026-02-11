@@ -94,7 +94,7 @@ const DesktopProfile: React.FC = () => {
         const modalWindow = document.querySelector(".modal-window-content");
         if (modalWindow && !e.composedPath().includes(modalWindow)) {
           logger.info("Closing difference viewer due to outside click");
-          setIconDifferenceViewer(null);
+          handleIconDifferenceClose();
           return;
         }
       }
@@ -297,7 +297,7 @@ const DesktopProfile: React.FC = () => {
   };
 
   const reloadOtherProfiles = async () => {
-    handleCompareProfiles(compareToProfile, true);
+    await handleCompareProfiles(compareToProfile, true);
   };
 
   const handleModifiedIconClick = (
@@ -311,6 +311,19 @@ const DesktopProfile: React.FC = () => {
       otherIcon: item.otherIcon,
       differences: item.differences,
     });
+  };
+
+  const handleIconDifferenceClose = async () => {
+    setIconDifferenceViewer(null);
+    try {
+      await reloadOtherProfiles();
+      await reloadFiles();
+    } catch (err) {
+      logger.error(
+        "Error reloading profiles after difference viewer closed:",
+        err
+      );
+    }
   };
 
   useEffect(() => {
@@ -1060,7 +1073,7 @@ const DesktopProfile: React.FC = () => {
           otherProfileName={iconDifferenceViewer.otherProfileName}
           otherIcon={iconDifferenceViewer.otherIcon}
           differences={iconDifferenceViewer.differences}
-          onClose={() => setIconDifferenceViewer(null)}
+          onClose={handleIconDifferenceClose}
         />
       )}
     </div>
