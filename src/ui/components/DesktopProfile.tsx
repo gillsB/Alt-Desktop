@@ -385,7 +385,7 @@ const DesktopProfile: React.FC = () => {
     return i;
   };
 
-  // Render highlighted path: common prefix green, differing tail yellow
+  // TODO remove if not re-used in new DesktopDifferenceViewer.
   const renderHighlightedPath = (
     iconPath: string | undefined,
     filePath: string
@@ -647,40 +647,34 @@ const DesktopProfile: React.FC = () => {
                 )}
 
                 {!partialMatchesCollapsed && (
-                  <div className="not-imported-content">
+                  <div className="desktop-profile-icons-grid-modified">
                     {desktopFiles.nameOnlyMatches.map((file, index) => (
                       <div
                         key={`partial-name-${index}`}
-                        className="desktop-profile-file partial"
-                        onClick={() => {
-                          if (contextMenu.visible) return;
-                          window.electron.openInExplorer(
-                            "programLink",
-                            file.path
-                          );
-                        }}
-                        onContextMenu={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setContextMenu({
-                            visible: true,
-                            x: e.clientX,
-                            y: e.clientY,
-                            file: file,
-                            section: "partial",
-                          });
-                        }}
+                        className="desktop-profile-icon-item modified-item"
+                        title={file.icon.name}
                       >
-                        <div className="desktop-file-content">
-                          <span className={`partial-match-name`}>
-                            {renderHighlightedPath(file.icon.name, file.name)}
-                          </span>
-                          <span className="partial-match-path">
-                            {renderHighlightedPath(
-                              file.icon.programLink,
-                              file.path
-                            )}
-                          </span>
+                        <div className="icon-card">
+                          <SafeImage
+                            profile={profile}
+                            id={file.icon.id}
+                            row={file.icon.row}
+                            col={file.icon.col}
+                            imagePath={file.icon.image}
+                            width={84}
+                            height={84}
+                            highlighted={false}
+                          />
+                          <div className="desktop-profile-icon-name">
+                            {file.icon.name}
+                          </div>
+                        </div>
+                        <div className="difference-box">
+                          <div className="modified-differences">
+                            <button className="difference-tag" title="Name">
+                              Name
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -688,36 +682,30 @@ const DesktopProfile: React.FC = () => {
                     {desktopFiles.pathOnlyMatches.map((file, index) => (
                       <div
                         key={`partial-path-${index}`}
-                        className="desktop-profile-file partial"
-                        onClick={() => {
-                          if (contextMenu.visible) return;
-                          window.electron.openInExplorer(
-                            "programLink",
-                            file.path
-                          );
-                        }}
-                        onContextMenu={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setContextMenu({
-                            visible: true,
-                            x: e.clientX,
-                            y: e.clientY,
-                            file: file,
-                            section: "partial",
-                          });
-                        }}
+                        className="desktop-profile-icon-item modified-item"
+                        title={file.icon.name}
                       >
-                        <div className="desktop-file-content">
-                          <span className={`partial-match-name`}>
-                            {renderHighlightedPath(file.icon.name, file.name)}
-                          </span>
-                          <span className="partial-match-path">
-                            {renderHighlightedPath(
-                              file.icon.programLink,
-                              file.path
-                            )}
-                          </span>
+                        <div className="icon-card">
+                          <SafeImage
+                            profile={profile}
+                            id={file.icon.id}
+                            row={file.icon.row}
+                            col={file.icon.col}
+                            imagePath={file.icon.image}
+                            width={84}
+                            height={84}
+                            highlighted={false}
+                          />
+                          <div className="desktop-profile-icon-name">
+                            {file.icon.name}
+                          </div>
+                        </div>
+                        <div className="difference-box">
+                          <div className="modified-differences">
+                            <button className="difference-tag" title="Path">
+                              Path
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
