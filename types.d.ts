@@ -281,7 +281,6 @@ interface EventParamMapping {
   ensureProfileFolder: [string, copyFromProfile?: string];
   ensureDataFolder: [string, string];
   ensureUniqueIconId: [string, string];
-  saveIconData: [DesktopIcon];
   saveIcon: [
     oldIcon: DesktopIcon | null,
     newIcon: DesktopIcon,
@@ -379,7 +378,6 @@ type EventPayloadMapping = {
   ensureProfileFolder: boolean;
   ensureDataFolder: boolean;
   ensureUniqueIconId: string | null;
-  saveIconData: boolean;
   saveIcon: {
     success: boolean;
     newID?: string;
@@ -492,7 +490,6 @@ interface Window {
       profile: string,
       name: string
     ) => Promise<string | null>;
-    saveIconData: (icon: DesktopIcon) => Promise<boolean>;
     saveIcon: (
       oldIcon: DesktopIcon | null,
       newIcon: DesktopIcon,

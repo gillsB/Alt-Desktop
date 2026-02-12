@@ -85,7 +85,6 @@ import {
   resetAllIconsFontColor,
   resolveShortcut,
   saveBgJsonFile,
-  saveIconData,
   saveImageToIconFolder,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
@@ -280,10 +279,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return ensureUniqueIconId(profile, name);
     }
   );
-
-  ipcMainHandle("saveIconData", async (icon: DesktopIcon): Promise<boolean> => {
-    return saveIconData(icon);
-  });
 
   ipcMainHandle(
     "saveIcon",

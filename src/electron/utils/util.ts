@@ -1287,7 +1287,7 @@ export async function getProfiles(): Promise<string[]> {
   }
 }
 
-export async function saveIconData(icon: DesktopIcon): Promise<boolean> {
+async function saveIconData(icon: DesktopIcon): Promise<boolean> {
   const filePath = await getSelectedProfilePath();
 
   try {
