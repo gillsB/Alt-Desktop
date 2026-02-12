@@ -85,6 +85,7 @@ import {
   resetAllIconsFontColor,
   resolveShortcut,
   saveBgJsonFile,
+  saveIcon,
   saveImageToIconFolder,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
@@ -287,133 +288,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       newIcon: DesktopIcon,
       profile?: string,
       checkFields?: boolean
-    ): Promise<{
-      success: boolean;
-      newID?: string;
-      checkResults?: { programLinkValid: boolean };
-      error?: string;
-    }> => {
-      try {
-        // determine profile (use provided or fallback to renderer state)
-        let useProfile = profile;
-        if (!useProfile) {
-          useProfile = await getRendererState("profile");
-          if (!useProfile) {
-            logger.warn("No profile available to save icon.");
-            return { success: false, error: "no_profile" };
-          }
-        }
-
-        const profileJsonPath = getProfileJsonPath(useProfile);
-        if (!fs.existsSync(profileJsonPath)) {
-          logger.warn(`Profile file not found: ${profileJsonPath}`);
-          return { success: false, error: "profile_not_found" };
-        }
-
-        const oldId = oldIcon?.id ?? newIcon.id;
-        let newId = newIcon.id;
-        const baseOldId = (oldId || "").match(/^(.*?)(?:_\d+)?$/)?.[1] || oldId;
-        const iconName = (newIcon.name || "").trim();
-        let nameChanged = false;
-
-        // Determine new id if name changed or unnamed new icon
-        if (oldIcon && !iconName) {
-          const gen = await ensureUniqueIconId(useProfile, "unknownIcon");
-          if (gen === null) return { success: false, error: "failed_read" };
-          newId = gen;
-          nameChanged = true;
-        } else if (iconName && baseOldId !== iconName) {
-          const gen = await ensureUniqueIconId(useProfile, iconName);
-          if (gen === null) return { success: false, error: "failed_read" };
-          newId = gen;
-          nameChanged = true;
-        }
-
-        // Early field checks (currently only programLink)
-        const programTypeEarly = getMimeType(newIcon.programLink || "");
-        const validProgram = !!programTypeEarly;
-        if (checkFields && newIcon.programLink && !validProgram) {
-          logger.warn(`Invalid program link: ${newIcon.programLink}`);
-          return {
-            success: false,
-            error: "invalid_program_link",
-            checkResults: { programLinkValid: false },
-          };
-        }
-
-        // If name changed and id differs, attempt rename of folder to newId
-        if (nameChanged && newId !== oldId) {
-          try {
-            const dataFolder = getIconsFolderPath(useProfile);
-            const oldPath = path.join(dataFolder, oldId);
-            const newPath = path.join(dataFolder, newId);
-            if (fs.existsSync(oldPath) && !fs.existsSync(newPath)) {
-              fs.renameSync(oldPath, newPath);
-              logger.info(`Renamed data folder ${oldPath} -> ${newPath}`);
-            }
-          } catch (e) {
-            logger.warn(
-              `Failed to rename data folder ${oldId} -> ${newId}:`,
-              e
-            );
-            return { success: false, error: "failed_rename_folder" };
-          }
-        }
-
-        // If image is an external path, try to copy it to the icon folder
-        const driveLetterRegex = /^[a-zA-Z]:[\\/]/;
-        if (newIcon.image && driveLetterRegex.test(newIcon.image)) {
-          const fileType = getMimeType(newIcon.image as string);
-          if (
-            fileType &&
-            typeof fileType === "string" &&
-            fileType.startsWith("image/")
-          ) {
-            try {
-              const savedFile = saveImageToIconFolder(
-                newIcon.image as string,
-                useProfile,
-                newId
-              );
-              newIcon.image = savedFile;
-            } catch (e) {
-              logger.error("Failed to save image to icon folder:", e);
-              // TODO Not sure if we should return false here, as we already renamed the folder above.
-              // probably just show the error in a small window
-            }
-          }
-        }
-
-        // Read profile json and update icon entry
-        const data = fs.readFileSync(profileJsonPath, "utf-8");
-        const parsed: DesktopIconData = JSON.parse(data);
-        parsed.icons = Array.isArray(parsed.icons) ? parsed.icons : [];
-
-        // ensure newIcon.id is set
-        newIcon.id = newId;
-
-        const existingIndex = parsed.icons.findIndex((i) => i.id === oldId);
-        if (existingIndex !== -1) {
-          parsed.icons[existingIndex] = newIcon;
-        } else {
-          parsed.icons.push(newIcon);
-        }
-
-        fs.writeFileSync(
-          profileJsonPath,
-          JSON.stringify(parsed, null, 2),
-          "utf-8"
-        );
-
-        return {
-          success: true,
-          newID: newId,
-          checkResults: { programLinkValid: validProgram },
-        };
-      } catch (error) {
-        logger.error("finalizeIconSave failed:", error);
-        return { success: false, error: String(error) };
-      }
+    ) => {
+      return saveIcon(oldIcon, newIcon, profile, checkFields);
     }
   );
 
