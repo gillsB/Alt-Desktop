@@ -35,6 +35,7 @@ export const ensureAppDataFiles = () => {
     const backgroundsFilePath = getBackgroundsJsonFilePath();
     const profilesPath = getProfilesPath();
     const profilesDefaultFolder = path.join(profilesPath, "default");
+    const profilesDesktopCacheFolder = path.join(profilesPath, "desktop_cache");
     const defaultProfileJson = getDefaultProfileJsonPath();
 
     migrateLegacyDataFolders();
@@ -66,6 +67,19 @@ export const ensureAppDataFiles = () => {
       logger.info("profiles folder created successfully.");
     } else {
       logger.info("profiles folder already exists:", profilesDefaultFolder);
+    }
+    if (!fs.existsSync(profilesDesktopCacheFolder)) {
+      logger.info(
+        "profiles desktop_cache folder does not exist, creating:",
+        profilesDesktopCacheFolder
+      );
+      fs.mkdirSync(profilesDesktopCacheFolder, { recursive: true });
+      logger.info("profiles desktop_cache folder created successfully.");
+    } else {
+      logger.info(
+        "profiles desktop_cache folder already exists:",
+        profilesDesktopCacheFolder
+      );
     }
 
     // Ensure desktopIcons.json exists

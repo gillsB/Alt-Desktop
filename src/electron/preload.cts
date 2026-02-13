@@ -199,7 +199,15 @@ electron.contextBridge.exposeInMainWorld("electron", {
     sourceID: string,
     targetProfile: string,
     targetID: string
-  ) => ipcInvoke("transferIconImage", sourceProfile, sourceID, targetProfile, targetID),
+  ) =>
+    ipcInvoke(
+      "transferIconImage",
+      sourceProfile,
+      sourceID,
+      targetProfile,
+      targetID
+    ),
+  importAllIconsToDesktopCache: () => ipcInvoke("importAllIconsToDesktopCache"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

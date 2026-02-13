@@ -366,6 +366,7 @@ interface EventParamMapping {
   importIconFromProfile: [string, string, DesktopIcon?];
   highlightIcon: [string];
   transferIconImage: [string, string, string, string];
+  importAllIconsToDesktopCache: [];
 }
 
 // The returns from the main process to the renderer
@@ -465,6 +466,7 @@ type EventPayloadMapping = {
   importIconFromProfile: DesktopIcon | null;
   highlightIcon: boolean;
   transferIconImage: string | null;
+  importAllIconsToDesktopCache: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -663,5 +665,6 @@ interface Window {
       targetProfile: string,
       targetID: string
     ) => Promise<string | null>;
+    importAllIconsToDesktopCache: (profile: string) => Promise<boolean>;
   };
 }

@@ -1532,7 +1532,7 @@ export async function ensureProfileFolder(
       }
     } else if (!fs.existsSync(profileJsonPath)) {
       logger.info(
-        `profile.json not found in ${profileFolder}, creating default.`
+        `profile.json not found in ${profileFolder}, creating default profile.json.`
       );
       fs.writeFileSync(
         profileJsonPath,
@@ -1954,10 +1954,13 @@ export async function importDesktopFileAsIcon(
     };
 
     logger.info(`Importing icon at (${row},${col}):`, JSON.stringify(icon));
-    const saved = await saveIcon(null, icon);
+    const saved = await saveIcon(null, icon, profile);
     if (saved) {
       if (mainWindow) {
-        mainWindow.webContents.send("reload-icon", { id: icon.id, icon });
+        // Only trigger reload if imported to current profile (otherwise this saves a blank icon on current profile).
+        if (profile === (await getRendererState("profile"))) {
+          mainWindow.webContents.send("reload-icon", { id: icon.id, icon });
+        }
       }
       return icon;
     } else {

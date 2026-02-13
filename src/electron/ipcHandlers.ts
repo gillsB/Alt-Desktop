@@ -1945,6 +1945,283 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
     return await importAllIconsFromDesktop(mainWindow, profile);
   });
+  ipcMainHandle("importAllIconsToDesktopCache", async (): Promise<boolean> => {
+    const profile = "desktop_cache";
+    try {
+      // Ensure the profile folder exists
+      await ensureProfileFolder(profile);
+    } catch (err) {
+      logger.warn(`ensureProfileFolder failed for ${profile}: ${err}`);
+    }
+
+    try {
+      const profileJsonPath = getProfileJsonPath(profile);
+      const profileDir = path.dirname(profileJsonPath);
+      const modFilePath = path.join(profileDir, "desktop_cache_modified.json");
+
+      // Load existing modified-date map
+      // Keys: basenames Values: mtimeMs
+      let modifiedMap: Record<string, number> = {};
+      if (fs.existsSync(modFilePath)) {
+        try {
+          modifiedMap = JSON.parse(fs.readFileSync(modFilePath, "utf-8")) || {};
+        } catch (e) {
+          logger.warn(`Failed to parse modified map: ${e}`);
+          modifiedMap = {};
+        }
+      }
+
+      // Load existing icons and taken coords from the profile
+      const takenCoords = new Set<string>();
+      let existingIcons: DesktopIcon[] = [];
+      if (fs.existsSync(profileJsonPath)) {
+        try {
+          const raw = fs.readFileSync(profileJsonPath, "utf-8");
+          const parsed: DesktopIconData = JSON.parse(raw);
+          existingIcons = parsed.icons || [];
+          existingIcons.forEach((icon) => {
+            if (typeof icon.row === "number" && typeof icon.col === "number") {
+              takenCoords.add(`${icon.row},${icon.col}`);
+            }
+          });
+        } catch (e) {
+          logger.warn(`Failed to read existing profile icons: ${e}`);
+        }
+      }
+
+      // Get desktop files and matches against the profile
+      const {
+        filesToImport,
+        alreadyImported,
+        nameOnlyMatches,
+        pathOnlyMatches,
+      } = await getDesktopUniqueFiles(profile, existingIcons);
+
+      // Build current Desktop basename set
+      const desktopPath = path.join(process.env.USERPROFILE || "", "Desktop");
+      let desktopBasenames = new Set<string>();
+      try {
+        if (fs.existsSync(desktopPath)) {
+          const desktopFiles = fs
+            .readdirSync(desktopPath)
+            .filter((f) => f.toLowerCase() !== "desktop.ini");
+          desktopBasenames = new Set(desktopFiles.map((f) => f));
+        }
+      } catch (e) {
+        logger.warn(`Failed to read Desktop directory for cleanup: ${e}`);
+      }
+
+      // Delete icons in profile that are present in modifiedMap but no longer on Desktop
+      const modifiedKeys = Object.keys(modifiedMap);
+      const toDeleteBasenames = modifiedKeys.filter(
+        (b) => !desktopBasenames.has(b)
+      );
+      if (toDeleteBasenames.length > 0) {
+        logger.info(
+          `Found ${toDeleteBasenames.length} cached desktop entries missing from Desktop, deleting corresponding icons.`
+        );
+        try {
+          if (fs.existsSync(profileJsonPath)) {
+            const raw = fs.readFileSync(profileJsonPath, "utf-8");
+            const parsed: DesktopIconData = JSON.parse(raw);
+            const iconsBefore = parsed.icons || [];
+            const iconsAfter: DesktopIcon[] = [];
+            const deletedIds: string[] = [];
+
+            for (const icon of iconsBefore) {
+              const progBasename = icon.programLink
+                ? path.basename(icon.programLink)
+                : "";
+              const nameBasename = icon.name ? path.basename(icon.name) : "";
+              const shouldDelete =
+                toDeleteBasenames.includes(progBasename) ||
+                toDeleteBasenames.includes(nameBasename);
+              if (shouldDelete) {
+                deletedIds.push(icon.id);
+              } else {
+                iconsAfter.push(icon);
+              }
+            }
+
+            if (deletedIds.length > 0) {
+              parsed.icons = iconsAfter;
+              try {
+                fs.writeFileSync(
+                  profileJsonPath,
+                  JSON.stringify(parsed, null, 2),
+                  "utf-8"
+                );
+              } catch (e) {
+                logger.error(
+                  `Failed to write profile JSON when deleting icons: ${e}`
+                );
+              }
+
+              for (const id of deletedIds) {
+                try {
+                  await deleteIconData(profile, id);
+                } catch (e) {
+                  logger.warn(`Failed to delete icon data for id ${id}: ${e}`);
+                }
+              }
+
+              // Remove deleted basenames from modifiedMap so they won't be processed again
+              for (const b of toDeleteBasenames) {
+                delete modifiedMap[b];
+              }
+            }
+          }
+        } catch (e) {
+          logger.error(`Error during desktop_cache cleanup: ${e}`);
+        }
+      }
+
+      // Build candidate list: new unique files + partial matches
+      const candidates: Array<{ name: string; path: string }> = [
+        ...filesToImport,
+        ...nameOnlyMatches.map((m) => ({ name: m.name, path: m.path })),
+        ...pathOnlyMatches.map((m) => ({ name: m.name, path: m.path })),
+      ];
+
+      // Decide which alreadyImported need re-import based on modified date
+      for (const ai of alreadyImported) {
+        try {
+          const st = fs.statSync(ai.path);
+          const mtime = st.mtimeMs;
+          const base = path.basename(ai.path);
+          const stored = modifiedMap[base];
+          if (!stored || mtime > stored) {
+            candidates.push({ name: ai.name, path: ai.path });
+          }
+        } catch (e) {
+          // If we can't stat lookup the file, attempt to import to be safe
+          candidates.push({ name: ai.name, path: ai.path });
+          logger.error(
+            `Failed to stat lookup already imported file, will attempt re-import: ${ai.path}, error: ${e}`
+          );
+        }
+      }
+
+      if (!candidates.length) {
+        logger.info("No desktop files to import into desktop_cache.");
+        return true;
+      }
+
+      const maxRows = (await getRendererState("visibleRows")) || 10;
+
+      let imported = 0;
+      for (const file of candidates) {
+        try {
+          // If an existing icon matches this desktop file (by programLink basename or name basename),
+          // delete the old icon before importing the new one when replacing due to newer modified date.
+          try {
+            const base = path.basename(file.path);
+            const matchIdx = existingIcons.findIndex((icon) => {
+              const progBase = icon.programLink
+                ? path.basename(icon.programLink)
+                : "";
+              const nameBase = icon.name ? path.basename(icon.name) : "";
+              return progBase === base || nameBase === base;
+            });
+
+            if (matchIdx !== -1) {
+              const oldIcon = existingIcons[matchIdx];
+              logger.info(
+                `Replacing existing icon ${oldIcon.id} for desktop file ${file.path}`
+              );
+
+              // Remove icon entry from profile JSON first
+              try {
+                if (fs.existsSync(profileJsonPath)) {
+                  const raw = fs.readFileSync(profileJsonPath, "utf-8");
+                  const parsed: DesktopIconData = JSON.parse(raw);
+                  parsed.icons = (parsed.icons || []).filter(
+                    (i) => i.id !== oldIcon.id
+                  );
+                  fs.writeFileSync(
+                    profileJsonPath,
+                    JSON.stringify(parsed, null, 2),
+                    "utf-8"
+                  );
+                }
+              } catch (e) {
+                logger.warn(
+                  `Failed to remove old icon from profile JSON: ${e}`
+                );
+              }
+
+              // Update local takenCoords and existingIcons
+              try {
+                if (
+                  typeof oldIcon.row === "number" &&
+                  typeof oldIcon.col === "number"
+                ) {
+                  takenCoords.delete(`${oldIcon.row},${oldIcon.col}`);
+                }
+                existingIcons.splice(matchIdx, 1);
+              } catch (e) {
+                logger.warn(`Failed to update in-memory icon lists: ${e}`);
+              }
+
+              // Delete icon data (folder) from icons folder
+              try {
+                await deleteIconData(profile, oldIcon.id);
+              } catch (e) {
+                logger.warn(
+                  `Failed to delete old icon data for ${oldIcon.id}: ${e}`
+                );
+              }
+            }
+          } catch (e) {
+            logger.warn(
+              `Error while checking/removing existing icon before import: ${e}`
+            );
+          }
+          const icon = await importDesktopFileAsIcon(
+            file,
+            profile,
+            takenCoords,
+            maxRows,
+            mainWindow
+          );
+          if (icon) {
+            imported++;
+            try {
+              const st = fs.statSync(file.path);
+              const b = path.basename(file.path);
+              modifiedMap[b] = st.mtimeMs;
+            } catch (e) {
+              logger.error(
+                `Failed to stat file after import: ${file.path} error: ${e}`
+              );
+            }
+          }
+        } catch (e) {
+          logger.error(`Failed to import desktop file ${file.path}: ${e}`);
+        }
+      }
+
+      try {
+        // Persist modified map
+        fs.mkdirSync(profileDir, { recursive: true });
+        fs.writeFileSync(
+          modFilePath,
+          JSON.stringify(modifiedMap, null, 2),
+          "utf-8"
+        );
+      } catch (e) {
+        logger.error(`Failed to save modified map: ${e}`);
+      }
+
+      logger.info(
+        `Imported ${imported} desktop file(s) into profile ${profile}`
+      );
+      return true;
+    } catch (error) {
+      logger.error(`importAllIconsToDesktopCache failed: ${error}`);
+      return false;
+    }
+  });
   ipcMainHandle(
     "getDesktopUniqueFiles",
     async (profile?: string): Promise<DesktopFileCompare> => {
