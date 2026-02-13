@@ -133,6 +133,9 @@ const bgPathToInfoHandlers = {
   resolution: bgPathToResolution,
 } as const;
 
+// Essentially a file lock for importing and caching desktop icons to desktop_cache profile
+let isImportingDesktopCache = false;
+
 export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle(
     "getDesktopIconData",
@@ -1945,7 +1948,18 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
     return await importAllIconsFromDesktop(mainWindow, profile);
   });
+  // TODO probably look into removing any icon folders with _1 etc. (likely added in error and would appear as duplicates)
+  // Have to ensure not to delete any actual desktop icon which has _1 in the name though.
   ipcMainHandle("importAllIconsToDesktopCache", async (): Promise<boolean> => {
+    // Prevent concurrent calls to avoid duplicating icons.
+    if (isImportingDesktopCache) {
+      logger.warn(
+        "importAllIconsToDesktopCache already in progress, ignoring duplicate call"
+      );
+      return false;
+    }
+
+    isImportingDesktopCache = true;
     const profile = "desktop_cache";
     try {
       // Ensure the profile folder exists
@@ -2220,6 +2234,8 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     } catch (error) {
       logger.error(`importAllIconsToDesktopCache failed: ${error}`);
       return false;
+    } finally {
+      isImportingDesktopCache = false;
     }
   });
   ipcMainHandle(
