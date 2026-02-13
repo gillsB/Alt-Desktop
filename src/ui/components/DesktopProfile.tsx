@@ -13,13 +13,6 @@ const TABS = [
   { key: "other", label: "Other Profiles" },
 ];
 
-interface DesktopFileState {
-  uniqueFiles: DesktopFile[];
-  alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-}
-
 interface ProfileCompareState {
   filesToImport: DesktopIcon[];
   alreadyImported: DesktopIcon[];
@@ -31,12 +24,12 @@ interface ProfileCompareState {
 }
 
 const DesktopProfile: React.FC = () => {
-  const [desktopFiles, setDesktopFiles] = useState<DesktopFileState>({
-    uniqueFiles: [],
-    alreadyImported: [],
-    nameOnlyMatches: [],
-    pathOnlyMatches: [],
-  });
+  const [desktopCacheCompare, setDesktopCacheCompare] =
+    useState<ProfileCompareState>({
+      filesToImport: [],
+      alreadyImported: [],
+      modified: [],
+    });
   const [profileCompare, setProfileCompare] = useState<ProfileCompareState>({
     filesToImport: [],
     alreadyImported: [],
@@ -46,25 +39,26 @@ const DesktopProfile: React.FC = () => {
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
   const [compareToProfile, setCompareToProfile] = useState<string>("");
-  const [alreadyImportedCollapsed, setAlreadyImportedCollapsed] =
-    useState(true);
-  const [partialMatchesCollapsed, setPartialMatchesCollapsed] = useState(false);
-  const [notImportedCollapsed, setNotImportedCollapsed] = useState(false);
+  const [desktopCacheLoading, setDesktopCacheLoading] = useState(false);
   const [compareImportCollapsed, setCompareImportCollapsed] = useState(false);
   const [compareModifiedCollapsed, setCompareModifiedCollapsed] =
     useState(false);
   const [compareAlreadyImportedCollapsed, setCompareAlreadyImportedCollapsed] =
     useState(true);
-  const [formattedPaths, setFormattedPaths] = useState<Record<string, string>>(
-    {}
-  );
+  const [desktopCacheImportCollapsed, setDesktopCacheImportCollapsed] =
+    useState(false);
+  const [desktopCacheModifiedCollapsed, setDesktopCacheModifiedCollapsed] =
+    useState(false);
+  const [
+    desktopCacheAlreadyImportedCollapsed,
+    setDesktopCacheAlreadyImportedCollapsed,
+  ] = useState(true);
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
     x: number;
     y: number;
     icon?: DesktopIcon;
-    file?: DesktopFile;
-    section?: "notImported" | "partial" | "imported";
+    section?: "desktop" | "compare";
   }>({ visible: false, x: 0, y: 0 });
   const [iconDifferenceViewer, setIconDifferenceViewer] = useState<{
     profileName: string;
@@ -168,13 +162,17 @@ const DesktopProfile: React.FC = () => {
   useEffect(() => {
     const fetchUniqueFiles = async () => {
       try {
-        reloadFiles();
+        reloadDesktopCache();
       } catch (error) {
-        logger.error("Error fetching unique desktop files:", error);
+        logger.error("Error fetching desktop cache:", error);
       }
     };
-    fetchUniqueFiles();
-  }, [profile]);
+
+    // Only load when desktop tab is active AND profile is set
+    if (activeTab === "desktop" && profile) {
+      fetchUniqueFiles();
+    }
+  }, [profile, activeTab]);
 
   const handleProfileChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -233,198 +231,70 @@ const DesktopProfile: React.FC = () => {
     }
   };
 
+  // TODO implementing this would require just a loop through all desktop_cache icons and importing
+  // Will get to eventually
   const handleImportAll = async () => {
-    if (!desktopFiles.uniqueFiles || desktopFiles.uniqueFiles.length === 0)
-      return;
-    try {
-      await window.electron.importAllIconsFromDesktop();
-
-      reloadFiles();
-    } catch (err) {
-      logger.error("Failed to import desktop files:", err);
-    }
-  };
-
-  const handleImportFile = async (file: DesktopFile) => {
-    try {
-      const importedIcon = await window.electron.importDesktopFile(
-        file,
-        profile
-      );
-      if (importedIcon) {
-        // Refresh the unique files list after import
-        reloadFiles();
-        logger.info(`Successfully imported ${file.name}`);
-      }
-    } catch (error) {
-      logger.error(`Failed to import ${file.name}:`, error);
-    }
+    // Import single file from desktop cache to current profile
+    return;
   };
 
   const importFromProfile = async (icon: DesktopIcon) => {
     try {
+      const sourceProfile =
+        activeTab === "desktop" ? "desktop_cache" : compareToProfile;
       const importedIcon = await window.electron.importIconFromProfile(
         profile,
-        compareToProfile,
+        sourceProfile,
         icon
       );
       if (!importedIcon) {
         logger.error("Failed to import icon from profile:", {
           icon,
-          compareToProfile,
+          sourceProfile,
           profile,
         });
       } else {
-        handleCompareProfiles(compareToProfile, true);
+        if (activeTab === "desktop") {
+          await reloadDesktopCache();
+        } else {
+          await handleCompareProfiles(compareToProfile, true);
+        }
       }
     } catch (error) {
       logger.error("Error importing icon from profile:", error);
     }
   };
 
-  const reloadFiles = async () => {
+  const reloadDesktopCache = async () => {
+    setDesktopCacheLoading(true);
     try {
-      const refreshed = await window.electron.getDesktopUniqueFiles(profile);
-      setDesktopFiles({
-        uniqueFiles: refreshed.filesToImport || [],
-        alreadyImported: refreshed.alreadyImported || [],
-        nameOnlyMatches: refreshed.nameOnlyMatches || [],
-        pathOnlyMatches: refreshed.pathOnlyMatches || [],
+      // First, import all icons from desktop to desktop_cache profile
+      await window.electron.importAllIconsToDesktopCache();
+
+      // Then compare the current profile with desktop_cache
+      const result = await window.electron.compareProfiles(
+        profile,
+        "desktop_cache"
+      );
+      setDesktopCacheCompare({
+        filesToImport: result.filesToImport || [],
+        alreadyImported: result.alreadyImported || [],
+        modified: result.modified || [],
       });
     } catch (error) {
-      logger.error("Error reloading unique desktop files:", error);
+      logger.error("Error reloading desktop cache:", error);
+      setDesktopCacheCompare({
+        filesToImport: [],
+        alreadyImported: [],
+        modified: [],
+      });
+    } finally {
+      setDesktopCacheLoading(false);
     }
   };
 
   const reloadOtherProfiles = async () => {
     await handleCompareProfiles(compareToProfile, true);
-  };
-
-  const handleModifiedIconClick = (
-    item: ProfileCompareState["modified"][0]
-  ) => {
-    window.electron.highlightIcon(item.currentIcon.id);
-    setIconDifferenceViewer({
-      profileName: profile,
-      icon: item.currentIcon,
-      otherProfileName: compareToProfile,
-      otherIcon: item.otherIcon,
-      differences: item.differences,
-    });
-  };
-
-  const handleIconDifferenceClose = async () => {
-    setIconDifferenceViewer(null);
-    try {
-      await reloadOtherProfiles();
-      await reloadFiles();
-    } catch (err) {
-      logger.error(
-        "Error reloading profiles after difference viewer closed:",
-        err
-      );
-    }
-  };
-
-  useEffect(() => {
-    const formatPaths = async () => {
-      const paths: Record<string, string> = {};
-      const allFiles = [
-        ...desktopFiles.uniqueFiles,
-        ...desktopFiles.nameOnlyMatches,
-        ...desktopFiles.pathOnlyMatches,
-        ...desktopFiles.alreadyImported,
-      ];
-
-      for (const file of allFiles) {
-        paths[file.path] = await formatFilePath(file.path);
-      }
-
-      setFormattedPaths(paths);
-    };
-
-    formatPaths();
-  }, [desktopFiles]);
-
-  const formatFilePath = async (path: string) => {
-    // Check for extension first
-    const extension = path.split(".").pop();
-    if (extension && extension !== path) {
-      return `.${extension.toLowerCase()}`;
-    }
-
-    // If no extension, get mimetype
-    try {
-      const mimeType = await window.electron.getFileType(path);
-      if (mimeType) {
-        if (mimeType.endsWith("directory")) {
-          return "(folder)";
-        }
-        // Get the general type from mimetype (last part after '/')
-        const type = mimeType.split("/")[0];
-        return `(${type})`;
-      }
-    } catch (err) {
-      logger.warn(`Could not determine file type for ${path}:`, err);
-    }
-
-    return "(unknown)";
-  };
-
-  const findCommonPrefixCut = (a: string, b: string) => {
-    const minLen = Math.min(a.length, b.length);
-    let i = 0;
-    while (i < minLen && a[i] === b[i]) i++;
-    if (i === minLen) return i;
-
-    const sepPos = Math.max(
-      a.lastIndexOf("\\", i - 1),
-      a.lastIndexOf("/", i - 1)
-    );
-    if (sepPos >= 0) return sepPos + 1;
-    return i;
-  };
-
-  // TODO remove if not re-used in new DesktopDifferenceViewer.
-  const renderHighlightedPath = (
-    iconPath: string | undefined,
-    filePath: string
-  ) => {
-    const ip = (iconPath || "") as string;
-
-    if (!ip) {
-      logger.info("renderHighlightedPath - no iconPath", { filePath });
-      return (
-        <span className="partial-match-path different-highlight">
-          (no path)
-        </span>
-      );
-    }
-
-    const ipLower = ip.toLowerCase();
-    const fpLower = filePath.toLowerCase();
-    const cut = findCommonPrefixCut(ipLower, fpLower);
-    const common = ip.slice(0, cut);
-    const diff = ip.slice(cut);
-
-    // Append ... if iconPath is a substring of filePath
-    if (!diff) {
-      const identical = ipLower === fpLower;
-
-      return (
-        <span className="highlighted-path-inline" title={ip}>
-          {common ? <span className="match-highlight">{common}</span> : null}
-          {!identical ? <span className="different-highlight">...</span> : null}
-        </span>
-      );
-    }
-
-    return (
-      <span className="highlighted-path-inline" title={ip}>
-        {common ? <span className="match-highlight">{common}</span> : null}
-        {diff ? <span className="different-highlight">{diff}</span> : null}
-      </span>
-    );
   };
 
   const handleCompareProfiles = async (
@@ -463,6 +333,35 @@ const DesktopProfile: React.FC = () => {
       } catch (error) {
         logger.error("Error comparing profiles:", error);
       }
+    }
+  };
+
+  const handleModifiedIconClick = (
+    item: ProfileCompareState["modified"][0]
+  ) => {
+    window.electron.highlightIcon(item.currentIcon.id);
+    setIconDifferenceViewer({
+      profileName: profile,
+      icon: item.currentIcon,
+      otherProfileName: compareToProfile,
+      otherIcon: item.otherIcon,
+      differences: item.differences,
+    });
+  };
+
+  const handleIconDifferenceClose = async () => {
+    setIconDifferenceViewer(null);
+    try {
+      if (activeTab === "desktop") {
+        await reloadDesktopCache();
+      } else {
+        await reloadOtherProfiles();
+      }
+    } catch (err) {
+      logger.error(
+        "Error reloading profiles after difference viewer closed:",
+        err
+      );
     }
   };
 
@@ -524,254 +423,234 @@ const DesktopProfile: React.FC = () => {
           ))}
         </div>
         <div className="import-icons-tab-content">
-          {/* Desktop Files Tab */}
+          {/* Desktop Files Tab - Compare with desktop_cache */}
           {activeTab === "desktop" && (
-            <div className="import-icons-desktop">
-              <div className="desktop-profile-count-row">
-                <div className="desktop-profile-count">
-                  Total unique DesktopFiles found:{" "}
-                  {desktopFiles.uniqueFiles.length}
+            <div className="import-icons-other">
+              {desktopCacheLoading ? (
+                <div className="loading-state">
+                  <p>Importing Desktop files to cache...</p>
                 </div>
-                <button
-                  type="button"
-                  className="button import-all-inline"
-                  onClick={handleImportAll}
-                >
-                  Import All
-                </button>
-                <button
-                  type="button"
-                  className="button reload-btn"
-                  onClick={reloadFiles}
-                >
-                  Reload
-                </button>
-              </div>
-              <div className="desktop-profile-list">
-                {/* Not Imported */}
-                <div
-                  className="desktop-profile-section-header"
-                  onClick={() => setNotImportedCollapsed(!notImportedCollapsed)}
-                >
-                  <button
-                    className="tag-toggle-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setNotImportedCollapsed(!notImportedCollapsed);
-                    }}
-                  >
-                    {notImportedCollapsed ? "▸" : "▾"}
-                  </button>
-                  <span>Not Imported ({desktopFiles.uniqueFiles.length})</span>
-                </div>
+              ) : (
+                <>
+                  <div className="import-icons-header">
+                    <button
+                      type="button"
+                      className="button reload-btn"
+                      onClick={reloadDesktopCache}
+                    >
+                      Reload
+                    </button>
+                  </div>
 
-                {!notImportedCollapsed && (
-                  <div className="not-imported-content">
-                    {desktopFiles.uniqueFiles.map((file, index) => (
-                      <div
-                        key={`new-${index}`}
-                        className="desktop-profile-file"
-                        title={`View ${file.name} in File Explorer`}
-                        onClick={() => {
-                          if (contextMenu.visible) return;
-                          window.electron.openInExplorer(
-                            "programLink",
-                            file.path
-                          );
-                        }}
-                        onContextMenu={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setContextMenu({
-                            visible: true,
-                            x: e.clientX,
-                            y: e.clientY,
-                            file: file,
-                            section: "notImported",
-                          });
-                        }}
-                      >
-                        <div className="desktop-file-content">
-                          <span className="file-name">
-                            {file.name.includes(".")
-                              ? file.name.split(".").slice(0, -1).join(".")
-                              : file.name}
-                          </span>
-                          <span className="file-path">
-                            {formattedPaths[file.path] || "..."}
-                          </span>
-                        </div>
-                        <div className="desktop-file-actions">
+                  <div className="compare-grid-container">
+                    {/* Not Imported Section */}
+                    {desktopCacheCompare.filesToImport.length > 0 && (
+                      <div className="icon-grid-section">
+                        <div
+                          className="desktop-profile-section-header"
+                          onClick={() =>
+                            setDesktopCacheImportCollapsed(
+                              !desktopCacheImportCollapsed
+                            )
+                          }
+                        >
                           <button
-                            type="button"
-                            className="button import-file-btn"
+                            className="tag-toggle-button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleImportFile(file);
+                              setDesktopCacheImportCollapsed(
+                                !desktopCacheImportCollapsed
+                              );
                             }}
+                            aria-label={
+                              desktopCacheImportCollapsed
+                                ? "Expand"
+                                : "Collapse"
+                            }
                           >
-                            Import
+                            {desktopCacheImportCollapsed ? "▸" : "▾"}
                           </button>
+                          <span>
+                            Not Imported (
+                            {desktopCacheCompare.filesToImport.length})
+                          </span>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Partial matches */}
-                {desktopFiles.nameOnlyMatches.length +
-                  desktopFiles.pathOnlyMatches.length >
-                  0 && (
-                  <div
-                    className="desktop-profile-section-header"
-                    onClick={() =>
-                      setPartialMatchesCollapsed(!partialMatchesCollapsed)
-                    }
-                  >
-                    <button
-                      className="tag-toggle-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPartialMatchesCollapsed(!partialMatchesCollapsed);
-                      }}
-                    >
-                      {partialMatchesCollapsed ? "▸" : "▾"}
-                    </button>
-                    <span>
-                      Partial Matches (
-                      {desktopFiles.nameOnlyMatches.length +
-                        desktopFiles.pathOnlyMatches.length}
-                      )
-                    </span>
-                  </div>
-                )}
-
-                {!partialMatchesCollapsed && (
-                  <div className="desktop-profile-icons-grid-modified">
-                    {desktopFiles.nameOnlyMatches.map((file, index) => (
-                      <div
-                        key={`partial-name-${index}`}
-                        className="desktop-profile-icon-item modified-item"
-                        title={file.icon.name}
-                      >
-                        <div className="icon-card">
-                          <SafeImage
-                            profile={profile}
-                            id={file.icon.id}
-                            row={file.icon.row}
-                            col={file.icon.col}
-                            imagePath={file.icon.image}
-                            width={84}
-                            height={84}
-                            highlighted={false}
-                          />
-                          <div className="desktop-profile-icon-name">
-                            {file.icon.name}
+                        {!desktopCacheImportCollapsed && (
+                          <div className="desktop-profile-icons-grid">
+                            {desktopCacheCompare.filesToImport.map((icon) => (
+                              <div
+                                key={`desktop-cache-not-imported-${icon.id}`}
+                                className="desktop-profile-icon-item with-import-button"
+                                title={icon.name}
+                              >
+                                <SafeImage
+                                  profile="desktop_cache"
+                                  id={icon.id}
+                                  row={icon.row}
+                                  col={icon.col}
+                                  imagePath={icon.image}
+                                  width={84}
+                                  height={84}
+                                  highlighted={false}
+                                />
+                                <div className="desktop-profile-icon-name">
+                                  {icon.name}
+                                </div>
+                                <button
+                                  className="import-hover-button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    importFromProfile(icon);
+                                  }}
+                                  aria-label={`Import ${icon.name}`}
+                                >
+                                  Import
+                                </button>
+                              </div>
+                            ))}
                           </div>
-                        </div>
-                        <div className="difference-box">
-                          <div className="modified-differences">
-                            <button className="difference-tag" title="Name">
-                              Name
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    {desktopFiles.pathOnlyMatches.map((file, index) => (
-                      <div
-                        key={`partial-path-${index}`}
-                        className="desktop-profile-icon-item modified-item"
-                        title={file.icon.name}
-                      >
-                        <div className="icon-card">
-                          <SafeImage
-                            profile={profile}
-                            id={file.icon.id}
-                            row={file.icon.row}
-                            col={file.icon.col}
-                            imagePath={file.icon.image}
-                            width={84}
-                            height={84}
-                            highlighted={false}
-                          />
-                          <div className="desktop-profile-icon-name">
-                            {file.icon.name}
-                          </div>
-                        </div>
-                        <div className="difference-box">
-                          <div className="modified-differences">
-                            <button className="difference-tag" title="Path">
-                              Path
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {/* Already imported */}
-                {desktopFiles.alreadyImported.length > 0 && (
-                  <>
-                    <div
-                      className="desktop-profile-section-header"
-                      onClick={() =>
-                        setAlreadyImportedCollapsed(!alreadyImportedCollapsed)
-                      }
-                    >
-                      <button
-                        className="tag-toggle-button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setAlreadyImportedCollapsed(
-                            !alreadyImportedCollapsed
-                          );
-                        }}
-                      >
-                        {alreadyImportedCollapsed ? "▸" : "▾"}
-                      </button>
-                      <span>
-                        Already Imported Files (
-                        {desktopFiles.alreadyImported.length})
-                      </span>
-                    </div>
-
-                    {!alreadyImportedCollapsed && (
-                      <div className="not-imported-content">
-                        {desktopFiles.alreadyImported.map((file, index) => (
-                          <div
-                            key={`imported-${index}`}
-                            className="desktop-profile-file imported"
-                            onContextMenu={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setContextMenu({
-                                visible: true,
-                                x: e.clientX,
-                                y: e.clientY,
-                                file: file,
-                                section: "imported",
-                              });
-                            }}
-                          >
-                            <div className="desktop-file-content">
-                              <span className="file-name">
-                                {file.name.includes(".")
-                                  ? file.name.split(".").slice(0, -1).join(".")
-                                  : file.name}
-                              </span>
-                              <span className="file-path">
-                                {formattedPaths[file.path] || "..."}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                        )}
                       </div>
                     )}
-                  </>
-                )}
-              </div>
+
+                    {/* Modified Section */}
+                    {desktopCacheCompare.modified.length > 0 && (
+                      <div className="icon-grid-section">
+                        <div
+                          className="desktop-profile-section-header"
+                          onClick={() =>
+                            setDesktopCacheModifiedCollapsed(
+                              !desktopCacheModifiedCollapsed
+                            )
+                          }
+                        >
+                          <button
+                            className="tag-toggle-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDesktopCacheModifiedCollapsed(
+                                !desktopCacheModifiedCollapsed
+                              );
+                            }}
+                            aria-label={
+                              desktopCacheModifiedCollapsed
+                                ? "Expand"
+                                : "Collapse"
+                            }
+                          >
+                            {desktopCacheModifiedCollapsed ? "▸" : "▾"}
+                          </button>
+                          <span>
+                            Modified ({desktopCacheCompare.modified.length})
+                          </span>
+                        </div>
+                        {!desktopCacheModifiedCollapsed && (
+                          <div className="desktop-profile-icons-grid-modified">
+                            {desktopCacheCompare.modified.map((item) => (
+                              <div
+                                key={`desktop-cache-modified-${item.otherIcon.id}`}
+                                className="desktop-profile-icon-item modified-item"
+                                title={item.otherIcon.name}
+                                style={{ cursor: "pointer" }}
+                              >
+                                <div className="icon-card">
+                                  <SafeImage
+                                    profile="desktop_cache"
+                                    id={item.otherIcon.id}
+                                    row={item.otherIcon.row}
+                                    col={item.otherIcon.col}
+                                    imagePath={item.otherIcon.image}
+                                    width={84}
+                                    height={84}
+                                    highlighted={false}
+                                  />
+                                  <div className="desktop-profile-icon-name">
+                                    {item.otherIcon.name}
+                                  </div>
+                                </div>
+
+                                <div className="difference-box">
+                                  <div className="modified-differences">
+                                    {item.differences.map((diff, index) => (
+                                      <button
+                                        key={index}
+                                        className="difference-tag"
+                                        title={diff}
+                                      >
+                                        {diff}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Already Imported Section */}
+                    {desktopCacheCompare.alreadyImported.length > 0 && (
+                      <div className="icon-grid-section">
+                        <div
+                          className="desktop-profile-section-header"
+                          onClick={() =>
+                            setDesktopCacheAlreadyImportedCollapsed(
+                              !desktopCacheAlreadyImportedCollapsed
+                            )
+                          }
+                        >
+                          <button
+                            className="tag-toggle-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDesktopCacheAlreadyImportedCollapsed(
+                                !desktopCacheAlreadyImportedCollapsed
+                              );
+                            }}
+                            aria-label={
+                              desktopCacheAlreadyImportedCollapsed
+                                ? "Expand"
+                                : "Collapse"
+                            }
+                          >
+                            {desktopCacheAlreadyImportedCollapsed ? "▸" : "▾"}
+                          </button>
+                          <span>
+                            Already Imported (
+                            {desktopCacheCompare.alreadyImported.length})
+                          </span>
+                        </div>
+                        {!desktopCacheAlreadyImportedCollapsed && (
+                          <div className="desktop-profile-icons-grid">
+                            {desktopCacheCompare.alreadyImported.map((icon) => (
+                              <div
+                                key={`desktop-cache-already-${icon.id}`}
+                                className="desktop-profile-icon-item"
+                                title={icon.name}
+                              >
+                                <SafeImage
+                                  profile="desktop_cache"
+                                  id={icon.id}
+                                  row={icon.row}
+                                  col={icon.col}
+                                  imagePath={icon.image}
+                                  width={84}
+                                  height={84}
+                                  highlighted={false}
+                                />
+                                <div className="desktop-profile-icon-name">
+                                  {icon.name}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
           {/* Other Profiles Tab */}
@@ -1016,7 +895,7 @@ const DesktopProfile: React.FC = () => {
         </div>
       </section>
 
-      {contextMenu.visible && (
+      {contextMenu.visible && contextMenu.icon && (
         <div
           className="context-menu"
           style={{
@@ -1030,21 +909,13 @@ const DesktopProfile: React.FC = () => {
             tabIndex={0}
             className="menu-item"
             onClick={() => {
-              if (contextMenu.file) {
-                // TODO custom handler for different sections (import/remove etc.)
+              if (contextMenu.icon && contextMenu.icon.programLink) {
                 window.electron.openInExplorer(
                   "programLink",
-                  contextMenu.file.path
+                  contextMenu.icon.programLink
                 );
-              } else if (contextMenu.icon) {
-                if (contextMenu.icon.programLink) {
-                  window.electron.openInExplorer(
-                    "programLink",
-                    contextMenu.icon.programLink
-                  );
-                } else {
-                  logger.error("No programLink found for icon in context menu");
-                }
+              } else {
+                logger.error("No programLink found for icon in context menu");
               }
               setContextMenu({ visible: false, x: 0, y: 0 });
             }}

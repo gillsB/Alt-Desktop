@@ -665,6 +665,6 @@ interface Window {
       targetProfile: string,
       targetID: string
     ) => Promise<string | null>;
-    importAllIconsToDesktopCache: (profile: string) => Promise<boolean>;
+    importAllIconsToDesktopCache: () => Promise<boolean>;
   };
 }
