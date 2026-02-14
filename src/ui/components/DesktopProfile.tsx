@@ -172,7 +172,9 @@ const DesktopProfile: React.FC = () => {
     if (activeTab === "desktop" && profile) {
       fetchUniqueFiles();
     }
-  }, [profile, activeTab]);
+  }, [profile]);
+  // Removed activeTab reloading, it reloads on mount and when differenceViewer is closed.
+  // So any change not reloaded is external, which the user can just click reload. Instead of adding weight to every tab swap.
 
   const handleProfileChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -268,8 +270,13 @@ const DesktopProfile: React.FC = () => {
   const reloadDesktopCache = async () => {
     setDesktopCacheLoading(true);
     try {
-      // First, import all icons from desktop to desktop_cache profile
-      await window.electron.importAllIconsToDesktopCache();
+      const importResult = await window.electron.importAllIconsToDesktopCache();
+      if (importResult === false) {
+        logger.warn(
+          "Import to desktop_cache is already in progress, keeping loading placeholder"
+        );
+        return;
+      }
 
       // Then compare the current profile with desktop_cache
       const result = await window.electron.compareProfiles(
@@ -281,6 +288,7 @@ const DesktopProfile: React.FC = () => {
         alreadyImported: result.alreadyImported || [],
         modified: result.modified || [],
       });
+      setDesktopCacheLoading(false);
     } catch (error) {
       logger.error("Error reloading desktop cache:", error);
       setDesktopCacheCompare({
@@ -288,7 +296,6 @@ const DesktopProfile: React.FC = () => {
         alreadyImported: [],
         modified: [],
       });
-    } finally {
       setDesktopCacheLoading(false);
     }
   };
@@ -352,11 +359,8 @@ const DesktopProfile: React.FC = () => {
   const handleIconDifferenceClose = async () => {
     setIconDifferenceViewer(null);
     try {
-      if (activeTab === "desktop") {
-        await reloadDesktopCache();
-      } else {
-        await reloadOtherProfiles();
-      }
+      await reloadDesktopCache();
+      await reloadOtherProfiles();
     } catch (err) {
       logger.error(
         "Error reloading profiles after difference viewer closed:",
