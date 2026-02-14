@@ -40,6 +40,10 @@ const DesktopProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("desktop");
   const [compareToProfile, setCompareToProfile] = useState<string>("");
   const [desktopCacheLoading, setDesktopCacheLoading] = useState(false);
+  const [desktopCacheProgress, setDesktopCacheProgress] = useState<{
+    imported: number;
+    total: number;
+  }>({ imported: 0, total: 0 });
   const [compareImportCollapsed, setCompareImportCollapsed] = useState(false);
   const [compareModifiedCollapsed, setCompareModifiedCollapsed] =
     useState(false);
@@ -175,6 +179,26 @@ const DesktopProfile: React.FC = () => {
   }, [profile]);
   // Removed activeTab reloading, it reloads on mount and when differenceViewer is closed.
   // So any change not reloaded is external, which the user can just click reload. Instead of adding weight to every tab swap.
+
+  useEffect(() => {
+    const onProgress = (...args: unknown[]) => {
+      const payload = args[1] as
+        | { imported: number; total: number }
+        | undefined;
+      if (payload) {
+        setDesktopCacheProgress({
+          imported: payload.imported,
+          total: payload.total,
+        });
+        setDesktopCacheLoading(true);
+      }
+    };
+
+    window.electron.on("desktop-cache-import-progress", onProgress);
+    return () => {
+      window.electron.off("desktop-cache-import-progress", onProgress);
+    };
+  }, [profile]);
 
   const handleProfileChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -432,7 +456,15 @@ const DesktopProfile: React.FC = () => {
             <div className="import-icons-other">
               {desktopCacheLoading ? (
                 <div className="loading-state">
-                  <p>Importing Desktop files to cache...</p>
+                  <p>
+                    Importing Desktop files to cache...
+                    {desktopCacheProgress.total > 0 && (
+                      <span>
+                        {` `}({desktopCacheProgress.imported}/
+                        {desktopCacheProgress.total})
+                      </span>
+                    )}
+                  </p>
                 </div>
               ) : (
                 <>

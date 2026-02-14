@@ -2124,6 +2124,21 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       const maxRows = (await getRendererState("visibleRows")) || 10;
 
       let imported = 0;
+      // Prepare to send progress updates to the DesktopProfile subwindow (if open)
+      const subWindow = getActiveSubWindow();
+      const totalCandidates = candidates.length;
+      try {
+        if (subWindow && subWindow.webContents) {
+          subWindow.webContents.send("desktop-cache-import-progress", {
+            imported: 0,
+            total: totalCandidates,
+          });
+        }
+      } catch (e) {
+        logger.warn(
+          `Failed to send initial desktop-cache-import-progress: ${e}`
+        );
+      }
       for (const file of candidates) {
         try {
           // If an existing icon matches this desktop file (by programLink basename or name basename),
@@ -2208,6 +2223,17 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
               logger.error(
                 `Failed to stat file after import: ${file.path} error: ${e}`
               );
+            }
+            // send progress update for each successful import
+            try {
+              if (subWindow && subWindow.webContents) {
+                subWindow.webContents.send("desktop-cache-import-progress", {
+                  imported,
+                  total: totalCandidates,
+                });
+              }
+            } catch (e) {
+              logger.warn(`Failed to send desktop-cache-import-progress: ${e}`);
             }
           }
         } catch (e) {
