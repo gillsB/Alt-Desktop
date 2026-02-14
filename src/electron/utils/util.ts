@@ -1279,7 +1279,8 @@ export async function getProfiles(): Promise<string[]> {
     });
     const profiles = entries
       .filter((entry) => entry.isDirectory())
-      .map((entry) => entry.name);
+      .map((entry) => entry.name)
+      .filter((profile) => profile !== "desktop_cache");
     return profiles;
   } catch (e) {
     logger.error("Failed to read profiles directory:", e);
