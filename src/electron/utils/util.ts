@@ -546,7 +546,7 @@ export async function indexBackgrounds(options?: {
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
       newIds.push(folderName);
-      let indexedTime: number | undefined = Math.floor(Date.now() / 1000);
+      let indexedTime: number | undefined;
       const bgJsonPath = await idToBgJsonPath(folderName);
       if (fs.existsSync(bgJsonPath)) {
         try {
@@ -556,21 +556,42 @@ export async function indexBackgrounds(options?: {
           if (
             importWithSavedDate &&
             bg.local &&
-            bg.local.indexed &&
-            !isNaN(bg.local.indexed)
+            bg.local.indexed !== undefined &&
+            !isNaN(Number(bg.local.indexed))
           ) {
             // Use saved date from bg.json if user chose "Import with Saved Date"
-            indexedTime = Number(bg.local.indexed);
+            const rawIndexed = Number(bg.local.indexed);
+            // Normalize second-precision values to milliseconds
+            indexedTime =
+              rawIndexed < 1e12 ? Math.floor(rawIndexed * 1000) : rawIndexed;
+          } else {
+            // Fallback to bg.json mtimeMs for high-precision timestamp
+            try {
+              const st = await fs.promises.stat(bgJsonPath);
+              indexedTime = st.mtimeMs ?? Date.now();
+            } catch (e) {
+              logger.error(
+                `Failed to get file stats for ${bgJsonPath}, using current time. error: ${e}`
+              );
+              indexedTime = Date.now();
+            }
           }
         } catch (e) {
           logger.warn(
-            `Could not read indexed value from ${bgJsonPath}, using current time. error: ${e}`
+            `Could not read indexed value from ${bgJsonPath}, using file mtime or current time. error: ${e}`
           );
+          try {
+            const st = await fs.promises.stat(bgJsonPath);
+            indexedTime = st.mtimeMs ?? Date.now();
+          } catch (e2) {
+            logger.error(
+              `Failed to get file stats for ${bgJsonPath}, using current time. error: ${e2}`
+            );
+            indexedTime = Date.now();
+          }
         }
-      }
-      // In case saved time in bg.json is not valid or not found
-      if (indexedTime === undefined) {
-        indexedTime = Math.floor(Date.now() / 1000);
+      } else {
+        indexedTime = Date.now();
       }
       newBgIndexedTimes[folderName] = indexedTime;
     }
@@ -597,7 +618,7 @@ export async function indexBackgrounds(options?: {
   const suspectedMoves = new Set<string>();
   for (const newId of newIds) {
     let matchedRemovedId: string | null = null;
-    let indexedTime: number = Math.floor(Date.now() / 1000);
+    let indexedTime: number = Date.now();
     let foundValidIndexed = false;
 
     // 1. Exact match
@@ -866,11 +887,16 @@ export async function saveBgJsonFile(
         summary.tags !== undefined ? summary.tags : (oldBg.public?.tags ?? []),
     };
 
-    // Handle local.indexed logic
+    // If old bg.json used unix-second precision, (pre- 2/14/2026) normalize it to milliseconds.
     const indexed: number | undefined =
       summary.localIndexed !== undefined
         ? summary.localIndexed
-        : (oldBg.local?.indexed ?? Math.floor(Date.now() / 1000));
+        : oldBg.local?.indexed !== undefined
+          ? typeof oldBg.local.indexed === "number" &&
+            oldBg.local.indexed < 1e12
+            ? Math.floor(oldBg.local.indexed * 1000)
+            : oldBg.local.indexed
+          : Date.now();
 
     const localData = {
       profile:
