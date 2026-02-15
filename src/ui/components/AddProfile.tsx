@@ -32,8 +32,10 @@ const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 
   useEffect(() => {
     const trimmed = profileInput.trim().toLowerCase();
+    const isReserved = trimmed === "desktop_cache";
     setDuplicateError(
-      trimmed.length > 0 && profiles.some((p) => p.toLowerCase() === trimmed)
+      trimmed.length > 0 &&
+        (isReserved || profiles.some((p) => p.toLowerCase() === trimmed))
     );
   }, [profileInput, profiles]);
 
