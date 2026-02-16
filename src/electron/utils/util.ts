@@ -546,53 +546,30 @@ export async function indexBackgrounds(options?: {
   for (const folderName of validIds) {
     if (!(folderName in backgroundsData.backgrounds)) {
       newIds.push(folderName);
-      let indexedTime: number | undefined;
+
+      let indexedTime = Date.now(); // default fallback
+
       const bgJsonPath = await idToBgJsonPath(folderName);
-      if (fs.existsSync(bgJsonPath)) {
+
+      if (fs.existsSync(bgJsonPath) && importWithSavedDate) {
         try {
           const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
           const bg: BgJson = JSON.parse(rawBg);
 
-          if (
-            importWithSavedDate &&
-            bg.local &&
-            bg.local.indexed !== undefined &&
-            !isNaN(Number(bg.local.indexed))
-          ) {
-            // Use saved date from bg.json if user chose "Import with Saved Date"
-            const rawIndexed = Number(bg.local.indexed);
-            // Normalize second-precision values to milliseconds
+          const rawIndexed = Number(bg?.local?.indexed);
+
+          if (!isNaN(rawIndexed)) {
+            // Normalize seconds → milliseconds
             indexedTime =
               rawIndexed < 1e12 ? Math.floor(rawIndexed * 1000) : rawIndexed;
-          } else {
-            // Fallback to bg.json mtimeMs for high-precision timestamp
-            try {
-              const st = await fs.promises.stat(bgJsonPath);
-              indexedTime = st.mtimeMs ?? Date.now();
-            } catch (e) {
-              logger.error(
-                `Failed to get file stats for ${bgJsonPath}, using current time. error: ${e}`
-              );
-              indexedTime = Date.now();
-            }
           }
         } catch (e) {
           logger.warn(
-            `Could not read indexed value from ${bgJsonPath}, using file mtime or current time. error: ${e}`
+            `Could not read indexed value from ${bgJsonPath}, using current time. error: ${e}`
           );
-          try {
-            const st = await fs.promises.stat(bgJsonPath);
-            indexedTime = st.mtimeMs ?? Date.now();
-          } catch (e2) {
-            logger.error(
-              `Failed to get file stats for ${bgJsonPath}, using current time. error: ${e2}`
-            );
-            indexedTime = Date.now();
-          }
         }
-      } else {
-        indexedTime = Date.now();
       }
+
       newBgIndexedTimes[folderName] = indexedTime;
     }
   }
