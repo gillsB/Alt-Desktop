@@ -267,8 +267,11 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-window-content modal-window-content-icon-difference-viewer">
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="modal-window-content modal-window-content-icon-difference-viewer"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-content icon-difference-viewer-content">
           {/* Icons Display */}
           <div className="icon-comparison-header">

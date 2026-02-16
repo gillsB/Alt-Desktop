@@ -86,16 +86,6 @@ const DesktopProfile: React.FC = () => {
       ) {
         hideContextMenu();
       }
-
-      // If a difference viewer is open, close it when clicking outside
-      if (iconDifferenceViewer) {
-        const modalWindow = document.querySelector(".modal-window-content");
-        if (modalWindow && !e.composedPath().includes(modalWindow)) {
-          logger.info("Closing difference viewer due to outside click");
-          handleIconDifferenceClose();
-          return;
-        }
-      }
     };
 
     const handleEscapeKey = (e: KeyboardEvent) => {
