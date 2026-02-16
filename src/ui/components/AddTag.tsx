@@ -10,7 +10,7 @@ const STATIC_OPTIONS = [
   { value: "new", label: "New category  ➕" },
 ];
 
-const AddTagWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
+const AddTagWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [tagInput, setTagInput] = useState("");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -82,55 +82,62 @@ const AddTagWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="modal-window-content">
-      <div className="modal-content">
-        <div className="subwindow-field">
-          <label>Tag Name:</label>
-          <input
-            type="text"
-            value={tagInput}
-            onChange={handleInputChange}
-            placeholder="Enter new tag"
-            className="create-tag-input"
-          />
-        </div>
-        <div className="subwindow-field">
-          <label>Category:</label>
-          <div className="dropdown-container" style={{ width: "100%" }}>
-            <select
-              value={category}
-              onChange={handleCategoryChange}
-              className="create-tag-input"
-              style={{ width: "100%" }}
-            >
-              {categoryOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="add-tag-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-window-content">
+          <div className="modal-content">
+            <div className="subwindow-field">
+              <label>Tag Name:</label>
+              <input
+                type="text"
+                value={tagInput}
+                onChange={handleInputChange}
+                placeholder="Enter new tag"
+                className="create-tag-input"
+              />
+            </div>
+            <div className="subwindow-field">
+              <label>Category:</label>
+              <div className="dropdown-container" style={{ width: "100%" }}>
+                <select
+                  value={category}
+                  onChange={handleCategoryChange}
+                  className="create-tag-input"
+                  style={{ width: "100%" }}
+                >
+                  {categoryOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            {category === "new" && (
+              <div className="subwindow-field">
+                <label>Category Name:</label>
+                <input
+                  type="text"
+                  value={newCategory}
+                  onChange={handleNewCategoryChange}
+                  placeholder="Enter new category"
+                  className="create-tag-input"
+                />
+              </div>
+            )}
+          </div>
+          <div className="modal-window-footer">
+            <button className="button" onClick={handleCreateTag}>
+              Create Tag
+            </button>
+            <button className="button" onClick={onClose}>
+              Close
+            </button>
           </div>
         </div>
-        {category === "new" && (
-          <div className="subwindow-field">
-            <label>Category Name:</label>
-            <input
-              type="text"
-              value={newCategory}
-              onChange={handleNewCategoryChange}
-              placeholder="Enter new category"
-              className="create-tag-input"
-            />
-          </div>
-        )}
-      </div>
-      <div className="modal-window-footer">
-        <button className="button" onClick={handleCreateTag}>
-          Create Tag
-        </button>
-        <button className="button" onClick={onClose}>
-          Close
-        </button>
       </div>
     </div>
   );
@@ -140,8 +147,8 @@ export const RenameTagModal: React.FC<{
   initialName: string;
   existingNames: string[];
   onRename: (newName: string) => void;
-  onCancel: () => void;
-}> = ({ initialName, existingNames, onRename, onCancel }) => {
+  onClose: () => void;
+}> = ({ initialName, existingNames, onRename, onClose }) => {
   const [value, setValue] = useState(initialName);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,29 +176,36 @@ export const RenameTagModal: React.FC<{
   };
 
   return (
-    <div className="modal-window-content">
-      <div className="modal-content">
-        <div className="subwindow-field">
-          <h3>Renaming: {initialName}</h3>
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="add-tag-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-window-content">
+          <div className="modal-content">
+            <div className="subwindow-field">
+              <h3>Renaming: {initialName}</h3>
+            </div>
+            <div className="subwindow-field">
+              <label>New name:</label>
+              <input
+                type="text"
+                value={value}
+                onChange={handleInputChange}
+                autoFocus
+                className="create-tag-input"
+              />
+            </div>
+          </div>
+          <div className="modal-window-footer">
+            <button className="button" onClick={handleSubmit}>
+              Rename
+            </button>
+            <button className="button" onClick={onClose}>
+              Cancel
+            </button>
+          </div>
         </div>
-        <div className="subwindow-field">
-          <label>New name:</label>
-          <input
-            type="text"
-            value={value}
-            onChange={handleInputChange}
-            autoFocus
-            className="create-tag-input"
-          />
-        </div>
-      </div>
-      <div className="modal-window-footer">
-        <button className="button" onClick={handleSubmit}>
-          Rename
-        </button>
-        <button className="button" onClick={onCancel}>
-          Cancel
-        </button>
       </div>
     </div>
   );

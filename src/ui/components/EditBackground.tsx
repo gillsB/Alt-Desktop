@@ -1686,28 +1686,9 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
           Save
         </button>
       </div>
-      {showAddTag && (
-        <div className="add-tag-modal-overlay" onClick={handleCloseAddTag}>
-          <div
-            className="add-tag-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <AddTagWindow onClose={handleCloseAddTag} />
-          </div>
-        </div>
-      )}
+      {showAddTag && <AddTagWindow onClose={handleCloseAddTag} />}
       {showEditCategories && (
-        <div
-          className="edit-categories-modal-overlay"
-          onClick={handleCloseEditCategories}
-        >
-          <div
-            className="edit-categories-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <EditCategories onClose={handleCloseEditCategories} />
-          </div>
-        </div>
+        <EditCategories onClose={handleCloseEditCategories} />
       )}
       {tagContextMenu && (
         <div
@@ -1740,22 +1721,15 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
         </div>
       )}
       {renameModal && (
-        <div className="add-tag-modal-overlay" onClick={handleCancelRenameTag}>
-          <div
-            className="add-tag-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <RenameTagModal
-              initialName={renameModal.tag.name}
-              onRename={handleFinishRenameTag}
-              onCancel={handleCancelRenameTag}
-              existingNames={localTags.map((t) => t.name)}
-            />
-          </div>
-        </div>
+        <RenameTagModal
+          initialName={renameModal.tag.name}
+          onRename={handleFinishRenameTag}
+          existingNames={localTags.map((t) => t.name)}
+          onClose={handleCancelRenameTag}
+        />
       )}
       {bgSaveProgress !== null && (
-        <div className="bg-save-progress-modal-overlay">
+        <div className="modal-overlay">
           <div className="bg-save-progress-modal-content">
             <div className="bg-save-progress-bar">
               <div
@@ -1770,16 +1744,7 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
           </div>
         </div>
       )}
-      {showAddProfile && (
-        <div className="add-tag-modal-overlay" onClick={handleCloseAddProfile}>
-          <div
-            className="add-tag-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <AddProfileWindow onClose={handleCloseAddProfile} />
-          </div>
-        </div>
-      )}
+      {showAddProfile && <AddProfileWindow onClose={handleCloseAddProfile} />}
     </div>
   );
 };

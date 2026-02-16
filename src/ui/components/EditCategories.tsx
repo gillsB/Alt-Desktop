@@ -12,7 +12,7 @@ interface DragState {
   insertPosition: "above" | "below" | null;
 }
 
-const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
+const EditCategories: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [categoryInput, setCategoryInput] = useState("");
   const [categoriesObj, setCategoriesObj] = useState<Record<string, boolean>>(
     {}
@@ -305,111 +305,124 @@ const EditCategories: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="modal-window-content">
-      <div className="modal-content">
-        <div className="subwindow-field">
-          <input
-            type="text"
-            value={categoryInput}
-            onChange={handleInputChange}
-            placeholder="Enter new category name"
-            className="create-tag-input"
-          />
-          <button className="button" onClick={handleAddCategory}>
-            Add Category
-          </button>
-        </div>
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="edit-categories-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-window-content">
+          <div className="modal-content">
+            <div className="subwindow-field">
+              <input
+                type="text"
+                value={categoryInput}
+                onChange={handleInputChange}
+                placeholder="Enter new category name"
+                className="create-tag-input"
+              />
+              <button className="button" onClick={handleAddCategory}>
+                Add Category
+              </button>
+            </div>
 
-        <div className="edit-categories-list">
-          <h3>Existing Categories</h3>
-          {pendingDeleteIndex !== null && (
-            <div
-              className="category-delete-overlay"
-              onClick={handleCancelDelete}
-            />
-          )}
-          <ul className="draggable-list">
-            {categories.map((cat, index) => (
-              <li
-                key={`${cat}-${index}`}
-                className={getCategoryItemClass(index)}
-                draggable
-                onDragStart={(e) => handleDragStart(e, index)}
-                onDragEnd={handleDragEnd}
-                onDragOver={(e) => handleDragOver(e, index)}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, index)}
-                style={{ position: "relative" }}
-              >
-                <span className="drag-handle">⋮⋮</span>
-                {editingIndex === index ? (
-                  <input
-                    className="category-edit-input"
-                    value={editingValue}
-                    autoFocus
-                    onChange={(e) => setEditingValue(e.target.value)}
-                    onBlur={() => finishEditing(index)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") finishEditing(index);
-                      if (e.key === "Escape") {
-                        setEditingIndex(null);
-                        setEditingValue("");
-                      }
-                    }}
-                  />
-                ) : (
-                  <span
-                    className="category-text"
-                    onDoubleClick={() => handleCategoryDoubleClick(index)}
-                    title="Double-click to rename"
-                    style={{ cursor: "pointer" }}
+            <div className="edit-categories-list">
+              <h3>Existing Categories</h3>
+              {pendingDeleteIndex !== null && (
+                <div
+                  className="category-delete-overlay"
+                  onClick={handleCancelDelete}
+                />
+              )}
+              <ul className="draggable-list">
+                {categories.map((cat, index) => (
+                  <li
+                    key={`${cat}-${index}`}
+                    className={getCategoryItemClass(index)}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, index)}
+                    style={{ position: "relative" }}
                   >
-                    {cat}
-                  </span>
-                )}
-                {/* Delete button */}
-                <button
-                  className="category-delete-btn"
-                  title="Delete category"
-                  onClick={() => handleDeleteClick(index)}
-                >
-                  ×
-                </button>
-                {/* Inline error */}
-                {duplicateErrorIndex === index && (
-                  <div className="category-inline-error">
-                    That name already exists
-                  </div>
-                )}
-                {/* Confirm dialog */}
-                {pendingDeleteIndex === index && (
-                  <div className="category-delete-confirm">
-                    <span
-                      className="category-delete-name"
-                      title={cat || "(empty)"}
+                    <span className="drag-handle">⋮⋮</span>
+                    {editingIndex === index ? (
+                      <input
+                        className="category-edit-input"
+                        value={editingValue}
+                        autoFocus
+                        onChange={(e) => setEditingValue(e.target.value)}
+                        onBlur={() => finishEditing(index)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") finishEditing(index);
+                          if (e.key === "Escape") {
+                            setEditingIndex(null);
+                            setEditingValue("");
+                          }
+                        }}
+                      />
+                    ) : (
+                      <span
+                        className="category-text"
+                        onDoubleClick={() => handleCategoryDoubleClick(index)}
+                        title="Double-click to rename"
+                        style={{ cursor: "pointer" }}
+                      >
+                        {cat}
+                      </span>
+                    )}
+                    {/* Delete button */}
+                    <button
+                      className="category-delete-btn"
+                      title="Delete category"
+                      onClick={() => handleDeleteClick(index)}
                     >
-                      {cat || <em>(empty)</em>}
-                    </span>
-                    <div className="category-delete-actions">
-                      <button className="button" onClick={handleConfirmDelete}>
-                        Delete
-                      </button>
-                      <button className="button" onClick={handleCancelDelete}>
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+                      ×
+                    </button>
+                    {/* Inline error */}
+                    {duplicateErrorIndex === index && (
+                      <div className="category-inline-error">
+                        That name already exists
+                      </div>
+                    )}
+                    {/* Confirm dialog */}
+                    {pendingDeleteIndex === index && (
+                      <div className="category-delete-confirm">
+                        <span
+                          className="category-delete-name"
+                          title={cat || "(empty)"}
+                        >
+                          {cat || <em>(empty)</em>}
+                        </span>
+                        <div className="category-delete-actions">
+                          <button
+                            className="button"
+                            onClick={handleConfirmDelete}
+                          >
+                            Delete
+                          </button>
+                          <button
+                            className="button"
+                            onClick={handleCancelDelete}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="modal-window-footer">
+            <button className="button" onClick={onClose}>
+              Close
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="modal-window-footer">
-        <button className="button" onClick={onClose}>
-          Close
-        </button>
       </div>
     </div>
   );

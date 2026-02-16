@@ -7,7 +7,7 @@ const logger = createLogger("AddProfile.tsx");
 
 const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g;
 
-const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
+const AddProfileWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [profileInput, setProfileInput] = useState("");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [duplicateError, setDuplicateError] = useState(false);
@@ -72,60 +72,67 @@ const AddProfileWindow: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="modal-window-content">
-      <div className="modal-content">
-        <div className="profile-field">
-          <div className="profile-input-row">
-            <label>Profile Name:</label>
-            <input
-              type="text"
-              value={profileInput}
-              onChange={handleInputChange}
-              placeholder="Enter new profile name"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreateProfile();
-              }}
-            />
-          </div>
-          <div className="error-space">
-            {duplicateError && (
-              <div className="add-profile-inline-error">
-                That profile already exists
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="add-tag-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-window-content">
+          <div className="modal-content">
+            <div className="profile-field">
+              <div className="profile-input-row">
+                <label>Profile Name:</label>
+                <input
+                  type="text"
+                  value={profileInput}
+                  onChange={handleInputChange}
+                  placeholder="Enter new profile name"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleCreateProfile();
+                  }}
+                />
               </div>
-            )}
+              <div className="error-space">
+                {duplicateError && (
+                  <div className="add-profile-inline-error">
+                    That profile already exists
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="subwindow-field">
+              <label>Copy from:</label>
+              <div className="dropdown-container">
+                <select
+                  value={selectedProfile}
+                  onChange={(e) => setSelectedProfile(e.target.value)}
+                  className="create-tag-input"
+                  style={{ width: "100%" }}
+                >
+                  <option value="">None (Fresh)</option>
+                  {profiles.map((profile) => (
+                    <option key={profile} value={profile}>
+                      {profile === "default" ? "Default" : profile}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="subwindow-field">
-          <label>Copy from:</label>
-          <div className="dropdown-container">
-            <select
-              value={selectedProfile}
-              onChange={(e) => setSelectedProfile(e.target.value)}
-              className="create-tag-input"
-              style={{ width: "100%" }}
+          <div className="modal-window-footer">
+            <button
+              className="button"
+              onClick={handleCreateProfile}
+              disabled={duplicateError}
             >
-              <option value="">None (Fresh)</option>
-              {profiles.map((profile) => (
-                <option key={profile} value={profile}>
-                  {profile === "default" ? "Default" : profile}
-                </option>
-              ))}
-            </select>
+              Create Profile
+            </button>
+            <button className="button" onClick={onClose}>
+              Cancel
+            </button>
           </div>
         </div>
-      </div>
-      <div className="modal-window-footer">
-        <button
-          className="button"
-          onClick={handleCreateProfile}
-          disabled={duplicateError}
-        >
-          Create Profile
-        </button>
-        <button className="button" onClick={onClose}>
-          Cancel
-        </button>
       </div>
     </div>
   );
