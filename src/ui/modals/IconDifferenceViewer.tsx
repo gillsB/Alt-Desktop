@@ -1,7 +1,7 @@
 import React, { useState } from "react";
+import { SafeImage } from "../components/SafeImage";
 import "../styles/IconDifferenceViewer.css";
 import { showSmallWindow } from "../util/uiUtil";
-import { SafeImage } from "./SafeImage";
 
 interface IconDifferenceViewerProps {
   profileName: string;

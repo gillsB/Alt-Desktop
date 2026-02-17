@@ -10,10 +10,10 @@ import "../App.css";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
-import AddProfileWindow from "./AddProfile";
-import AddTagWindow, { RenameTagModal } from "./AddTag";
+import AddProfileWindow from "../modals/AddProfile";
+import AddTagWindow, { RenameTagModal } from "../modals/AddTag";
 import ClearableInput from "./ClearableInput";
-import EditCategories from "./EditCategories";
+import EditCategories from "../modals/EditCategories";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 

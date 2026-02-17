@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
+import IconDifferenceViewer from "../modals/IconDifferenceViewer";
 import "../styles/DesktopProfile.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
-import IconDifferenceViewer from "./IconDifferenceViewer";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
