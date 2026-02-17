@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import IconDifferenceViewer from "../modals/IconDifferenceViewer";
 import "../styles/DesktopProfile.css";
 import { createLogger } from "../util/uiLogger";
@@ -72,11 +72,18 @@ const DesktopProfile: React.FC = () => {
     differences: string[];
   } | null>(null);
 
+  const iconDifferenceViewerRef = useRef(false);
+
   const hideContextMenu = () => {
     setContextMenu({ visible: false, x: 0, y: 0 });
   };
 
   useEffect(() => {
+    iconDifferenceViewerRef.current = !!iconDifferenceViewer;
+  }, [iconDifferenceViewer]);
+
+  useEffect(() => {
+    // TODO context menu currently disabled, might need changes to make this work. probably needs a useRef.
     const handleClickOutside = (e: MouseEvent) => {
       const contextMenuElement = document.querySelector(".context-menu");
       if (
@@ -93,8 +100,10 @@ const DesktopProfile: React.FC = () => {
         // Close context/DifferenceViewer if either, else close window
         if (contextMenu.visible) {
           hideContextMenu();
-        } else if (iconDifferenceViewer) {
-          setIconDifferenceViewer(null);
+        } else if (iconDifferenceViewerRef.current) {
+          e.stopPropagation();
+          e.preventDefault();
+          handleIconDifferenceClose();
         } else {
           handleClose();
         }
@@ -102,12 +111,12 @@ const DesktopProfile: React.FC = () => {
     };
 
     document.addEventListener("click", handleClickOutside);
-    document.addEventListener("keydown", handleEscapeKey);
+    document.addEventListener("keydown", handleEscapeKey, true);
     return () => {
       document.removeEventListener("click", handleClickOutside);
-      document.removeEventListener("keydown", handleEscapeKey);
+      document.removeEventListener("keydown", handleEscapeKey, true);
     };
-  }, [contextMenu, iconDifferenceViewer]);
+  }, []);
 
   const handleClose = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "DesktopProfile");
