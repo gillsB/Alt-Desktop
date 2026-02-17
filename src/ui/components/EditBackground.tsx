@@ -7,13 +7,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { PUBLIC_TAG_CATEGORIES } from "../../electron/publicTags";
 import "../App.css";
+import AddProfileWindow from "../modals/AddProfile";
+import AddTagWindow, { RenameTagModal } from "../modals/AddTag";
+import EditCategories from "../modals/EditCategories";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
-import AddProfileWindow from "../modals/AddProfile";
-import AddTagWindow, { RenameTagModal } from "../modals/AddTag";
 import ClearableInput from "./ClearableInput";
-import EditCategories from "../modals/EditCategories";
 import { SafeImage } from "./SafeImage";
 import { SubWindowHeader } from "./SubWindowHeader";
 
@@ -592,6 +592,8 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
           logger.info(
             "Sub-modal open, closing sub-modal instead of EditBackground"
           );
+          e.stopPropagation();
+          e.preventDefault();
           setShowAddTag(false);
           setShowEditCategories(false);
           setRenameModal(null);
@@ -604,12 +606,12 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, true);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown, true);
     };
-  }, [handleClose]); // Needs updated handleClose reference or does not detect changes.
+  }, [handleClose]);
 
   const getChanges = (): boolean => {
     const orig = originalSummary.current;
