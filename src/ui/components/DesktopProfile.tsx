@@ -71,19 +71,23 @@ const DesktopProfile: React.FC = () => {
     otherIcon: DesktopIcon;
     differences: string[];
   } | null>(null);
-
-  const iconDifferenceViewerRef = useRef(false);
+  const escapeHandlerRef = useRef<() => void>(() => {});
 
   const hideContextMenu = () => {
     setContextMenu({ visible: false, x: 0, y: 0 });
   };
 
-  useEffect(() => {
-    iconDifferenceViewerRef.current = !!iconDifferenceViewer;
-  }, [iconDifferenceViewer]);
+  escapeHandlerRef.current = () => {
+    if (contextMenu.visible) {
+      hideContextMenu();
+    } else if (iconDifferenceViewer) {
+      handleIconDifferenceClose();
+    } else {
+      handleClose();
+    }
+  };
 
   useEffect(() => {
-    // TODO context menu currently disabled, might need changes to make this work. probably needs a useRef.
     const handleClickOutside = (e: MouseEvent) => {
       const contextMenuElement = document.querySelector(".context-menu");
       if (
@@ -97,17 +101,7 @@ const DesktopProfile: React.FC = () => {
 
     const handleEscapeKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        // Close context/DifferenceViewer if either, else close window
-        if (contextMenu.visible) {
-          hideContextMenu();
-        } else if (iconDifferenceViewerRef.current) {
-          // iconDifferenceViewer detects it and calls close instead of handling here 
-          // (avoids outdated state issues without 50 useRefs)
-          e.stopPropagation();
-          e.preventDefault();
-        } else {
-          handleClose();
-        }
+        escapeHandlerRef.current();
       }
     };
 
