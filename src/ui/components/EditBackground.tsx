@@ -86,27 +86,6 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
   } | null>(null);
   const [showAddProfile, setShowAddProfile] = useState(false);
 
-  const showAddTagRef = useRef(false);
-  const showEditCategoriesRef = useRef(false);
-  const renameModalRef = useRef<{ tag: LocalTag; category: string } | null>(
-    null
-  );
-  const showAddProfileRef = useRef(false);
-
-  useEffect(() => {
-    showAddTagRef.current = showAddTag;
-  }, [showAddTag]);
-  useEffect(() => {
-    showEditCategoriesRef.current = showEditCategories;
-  }, [showEditCategories]);
-  useEffect(() => {
-    renameModalRef.current = renameModal;
-  }, [renameModal]);
-  useEffect(() => {
-    logger.info("updating showAddProfileRef:", showAddProfile);
-    showAddProfileRef.current = showAddProfile;
-  }, [showAddProfile]);
-
   const [ids, setIds] = useState<Set<string>>(new Set<string>());
   const [isHoveringBgFile, setIsHoveringBgFile] = useState(false);
   const [isHoveringIconPath, setIsHoveringIconPath] = useState(false);
@@ -192,6 +171,30 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
   >(new Set());
   const [collapsedPublicTags, setCollapsedPublicTags] = useState(false);
   const [collapsedLocalTags, setCollapsedLocalTags] = useState(false);
+
+  const escapeHandlerRef = useRef<() => void>(() => {});
+
+  escapeHandlerRef.current = () => {
+    if (
+      showAddTag ||
+      showEditCategories ||
+      renameModal ||
+      showAddProfile ||
+      tagContextMenu
+    ) {
+      logger.info(
+        "Sub-modal open, closing sub-modal instead of EditBackground"
+      );
+      setShowAddTag(false);
+      setShowEditCategories(false);
+      setRenameModal(null);
+      setShowAddProfile(false);
+      setTagContextMenu(null);
+      return;
+    } else {
+      handleClose();
+    }
+  };
 
   // Load categories collapsed/expanded state from settings
   useEffect(() => {
@@ -580,38 +583,20 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
   };
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (
-          showAddTagRef.current ||
-          showEditCategoriesRef.current ||
-          renameModalRef.current ||
-          showAddProfileRef.current ||
-          tagContextMenu
-        ) {
-          logger.info(
-            "Sub-modal open, closing sub-modal instead of EditBackground"
-          );
-          e.stopPropagation();
-          e.preventDefault();
-          setShowAddTag(false);
-          setShowEditCategories(false);
-          setRenameModal(null);
-          setShowAddProfile(false);
-          setTagContextMenu(null);
-          return;
-        }
-        logger.info("No sub-modals open, closing EditBackground");
-        handleClose();
+        escapeHandlerRef.current();
+        e.stopPropagation();
+        e.preventDefault();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("keydown", handleEscapeKey, true);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("keydown", handleEscapeKey, true);
     };
-  }, [handleClose]);
+  }, []);
 
   const getChanges = (): boolean => {
     const orig = originalSummary.current;
