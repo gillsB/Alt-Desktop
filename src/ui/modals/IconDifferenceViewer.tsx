@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeImage } from "../components/SafeImage";
 import "../styles/IconDifferenceViewer.css";
 import { showSmallWindow } from "../util/uiUtil";
@@ -82,6 +82,19 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
       return map;
     }
   );
+
+  useEffect(() => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscapeKey, true);
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey, true);
+    };
+  }, []);
 
   const copyLeftToRight = (field: string) => {
     setEditedRight((prev) => ({ ...prev, [field]: editedLeft[field] }));

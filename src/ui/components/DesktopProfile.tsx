@@ -101,9 +101,10 @@ const DesktopProfile: React.FC = () => {
         if (contextMenu.visible) {
           hideContextMenu();
         } else if (iconDifferenceViewerRef.current) {
+          // iconDifferenceViewer detects it and calls close instead of handling here 
+          // (avoids outdated state issues without 50 useRefs)
           e.stopPropagation();
           e.preventDefault();
-          handleIconDifferenceClose();
         } else {
           handleClose();
         }
