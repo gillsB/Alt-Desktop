@@ -828,7 +828,7 @@ const BackgroundSelect: React.FC = () => {
     setEditingSummary(null);
 
     try {
-      if (saved && applied) {
+      if (saved) {
         // Re-index and refresh list
         await window.electron.indexBackgrounds();
         let updated: BackgroundSummary | null = null;
