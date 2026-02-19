@@ -252,11 +252,57 @@ const DesktopProfile: React.FC = () => {
     }
   };
 
-  // TODO implementing this would require just a loop through all desktop_cache icons and importing
-  // Will get to eventually
+  // import every icon currently listed as "not imported" in Desktop Files (icons from desktop_cache)
   const handleImportAll = async () => {
-    // Import single file from desktop cache to current profile
-    return;
+    if (!profile) {
+      logger.warn("Cannot import all when no profile is selected");
+      return;
+    }
+
+    const confirmImport = await showSmallWindow(
+      "Confirm Import",
+      `Import all (${desktopCacheCompare.filesToImport.length}) "Not Imported" icons\n to the "${profile}" profile?`,
+      ["Yes", "No"]
+    );
+
+    if (confirmImport === "Yes") {
+      const toImport = desktopCacheCompare.filesToImport;
+      if (!toImport || toImport.length === 0) {
+        return;
+      }
+
+      // process sequentially; errors for individual icons won't abort the loop
+      for (const icon of toImport) {
+        try {
+          const importedIcon = await window.electron.importIconFromProfile(
+            profile,
+            "desktop_cache",
+            icon
+          );
+          if (!importedIcon) {
+            logger.error(
+              "Failed to import icon from desktop_cache during importAll",
+              {
+                icon,
+                profile,
+              }
+            );
+          }
+        } catch (err) {
+          logger.error(
+            "Error importing icon from desktop_cache during importAll",
+            err
+          );
+        }
+      }
+
+      // refresh once when done
+      try {
+        await reloadDesktopCache();
+      } catch (error) {
+        logger.error("Error reloading desktop cache after importAll", error);
+      }
+    }
   };
 
   const importFromProfile = async (icon: DesktopIcon) => {
@@ -467,13 +513,28 @@ const DesktopProfile: React.FC = () => {
               ) : (
                 <>
                   <div className="import-icons-header">
-                    <button
-                      type="button"
-                      className="button reload-btn"
-                      onClick={reloadDesktopCache}
-                    >
-                      Reload
-                    </button>
+                    <div className="header-left-group">
+                      <button
+                        type="button"
+                        className="button import-all-btn"
+                        onClick={handleImportAll}
+                        disabled={
+                          desktopCacheCompare.filesToImport.length === 0 ||
+                          !profile
+                        }
+                      >
+                        Import all
+                      </button>
+                    </div>
+                    <div className="header-right-group">
+                      <button
+                        type="button"
+                        className="button reload-btn"
+                        onClick={reloadDesktopCache}
+                      >
+                        Reload
+                      </button>
+                    </div>
                   </div>
 
                   <div className="compare-grid-container">
@@ -691,29 +752,33 @@ const DesktopProfile: React.FC = () => {
           {activeTab === "other" && (
             <div className="import-icons-other">
               <div className="import-icons-header">
-                <label className="desktop-profile-label">
-                  Compare to Profile:
-                </label>
-                <select
-                  className="desktop-profile-select"
-                  value={compareToProfile}
-                  onChange={handleCompareProfiles}
-                >
-                  {profiles
-                    .filter((p) => p !== profile)
-                    .map((p) => (
-                      <option key={p} value={p}>
-                        {p === "default" ? "Default" : p}
-                      </option>
-                    ))}
-                </select>
-                <button
-                  type="button"
-                  className="button reload-btn"
-                  onClick={reloadOtherProfiles}
-                >
-                  Reload
-                </button>
+                <div className="header-left-group">
+                  <label className="desktop-profile-label">
+                    Compare to Profile:
+                  </label>
+                  <select
+                    className="desktop-profile-select"
+                    value={compareToProfile}
+                    onChange={handleCompareProfiles}
+                  >
+                    {profiles
+                      .filter((p) => p !== profile)
+                      .map((p) => (
+                        <option key={p} value={p}>
+                          {p === "default" ? "Default" : p}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="header-right-group">
+                  <button
+                    type="button"
+                    className="button reload-btn"
+                    onClick={reloadOtherProfiles}
+                  >
+                    Reload
+                  </button>
+                </div>
               </div>
 
               {compareToProfile && (

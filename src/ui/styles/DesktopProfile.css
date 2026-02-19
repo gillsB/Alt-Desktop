@@ -48,6 +48,20 @@
   padding-bottom: 4px;
   border-bottom: 1px solid rgb(var(--color-textPrimary));
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.header-left-group,
+.header-right-group {
+  display: flex;
+  align-items: center;
+}
+
+.header-left-group > * {
+  margin-right: 8px;
 }
 
 .import-icons-header h2 {
