@@ -81,7 +81,8 @@ const DesktopProfile: React.FC = () => {
     if (contextMenu.visible) {
       hideContextMenu();
     } else if (iconDifferenceViewer) {
-      handleIconDifferenceClose();
+      // modal captures escape key so it can pass back saved state
+      return;
     } else {
       handleClose();
     }
@@ -374,16 +375,19 @@ const DesktopProfile: React.FC = () => {
     });
   };
 
-  const handleIconDifferenceClose = async () => {
+  const handleIconDifferenceClose = async (saved: boolean = false) => {
     setIconDifferenceViewer(null);
-    try {
-      await reloadDesktopCache();
-      await reloadOtherProfiles();
-    } catch (err) {
-      logger.error(
-        "Error reloading profiles after difference viewer closed:",
-        err
-      );
+    logger.info("Icon difference viewer closed. Changes saved:", saved);
+    if (saved) {
+      try {
+        await reloadDesktopCache();
+        await reloadOtherProfiles();
+      } catch (err) {
+        logger.error(
+          "Error reloading profiles after difference viewer closed:",
+          err
+        );
+      }
     }
   };
 

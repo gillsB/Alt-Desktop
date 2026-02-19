@@ -9,7 +9,7 @@ interface IconDifferenceViewerProps {
   otherProfileName: string;
   otherIcon: DesktopIcon;
   differences: string[];
-  onClose: () => void;
+  onClose: (saved?: boolean) => void;
 }
 
 const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
@@ -62,6 +62,8 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     });
     return map;
   });
+
+  const [hasSaved, setHasSaved] = useState(false);
 
   const [isLeftEdited, setIsLeftEdited] = useState<Record<string, boolean>>(
     () => {
@@ -139,6 +141,16 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     return value;
   };
 
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [hasSaved]);
+
   const saveLeft = async () => {
     const iconBackup = { ...icon };
     fieldsToCompare.forEach((field) => {
@@ -199,6 +211,8 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         await window.electron.reloadIcon(iconBackup.id);
       }
       await window.electron.reloadIcon(icon.id);
+
+      setHasSaved(true);
     } else {
       icon = iconBackup;
     }
@@ -261,13 +275,18 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         });
         return map;
       });
+      setHasSaved(true);
     } else {
       otherIcon = otherIconBackup;
     }
   };
 
+  const handleClose = () => {
+    onClose(hasSaved);
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleClose}>
       <div
         className="modal-window-content modal-window-content-icon-difference-viewer"
         onClick={(e) => e.stopPropagation()}
@@ -426,7 +445,7 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
           </div>
         </div>
         <div className="modal-window-footer">
-          <button className="button" onClick={onClose}>
+          <button className="button" onClick={handleClose}>
             Close
           </button>
         </div>
