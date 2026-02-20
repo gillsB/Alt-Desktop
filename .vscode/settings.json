@@ -30,6 +30,7 @@
     "lnks",
     "logsfolderpath",
     "maxsize",
+    "noicon",
     "nosniff",
     "nuitka",
     "onefile",

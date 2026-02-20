@@ -19,7 +19,22 @@ const getImagePath = (
   id?: string,
   timestamp?: number
 ) => {
-  if (imagePath === " " || imagePath.toLowerCase() === "none") {
+  const imageLower = imagePath.toLowerCase();
+  const transparentImageValues = new Set([
+    " ",
+    "none",
+    "blank",
+    "empty",
+    "null",
+    "undefined",
+    "transparent",
+    "invisible",
+    "noicon",
+    "false",
+    "0",
+    "n/a",
+  ]);
+  if (transparentImageValues.has(imageLower)) {
     return ""; // Return empty string for special cases
   }
 
