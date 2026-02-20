@@ -2353,8 +2353,19 @@ function standardizeIconName(name: string): string {
   return name;
 }
 
-// Manual addition of .url MIME type otherwise mime.lookup returns ""
+// Manual addition of .url and folder MIME type otherwise mime.lookup returns false
 export function getMimeType(filePath: string): string | false {
+  try {
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+      return "inode/directory";
+    }
+  } catch (e) {
+    logger.error(
+      `Error checking if path is directory for MIME type: ${filePath}`,
+      e
+    );
+  }
+
   const ext = path.extname(filePath).toLowerCase();
   if (ext === ".url") {
     return "application/x-url";
@@ -2580,6 +2591,10 @@ export async function saveIcon(
     }
 
     // Early field checks (currently only programLink)
+    logger.info(
+      "Validating program link:",
+      getMimeType(newIcon.programLink || "")
+    );
     const programTypeEarly = getMimeType(newIcon.programLink || "");
     const validProgram = !!programTypeEarly;
     if (checkFields && newIcon.programLink && !validProgram) {
