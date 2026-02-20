@@ -235,6 +235,18 @@ const EditIcon: React.FC = () => {
     try {
       const oldIcon = originalIcon.current ?? null;
 
+      if (!icon.image && (icon.programLink || icon.websiteLink)) {
+        logger.info("Attempting to generate icon for icon with no image.");
+        const selectedIcon = await handleGenerateIcon();
+        if (selectedIcon) {
+          icon.image = selectedIcon;
+        } else {
+          logger.info(
+            "Auto-generated icon not selected or generation failed, proceeding with save without image."
+          );
+        }
+      }
+
       // Attempt to save, but check fields for validity first (Returns success=false if checks fail)
       const checkFieldSave = await window.electron.saveIcon(
         oldIcon,
@@ -303,7 +315,7 @@ const EditIcon: React.FC = () => {
     }
   };
 
-  const handleGenerateIcon = async () => {
+  const handleGenerateIcon = async (): Promise<string | undefined> => {
     if (!icon) return;
     try {
       let iconPaths = await window.electron.generateIcon(
@@ -353,8 +365,10 @@ const EditIcon: React.FC = () => {
           await window.electron.previewIconUpdate(icon.id, icon);
         }
       }
+      return selectedIcon;
     } catch (e) {
       logger.error("Error during autoGenIcon", e);
+      return undefined;
     }
   };
 
