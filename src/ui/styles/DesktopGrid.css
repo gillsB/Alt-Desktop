@@ -239,13 +239,12 @@
 }
 
 .swap-highlight {
-  border: 2px dashed rgb(var(--color-highlightYellow));
-  box-shadow: 0 0 10px rgba(var(--color-highlightYellow), 0.5);
+  border: 2px dashed rgb(var(--color-highlightSwap));
 }
 
 .swap-preview {
   opacity: 1;
-  border: 2px solid rgb(var(--color-highlightYellow));
+  border: 2px solid rgb(var(--color-highlightSwap));
   box-sizing: border-box;
 }
 

@@ -87,6 +87,7 @@ import {
   saveBgJsonFile,
   saveIcon,
   saveImageToIconFolder,
+  sendHoverHighlightIcon,
   setSmallWindowDevtoolsEnabled,
   setSubWindowDevtoolsEnabled,
   swapDesktopIcons,
@@ -2472,4 +2473,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  ipcMainHandle("hoverHighlightIcon", async (id: string): Promise<boolean> => {
+    return sendHoverHighlightIcon(id);
+  });
 }

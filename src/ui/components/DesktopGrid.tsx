@@ -690,6 +690,15 @@ const DesktopGrid: React.FC = () => {
       "highlightIcon",
       ipcHighlight as (...a: unknown[]) => void
     );
+
+    const handleHoverHighlight = (_: Electron.IpcRendererEvent, id: string) => {
+      logger.info(`hover-highlight-icon received id=${id}`);
+    };
+    window.electron.on(
+      "hover-highlight-icon",
+      handleHoverHighlight as (...a: unknown[]) => void
+    );
+
     // Cleanup the event listeners on unmount
     return () => {
       window.electron.off(
@@ -704,6 +713,10 @@ const DesktopGrid: React.FC = () => {
       window.electron.off(
         "highlightIcon",
         ipcHighlight as (...a: unknown[]) => void
+      );
+      window.electron.off(
+        "hover-highlight-icon",
+        handleHoverHighlight as (...a: unknown[]) => void
       );
     };
   }, []);

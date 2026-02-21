@@ -2673,3 +2673,11 @@ export async function saveIcon(
     return { success: false, error: String(error) };
   }
 }
+
+export function sendHoverHighlightIcon(id: string): boolean {
+  if (mainWindow) {
+    mainWindow.webContents.send("hover-highlight-icon", id);
+    return true;
+  }
+  return false;
+}

@@ -43,8 +43,8 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     highlightOffset: "255, 87, 34", // #ff5722
     highlightOversized: "190, 137, 0", // #be8900
     highlightOffsetOversized: "158, 23, 13", // #9e170d
-    highlightGreen: "76, 175, 80", // #4caf50
-    highlightYellow: "255, 255, 0", // #ffff00
+    highlightHover: "76, 175, 80", // #4caf50
+    highlightSwap: "255, 255, 0", // #ffff00
 
     shadow: "0, 0, 0", // #000000
   },
@@ -80,8 +80,8 @@ const themes: Record<BinaryTheme, ThemeColors> = {
     highlightOffset: "255, 87, 34", // #ff5722
     highlightOversized: "190, 137, 0", // #be8900
     highlightOffsetOversized: "158, 23, 13", // #9e170d
-    highlightGreen: "76, 175, 80", // #4caf50
-    highlightYellow: "249, 168, 37", // #f9a825
+    highlightHover: "76, 175, 80", // #4caf50
+    highlightSwap: "249, 168, 37", // #f9a825
 
     shadow: "0, 0, 0", // #000000
   },

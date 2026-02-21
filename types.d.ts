@@ -265,8 +265,8 @@ interface ThemeColors {
   highlightOffset: string;
   highlightOversized: string;
   highlightOffsetOversized: string;
-  highlightGreen: string;
-  highlightYellow: string;
+  highlightHover: string;
+  highlightSwap: string;
 
   shadow: string;
 }
@@ -367,6 +367,7 @@ interface EventParamMapping {
   highlightIcon: [string];
   transferIconImage: [string, string, string, string];
   importAllIconsToDesktopCache: [];
+  hoverHighlightIcon: [string];
 }
 
 // The returns from the main process to the renderer
@@ -467,6 +468,7 @@ type EventPayloadMapping = {
   highlightIcon: boolean;
   transferIconImage: string | null;
   importAllIconsToDesktopCache: boolean;
+  hoverHighlightIcon: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -666,5 +668,6 @@ interface Window {
       targetID: string
     ) => Promise<string | null>;
     importAllIconsToDesktopCache: () => Promise<boolean>;
+    hoverHighlightIcon: (id: string) => Promise<boolean>;
   };
 }
