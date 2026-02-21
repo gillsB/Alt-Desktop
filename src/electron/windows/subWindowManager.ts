@@ -112,6 +112,8 @@ export function openSubWindow(
 
     logger.info(`Created subwindow with URL: ${subWindowUrl}`);
 
+    activeSubWindow.focus();
+
     return activeSubWindow;
   };
 
