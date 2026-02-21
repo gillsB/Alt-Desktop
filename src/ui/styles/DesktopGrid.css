@@ -238,8 +238,14 @@
   z-index: 1000;
 }
 
+.hover-highlight {
+  border: 2px dashed rgb(var(--color-highlightHover));
+  box-shadow: 0 0 10px rgba(var(--color-highlightHover), 0.5);
+}
+
 .swap-highlight {
   border: 2px dashed rgb(var(--color-highlightSwap));
+  box-shadow: 0 0 10px rgba(var(--color-highlightSwap), 0.5);
 }
 
 .swap-preview {

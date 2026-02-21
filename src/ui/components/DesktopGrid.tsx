@@ -153,6 +153,13 @@ const DesktopGrid: React.FC = () => {
     icons: [],
   });
 
+  const [hoverHighlightId, setHoverHighlightId] = useState<string | null>(null);
+  useEffect(() => {
+    if (hoverHighlightId && !iconsById.has(hoverHighlightId)) {
+      setHoverHighlightId(null);
+    }
+  }, [iconsById, hoverHighlightId]);
+
   const [isDraggingPanel, setIsDraggingPanel] = useState(false);
   const [panelDragStart, setPanelDragStart] = useState<{
     x: number;
@@ -693,6 +700,11 @@ const DesktopGrid: React.FC = () => {
 
     const handleHoverHighlight = (_: Electron.IpcRendererEvent, id: string) => {
       logger.info(`hover-highlight-icon received id=${id}`);
+      if (id) {
+        setHoverHighlightId(id);
+      } else {
+        setHoverHighlightId(null);
+      }
     };
     window.electron.on(
       "hover-highlight-icon",
@@ -2222,6 +2234,30 @@ const DesktopGrid: React.FC = () => {
               </div>
             );
           })}
+
+        {hoverHighlightId &&
+          (() => {
+            const icon = iconsById.get(hoverHighlightId);
+            if (!icon) return null;
+            const { row, col } = icon;
+            return (
+              <div
+                className="highlight-box hover-highlight"
+                style={{
+                  left:
+                    col * (iconBox + ICON_HORIZONTAL_PADDING) +
+                    (icon.offsetX || 0) +
+                    ICON_ROOT_OFFSET_LEFT,
+                  top:
+                    row * (iconBox + ICON_VERTICAL_PADDING) +
+                    (icon.offsetY || 0) +
+                    ICON_ROOT_OFFSET_TOP,
+                  width: iconBox,
+                  height: iconBox + ICON_VERTICAL_PADDING,
+                }}
+              />
+            );
+          })()}
 
         {showAllHighlights && (
           <div
