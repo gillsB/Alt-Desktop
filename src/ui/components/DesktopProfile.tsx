@@ -15,7 +15,7 @@ const TABS = [
 
 interface ProfileCompareState {
   filesToImport: DesktopIcon[];
-  alreadyImported: DesktopIcon[];
+  alreadyImported: PairedIcons[];
   modified: Array<{
     otherIcon: DesktopIcon;
     currentIcon: DesktopIcon;
@@ -421,6 +421,10 @@ const DesktopProfile: React.FC = () => {
     });
   };
 
+  const handleIconHover = (icon: DesktopIcon) => {
+    window.electron.hoverHighlightIcon(icon.id);
+  };
+
   const handleIconDifferenceClose = async (saved: boolean = false) => {
     setIconDifferenceViewer(null);
     logger.info("Icon difference viewer closed. Changes saved:", saved);
@@ -718,24 +722,27 @@ const DesktopProfile: React.FC = () => {
                         </div>
                         {!desktopCacheAlreadyImportedCollapsed && (
                           <div className="desktop-profile-icons-grid">
-                            {desktopCacheCompare.alreadyImported.map((icon) => (
+                            {desktopCacheCompare.alreadyImported.map((pair) => (
                               <div
-                                key={`desktop-cache-already-${icon.id}`}
+                                key={`desktop-cache-already-${pair.otherIcon.id}`}
                                 className="desktop-profile-icon-item"
-                                title={icon.name}
+                                title={pair.otherIcon.name}
+                                onMouseEnter={() =>
+                                  handleIconHover(pair.currentIcon)
+                                }
                               >
                                 <SafeImage
                                   profile="desktop_cache"
-                                  id={icon.id}
-                                  row={icon.row}
-                                  col={icon.col}
-                                  imagePath={icon.image}
+                                  id={pair.otherIcon.id}
+                                  row={pair.otherIcon.row}
+                                  col={pair.otherIcon.col}
+                                  imagePath={pair.otherIcon.image}
                                   width={84}
                                   height={84}
                                   highlighted={false}
                                 />
                                 <div className="desktop-profile-icon-name">
-                                  {icon.name}
+                                  {pair.otherIcon.name}
                                 </div>
                               </div>
                             ))}
@@ -962,24 +969,27 @@ const DesktopProfile: React.FC = () => {
                       </div>
                       {!compareAlreadyImportedCollapsed && (
                         <div className="desktop-profile-icons-grid">
-                          {profileCompare.alreadyImported.map((icon) => (
+                          {profileCompare.alreadyImported.map((pair) => (
                             <div
-                              key={`already-imported-${icon.id}`}
+                              key={`already-imported-${pair.otherIcon.id}`}
                               className="desktop-profile-icon-item"
-                              title={icon.name}
+                              title={pair.otherIcon.name}
+                              onMouseEnter={() =>
+                                handleIconHover(pair.currentIcon)
+                              }
                             >
                               <SafeImage
                                 profile={compareToProfile}
-                                id={icon.id}
-                                row={icon.row}
-                                col={icon.col}
-                                imagePath={icon.image}
+                                id={pair.otherIcon.id}
+                                row={pair.otherIcon.row}
+                                col={pair.otherIcon.col}
+                                imagePath={pair.otherIcon.image}
                                 width={84}
                                 height={84}
                                 highlighted={false}
                               />
                               <div className="desktop-profile-icon-name">
-                                {icon.name}
+                                {pair.otherIcon.name}
                               </div>
                             </div>
                           ))}
