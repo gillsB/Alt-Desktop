@@ -2254,7 +2254,10 @@ export async function compareProfiles(
     }
 
     const filesToImport: DesktopIcon[] = [];
-    const alreadyImported: DesktopIcon[] = [];
+    const alreadyImported: Array<{
+      otherIcon: DesktopIcon;
+      currentIcon: DesktopIcon;
+    }> = [];
     const modified: Array<{
       otherIcon: DesktopIcon;
       currentIcon: DesktopIcon;
@@ -2300,7 +2303,7 @@ export async function compareProfiles(
 
         if (differences.length === 0) {
           // Icons are identical (excluding position fields)
-          alreadyImported.push(otherIcon);
+          alreadyImported.push({ otherIcon, currentIcon: bestMatch });
         } else {
           // Icons have differences
           modified.push({

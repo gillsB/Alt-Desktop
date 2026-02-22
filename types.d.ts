@@ -97,9 +97,14 @@ type DesktopFileCompare = {
   pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
 };
 
+type PairedIcons = {
+  otherIcon: DesktopIcon;
+  currentIcon: DesktopIcon;
+};
+
 type ProfileIconCompare = {
   filesToImport: DesktopIcon[];
-  alreadyImported: DesktopIcon[];
+  alreadyImported: PairedIcons[];
   modified: Array<{
     otherIcon: DesktopIcon;
     currentIcon: DesktopIcon;
