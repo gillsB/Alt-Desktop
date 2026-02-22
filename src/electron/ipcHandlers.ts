@@ -75,7 +75,6 @@ import {
   getProfilesPath,
   getSelectedProfilePath,
   getSettingsFilePath,
-  importAllIconsFromDesktop,
   importDesktopFileAsIcon,
   importIconFromProfile,
   indexBackgrounds,
@@ -1938,17 +1937,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
 
-  ipcMainHandle("importAllIconsFromDesktop", async (): Promise<boolean> => {
-    logger.info("called importAllIconsFromDesktop");
-    const profile = await getRendererState("profile");
-    // Do not import if no profile returned from getRendererState
-    if (!profile) {
-      logger.error("No profile set in renderer state, cannot import icons.");
-      showSmallWindow("Error Importing Icons", "No profile is set.", ["Okay"]);
-      return false;
-    }
-    return await importAllIconsFromDesktop(mainWindow, profile);
-  });
   // TODO probably look into removing any icon folders with _1 etc. (likely added in error and would appear as duplicates)
   // Have to ensure not to delete any actual desktop icon which has _1 in the name though.
   ipcMainHandle("importAllIconsToDesktopCache", async (): Promise<boolean> => {
@@ -2265,15 +2253,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       isImportingDesktopCache = false;
     }
   });
-  ipcMainHandle(
-    "getDesktopUniqueFiles",
-    async (profile?: string): Promise<DesktopFileCompare> => {
-      if (profile) {
-        return await getDesktopUniqueFiles(profile);
-      }
-      return await getDesktopUniqueFiles();
-    }
-  );
   ipcMainHandle(
     "importDesktopFile",
     async (file: DesktopFile, profile: string): Promise<DesktopIcon | null> => {

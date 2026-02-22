@@ -1738,6 +1738,7 @@ export function saveImageToIconFolder(
   return localFileName;
 }
 
+// Generates fields for desktop_cache profile (what icons to import, update etc.)
 export async function getDesktopUniqueFiles(
   profile?: string,
   existingIcons?: DesktopIcon[]
@@ -1974,82 +1975,6 @@ export async function importDesktopFileAsIcon(
   } catch (error) {
     logger.error(`Error importing ${file.name}:`, error);
     return null;
-  }
-}
-
-async function loadExistingIconsAndTakenCoords(profile: string) {
-  const profileJsonPath = getProfileJsonPath(profile);
-  let existingIcons: DesktopIcon[] = [];
-  if (fs.existsSync(profileJsonPath)) {
-    try {
-      const data = fs.readFileSync(profileJsonPath, "utf-8");
-      const parsedData: DesktopIconData = JSON.parse(data);
-      existingIcons = parsedData.icons || [];
-    } catch (e) {
-      logger.warn("Failed to read profile icon data:", e);
-    }
-  }
-  const takenCoords = new Set(
-    existingIcons.map((icon) => `${icon.row},${icon.col}`)
-  );
-  return { existingIcons, takenCoords };
-}
-
-export async function importAllIconsFromDesktop(
-  mainWindow: BrowserWindow,
-  profile: string
-): Promise<boolean> {
-  try {
-    const { existingIcons, takenCoords } =
-      await loadExistingIconsAndTakenCoords(profile);
-    // Fetch current profile's DesktopIconData
-
-    const { filesToImport } = await getDesktopUniqueFiles(
-      profile,
-      existingIcons
-    );
-
-    if (!filesToImport.length) {
-      logger.warn("No new files found on Desktop to import as icons.");
-      return true;
-    }
-
-    logger.info(`Found ${filesToImport.length} new files to import.`);
-
-    const importIcons = await showSmallWindow(
-      "Import Desktop Icons",
-      `Found ${filesToImport.length} new unique Desktop icon(s).\nWould you like to import them?`,
-      ["Import", "Cancel"]
-    );
-
-    if (importIcons === "Import") {
-      const maxRows = (await getRendererState("visibleRows")) || 10;
-
-      const importedIcons: DesktopIcon[] = [];
-
-      // import all icons from filesToImport
-      for (const file of filesToImport) {
-        const icon = await importDesktopFileAsIcon(
-          file,
-          profile,
-          takenCoords,
-          maxRows,
-          mainWindow
-        );
-        if (icon) {
-          importedIcons.push(icon);
-        }
-      }
-
-      logger.info(`Successfully imported ${importedIcons.length} icons.`);
-      return true;
-    } else {
-      logger.info("User cancelled icon import from Desktop.");
-      return false;
-    }
-  } catch (error) {
-    logger.error("Error importing icons from desktop:", error);
-    return false;
   }
 }
 

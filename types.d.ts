@@ -90,12 +90,6 @@ type DesktopFile = {
   path: string;
 };
 
-type DesktopFileCompare = {
-  filesToImport: DesktopFile[];
-  alreadyImported: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  nameOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-  pathOnlyMatches: Array<{ name: string; path: string; icon: DesktopIcon }>;
-};
 
 type PairedIcons = {
   otherIcon: DesktopIcon;
@@ -360,8 +354,6 @@ interface EventParamMapping {
   swapDesktopIcons: [string, string];
   editIconOffsetUpdate: [number, number];
   openDesktopProfile: [];
-  importAllIconsFromDesktop: [];
-  getDesktopUniqueFiles: [profile?: string];
   importDesktopFile: [DesktopFile, string];
   compareProfiles: [string, string];
   getCurrentTheme: [];
@@ -461,8 +453,6 @@ type EventPayloadMapping = {
   swapDesktopIcons: boolean;
   editIconOffsetUpdate: boolean;
   openDesktopProfile: boolean;
-  importAllIconsFromDesktop: boolean;
-  getDesktopUniqueFiles: DesktopFileCompare;
   importDesktopFile: DesktopIcon | null;
   compareProfiles: ProfileIconCompare;
   getCurrentTheme: "dark" | "light" | "system";
@@ -643,8 +633,6 @@ interface Window {
     swapDesktopIcons: (id1: string, id2: string) => Promise<boolean>;
     editIconOffsetUpdate: (offsetX: number, offsetY: number) => void;
     openDesktopProfile: () => Promise<boolean>;
-    importAllIconsFromDesktop: () => Promise<boolean>;
-    getDesktopUniqueFiles: (profile?: string) => Promise<DesktopFileCompare>;
     importDesktopFile: (
       file: DesktopFile,
       profile: string
