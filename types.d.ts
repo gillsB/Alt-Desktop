@@ -90,7 +90,6 @@ type DesktopFile = {
   path: string;
 };
 
-
 type PairedIcons = {
   otherIcon: DesktopIcon;
   currentIcon: DesktopIcon;
@@ -364,7 +363,7 @@ interface EventParamMapping {
   highlightIcon: [string];
   transferIconImage: [string, string, string, string];
   importAllIconsToDesktopCache: [];
-  hoverHighlightIcon: [string];
+  hoverHighlightIcon: [id?: string];
 }
 
 // The returns from the main process to the renderer
@@ -661,6 +660,6 @@ interface Window {
       targetID: string
     ) => Promise<string | null>;
     importAllIconsToDesktopCache: () => Promise<boolean>;
-    hoverHighlightIcon: (id: string) => Promise<boolean>;
+    hoverHighlightIcon: (id?: string) => Promise<boolean>;
   };
 }

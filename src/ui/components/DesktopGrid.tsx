@@ -699,7 +699,6 @@ const DesktopGrid: React.FC = () => {
     );
 
     const handleHoverHighlight = (_: Electron.IpcRendererEvent, id: string) => {
-      logger.info(`hover-highlight-icon received id=${id}`);
       if (id) {
         setHoverHighlightId(id);
       } else {

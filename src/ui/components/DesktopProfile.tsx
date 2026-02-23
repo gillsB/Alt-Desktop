@@ -654,7 +654,7 @@ const DesktopProfile: React.FC = () => {
                                   handleIconHover(item.currentIcon)
                                 }
                                 onMouseLeave={() =>
-                                  window.electron.hoverHighlightIcon("")
+                                  window.electron.hoverHighlightIcon()
                                 }
                                 style={{ cursor: "pointer" }}
                               >
@@ -737,7 +737,7 @@ const DesktopProfile: React.FC = () => {
                                   handleIconHover(pair.currentIcon)
                                 }
                                 onMouseLeave={() =>
-                                  window.electron.hoverHighlightIcon("")
+                                  window.electron.hoverHighlightIcon()
                                 }
                               >
                                 <SafeImage
@@ -902,7 +902,7 @@ const DesktopProfile: React.FC = () => {
                                 handleIconHover(item.currentIcon)
                               }
                               onMouseLeave={() =>
-                                window.electron.hoverHighlightIcon("")
+                                window.electron.hoverHighlightIcon()
                               }
                               style={{ cursor: "pointer" }}
                             >
@@ -993,7 +993,7 @@ const DesktopProfile: React.FC = () => {
                                 handleIconHover(pair.currentIcon)
                               }
                               onMouseLeave={() =>
-                                window.electron.hoverHighlightIcon("")
+                                window.electron.hoverHighlightIcon()
                               }
                             >
                               <SafeImage

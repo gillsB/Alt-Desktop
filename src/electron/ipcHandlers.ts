@@ -2452,7 +2452,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
-  ipcMainHandle("hoverHighlightIcon", async (id: string): Promise<boolean> => {
-    return sendHoverHighlightIcon(id);
+  ipcMainHandle("hoverHighlightIcon", async (id?: string): Promise<boolean> => {
+    if (id) {
+      return sendHoverHighlightIcon(id);
+    }
+    return sendHoverHighlightIcon();
   });
 }

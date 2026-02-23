@@ -205,7 +205,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
       targetID
     ),
   importAllIconsToDesktopCache: () => ipcInvoke("importAllIconsToDesktopCache"),
-  hoverHighlightIcon: (id: string) => ipcInvoke("hoverHighlightIcon", id),
+  hoverHighlightIcon: (id?: string) => ipcInvoke("hoverHighlightIcon", id),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

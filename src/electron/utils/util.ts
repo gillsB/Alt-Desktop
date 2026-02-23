@@ -2602,7 +2602,7 @@ export async function saveIcon(
   }
 }
 
-export function sendHoverHighlightIcon(id: string): boolean {
+export function sendHoverHighlightIcon(id?: string): boolean {
   if (mainWindow) {
     mainWindow.webContents.send("hover-highlight-icon", id);
     return true;
