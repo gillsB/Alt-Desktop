@@ -650,6 +650,12 @@ const DesktopProfile: React.FC = () => {
                                 key={`desktop-cache-modified-${item.otherIcon.id}`}
                                 className="desktop-profile-icon-item modified-item"
                                 title={item.otherIcon.name}
+                                onMouseEnter={() =>
+                                  handleIconHover(item.currentIcon)
+                                }
+                                onMouseLeave={() =>
+                                  window.electron.hoverHighlightIcon("")
+                                }
                                 style={{ cursor: "pointer" }}
                               >
                                 <div className="icon-card">
@@ -729,6 +735,9 @@ const DesktopProfile: React.FC = () => {
                                 title={pair.otherIcon.name}
                                 onMouseEnter={() =>
                                   handleIconHover(pair.currentIcon)
+                                }
+                                onMouseLeave={() =>
+                                  window.electron.hoverHighlightIcon("")
                                 }
                               >
                                 <SafeImage
@@ -889,6 +898,12 @@ const DesktopProfile: React.FC = () => {
                                 e.stopPropagation();
                                 handleModifiedIconClick(item);
                               }}
+                              onMouseEnter={() =>
+                                handleIconHover(item.currentIcon)
+                              }
+                              onMouseLeave={() =>
+                                window.electron.hoverHighlightIcon("")
+                              }
                               style={{ cursor: "pointer" }}
                             >
                               <div className="icon-card">
@@ -976,6 +991,9 @@ const DesktopProfile: React.FC = () => {
                               title={pair.otherIcon.name}
                               onMouseEnter={() =>
                                 handleIconHover(pair.currentIcon)
+                              }
+                              onMouseLeave={() =>
+                                window.electron.hoverHighlightIcon("")
                               }
                             >
                               <SafeImage
