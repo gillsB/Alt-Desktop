@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeImage } from "../components/SafeImage";
 import "../styles/IconDifferenceViewer.css";
 import { showSmallWindow } from "../util/uiUtil";
@@ -141,7 +141,7 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     return value;
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         handleClose();

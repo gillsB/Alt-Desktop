@@ -82,6 +82,9 @@ const DesktopProfile: React.FC = () => {
   escapeHandlerRef.current = () => {
     if (contextMenu.visible) {
       hideContextMenu();
+    } else if (showManageModal) {
+      // modal does not capture escape key, closes from here
+      setShowManageModal(false);
     } else if (iconDifferenceViewer) {
       // modal captures escape key so it can pass back saved state
       return;
