@@ -55,6 +55,7 @@ import {
   changeBackgroundDirectory,
   compareProfiles,
   deleteIconData,
+  deleteProfile,
   ensureFileExists,
   ensureProfileFolder,
   ensureUniqueIconId,
@@ -1809,6 +1810,15 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMainHandle("getProfiles", async (): Promise<string[]> => {
     return getProfiles();
   });
+
+  ipcMainHandle("deleteProfile", async (profile: string): Promise<boolean> => {
+    // for safety, do not delete default and fail if no profile
+    if (!profile || profile === "default") {
+      return false;
+    }
+    return deleteProfile(profile);
+  });
+
   ipcMainHandle("setRendererStates", (updates: Partial<RendererStates>) => {
     if (updates) {
       setRendererStates(updates);

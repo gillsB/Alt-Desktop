@@ -164,6 +164,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   renameDataFolder: (profile: string, oldFolder: string, newFolder: string) =>
     ipcInvoke("renameDataFolder", profile, oldFolder, newFolder),
   getProfiles: () => ipcInvoke("getProfiles"),
+  deleteProfile: (profile: string) => ipcInvoke("deleteProfile", profile),
   moveDesktopIcon: (
     id: string,
     newRow: number,

@@ -349,6 +349,7 @@ interface EventParamMapping {
   getInfoFromBgPath: [string, PathKey];
   renameDataFolder: [string, string, string];
   getProfiles: [];
+  deleteProfile: [string];
   moveDesktopIcon: [string, number, number, offsetReset?: boolean];
   swapDesktopIcons: [string, string];
   editIconOffsetUpdate: [number, number];
@@ -448,6 +449,7 @@ type EventPayloadMapping = {
   getInfoFromBgPath: PathInfo<K> | null;
   renameDataFolder: boolean;
   getProfiles: string[];
+  deleteProfile: boolean;
   moveDesktopIcon: boolean;
   swapDesktopIcons: boolean;
   editIconOffsetUpdate: boolean;
@@ -623,6 +625,7 @@ interface Window {
       newFolder: string
     ) => Promise<boolean>;
     getProfiles: () => Promise<string[]>;
+    deleteProfile: (profile: string) => Promise<boolean>;
     moveDesktopIcon: (
       id: string,
       newRow: number,

@@ -1291,6 +1291,28 @@ export async function getProfiles(): Promise<string[]> {
   }
 }
 
+export async function deleteProfile(profile: string): Promise<boolean> {
+  if (!profile || profile === "default") {
+    logger.warn(`refusing to delete profile: ${profile}`);
+    return false;
+  }
+
+  const profileFolder = path.join(getProfilesPath(), profile);
+  if (fs.existsSync(profileFolder)) {
+    try {
+      await shell.trashItem(profileFolder);
+      logger.info(`Profile folder moved to recycle bin: ${profileFolder}`);
+      return true;
+    } catch (err) {
+      logger.error(`Failed to delete profile folder ${profileFolder}:`, err);
+      return false;
+    }
+  } else {
+    logger.warn(`Profile folder not found: ${profileFolder}`);
+    return false;
+  }
+}
+
 export async function moveDesktopIcon(
   id: string,
   newRow: number,
