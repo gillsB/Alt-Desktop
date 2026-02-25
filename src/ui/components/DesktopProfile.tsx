@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import IconDifferenceViewer from "../modals/IconDifferenceViewer";
+import ManageProfiles from "../modals/ManageProfiles";
 import "../styles/DesktopProfile.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
@@ -39,6 +40,7 @@ const DesktopProfile: React.FC = () => {
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
   const [compareToProfile, setCompareToProfile] = useState<string>("");
+  const [showManageModal, setShowManageModal] = useState<boolean>(false);
   const [desktopCacheLoading, setDesktopCacheLoading] = useState(false);
   const [desktopCacheProgress, setDesktopCacheProgress] = useState<{
     imported: number;
@@ -195,12 +197,21 @@ const DesktopProfile: React.FC = () => {
     };
   }, [profile]);
 
-  const handleProfileChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newProfile = e.target.value;
+  const doProfileChange = async (newProfile: string) => {
     setProfile(newProfile);
     window.electron.setRendererStates({ profile: newProfile });
+
+    try {
+      const list = await window.electron.getProfiles();
+      if (list) {
+        // sort default selection order and apply to state
+        const others = list.filter((p) => p !== newProfile);
+        others.sort((a, b) => a.localeCompare(b));
+        setProfiles(newProfile ? [newProfile, ...others] : others);
+      }
+    } catch (err) {
+      logger.error("Error reloading profile list:", err);
+    }
 
     if (activeTab === "other") {
       let updatedCompareToProfile = compareToProfile;
@@ -250,6 +261,12 @@ const DesktopProfile: React.FC = () => {
         err
       );
     }
+  };
+
+  const handleProfileChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    await doProfileChange(e.target.value);
   };
 
   // import every icon currently listed as "not imported" in Desktop Files (icons from desktop_cache)
@@ -472,10 +489,8 @@ const DesktopProfile: React.FC = () => {
         <button
           type="button"
           className="button"
-          onClick={() => {
-            showSmallWindow("Placeholder", "Placeholder", ["Ok"]);
-          }}
-          title="Placeholder"
+          onClick={() => setShowManageModal(true)}
+          title="Manage Profiles"
         >
           Manage Profiles
         </button>
@@ -1060,6 +1075,16 @@ const DesktopProfile: React.FC = () => {
           otherIcon={iconDifferenceViewer.otherIcon}
           differences={iconDifferenceViewer.differences}
           onClose={handleIconDifferenceClose}
+        />
+      )}
+
+      {showManageModal && (
+        <ManageProfiles
+          currentProfile={profile}
+          onClose={() => setShowManageModal(false)}
+          onSelectProfile={(p) => {
+            doProfileChange(p);
+          }}
         />
       )}
     </div>
