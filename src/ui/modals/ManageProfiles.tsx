@@ -20,16 +20,26 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
   const [searchText, setSearchText] = useState<string>("");
   const [selectedProfile, setSelectedProfile] =
     useState<string>(currentProfile);
-  const [pinnedProfile] = useState<string>(currentProfile);
+  const [pinnedProfile, setPinnedProfile] = useState<string>(currentProfile);
 
   const fetchProfiles = async () => {
     try {
       let result = await window.electron.getProfiles();
+      logger.info("Fetched profiles:", result);
       if (!result) result = [];
-      // sort alphabetically but make sure the pinned profile is at the top
-      const others = result.filter((p) => p !== pinnedProfile);
+
+      // remove pinned if deleted
+      if (pinnedProfile && !result.includes(pinnedProfile)) {
+        setPinnedProfile("");
+      }
+
+      // sort alphabetically
+      const hasPinned = pinnedProfile && result.includes(pinnedProfile);
+      const others = hasPinned
+        ? result.filter((p) => p !== pinnedProfile)
+        : [...result];
       others.sort((a, b) => a.localeCompare(b));
-      const ordered = pinnedProfile ? [pinnedProfile, ...others] : [...others];
+      const ordered = hasPinned ? [pinnedProfile, ...others] : others;
       setProfiles(ordered);
       setSelectedProfile(currentProfile);
     } catch (e) {
@@ -94,9 +104,12 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
         const ok = await window.electron.deleteProfile(profile);
         if (ok) {
           logger.info(`Profile deleted: ${profile}`);
-          await fetchProfiles();
+          if (profile === pinnedProfile) {
+            setPinnedProfile("");
+          }
+          // if the deleted profile was selected, fallback default
           if (selectedProfile === profile) {
-            const fallback = profiles.find((p) => p !== profile) || "default";
+            const fallback = "default";
             setSelectedProfile(fallback);
             onSelectProfile(fallback);
           }
@@ -105,6 +118,8 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
         }
       } catch (err) {
         logger.error("Error deleting profile", err);
+      } finally {
+        await fetchProfiles();
       }
     }
   };
