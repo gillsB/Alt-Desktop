@@ -97,44 +97,8 @@
   height: 100%;
 }
 
-.manage-profiles-modal-content.compact .modal-window-content {
-  max-height: none;
-}
-
-.manage-profiles-modal-content.compact .modal-content {
-  height: auto !important;
-  max-height: none !important;
-}
-
 .manage-profiles-upper {
   flex: 1;
   overflow: auto;
   width: 100%;
-  transition: flex 0.2s ease;
-}
-
-.manage-profiles-add-inline {
-  flex: 0 0 auto;
-  overflow: visible;
-  border-top: 1px solid rgba(var(--color-borderPrimary), 0.2);
-  padding: 8px 10px;
-  transition: all 0.3s ease;
-}
-
-.manage-profiles-add-inline.compact {
-  max-height: 200px;
-}
-
-.manage-profiles-add-inline.expanded {
-  flex: 1;
-  max-height: none;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.manage-profiles-add-inline.expanded .add-profile-inline-form {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
 }

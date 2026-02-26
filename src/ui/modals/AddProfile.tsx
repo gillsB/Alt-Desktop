@@ -15,7 +15,7 @@ interface AddProfileFormProps {
   onCancel?: () => void;
 }
 
-export const AddProfileForm: React.FC<AddProfileFormProps> = ({
+const AddProfileForm: React.FC<AddProfileFormProps> = ({
   profiles,
   copyEnabled,
   onCopyChange,
@@ -71,7 +71,7 @@ export const AddProfileForm: React.FC<AddProfileFormProps> = ({
   }, [profiles, searchText, profileInput]);
 
   return (
-    <div className="add-profile-inline-form">
+    <div className="add-profile-form">
       <div className="profile-field">
         <div className="profile-input-row">
           <label>Profile Name:</label>

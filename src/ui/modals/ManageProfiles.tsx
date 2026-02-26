@@ -3,7 +3,7 @@ import ClearableInput from "../components/ClearableInput";
 import "../styles/ManageProfiles.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
-import { AddProfileForm } from "./AddProfile";
+import AddProfileWindow from "./AddProfile";
 
 const logger = createLogger("ManageProfiles.tsx");
 
@@ -23,13 +23,12 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
   const [selectedProfile, setSelectedProfile] =
     useState<string>(currentProfile);
   const [pinnedProfile, setPinnedProfile] = useState<string>(currentProfile);
-  const [showAddProfile, setShowAddProfile] = useState<boolean>(false);
-  const [copyEnabled, setCopyEnabled] = useState<boolean>(false);
+  const [showAddProfileModal, setShowAddProfileModal] =
+    useState<boolean>(false);
 
   const fetchProfiles = useCallback(async () => {
     try {
       let result = await window.electron.getProfiles();
-      logger.info("Fetched profiles:", result);
       if (!result) result = [];
 
       // remove pinned if deleted
@@ -128,6 +127,11 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
     }
   };
 
+  const handleAddProfileClose = async () => {
+    setShowAddProfileModal(false);
+    await fetchProfiles();
+  };
+
   let filteredProfiles = profiles.filter((p) =>
     p.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -140,13 +144,6 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
 
   const topProfiles: string[] = [];
 
-  const handleCreateInline = async (name: string, copyFrom?: string) => {
-    logger.info(`Creating profile ${name} copyFrom=${copyFrom}`);
-    await window.electron.ensureProfileFolder(name, copyFrom);
-    setShowAddProfile(false);
-    setCopyEnabled(false);
-    fetchProfiles();
-  };
   if (pinnedProfile && filteredProfiles.includes(pinnedProfile)) {
     topProfiles.push(pinnedProfile);
   }
@@ -160,119 +157,103 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
 
   const restProfiles = filteredProfiles.filter((p) => !topProfiles.includes(p));
 
+  if (showAddProfileModal) {
+    return <AddProfileWindow onClose={handleAddProfileClose} />;
+  }
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className={`manage-profiles-modal-content${showAddProfile && !copyEnabled ? " compact" : ""}`}
+        className="manage-profiles-modal-content"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-window-content">
           <div className="modal-content">
-            {showAddProfile && (
-              <div
-                className={`manage-profiles-add-inline${copyEnabled ? " expanded" : " compact"}`}
-              >
-                <AddProfileForm
-                  profiles={profiles}
-                  copyEnabled={copyEnabled}
-                  onCopyChange={setCopyEnabled}
-                  onCreate={handleCreateInline}
-                  onCancel={() => {
-                    setShowAddProfile(false);
-                    setCopyEnabled(false);
-                  }}
+            <div className="manage-profiles-upper">
+              <div className="subwindow-field">
+                <ClearableInput
+                  value={searchText}
+                  onChange={handleSearchChange}
+                  onClear={() => setSearchText("")}
+                  placeholder="Search profiles"
+                  inputClassName="manage-profiles-search"
                 />
               </div>
-            )}
-            {!showAddProfile && (
-              <div className="manage-profiles-upper">
-                <div className="subwindow-field">
-                  <ClearableInput
-                    value={searchText}
-                    onChange={handleSearchChange}
-                    onClear={() => setSearchText("")}
-                    placeholder="Search profiles"
-                    inputClassName="manage-profiles-search"
-                  />
-                </div>
-                <div className="manage-profiles-list">
-                  <ul>
-                    {topProfiles.map((profile, idx) => (
-                      <li
-                        key={`top-${profile}-${idx}`}
-                        className={`profile-item${
-                          profile === selectedProfile ? " selected" : ""
-                        }`}
-                        onClick={() => handleProfileClick(profile)}
-                      >
-                        <span className="profile-text">
-                          {profile === "default" ? "Default" : profile}
-                        </span>
-                        {profile !== "default" && (
-                          <button
-                            className="profile-delete-btn"
-                            title="Delete profile"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteClick(profile);
-                            }}
-                          >
-                            ×
-                          </button>
-                        )}
-                      </li>
-                    ))}
+              <div className="manage-profiles-list">
+                <ul>
+                  {topProfiles.map((profile, idx) => (
+                    <li
+                      key={`top-${profile}-${idx}`}
+                      className={`profile-item${
+                        profile === selectedProfile ? " selected" : ""
+                      }`}
+                      onClick={() => handleProfileClick(profile)}
+                    >
+                      <span className="profile-text">
+                        {profile === "default" ? "Default" : profile}
+                      </span>
+                      {profile !== "default" && (
+                        <button
+                          className="profile-delete-btn"
+                          title="Delete profile"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(profile);
+                          }}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </li>
+                  ))}
 
-                    {restProfiles.length > 0 && topProfiles.length > 0 && (
-                      <li className="profile-separator" />
-                    )}
+                  {restProfiles.length > 0 && topProfiles.length > 0 && (
+                    <li className="profile-separator" />
+                  )}
 
-                    {restProfiles.map((profile, idx) => (
-                      <li
-                        key={`rest-${profile}-${idx}`}
-                        className={`profile-item${
-                          profile === selectedProfile ? " selected" : ""
-                        }`}
-                        onClick={() => handleProfileClick(profile)}
-                      >
-                        <span className="profile-text">
-                          {profile === "default" ? "Default" : profile}
-                        </span>
-                        {profile !== "default" && (
-                          <button
-                            className="profile-delete-btn"
-                            title="Delete profile"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteClick(profile);
-                            }}
-                          >
-                            ×
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                    {filteredProfiles.length === 0 && (
-                      <li className="no-results">No profiles match</li>
-                    )}
-                  </ul>
-                </div>
+                  {restProfiles.map((profile, idx) => (
+                    <li
+                      key={`rest-${profile}-${idx}`}
+                      className={`profile-item${
+                        profile === selectedProfile ? " selected" : ""
+                      }`}
+                      onClick={() => handleProfileClick(profile)}
+                    >
+                      <span className="profile-text">
+                        {profile === "default" ? "Default" : profile}
+                      </span>
+                      {profile !== "default" && (
+                        <button
+                          className="profile-delete-btn"
+                          title="Delete profile"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(profile);
+                          }}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                  {filteredProfiles.length === 0 && (
+                    <li className="no-results">No profiles match</li>
+                  )}
+                </ul>
               </div>
-            )}
-          </div>
-          {!showAddProfile && (
-            <div className="modal-window-footer">
-              <button
-                className="button"
-                onClick={() => setShowAddProfile(true)}
-              >
-                Add New
-              </button>
-              <button className="button" onClick={onClose}>
-                Close
-              </button>
             </div>
-          )}
+          </div>
+        </div>
+        <div className="modal-window-footer">
+          <button
+            className="button"
+            onClick={() => setShowAddProfileModal(true)}
+          >
+            Add New
+          </button>
+          <button className="button" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>

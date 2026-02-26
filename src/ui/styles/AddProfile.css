@@ -36,7 +36,7 @@
   margin-left: calc(4.5em + 10px);
 }
 
-.add-profile-inline-form {
+.add-profile-form {
   width: 100%;
   display: flex;
   flex-direction: column;
