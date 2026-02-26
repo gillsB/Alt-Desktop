@@ -271,20 +271,6 @@
   margin-top: 0;
   margin-bottom: 0;
 }
-.add-tag-modal-content {
-  background: rgb(var(--color-bgPrimary));
-  border-radius: 0px;
-  min-width: 340px;
-  height: 220px;
-  max-width: 420px;
-  box-shadow: 0 4px 32px rgba(var(--color-shadow), 0.4);
-  padding: 0;
-  position: relative;
-  z-index: 2001;
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-}
 .edit-categories-modal-content {
   background: rgb(var(--color-bgPrimary));
   border-radius: 0px;

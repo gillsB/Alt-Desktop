@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ClearableInput from "../components/ClearableInput";
 import "../styles/ManageProfiles.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
-
-const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g;
+import { AddProfileForm } from "./AddProfile";
 
 const logger = createLogger("ManageProfiles.tsx");
 
@@ -25,11 +24,7 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
     useState<string>(currentProfile);
   const [pinnedProfile, setPinnedProfile] = useState<string>(currentProfile);
   const [showAddProfile, setShowAddProfile] = useState<boolean>(false);
-  const [profileInput, setProfileInput] = useState<string>("");
-  const [duplicateError, setDuplicateError] = useState<boolean>(false);
-  const [copyFromEnabled, setCopyFromEnabled] = useState<boolean>(false);
-  const [copySearchText, setCopySearchText] = useState<string>("");
-  const [copySelection, setCopySelection] = useState<string>("");
+  const [copyEnabled, setCopyEnabled] = useState<boolean>(false);
 
   const fetchProfiles = useCallback(async () => {
     try {
@@ -89,20 +84,6 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
     setSearchText(e.target.value);
   };
 
-  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const sanitized = e.target.value.replace(INVALID_FOLDER_CHARS, "");
-    setProfileInput(sanitized);
-  };
-
-  useEffect(() => {
-    const trimmed = profileInput.trim().toLowerCase();
-    const isReserved = trimmed === "desktop_cache";
-    setDuplicateError(
-      trimmed.length > 0 &&
-        (isReserved || profiles.some((p) => p.toLowerCase() === trimmed))
-    );
-  }, [profileInput, profiles]);
-
   const handleProfileClick = (profile: string) => {
     setSelectedProfile(profile);
     onSelectProfile(profile);
@@ -151,14 +132,6 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
     p.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // copy-from list filtering
-  const copyFiltered = useMemo(() => {
-    if (!copySearchText) return profiles;
-    return profiles.filter((p) =>
-      p.toLowerCase().includes(copySearchText.toLowerCase())
-    );
-  }, [profiles, copySearchText]);
-
   if (searchText) {
     filteredProfiles = filteredProfiles.filter(
       (p) => p !== selectedProfile || p === pinnedProfile
@@ -167,30 +140,11 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
 
   const topProfiles: string[] = [];
 
-  const handleCreateInline = async () => {
-    if (!profileInput.trim()) {
-      await showSmallWindow(
-        "Invalid Profile Name",
-        "Profile name cannot be empty.",
-        ["Okay"]
-      );
-      return;
-    }
-    if (duplicateError) {
-      return;
-    }
-    let source = "";
-    if (copyFromEnabled && copySelection) {
-      source = copySelection;
-    }
-    logger.info(`Creating profile ${profileInput.trim()} copyFrom=${source}`);
-    await window.electron.ensureProfileFolder(profileInput.trim(), source);
-    // reset form
-    setProfileInput("");
-    setCopyFromEnabled(false);
-    setCopySearchText("");
-    setCopySelection("");
+  const handleCreateInline = async (name: string, copyFrom?: string) => {
+    logger.info(`Creating profile ${name} copyFrom=${copyFrom}`);
+    await window.electron.ensureProfileFolder(name, copyFrom);
     setShowAddProfile(false);
+    setCopyEnabled(false);
     fetchProfiles();
   };
   if (pinnedProfile && filteredProfiles.includes(pinnedProfile)) {
@@ -209,76 +163,25 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className={`manage-profiles-modal-content${showAddProfile && !copyFromEnabled ? " compact" : ""}`}
+        className={`manage-profiles-modal-content${showAddProfile && !copyEnabled ? " compact" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-window-content">
           <div className="modal-content">
             {showAddProfile && (
               <div
-                className={`manage-profiles-add-inline${copyFromEnabled ? " expanded" : " compact"}`}
+                className={`manage-profiles-add-inline${copyEnabled ? " expanded" : " compact"}`}
               >
-                <div className="add-profile-inline-form">
-                  <div className="profile-field">
-                    <div className="profile-input-row">
-                      <label>Profile Name:</label>
-                      <input
-                        type="text"
-                        value={profileInput}
-                        onChange={handleProfileInputChange}
-                        placeholder="Enter new profile name"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleCreateInline();
-                        }}
-                      />
-                    </div>
-                    <div className="error-space">
-                      {duplicateError && (
-                        <div className="add-profile-inline-error">
-                          That profile already exists
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="subwindow-field">
-                    <label>Copy from Profile</label>
-                    <input
-                      type="checkbox"
-                      checked={copyFromEnabled}
-                      onChange={(e) => setCopyFromEnabled(e.target.checked)}
-                    />
-                  </div>
-                  {copyFromEnabled && (
-                    <div className="copy-section">
-                      <ClearableInput
-                        value={copySearchText}
-                        onChange={(e) => setCopySearchText(e.target.value)}
-                        onClear={() => setCopySearchText("")}
-                        placeholder="Search profiles"
-                        inputClassName="manage-profiles-search"
-                      />
-                      <div className="copy-list">
-                        <ul>
-                          {copyFiltered.map((profile) => (
-                            <li
-                              key={profile}
-                              className={`profile-item${
-                                profile === copySelection ? " selected" : ""
-                              }`}
-                              onClick={() => setCopySelection(profile)}
-                            >
-                              {profile === "default" ? "Default" : profile}
-                            </li>
-                          ))}
-                          {copyFiltered.length === 0 && (
-                            <li className="no-results">No profiles match</li>
-                          )}
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <AddProfileForm
+                  profiles={profiles}
+                  copyEnabled={copyEnabled}
+                  onCopyChange={setCopyEnabled}
+                  onCreate={handleCreateInline}
+                  onCancel={() => {
+                    setShowAddProfile(false);
+                    setCopyEnabled(false);
+                  }}
+                />
               </div>
             )}
             {!showAddProfile && (
@@ -357,43 +260,19 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
               </div>
             )}
           </div>
-          <div className="modal-window-footer">
-            {showAddProfile ? (
-              <>
-                <button
-                  className="button"
-                  onClick={handleCreateInline}
-                  disabled={duplicateError}
-                >
-                  Create Profile
-                </button>
-                <button
-                  className="button"
-                  onClick={() => {
-                    setShowAddProfile(false);
-                    setProfileInput("");
-                    setCopyFromEnabled(false);
-                    setCopySearchText("");
-                    setCopySelection("");
-                  }}
-                >
-                  Close
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className="button"
-                  onClick={() => setShowAddProfile(true)}
-                >
-                  Add New
-                </button>
-                <button className="button" onClick={onClose}>
-                  Close
-                </button>
-              </>
-            )}
-          </div>
+          {!showAddProfile && (
+            <div className="modal-window-footer">
+              <button
+                className="button"
+                onClick={() => setShowAddProfile(true)}
+              >
+                Add New
+              </button>
+              <button className="button" onClick={onClose}>
+                Close
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
