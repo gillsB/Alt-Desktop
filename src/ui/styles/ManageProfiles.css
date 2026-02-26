@@ -76,6 +76,10 @@
   box-sizing: border-box;
 }
 
+.subwindow-field .search-input-wrapper,
+.subwindow-field .search-input-wrapper-flex {
+  width: 100%;
+}
 .no-results {
   text-align: center;
   color: rgb(var(--color-textSecondary));

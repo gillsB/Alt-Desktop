@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ClearableInput from "../components/ClearableInput";
 import "../styles/ManageProfiles.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
@@ -128,9 +129,10 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
     p.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  if (pinnedProfile) {
-    filteredProfiles = filteredProfiles.filter((p) => p !== pinnedProfile);
-    filteredProfiles.unshift(pinnedProfile);
+  if (searchText) {
+    filteredProfiles = filteredProfiles.filter(
+      (p) => p !== selectedProfile || p === pinnedProfile
+    );
   }
 
   const topProfiles: string[] = [];
@@ -156,12 +158,12 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
         <div className="modal-window-content">
           <div className="modal-content">
             <div className="subwindow-field">
-              <input
-                type="text"
+              <ClearableInput
                 value={searchText}
                 onChange={handleSearchChange}
+                onClear={() => setSearchText("")}
                 placeholder="Search profiles"
-                className="manage-profiles-search"
+                inputClassName="manage-profiles-search"
               />
             </div>
             <div className="manage-profiles-list">
