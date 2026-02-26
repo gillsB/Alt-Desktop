@@ -174,7 +174,7 @@ const AddProfileWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="add-tag-modal-content"
+        className={`add-tag-modal-content${!copyEnabled ? " compact" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-window-content">
