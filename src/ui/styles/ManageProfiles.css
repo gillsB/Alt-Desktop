@@ -81,3 +81,7 @@
   color: rgb(var(--color-textSecondary));
   padding: 8px;
 }
+
+.profile-separator {
+  height: 8px;
+}

@@ -133,6 +133,20 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
     filteredProfiles.unshift(pinnedProfile);
   }
 
+  const topProfiles: string[] = [];
+  if (pinnedProfile && filteredProfiles.includes(pinnedProfile)) {
+    topProfiles.push(pinnedProfile);
+  }
+  if (
+    selectedProfile &&
+    selectedProfile !== pinnedProfile &&
+    filteredProfiles.includes(selectedProfile)
+  ) {
+    topProfiles.push(selectedProfile);
+  }
+
+  const restProfiles = filteredProfiles.filter((p) => !topProfiles.includes(p));
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
@@ -152,9 +166,39 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
             </div>
             <div className="manage-profiles-list">
               <ul>
-                {filteredProfiles.map((profile, idx) => (
+                {topProfiles.map((profile, idx) => (
                   <li
-                    key={`${profile}-${idx}`}
+                    key={`top-${profile}-${idx}`}
+                    className={`profile-item${
+                      profile === selectedProfile ? " selected" : ""
+                    }`}
+                    onClick={() => handleProfileClick(profile)}
+                  >
+                    <span className="profile-text">
+                      {profile === "default" ? "Default" : profile}
+                    </span>
+                    {profile !== "default" && (
+                      <button
+                        className="profile-delete-btn"
+                        title="Delete profile"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(profile);
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </li>
+                ))}
+
+                {restProfiles.length > 0 && topProfiles.length > 0 && (
+                  <li className="profile-separator" />
+                )}
+
+                {restProfiles.map((profile, idx) => (
+                  <li
+                    key={`rest-${profile}-${idx}`}
                     className={`profile-item${
                       profile === selectedProfile ? " selected" : ""
                     }`}
