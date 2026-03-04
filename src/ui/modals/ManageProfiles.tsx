@@ -51,6 +51,22 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
   }, [currentProfile, pinnedProfile]);
 
   useEffect(() => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      // If AddProfile is open, let it handle the escape key (otherwise it closes both)
+      if (!showAddProfileModal && e.key === "Escape") {
+        onClose();
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscapeKey);
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [onClose, showAddProfileModal]);
+
+  useEffect(() => {
     fetchProfiles();
   }, [fetchProfiles]);
 

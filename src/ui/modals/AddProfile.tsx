@@ -150,6 +150,21 @@ const AddProfileWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [copyEnabled, setCopyEnabled] = useState<boolean>(false);
 
   useEffect(() => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscapeKey);
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [onClose]);
+
+  useEffect(() => {
     const fetchProfiles = async () => {
       const result = await window.electron.getProfiles();
       let sortedProfiles: string[] = [];
@@ -172,7 +187,13 @@ const AddProfileWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div
+      className="modal-overlay"
+      onClick={() => {
+        logger.info("closing here");
+        onClose();
+      }}
+    >
       <div
         className={`add-tag-modal-content${!copyEnabled ? " compact" : ""}`}
         onClick={(e) => e.stopPropagation()}
