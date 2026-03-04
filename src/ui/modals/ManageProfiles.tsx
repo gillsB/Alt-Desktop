@@ -195,7 +195,7 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
                   inputClassName="manage-profiles-search"
                 />
               </div>
-              <div className="manage-profiles-list">
+              <div className="manage-profiles-top-section">
                 <ul>
                   {topProfiles.map((profile, idx) => (
                     <li
@@ -222,40 +222,45 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
                       )}
                     </li>
                   ))}
-
-                  {restProfiles.length > 0 && topProfiles.length > 0 && (
-                    <li className="profile-separator" />
-                  )}
-
-                  {restProfiles.map((profile, idx) => (
-                    <li
-                      key={`rest-${profile}-${idx}`}
-                      className={`profile-item${
-                        profile === selectedProfile ? " selected" : ""
-                      }`}
-                      onClick={() => handleProfileClick(profile)}
-                    >
-                      <span className="profile-text">
-                        {profile === "default" ? "Default" : profile}
-                      </span>
-                      {profile !== "default" && (
-                        <button
-                          className="profile-delete-btn"
-                          title="Delete profile"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(profile);
-                          }}
-                        >
-                          ×
-                        </button>
-                      )}
-                    </li>
-                  ))}
-                  {filteredProfiles.length === 0 && (
-                    <li className="no-results">No profiles match</li>
-                  )}
                 </ul>
+              </div>
+
+              {restProfiles.length > 0 && topProfiles.length > 0 && (
+                <div className="profile-separator-section" />
+              )}
+
+              <div className="manage-profiles-list">
+                {restProfiles.length === 0 && filteredProfiles.length === 0 ? (
+                  <div className="no-results">No profiles match</div>
+                ) : (
+                  <ul>
+                    {restProfiles.map((profile, idx) => (
+                      <li
+                        key={`rest-${profile}-${idx}`}
+                        className={`profile-item${
+                          profile === selectedProfile ? " selected" : ""
+                        }`}
+                        onClick={() => handleProfileClick(profile)}
+                      >
+                        <span className="profile-text">
+                          {profile === "default" ? "Default" : profile}
+                        </span>
+                        {profile !== "default" && (
+                          <button
+                            className="profile-delete-btn"
+                            title="Delete profile"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(profile);
+                            }}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
           </div>
