@@ -54,24 +54,10 @@
   border: 2px solid rgb(var(--color-highlightBox));
   border-radius: 4px;
   opacity: 0;
-  animation: flash-outline 2s infinite;
+  animation: expand-loop 2s infinite;
   pointer-events: none;
 }
 
-@keyframes flash-outline {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 .multi-highlight-box {
   position: absolute;
   pointer-events: none;
@@ -239,8 +225,19 @@
 }
 
 .hover-highlight {
-  border: 2px dashed rgb(var(--color-highlightHover));
-  box-shadow: 0 0 10px rgba(var(--color-highlightHover), 0.5);
+  background: rgba(var(--color-shadow), 0.9);
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border: 2px solid rgb(var(--color-highlightHover));
+  border-radius: 4px;
+  opacity: 0;
+  animation: expand-loop 2s infinite;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .swap-highlight {
