@@ -87,17 +87,40 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     }
   );
 
+  const [leftImagePreviewProfile, setLeftImagePreviewProfile] =
+    useState(profileName);
+  const [rightImagePreviewProfile, setRightImagePreviewProfile] =
+    useState(otherProfileName);
+
   const copyLeftToRight = (field: string) => {
     setEditedRight((prev) => ({ ...prev, [field]: editedLeft[field] }));
     setIsRightEdited((prev) => ({ ...prev, [field]: true }));
     setIsLeftEdited((prev) => ({ ...prev, [field]: false }));
+
+    if (field === "image") {
+      setRightImagePreviewProfile(profileName);
+    }
   };
 
   const copyRightToLeft = (field: string) => {
     setEditedLeft((prev) => ({ ...prev, [field]: editedRight[field] }));
     setIsLeftEdited((prev) => ({ ...prev, [field]: true }));
     setIsRightEdited((prev) => ({ ...prev, [field]: false }));
+
+    if (field === "image") {
+      setLeftImagePreviewProfile(otherProfileName);
+    }
   };
+
+  const previewLeftIcon =
+    isLeftEdited["image"] && editedLeft["image"] === editedRight["image"]
+      ? { ...otherIcon, image: editedLeft["image"] }
+      : { ...icon, image: editedLeft["image"] };
+
+  const previewRightIcon =
+    isRightEdited["image"] && editedLeft["image"] === editedRight["image"]
+      ? { ...icon, image: editedRight["image"] }
+      : { ...otherIcon, image: editedRight["image"] };
 
   const resetField = (field: string) => {
     setEditedLeft((prev) => ({
@@ -112,6 +135,11 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     }));
     setIsLeftEdited((prev) => ({ ...prev, [field]: false }));
     setIsRightEdited((prev) => ({ ...prev, [field]: false }));
+
+    if (field === "image") {
+      setLeftImagePreviewProfile(profileName);
+      setRightImagePreviewProfile(otherProfileName);
+    }
   };
 
   const fieldsMatch = (field: string): boolean => {
@@ -310,17 +338,19 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                 <div className="comparison-profile-name">{profileName}</div>
                 <div className="comparison-icon-display">
                   <SafeImage
-                    profile={profileName}
-                    id={icon.id}
-                    row={icon.row}
-                    col={icon.col}
-                    imagePath={icon.image}
+                    profile={leftImagePreviewProfile}
+                    id={previewLeftIcon.id}
+                    row={previewLeftIcon.row}
+                    col={previewLeftIcon.col}
+                    imagePath={previewLeftIcon.image}
                     width={64}
                     height={64}
                     highlighted={false}
                   />
                 </div>
-                <div className="comparison-icon-id">{icon.id}</div>
+                <div className="comparison-icon-id">
+                  {editedLeft["name"] || icon.id}
+                </div>
               </div>
 
               <div className="icon-container">
@@ -329,17 +359,19 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                 </div>
                 <div className="comparison-icon-display">
                   <SafeImage
-                    profile={otherProfileName}
-                    id={otherIcon.id}
-                    row={otherIcon.row}
-                    col={otherIcon.col}
-                    imagePath={otherIcon.image}
+                    profile={rightImagePreviewProfile}
+                    id={previewRightIcon.id}
+                    row={previewRightIcon.row}
+                    col={previewRightIcon.col}
+                    imagePath={previewRightIcon.image}
                     width={64}
                     height={64}
                     highlighted={false}
                   />
                 </div>
-                <div className="comparison-icon-id">{otherIcon.id}</div>
+                <div className="comparison-icon-id">
+                  {editedRight["name"] || otherIcon.id}
+                </div>
               </div>
             </div>
           </div>
