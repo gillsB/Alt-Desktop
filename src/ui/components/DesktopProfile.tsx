@@ -73,6 +73,7 @@ const DesktopProfile: React.FC = () => {
     otherIcon: DesktopIcon;
     differences: string[];
   } | null>(null);
+  const [forcedHighlight, setForcedHighlight] = useState(false);
   const escapeHandlerRef = useRef<() => void>(() => {});
 
   const hideContextMenu = () => {
@@ -431,7 +432,7 @@ const DesktopProfile: React.FC = () => {
   const handleModifiedIconClick = (
     item: ProfileCompareState["modified"][0]
   ) => {
-    window.electron.highlightIcon(item.currentIcon.id);
+    setForcedHighlight(true);
     setIconDifferenceViewer({
       profileName: profile,
       icon: item.currentIcon,
@@ -447,6 +448,8 @@ const DesktopProfile: React.FC = () => {
 
   const handleIconDifferenceClose = async (saved: boolean = false) => {
     setIconDifferenceViewer(null);
+    setForcedHighlight(false);
+    window.electron.hoverHighlightIcon();
     logger.info("Icon difference viewer closed. Changes saved:", saved);
     if (saved) {
       try {
@@ -671,9 +674,11 @@ const DesktopProfile: React.FC = () => {
                                 onMouseEnter={() =>
                                   handleIconHover(item.currentIcon)
                                 }
-                                onMouseLeave={() =>
-                                  window.electron.hoverHighlightIcon()
-                                }
+                                onMouseLeave={() => {
+                                  if (!forcedHighlight) {
+                                    window.electron.hoverHighlightIcon();
+                                  }
+                                }}
                                 style={{ cursor: "pointer" }}
                               >
                                 <div className="icon-card">
@@ -919,9 +924,11 @@ const DesktopProfile: React.FC = () => {
                               onMouseEnter={() =>
                                 handleIconHover(item.currentIcon)
                               }
-                              onMouseLeave={() =>
-                                window.electron.hoverHighlightIcon()
-                              }
+                              onMouseLeave={() => {
+                                if (!forcedHighlight) {
+                                  window.electron.hoverHighlightIcon();
+                                }
+                              }}
                               style={{ cursor: "pointer" }}
                             >
                               <div className="icon-card">

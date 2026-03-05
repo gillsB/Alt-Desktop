@@ -22,6 +22,8 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
 }) => {
   const [showAllFields, setShowAllFields] = useState(false);
 
+  window.electron.hoverHighlightIcon(icon.id);
+
   const fieldsToCompare: (keyof DesktopIcon)[] = [
     "name",
     "image",

@@ -72,7 +72,7 @@
 
 .subwindow-field .search-input-wrapper,
 .subwindow-field .search-input-wrapper-flex {
-  width: 93%;
+  width: 97%;
   padding-left: 2px;
 }
 .no-results {
@@ -103,7 +103,6 @@
 
 .manage-profiles-top-section {
   flex-shrink: 0;
-  padding-right: 15px;
 }
 
 .manage-profiles-top-section ul {
