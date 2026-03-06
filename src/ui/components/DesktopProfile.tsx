@@ -72,6 +72,7 @@ const DesktopProfile: React.FC = () => {
     otherProfileName: string;
     otherIcon: DesktopIcon;
     differences: string[];
+    desktopComparison?: boolean;
   } | null>(null);
   const [forcedHighlight, setForcedHighlight] = useState(false);
   const escapeHandlerRef = useRef<() => void>(() => {});
@@ -430,15 +431,18 @@ const DesktopProfile: React.FC = () => {
   };
 
   const handleModifiedIconClick = (
-    item: ProfileCompareState["modified"][0]
+    item: ProfileCompareState["modified"][0],
+    isDesktopComparison: boolean = false,
+    otherProfileNameOverride?: string
   ) => {
     setForcedHighlight(true);
     setIconDifferenceViewer({
       profileName: profile,
       icon: item.currentIcon,
-      otherProfileName: compareToProfile,
+      otherProfileName: otherProfileNameOverride || compareToProfile,
       otherIcon: item.otherIcon,
       differences: item.differences,
+      desktopComparison: isDesktopComparison,
     });
   };
 
@@ -671,6 +675,14 @@ const DesktopProfile: React.FC = () => {
                                 key={`desktop-cache-modified-${item.otherIcon.id}`}
                                 className="desktop-profile-icon-item modified-item"
                                 title={item.otherIcon.name}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleModifiedIconClick(
+                                    item,
+                                    true,
+                                    "desktop_cache"
+                                  );
+                                }}
                                 onMouseEnter={() =>
                                   handleIconHover(item.currentIcon)
                                 }
@@ -704,6 +716,14 @@ const DesktopProfile: React.FC = () => {
                                         key={index}
                                         className="difference-tag"
                                         title={diff}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleModifiedIconClick(
+                                            item,
+                                            true,
+                                            "desktop_cache"
+                                          );
+                                        }}
                                       >
                                         {diff}
                                       </button>
@@ -1085,6 +1105,7 @@ const DesktopProfile: React.FC = () => {
           otherIcon={iconDifferenceViewer.otherIcon}
           differences={iconDifferenceViewer.differences}
           onClose={handleIconDifferenceClose}
+          desktopComparison={iconDifferenceViewer.desktopComparison}
         />
       )}
 

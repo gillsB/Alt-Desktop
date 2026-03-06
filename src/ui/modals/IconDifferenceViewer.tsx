@@ -10,6 +10,7 @@ interface IconDifferenceViewerProps {
   otherIcon: DesktopIcon;
   differences: string[];
   onClose: (saved?: boolean) => void;
+  desktopComparison?: boolean;
 }
 
 const fieldsToCompare: (keyof DesktopIcon)[] = [
@@ -51,6 +52,7 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   otherIcon,
   differences,
   onClose,
+  desktopComparison = false,
 }) => {
   const [showAllFields, setShowAllFields] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
@@ -313,13 +315,15 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
             >
               Save {profileName}
             </button>
-            <button
-              className="button icon-save-button"
-              onClick={saveRight}
-              disabled={!isAnyRightEdited}
-            >
-              Save {otherProfileName}
-            </button>
+            {!desktopComparison && (
+              <button
+                className="button icon-save-button"
+                onClick={saveRight}
+                disabled={!isAnyRightEdited}
+              >
+                Save {otherProfileName}
+              </button>
+            )}
           </div>
           {/* FIELD ROWS */}
           <div className="icon-fields-comparison">
@@ -363,13 +367,15 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                           >
                             &lt;
                           </button>
-                          <button
-                            className="button field-copy-right"
-                            onClick={() => copyLeftToRight(fieldName)}
-                            title="Copy left to right"
-                          >
-                            &gt;
-                          </button>
+                          {!desktopComparison && (
+                            <button
+                              className="button field-copy-right"
+                              onClick={() => copyLeftToRight(fieldName)}
+                              title="Copy left to right"
+                            >
+                              &gt;
+                            </button>
+                          )}
                         </>
                       ) : null}
                     </div>
