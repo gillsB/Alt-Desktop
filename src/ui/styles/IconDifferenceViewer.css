@@ -11,6 +11,9 @@
   align-items: end;
   gap: 20px;
 }
+.icon-comparison-header label  {
+  user-select: none;
+}
 
 .icon-comparison-column {
   display: grid;

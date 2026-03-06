@@ -12,6 +12,38 @@ interface IconDifferenceViewerProps {
   onClose: (saved?: boolean) => void;
 }
 
+const fieldsToCompare: (keyof DesktopIcon)[] = [
+  "name",
+  "image",
+  "programLink",
+  "args",
+  "websiteLink",
+  "fontColor",
+];
+
+const formatValue = (value: unknown): string => {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+
+const parseFieldValue = (
+  fieldName: keyof DesktopIcon,
+  value: string
+): DesktopIcon[keyof DesktopIcon] => {
+  if (fieldName === "args") {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+  if (fieldName === "fontSize") {
+    return parseInt(value, 10);
+  }
+  return value;
+};
+
 const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   profileName,
   icon,
@@ -21,161 +53,96 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   onClose,
 }) => {
   const [showAllFields, setShowAllFields] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false);
 
   window.electron.hoverHighlightIcon(icon.id);
 
-  const fieldsToCompare: (keyof DesktopIcon)[] = [
-    "name",
-    "image",
-    "programLink",
-    "args",
-    "websiteLink",
-    "fontColor",
-  ];
-
-  const formatValue = (value: unknown): string => {
-    if (value === null || value === undefined) return "";
-    if (typeof value === "object") return JSON.stringify(value);
-    return String(value);
-  };
-
-  const isFieldDifferent = (fieldName: string): boolean => {
-    return differences.includes(fieldName);
-  };
-
-  const getFieldValue = (icon: DesktopIcon, fieldName: keyof DesktopIcon) => {
-    return icon[fieldName];
-  };
-
-  const [editedLeft, setEditedLeft] = useState<Record<string, string>>(() => {
+  const buildFieldMap = (iconObj: DesktopIcon) => {
     const map: Record<string, string> = {};
     fieldsToCompare.forEach((f) => {
-      const v = getFieldValue(icon, f);
-      map[String(f)] = formatValue(v);
+      map[String(f)] = formatValue(iconObj[f]);
     });
     return map;
-  });
+  };
 
-  const [editedRight, setEditedRight] = useState<Record<string, string>>(() => {
-    const map: Record<string, string> = {};
-    fieldsToCompare.forEach((f) => {
-      const v = getFieldValue(otherIcon, f);
-      map[String(f)] = formatValue(v);
-    });
-    return map;
-  });
-
-  const [hasSaved, setHasSaved] = useState(false);
-
-  const [isLeftEdited, setIsLeftEdited] = useState<Record<string, boolean>>(
-    () => {
-      const map: Record<string, boolean> = {};
-      fieldsToCompare.forEach((f) => {
-        map[String(f)] = false;
-      });
-      return map;
-    }
+  const [left, setLeft] = useState<Record<string, string>>(() =>
+    buildFieldMap(icon)
   );
 
-  const [isRightEdited, setIsRightEdited] = useState<Record<string, boolean>>(
-    () => {
-      const map: Record<string, boolean> = {};
-      fieldsToCompare.forEach((f) => {
-        map[String(f)] = false;
-      });
-      return map;
-    }
+  const [right, setRight] = useState<Record<string, string>>(() =>
+    buildFieldMap(otherIcon)
   );
 
-  const [leftImagePreviewProfile, setLeftImagePreviewProfile] =
-    useState(profileName);
-  const [rightImagePreviewProfile, setRightImagePreviewProfile] =
-    useState(otherProfileName);
+  const leftEdited = (field: string) =>
+    left[field] !== formatValue(icon[field as keyof DesktopIcon]);
+
+  const rightEdited = (field: string) =>
+    right[field] !== formatValue(otherIcon[field as keyof DesktopIcon]);
+
+  const isAnyLeftEdited = fieldsToCompare.some((f) => leftEdited(String(f)));
+
+  const isAnyRightEdited = fieldsToCompare.some((f) => rightEdited(String(f)));
+
+  const fieldsMatch = (field: string) => left[field] === right[field];
+
+  const [leftImageSource, setLeftImageSource] = useState<"left" | "right">(
+    "left"
+  );
+  const [rightImageSource, setRightImageSource] = useState<"left" | "right">(
+    "right"
+  );
 
   const copyLeftToRight = (field: string) => {
-    setEditedRight((prev) => ({ ...prev, [field]: editedLeft[field] }));
-    setIsRightEdited((prev) => ({ ...prev, [field]: true }));
-    setIsLeftEdited((prev) => ({ ...prev, [field]: false }));
+    setRight((prev) => ({ ...prev, [field]: left[field] }));
 
     if (field === "image") {
-      setRightImagePreviewProfile(profileName);
+      setRightImageSource("left");
     }
   };
 
   const copyRightToLeft = (field: string) => {
-    setEditedLeft((prev) => ({ ...prev, [field]: editedRight[field] }));
-    setIsLeftEdited((prev) => ({ ...prev, [field]: true }));
-    setIsRightEdited((prev) => ({ ...prev, [field]: false }));
+    setLeft((prev) => ({ ...prev, [field]: right[field] }));
 
     if (field === "image") {
-      setLeftImagePreviewProfile(otherProfileName);
+      setLeftImageSource("right");
     }
   };
-
-  const previewLeftIcon =
-    isLeftEdited["image"] && editedLeft["image"] === editedRight["image"]
-      ? { ...otherIcon, image: editedLeft["image"] }
-      : { ...icon, image: editedLeft["image"] };
-
-  const previewRightIcon =
-    isRightEdited["image"] && editedLeft["image"] === editedRight["image"]
-      ? { ...icon, image: editedRight["image"] }
-      : { ...otherIcon, image: editedRight["image"] };
 
   const resetField = (field: string) => {
-    setEditedLeft((prev) => ({
+    setLeft((prev) => ({
       ...prev,
-      [field]: formatValue(getFieldValue(icon, field as keyof DesktopIcon)),
+      [field]: formatValue(icon[field as keyof DesktopIcon]),
     }));
-    setEditedRight((prev) => ({
+
+    setRight((prev) => ({
       ...prev,
-      [field]: formatValue(
-        getFieldValue(otherIcon, field as keyof DesktopIcon)
-      ),
+      [field]: formatValue(otherIcon[field as keyof DesktopIcon]),
     }));
-    setIsLeftEdited((prev) => ({ ...prev, [field]: false }));
-    setIsRightEdited((prev) => ({ ...prev, [field]: false }));
 
     if (field === "image") {
-      setLeftImagePreviewProfile(profileName);
-      setRightImagePreviewProfile(otherProfileName);
+      setLeftImageSource("left");
+      setRightImageSource("right");
     }
   };
 
-  const fieldsMatch = (field: string): boolean => {
-    return editedLeft[field] === editedRight[field];
-  };
+  // Mirror preview logic for images
+  const leftMirrorsRight = left["image"] === formatValue(otherIcon.image);
+  const rightMirrorsLeft = right["image"] === formatValue(icon.image);
 
-  const isAnyLeftEdited = (): boolean => {
-    return Object.values(isLeftEdited).some((val) => val);
-  };
+  const previewLeftIcon = leftMirrorsRight
+    ? { ...otherIcon, image: left["image"] }
+    : { ...icon, image: left["image"] };
 
-  const isAnyRightEdited = (): boolean => {
-    return Object.values(isRightEdited).some((val) => val);
-  };
+  const previewRightIcon = rightMirrorsLeft
+    ? { ...icon, image: right["image"] }
+    : { ...otherIcon, image: right["image"] };
 
-  const parseFieldValue = (
-    fieldName: keyof DesktopIcon,
-    value: string
-  ): DesktopIcon[keyof DesktopIcon] => {
-    if (fieldName === "args") {
-      try {
-        return JSON.parse(value);
-      } catch {
-        return [];
-      }
-    }
-    if (fieldName === "fontSize") {
-      return parseInt(value, 10);
-    }
-    return value;
-  };
+  const previewLeftProfile = leftMirrorsRight ? otherProfileName : profileName;
+  const previewRightProfile = rightMirrorsLeft ? profileName : otherProfileName;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        handleClose();
-      }
+      if (e.key === "Escape") handleClose();
     };
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
@@ -184,59 +151,45 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   const saveLeft = async () => {
     const iconBackup = { ...icon };
     fieldsToCompare.forEach((field) => {
-      if (isLeftEdited[String(field)]) {
-        const newValue = editedLeft[String(field)];
-        const parsedValue = parseFieldValue(field, newValue);
-        icon[field] = parsedValue as never;
+      if (leftEdited(String(field))) {
+        icon[field] = parseFieldValue(field, left[String(field)]) as never;
       }
     });
 
-    // If image field was edited, transfer the image from right icon to left icon
-    if (isLeftEdited["image"]) {
-      // If the other icon has an image, attempt to transfer it (skips if right icon is empty)
-      if (otherIcon.image) {
-        const transferredFileName = await window.electron.transferIconImage(
-          otherProfileName,
-          otherIcon.id,
-          profileName,
-          icon.id
-        );
-        if (transferredFileName) {
-          icon.image = transferredFileName;
-        } else {
-          // If transfer fails, restore backup and abort
-          icon = iconBackup;
-          showSmallWindow(
-            "Error",
-            `Failed to transfer image file from profile 
+    if (leftImageSource === "right" && otherIcon.image) {
+      const transferredFileName = await window.electron.transferIconImage(
+        otherProfileName,
+        otherIcon.id,
+        profileName,
+        icon.id
+      );
+
+      if (!transferredFileName) {
+        showSmallWindow(
+          "Error",
+          `Failed to transfer image file from profile 
             \n${otherProfileName}: ${otherIcon.id} ${otherIcon.image}, 
             \nto ${profileName}: ${icon.id} ${icon.image} 
             \nChanges not saved.`
-          );
-          return;
-        }
+        );
+        return;
       }
+
+      icon.image = transferredFileName;
     }
-    // This saves the icon with updated id if "name" changed
+
     const result = await window.electron.saveIcon(
       iconBackup,
       icon,
       profileName
     );
+
     if (result.success) {
-      // Update id if it was changed
       if (result.newID) {
         icon.id = result.newID;
       }
-      setIsLeftEdited({});
-      setEditedLeft(() => {
-        const map: Record<string, string> = {};
-        fieldsToCompare.forEach((f) => {
-          const v = getFieldValue(icon, f);
-          map[String(f)] = formatValue(v);
-        });
-        return map;
-      });
+      setLeft(buildFieldMap(icon));
+
       if (iconBackup.id !== icon.id) {
         await window.electron.reloadIcon(iconBackup.id);
       }
@@ -244,70 +197,50 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
 
       setHasSaved(true);
     } else {
-      icon = iconBackup;
+      Object.assign(icon, iconBackup);
     }
   };
 
   const saveRight = async () => {
     const otherIconBackup = { ...otherIcon };
+
     fieldsToCompare.forEach((field) => {
-      if (isRightEdited[String(field)]) {
-        const newValue = editedRight[String(field)];
-        const parsedValue = parseFieldValue(field, newValue);
-        otherIcon[field] = parsedValue as never;
+      if (rightEdited(String(field))) {
+        otherIcon[field] = parseFieldValue(
+          field,
+          right[String(field)]
+        ) as never;
       }
     });
 
-    // If image field was edited, transfer the image from left icon to right icon
-    if (isRightEdited["image"]) {
-      // If the left icon has an image, attempt to transfer it (skips if left icon is empty)
-      if (icon.image) {
-        const transferredFileName = await window.electron.transferIconImage(
-          profileName,
-          icon.id,
-          otherProfileName,
-          otherIcon.id
-        );
-        if (transferredFileName) {
-          otherIcon.image = transferredFileName;
-        } else {
-          // If transfer fails, restore backup and abort
-          otherIcon = otherIconBackup;
-          showSmallWindow(
-            "Error",
-            `Failed to transfer image file from profile 
-            \n${profileName}: ${icon.id} ${icon.image}, 
-            \nto ${otherProfileName}: ${otherIcon.id} ${otherIcon.image} 
-            \nChanges not saved.`
-          );
-          return;
-        }
+    if (rightImageSource === "left" && icon.image) {
+      const transferredFileName = await window.electron.transferIconImage(
+        profileName,
+        icon.id,
+        otherProfileName,
+        otherIcon.id
+      );
+
+      if (!transferredFileName) {
+        showSmallWindow("Error", "Failed to transfer image.");
+        return;
       }
+
+      otherIcon.image = transferredFileName;
     }
 
-    // This saves the icon with updated id if "name" changed
     const result = await window.electron.saveIcon(
       otherIconBackup,
       otherIcon,
       otherProfileName
     );
+
     if (result.success) {
-      // Update id if it was changed
-      if (result.newID) {
-        otherIcon.id = result.newID;
-      }
-      setIsRightEdited({});
-      setEditedRight(() => {
-        const map: Record<string, string> = {};
-        fieldsToCompare.forEach((f) => {
-          const v = getFieldValue(otherIcon, f);
-          map[String(f)] = formatValue(v);
-        });
-        return map;
-      });
+      if (result.newID) otherIcon.id = result.newID;
+      setRight(buildFieldMap(otherIcon));
       setHasSaved(true);
     } else {
-      otherIcon = otherIconBackup;
+      Object.assign(otherIcon, otherIconBackup);
     }
   };
 
@@ -322,146 +255,117 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-content icon-difference-viewer-content">
-          {/* Icons Display */}
+          {/* ICON PREVIEW */}
           <div className="icon-comparison-header">
             <div className="checkbox-container">
               <input
                 type="checkbox"
-                id="showAllFields"
                 checked={showAllFields}
                 onChange={(e) => setShowAllFields(e.target.checked)}
               />
-              <label htmlFor="showAllFields">Show all fields</label>
+              <label onClick={() => setShowAllFields(!showAllFields)}>
+                Show all fields
+              </label>
             </div>
             <div className="icon-comparison-column">
               <div className="icon-container">
                 <div className="comparison-profile-name">{profileName}</div>
-                <div className="comparison-icon-display">
-                  <SafeImage
-                    profile={leftImagePreviewProfile}
-                    id={previewLeftIcon.id}
-                    row={previewLeftIcon.row}
-                    col={previewLeftIcon.col}
-                    imagePath={previewLeftIcon.image}
-                    width={64}
-                    height={64}
-                    highlighted={false}
-                  />
-                </div>
+                <SafeImage
+                  profile={previewLeftProfile}
+                  id={previewLeftIcon.id}
+                  row={previewLeftIcon.row}
+                  col={previewLeftIcon.col}
+                  imagePath={previewLeftIcon.image}
+                  width={64}
+                  height={64}
+                  highlighted={false}
+                />
                 <div className="comparison-icon-id">
-                  {editedLeft["name"] || icon.id}
+                  {left["name"] || icon.id}
                 </div>
               </div>
-
               <div className="icon-container">
                 <div className="comparison-profile-name">
                   {otherProfileName}
                 </div>
-                <div className="comparison-icon-display">
-                  <SafeImage
-                    profile={rightImagePreviewProfile}
-                    id={previewRightIcon.id}
-                    row={previewRightIcon.row}
-                    col={previewRightIcon.col}
-                    imagePath={previewRightIcon.image}
-                    width={64}
-                    height={64}
-                    highlighted={false}
-                  />
-                </div>
+                <SafeImage
+                  profile={previewRightProfile}
+                  id={previewRightIcon.id}
+                  row={previewRightIcon.row}
+                  col={previewRightIcon.col}
+                  imagePath={previewRightIcon.image}
+                  width={64}
+                  height={64}
+                  highlighted={false}
+                />
                 <div className="comparison-icon-id">
-                  {editedRight["name"] || otherIcon.id}
+                  {right["name"] || otherIcon.id}
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Fields Comparison */}
+          {/* SAVE BUTTONS */}
+          <div className="icon-save-buttons-row">
+            <button
+              className="button icon-save-button"
+              onClick={saveLeft}
+              disabled={!isAnyLeftEdited}
+            >
+              Save {profileName}
+            </button>
+            <button
+              className="button icon-save-button"
+              onClick={saveRight}
+              disabled={!isAnyRightEdited}
+            >
+              Save {otherProfileName}
+            </button>
+          </div>
+          {/* FIELD ROWS */}
           <div className="icon-fields-comparison">
-            {/* Save Buttons Row */}
-            <div className="icon-save-buttons-row">
-              <button
-                className="button icon-save-button"
-                onClick={saveLeft}
-                disabled={!isAnyLeftEdited()}
-                title={
-                  isAnyLeftEdited()
-                    ? "Save changes to left icon"
-                    : "No changes to save"
-                }
-              >
-                Save {profileName}
-              </button>
-              <button
-                className="button icon-save-button"
-                onClick={saveRight}
-                disabled={!isAnyRightEdited()}
-                title={
-                  isAnyRightEdited()
-                    ? "Save changes to right icon"
-                    : "No changes to save"
-                }
-              >
-                Save {otherProfileName}
-              </button>
-            </div>
-            {fieldsToCompare.map((fieldName) => {
-              const isDifferent = isFieldDifferent(fieldName);
-              const currentMatch = fieldsMatch(String(fieldName));
-
-              // Only show different fields unless showAllFields is true
-              if (!showAllFields && !isDifferent) {
-                return null;
-              }
-
+            {fieldsToCompare.map((field) => {
+              const fieldName = String(field);
+              const isDifferent = differences.includes(fieldName);
+              if (!showAllFields && !isDifferent) return null;
+              const match = fieldsMatch(fieldName);
+              const edited = leftEdited(fieldName) || rightEdited(fieldName);
               return (
                 <div
                   key={fieldName}
-                  className={`icon-field-row ${
-                    currentMatch ? "same" : "different"
-                  }`}
+                  className={`icon-field-row ${match ? "same" : "different"}`}
                 >
                   <div className="field-indicator">
                     <div
-                      className={`indicator-dot ${
-                        currentMatch ? "green" : "yellow"
-                      }`}
-                      title={currentMatch ? "Match" : "Different"}
-                    ></div>
+                      className={`indicator-dot ${match ? "green" : "yellow"}`}
+                    />
                   </div>
                   <div className="field-name">
                     {fieldName}
-                    {(isLeftEdited[String(fieldName)] ||
-                      isRightEdited[String(fieldName)]) && (
-                      <span className="unsaved-indicator">*</span>
-                    )}
+                    {edited && <span className="unsaved-indicator">*</span>}
                   </div>
                   <div className="field-values">
-                    <div className="field-value">
-                      {editedLeft[String(fieldName)]}
-                    </div>
+                    <div className="field-value">{left[fieldName]}</div>
                     <div className="field-buttons">
-                      {isLeftEdited[String(fieldName)] ||
-                      isRightEdited[String(fieldName)] ? (
+                      {edited ? (
                         <button
                           className="field-copy-btn field-copy-center"
-                          onClick={() => resetField(String(fieldName))}
+                          onClick={() => resetField(fieldName)}
                           title="Reset to original"
                         >
                           ↩️
                         </button>
-                      ) : !currentMatch ? (
+                      ) : !match ? (
                         <>
                           <button
                             className="button field-copy-left"
-                            onClick={() => copyRightToLeft(String(fieldName))}
+                            onClick={() => copyRightToLeft(fieldName)}
                             title="Copy right to left"
                           >
                             &lt;
                           </button>
                           <button
                             className="button field-copy-right"
-                            onClick={() => copyLeftToRight(String(fieldName))}
+                            onClick={() => copyLeftToRight(fieldName)}
                             title="Copy left to right"
                           >
                             &gt;
@@ -469,9 +373,7 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                         </>
                       ) : null}
                     </div>
-                    <div className="field-value">
-                      {editedRight[String(fieldName)]}
-                    </div>
+                    <div className="field-value">{right[fieldName]}</div>
                   </div>
                 </div>
               );
