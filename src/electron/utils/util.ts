@@ -2565,6 +2565,12 @@ export async function saveIcon(
         if (fs.existsSync(oldPath) && !fs.existsSync(newPath)) {
           fs.renameSync(oldPath, newPath);
           logger.info(`Renamed data folder ${oldPath} -> ${newPath}`);
+
+          // Update image path to new folder if it was a full path inside old folder (changed name and selected file from inside folder).
+          if (newIcon.image && newIcon.image.startsWith(oldPath + path.sep)) {
+            newIcon.image = newIcon.image.replace(oldPath, newPath);
+            logger.info(`Updated image path from old folder: ${newIcon.image}`);
+          }
         }
       } catch (e) {
         logger.warn(`Failed to rename data folder ${oldId} -> ${newId}:`, e);
