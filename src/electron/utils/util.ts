@@ -2124,6 +2124,49 @@ export async function compareProfiles(
       return val;
     };
 
+    const iconImagesDiffer = (
+      iconA: DesktopIcon,
+      iconB: DesktopIcon,
+      profileA: string = otherProfile,
+      profileB: string = currentProfile
+    ): boolean => {
+      if (!iconA.image || !iconB.image) {
+        return iconA.image !== iconB.image;
+      }
+
+      const fileA = path.join(
+        getIconsFolderPath(profileA),
+        iconA.id,
+        iconA.image
+      );
+      const fileB = path.join(
+        getIconsFolderPath(profileB),
+        iconB.id,
+        iconB.image
+      );
+
+      logger.info(
+        `Comparing icon images:\n  ${JSON.stringify(iconA)}\n  ${JSON.stringify(iconB)}`
+      );
+
+      try {
+        const statA = fs.statSync(fileA);
+        const statB = fs.statSync(fileB);
+
+        if (statA.size !== statB.size) {
+          logger.info(
+            `Icon images differ in size: ${fileA} (${statA.size}) vs ${fileB} (${statB.size})`
+          );
+          return true;
+        }
+        return false;
+      } catch {
+        // can't read files, return true
+        logger.error(`Failed to compare icon images: ${fileA} and ${fileB}`);
+        return true;
+      }
+    };
+
     // Helper function to compare two icons and return differences
     const getIconDifferences = (
       icon1: DesktopIcon,
@@ -2140,6 +2183,14 @@ export async function compareProfiles(
         const normalized2 = normalizeValue(
           val2 as string | string[] | undefined
         );
+
+        if (field === "image") {
+          // image string may be identical but actual files can differ
+          if (iconImagesDiffer(icon1, icon2)) {
+            differences.push(field);
+          }
+          continue;
+        }
 
         // Deep comparison for arrays
         if (Array.isArray(normalized1) && Array.isArray(normalized2)) {
@@ -2169,6 +2220,13 @@ export async function compareProfiles(
         const normalized2 = normalizeValue(
           val2 as string | string[] | undefined
         );
+
+        if (field === "image") {
+          if (!iconImagesDiffer(icon1, icon2)) {
+            matches++;
+          }
+          continue;
+        }
 
         if (Array.isArray(normalized1) && Array.isArray(normalized2)) {
           if (JSON.stringify(normalized1) === JSON.stringify(normalized2)) {
