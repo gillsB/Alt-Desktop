@@ -312,25 +312,27 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
               </div>
             </div>
           </div>
-          {/* SAVE BUTTONS */}
-          <div className="icon-save-buttons-row">
-            <button
-              className="button icon-save-button"
-              onClick={saveLeft}
-              disabled={!isAnyLeftEdited}
-            >
-              Save {profileName}
-            </button>
-            {!desktopComparison && (
-              <button
-                className="button icon-save-button"
-                onClick={saveRight}
-                disabled={!isAnyRightEdited}
-              >
-                Save {displayOtherProfileName}
-              </button>
-            )}
-          </div>
+          {/* SAVE BUTTONS (only when comparing two profiles) */}
+          {!desktopComparison && (
+            <div className="icon-save-buttons-row">
+              <div className="icon-save-buttons-inner">
+                <button
+                  className="button icon-save-button"
+                  onClick={saveLeft}
+                  disabled={!isAnyLeftEdited}
+                >
+                  Save {profileName}
+                </button>
+                <button
+                  className="button icon-save-button"
+                  onClick={saveRight}
+                  disabled={!isAnyRightEdited}
+                >
+                  Save {displayOtherProfileName}
+                </button>
+              </div>
+            </div>
+          )}
           {/* FIELD ROWS */}
           <div className="icon-fields-comparison">
             {fieldsToCompare.map((field) => {
@@ -396,6 +398,15 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
           <button className="button" onClick={handleClose}>
             Close
           </button>
+          {desktopComparison && (
+            <button
+              className="button icon-save-button"
+              onClick={saveLeft}
+              disabled={!isAnyLeftEdited}
+            >
+              Save {profileName}
+            </button>
+          )}
         </div>
       </div>
     </div>
