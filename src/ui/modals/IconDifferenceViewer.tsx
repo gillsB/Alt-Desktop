@@ -142,6 +142,12 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   const previewLeftProfile = leftMirrorsRight ? otherProfileName : profileName;
   const previewRightProfile = rightMirrorsLeft ? profileName : otherProfileName;
 
+  // Show "Windows Desktop Icon" instead of "desktop_cache" if comparing to desktop
+  const displayOtherProfileName =
+    desktopComparison && otherProfileName === "desktop_cache"
+      ? "Windows Desktop Icon"
+      : otherProfileName;
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleClose();
@@ -288,7 +294,7 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
               </div>
               <div className="icon-container">
                 <div className="comparison-profile-name">
-                  {otherProfileName}
+                  {displayOtherProfileName}
                 </div>
                 <SafeImage
                   profile={previewRightProfile}
@@ -321,7 +327,7 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                 onClick={saveRight}
                 disabled={!isAnyRightEdited}
               >
-                Save {otherProfileName}
+                Save {displayOtherProfileName}
               </button>
             )}
           </div>
