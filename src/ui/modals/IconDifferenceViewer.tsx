@@ -56,6 +56,7 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
 }) => {
   const [showAllFields, setShowAllFields] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
+  const [copiedFields, setCopiedFields] = useState<Set<string>>(new Set());
 
   window.electron.hoverHighlightIcon(icon.id);
 
@@ -76,16 +77,16 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   );
 
   const leftEdited = (field: string) =>
-    left[field] !== formatValue(icon[field as keyof DesktopIcon]);
+    left[field] !== formatValue(icon[field as keyof DesktopIcon]) ||
+    copiedFields.has(`left:${field}`);
 
   const rightEdited = (field: string) =>
-    right[field] !== formatValue(otherIcon[field as keyof DesktopIcon]);
+    right[field] !== formatValue(otherIcon[field as keyof DesktopIcon]) ||
+    copiedFields.has(`right:${field}`);
 
   const isAnyLeftEdited = fieldsToCompare.some((f) => leftEdited(String(f)));
 
   const isAnyRightEdited = fieldsToCompare.some((f) => rightEdited(String(f)));
-
-  const fieldsMatch = (field: string) => left[field] === right[field];
 
   const [leftImageSource, setLeftImageSource] = useState<"left" | "right">(
     "left"
@@ -97,6 +98,12 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   const copyLeftToRight = (field: string) => {
     setRight((prev) => ({ ...prev, [field]: left[field] }));
 
+    setCopiedFields((prev) => {
+      const next = new Set(prev);
+      next.add(`right:${field}`);
+      return next;
+    });
+
     if (field === "image") {
       setRightImageSource("left");
     }
@@ -104,6 +111,12 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
 
   const copyRightToLeft = (field: string) => {
     setLeft((prev) => ({ ...prev, [field]: right[field] }));
+
+    setCopiedFields((prev) => {
+      const next = new Set(prev);
+      next.add(`left:${field}`);
+      return next;
+    });
 
     if (field === "image") {
       setLeftImageSource("right");
@@ -120,6 +133,13 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
       ...prev,
       [field]: formatValue(otherIcon[field as keyof DesktopIcon]),
     }));
+
+    setCopiedFields((prev) => {
+      const next = new Set(prev);
+      next.delete(`left:${field}`);
+      next.delete(`right:${field}`);
+      return next;
+    });
 
     if (field === "image") {
       setLeftImageSource("left");
@@ -341,7 +361,11 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
               const fieldName = String(field);
               const isDifferent = differences.includes(fieldName);
               if (!showAllFields && !isDifferent) return null;
-              const match = fieldsMatch(fieldName);
+              const match =
+                left[fieldName] === right[fieldName] &&
+                (!differences.includes(fieldName) ||
+                  leftEdited(fieldName) ||
+                  rightEdited(fieldName));
               const edited = leftEdited(fieldName) || rightEdited(fieldName);
               return (
                 <div
@@ -368,7 +392,7 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                         >
                           ↩️
                         </button>
-                      ) : !match ? (
+                      ) : (
                         <>
                           <button
                             className="button field-copy-left"
@@ -387,7 +411,7 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
                             </button>
                           )}
                         </>
-                      ) : null}
+                      )}
                     </div>
                     <div className="field-value">{right[fieldName]}</div>
                   </div>
