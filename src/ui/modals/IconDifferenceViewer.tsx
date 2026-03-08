@@ -128,8 +128,10 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   };
 
   // Mirror preview logic for images
-  const leftMirrorsRight = left["image"] === formatValue(otherIcon.image);
-  const rightMirrorsLeft = right["image"] === formatValue(icon.image);
+  const leftMirrorsRight =
+    leftEdited("image") && left["image"] === formatValue(otherIcon.image);
+  const rightMirrorsLeft =
+    rightEdited("image") && right["image"] === formatValue(icon.image);
 
   const previewLeftIcon = leftMirrorsRight
     ? { ...otherIcon, image: left["image"] }
