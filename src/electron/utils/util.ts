@@ -2125,28 +2125,23 @@ export async function compareProfiles(
     };
 
     const iconImagesDiffer = (
-      iconA: DesktopIcon,
-      iconB: DesktopIcon,
-      profileA: string = otherProfile,
-      profileB: string = currentProfile
+      profileIconA: ProfileIcon,
+      profileIconB: ProfileIcon
     ): boolean => {
-      if (!iconA.image || !iconB.image) {
-        return iconA.image !== iconB.image;
+      // Return false if both images are missing/empty, true if only one is missing
+      if (!profileIconA.icon.image || !profileIconB.icon.image) {
+        return profileIconA.icon.image !== profileIconB.icon.image;
       }
 
       const fileA = path.join(
-        getIconsFolderPath(profileA),
-        iconA.id,
-        iconA.image
+        getIconsFolderPath(profileIconA.profile),
+        profileIconA.icon.id,
+        profileIconA.icon.image
       );
       const fileB = path.join(
-        getIconsFolderPath(profileB),
-        iconB.id,
-        iconB.image
-      );
-
-      logger.info(
-        `Comparing icon images:\n  ${JSON.stringify(iconA)}\n  ${JSON.stringify(iconB)}`
+        getIconsFolderPath(profileIconB.profile),
+        profileIconB.icon.id,
+        profileIconB.icon.image
       );
 
       try {
@@ -2169,13 +2164,13 @@ export async function compareProfiles(
 
     // Helper function to compare two icons and return differences
     const getIconDifferences = (
-      icon1: DesktopIcon,
-      icon2: DesktopIcon
+      profileIcon1: ProfileIcon,
+      profileIcon2: ProfileIcon
     ): string[] => {
       const differences: string[] = [];
       for (const field of fieldsToCompare) {
-        const val1 = icon1[field];
-        const val2 = icon2[field];
+        const val1 = profileIcon1.icon[field];
+        const val2 = profileIcon2.icon[field];
 
         const normalized1 = normalizeValue(
           val1 as string | string[] | undefined
@@ -2186,7 +2181,7 @@ export async function compareProfiles(
 
         if (field === "image") {
           // image string may be identical but actual files can differ
-          if (iconImagesDiffer(icon1, icon2)) {
+          if (iconImagesDiffer(profileIcon1, profileIcon2)) {
             differences.push(field);
           }
           continue;
@@ -2206,13 +2201,13 @@ export async function compareProfiles(
 
     // Helper function to count matching fields (for finding best match)
     const countMatchingFields = (
-      icon1: DesktopIcon,
-      icon2: DesktopIcon
+      profileIcon1: ProfileIcon,
+      profileIcon2: ProfileIcon
     ): number => {
       let matches = 0;
       for (const field of fieldsToCompare) {
-        const val1 = icon1[field];
-        const val2 = icon2[field];
+        const val1 = profileIcon1.icon[field];
+        const val2 = profileIcon2.icon[field];
 
         const normalized1 = normalizeValue(
           val1 as string | string[] | undefined
@@ -2222,7 +2217,7 @@ export async function compareProfiles(
         );
 
         if (field === "image") {
-          if (!iconImagesDiffer(icon1, icon2)) {
+          if (!iconImagesDiffer(profileIcon1, profileIcon2)) {
             matches++;
           }
           continue;
@@ -2258,18 +2253,22 @@ export async function compareProfiles(
       }
     }
 
-    const filesToImport: DesktopIcon[] = [];
+    const filesToImport: ProfileIcon[] = [];
     const alreadyImported: Array<{
-      otherIcon: DesktopIcon;
-      currentIcon: DesktopIcon;
+      other: ProfileIcon;
+      current: ProfileIcon;
     }> = [];
     const modified: Array<{
-      otherIcon: DesktopIcon;
-      currentIcon: DesktopIcon;
+      other: ProfileIcon;
+      current: ProfileIcon;
       differences: string[];
     }> = [];
 
     for (const otherIcon of otherIcons) {
+      const otherProfileIcon: ProfileIcon = {
+        profile: otherProfile,
+        icon: otherIcon,
+      };
       const normalizedName = standardizeIconName(otherIcon.name);
 
       // Find potential matches by name or filepath
@@ -2289,41 +2288,70 @@ export async function compareProfiles(
 
       if (matchArray.length === 0) {
         // No match found - this is a new icon to import
-        filesToImport.push(otherIcon);
+        filesToImport.push(otherProfileIcon);
       } else {
         // Find the best match based on number of matching fields
         let bestMatch = matchArray[0];
-        let bestMatchScore = countMatchingFields(otherIcon, bestMatch);
+        let bestMatchScore = countMatchingFields(otherProfileIcon, {
+          profile: currentProfile,
+          icon: bestMatch,
+        });
 
         for (let i = 1; i < matchArray.length; i++) {
-          const matchScore = countMatchingFields(otherIcon, matchArray[i]);
+          const matchScore = countMatchingFields(otherProfileIcon, {
+            profile: currentProfile,
+            icon: matchArray[i],
+          });
           if (matchScore > bestMatchScore) {
             bestMatch = matchArray[i];
             bestMatchScore = matchScore;
           }
         }
 
+        const currentProfileIcon: ProfileIcon = {
+          profile: currentProfile,
+          icon: bestMatch,
+        };
+
         // Check if there are any differences
-        const differences = getIconDifferences(otherIcon, bestMatch);
+        const differences = getIconDifferences(
+          otherProfileIcon,
+          currentProfileIcon
+        );
 
         if (differences.length === 0) {
           // Icons are identical (excluding position fields)
-          alreadyImported.push({ otherIcon, currentIcon: bestMatch });
+          alreadyImported.push({
+            other: otherProfileIcon,
+            current: currentProfileIcon,
+          });
         } else {
           // Icons have differences
           modified.push({
-            otherIcon: otherIcon,
-            currentIcon: bestMatch,
+            other: otherProfileIcon,
+            current: currentProfileIcon,
             differences,
           });
         }
       }
     }
 
+    // Convert back to original return format
+    const resultFilesToImport = filesToImport.map((p) => p.icon);
+    const resultAlreadyImported = alreadyImported.map((p) => ({
+      otherIcon: p.other.icon,
+      currentIcon: p.current.icon,
+    }));
+    const resultModified = modified.map((m) => ({
+      otherIcon: m.other.icon,
+      currentIcon: m.current.icon,
+      differences: m.differences,
+    }));
+
     return {
-      filesToImport,
-      alreadyImported,
-      modified,
+      filesToImport: resultFilesToImport,
+      alreadyImported: resultAlreadyImported,
+      modified: resultModified,
     };
   } catch (error) {
     logger.error(

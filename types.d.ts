@@ -105,6 +105,11 @@ type ProfileIconCompare = {
   }>;
 };
 
+type ProfileIcon = {
+  profile: string;
+  icon: DesktopIcon;
+};
+
 type DesktopIconData = {
   icons: DesktopIcon[];
 };
