@@ -68,6 +68,13 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     return map;
   };
 
+  const initialLeftRef = React.useRef<Record<string, string>>(
+    buildFieldMap(icon)
+  );
+  const initialRightRef = React.useRef<Record<string, string>>(
+    buildFieldMap(otherIcon)
+  );
+
   const [left, setLeft] = useState<Record<string, string>>(() =>
     buildFieldMap(icon)
   );
@@ -124,14 +131,17 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
   };
 
   const resetField = (field: string) => {
+    const initialLeft = initialLeftRef.current[field];
+    const initialRight = initialRightRef.current[field];
+
     setLeft((prev) => ({
       ...prev,
-      [field]: formatValue(icon[field as keyof DesktopIcon]),
+      [field]: initialLeft,
     }));
 
     setRight((prev) => ({
       ...prev,
-      [field]: formatValue(otherIcon[field as keyof DesktopIcon]),
+      [field]: initialRight,
     }));
 
     setCopiedFields((prev) => {
