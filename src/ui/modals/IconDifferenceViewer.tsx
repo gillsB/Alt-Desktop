@@ -197,6 +197,15 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     });
 
     if (leftImageSource === "right" && otherIcon.image) {
+      if (otherIcon.image === icon.image) {
+        const resp = await showSmallWindow(
+          "Overwrite Image?",
+          `This will overwrite your current applied icon image in profile: ${profileName}. \nAre you sure you want to save?`,
+          ["Yes", "No"]
+        );
+        if (resp !== "Yes") return;
+      }
+
       const transferredFileName = await window.electron.transferIconImage(
         otherProfileName,
         otherIcon.id,
@@ -254,6 +263,15 @@ const IconDifferenceViewer: React.FC<IconDifferenceViewerProps> = ({
     });
 
     if (rightImageSource === "left" && icon.image) {
+      if (icon.image === otherIcon.image) {
+        const resp = await showSmallWindow(
+          "Overwrite Image?",
+          `This will overwrite your current applied icon image in profile: ${otherProfileName}. \nAre you sure you want to save?`,
+          ["Yes", "No"]
+        );
+        if (resp !== "Yes") return;
+      }
+
       const transferredFileName = await window.electron.transferIconImage(
         profileName,
         icon.id,
