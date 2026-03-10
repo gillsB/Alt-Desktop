@@ -734,7 +734,7 @@ const DesktopGrid: React.FC = () => {
     };
   }, []);
 
-  const handleIconDoubleClick = async (icon: DesktopIcon) => {
+  const launchIcon = async (icon: DesktopIcon) => {
     if (icon.launchDefault === "program") {
       await window.electron.launchProgram(icon.id);
     } else {
@@ -2195,7 +2195,7 @@ const DesktopGrid: React.FC = () => {
                 onDragEnd={
                   editingIconId ? handleEditIconDragEnd : handleDragEnd
                 }
-                onDoubleClick={() => handleIconDoubleClick(icon)}
+                onDoubleClick={() => launchIcon(icon)}
                 onContextMenu={(e) => {
                   e.stopPropagation();
                   handleIconRightClick(e, row, col);
@@ -2503,6 +2503,14 @@ const DesktopGrid: React.FC = () => {
                 className="menu-item has-submenu"
                 onMouseEnter={() => setShowLaunchSubmenu(true)}
                 onMouseLeave={() => setShowLaunchSubmenu(false)}
+                onClick={() => {
+                  if (contextMenu?.icon) {
+                    launchIcon(contextMenu.icon);
+                  }
+                  setShowLaunchSubmenu(false);
+                  setContextMenu(null);
+                  hideHighlightBox();
+                }}
               >
                 Launch
                 <span className="submenu-arrow">▶</span>
@@ -2510,13 +2518,19 @@ const DesktopGrid: React.FC = () => {
                   <div className="submenu">
                     <div
                       className="menu-item"
-                      onClick={() => handleLaunchSubmenuClick("Program")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLaunchSubmenuClick("Program");
+                      }}
                     >
                       Program
                     </div>
                     <div
                       className="menu-item"
-                      onClick={() => handleLaunchSubmenuClick("Website")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLaunchSubmenuClick("Website");
+                      }}
                     >
                       Website
                     </div>
