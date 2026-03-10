@@ -516,7 +516,6 @@ interface Window {
     editIcon: (id: string, row: number, col: number) => Promise<boolean>;
     on: (channel: string, callback: (...args: unknown[]) => void) => void;
     off: (channel: string, callback: (...args: unknown[]) => void) => void;
-    subWindowFocus: () => Promise<boolean>;
     reloadWindow: () => Promise<boolean>;
     logMessage: (level: string, file: string, message: string) => void;
     logVideoMessage: (level: string, file: string, message: string) => void;

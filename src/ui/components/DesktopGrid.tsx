@@ -644,6 +644,8 @@ const DesktopGrid: React.FC = () => {
     const handleKeybinds = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         hideContextMenu();
+        // Focuses subwindow if open
+        window.electron.getSubWindowTitle();
       }
     };
 
