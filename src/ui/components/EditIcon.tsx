@@ -318,12 +318,30 @@ const EditIcon: React.FC = () => {
   const handleGenerateIcon = async (): Promise<string | undefined> => {
     if (!icon) return;
     try {
-      let iconPaths = await window.electron.generateIcon(
-        profile,
-        icon.id,
-        icon.programLink ?? "",
-        icon.websiteLink ?? ""
-      );
+      let iconPaths: string[] = [];
+
+      // If programLink is already an image file, use that first instead of extracting icon from associated filetype
+      if (icon.programLink) {
+        const programLinkType = await window.electron.getFileType(
+          icon.programLink
+        );
+        if (programLinkType && programLinkType.startsWith("image/")) {
+          iconPaths.push(icon.programLink);
+          logger.info(
+            `Program link is an image; using as icon source: ${icon.programLink}`
+          );
+        }
+      }
+
+      if (iconPaths.length === 0) {
+        iconPaths = await window.electron.generateIcon(
+          profile,
+          icon.id,
+          icon.programLink ?? "",
+          icon.websiteLink ?? ""
+        );
+      }
+
       if (icon.image && !iconPaths.includes(icon.image)) {
         iconPaths = [icon.image, ...iconPaths];
       }
