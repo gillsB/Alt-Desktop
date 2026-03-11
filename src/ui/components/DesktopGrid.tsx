@@ -79,8 +79,20 @@ const DesktopGrid: React.FC = () => {
 
   const [backgroundType, setBackgroundType] = useState<string>("image");
   const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
+  const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
 
   const [editIconActive, setEditIconActive] = useState(false);
+
+  const fetchMultipleProfilesSetting = async () => {
+    try {
+      const profileSetting =
+        await window.electron.getSetting("multipleProfiles");
+      setMultipleProfiles(Boolean(profileSetting));
+    } catch (error) {
+      logger.error("Error fetching multipleProfiles setting:", error);
+    }
+  };
+
   const [editingIconId, setEditingIconId] = useState<string | null>(null);
   const [originalEditIconOffset, setOriginalEditIconOffset] = useState<{
     x: number;
@@ -182,6 +194,7 @@ const DesktopGrid: React.FC = () => {
       setProfile(rendererStates.profile || "");
     };
     fetchRendererStates();
+    fetchMultipleProfilesSetting();
   }, []);
 
   useEffect(() => {
@@ -998,6 +1011,7 @@ const DesktopGrid: React.FC = () => {
       fetchIconSize();
       fetchIcons(true);
       fetchFontColor();
+      fetchMultipleProfilesSetting();
     };
 
     window.electron.on("reload-grid", handleReloadGrid);
@@ -2409,9 +2423,13 @@ const DesktopGrid: React.FC = () => {
               <div
                 className="menu-item"
                 onClick={handleOpenDesktopProfile}
-                title="Change the desktop icon profile for this background"
+                title={
+                  multipleProfiles
+                    ? "Change the desktop icon profile for this background"
+                    : "Import icons into the current desktop layout"
+                }
               >
-                Desktop Profile
+                {multipleProfiles ? "Desktop Profiles" : "Import Icons"}
               </div>
               <div className="menu-item" onClick={handleOpenSettings}>
                 Settings

@@ -39,6 +39,7 @@ const DesktopProfile: React.FC = () => {
   const [profile, setProfile] = useState<string>("");
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>("desktop");
+  const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
   const [compareToProfile, setCompareToProfile] = useState<string>("");
   const [showManageModal, setShowManageModal] = useState<boolean>(false);
   const [desktopCacheLoading, setDesktopCacheLoading] = useState(false);
@@ -149,8 +150,25 @@ const DesktopProfile: React.FC = () => {
       const rendererStates = await window.electron.getRendererStates();
       setProfile(rendererStates.profile || "");
     };
+
+    const fetchMultipleProfilesSetting = async () => {
+      try {
+        const value = await window.electron.getSetting("multipleProfiles");
+        setMultipleProfiles(Boolean(value));
+      } catch (error) {
+        logger.error("Error fetching multipleProfiles setting:", error);
+      }
+    };
+
     fetchRendererStates();
+    fetchMultipleProfilesSetting();
   }, []);
+
+  useEffect(() => {
+    if (!multipleProfiles && activeTab !== "desktop") {
+      setActiveTab("desktop");
+    }
+  }, [multipleProfiles, activeTab]);
 
   useEffect(() => {
     const updateStates = (...args: unknown[]) => {
@@ -483,34 +501,41 @@ const DesktopProfile: React.FC = () => {
   return (
     <div className="subwindow-container">
       <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
-      <section className="desktop-profile-top">
-        <label className="desktop-profile-label">Current Profile:</label>
-        <select
-          className="desktop-profile-select"
-          value={profile}
-          onChange={handleProfileChange}
-        >
-          {profiles.map((p) => (
-            <option key={p} value={p}>
-              {p === "default" ? "Default" : p}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          className="button"
-          onClick={() => setShowManageModal(true)}
-          title="Manage Profiles"
-        >
-          Manage Profiles
-        </button>
-      </section>
+
+      {multipleProfiles && (
+        <section className="desktop-profile-top">
+          <label className="desktop-profile-label">Current Profile:</label>
+          <select
+            className="desktop-profile-select"
+            value={profile}
+            onChange={handleProfileChange}
+          >
+            {profiles.map((p) => (
+              <option key={p} value={p}>
+                {p === "default" ? "Default" : p}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="button"
+            onClick={() => setShowManageModal(true)}
+            title="Manage Profiles"
+          >
+            Manage Profiles
+          </button>
+        </section>
+      )}
+
       <section className="desktop-profile-bottom">
         <div className="import-icons-header">
           <h2>Import Icons</h2>
         </div>
         <div className="import-icons-tabs">
-          {TABS.map((tab) => (
+          {(multipleProfiles
+            ? TABS
+            : TABS.filter((tab) => tab.key === "desktop")
+          ).map((tab) => (
             <button
               key={tab.key}
               className={`import-icons-tab-btn${
