@@ -35,6 +35,7 @@ export const defaultSettings: SettingsData = {
   },
   localTags: [],
   theme: "system",
+  multipleProfiles: false,
 };
 
 const logger = createLoggerForFile("settings.ts");
