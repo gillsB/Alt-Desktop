@@ -520,6 +520,20 @@ const Settings: React.FC = () => {
             <option value="light">Light</option>
           </select>
         </div>
+        <div className="subwindow-field">
+          <label htmlFor="multiple-profiles" className="checkbox-label">
+            Allow Multiple Icon Profiles
+          </label>
+          <input
+            id="multiple-profiles"
+            type="checkbox"
+            checked={settings?.multipleProfiles ?? false}
+            onChange={(e) => {
+              updateSetting("multipleProfiles", e.target.checked);
+            }}
+            title="Allow multiple desktop icon profiles"
+          />
+        </div>
       </div>
       <div className="subwindow-footer">
         <button className="save-button" onClick={handleSave}>
