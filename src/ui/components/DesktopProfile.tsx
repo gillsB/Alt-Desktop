@@ -500,7 +500,10 @@ const DesktopProfile: React.FC = () => {
 
   return (
     <div className="subwindow-container">
-      <SubWindowHeader title={`Desktop Profile`} onClose={handleClose} />
+      <SubWindowHeader
+        title={multipleProfiles ? "Desktop Profiles" : "Import Icons"}
+        onClose={handleClose}
+      />
 
       {multipleProfiles && (
         <section className="desktop-profile-top">

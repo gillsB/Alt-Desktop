@@ -1277,6 +1277,10 @@ export async function deleteIconData(profile: string, id: string) {
 export async function getProfiles(): Promise<string[]> {
   const profilesDir = getProfilesPath();
   try {
+    // Return only "default" if Allow multiple icon profiles false
+    if (getSetting("multipleProfiles") === false) {
+      return ["default"];
+    }
     const entries = await fs.promises.readdir(profilesDir, {
       withFileTypes: true,
     });
