@@ -106,6 +106,7 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
   const [bgSaveProgress, setBgSaveProgress] = useState<number | null>(null);
 
   const [profiles, setProfiles] = useState<string[]>([]);
+  const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
 
   // Filtered public categories/tags
   const filteredPublicTagCategories = React.useMemo(() => {
@@ -251,6 +252,17 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
         setProfiles(sortedProfiles);
       }
     })();
+
+    const fetchMultipleProfilesSetting = async () => {
+      try {
+        const value = await window.electron.getSetting("multipleProfiles");
+        setMultipleProfiles(Boolean(value));
+      } catch (error) {
+        logger.error("Error fetching multipleProfiles setting:", error);
+      }
+    };
+
+    fetchMultipleProfilesSetting();
     return () => {
       cancelled = true;
     };
@@ -1285,38 +1297,41 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
               </div>
             </div>
           )}
-          <div className="edit-bg-field">
-            <label>Desktop Icon Profile</label>
-            <div className="input-row" style={{ width: "90%" }}>
-              <div className="edit-bg-field dropdown-container">
-                <select
-                  id="profile-select"
-                  value={summary.localProfile ?? "default"}
-                  onChange={(e) => {
-                    setSummary((prev) => ({
-                      ...prev,
-                      localProfile: e.target.value,
-                    }));
-                  }}
+
+          {multipleProfiles && (
+            <div className="edit-bg-field">
+              <label>Desktop Icon Profile</label>
+              <div className="input-row" style={{ width: "90%" }}>
+                <div className="edit-bg-field dropdown-container">
+                  <select
+                    id="profile-select"
+                    value={summary.localProfile ?? "default"}
+                    onChange={(e) => {
+                      setSummary((prev) => ({
+                        ...prev,
+                        localProfile: e.target.value,
+                      }));
+                    }}
+                  >
+                    {profiles.map((profile) => (
+                      <option key={profile} value={profile}>
+                        {profile === "default" ? "Default" : profile}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={handleAddProfileClick}
+                  title="Add new profile"
+                  tabIndex={-1}
                 >
-                  {profiles.map((profile) => (
-                    <option key={profile} value={profile}>
-                      {profile === "default" ? "Default" : profile}
-                    </option>
-                  ))}
-                </select>
+                  +
+                </button>
               </div>
-              <button
-                type="button"
-                className="button"
-                onClick={handleAddProfileClick}
-                title="Add new profile"
-                tabIndex={-1}
-              >
-                +
-              </button>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right: Tag management */}
