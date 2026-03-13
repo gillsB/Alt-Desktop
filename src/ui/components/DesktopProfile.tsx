@@ -263,33 +263,6 @@ const DesktopProfile: React.FC = () => {
         }
       }
     }
-
-    // Save the current background with the new profile
-    try {
-      // Get the current background ID from settings
-      const bgId = await window.electron.getSetting("background");
-      if (bgId) {
-        await window.electron.saveBgJson({
-          id: bgId,
-          localProfile: newProfile,
-        });
-      } else {
-        await window.electron.saveSettingsData({
-          noBgDesktopProfile: newProfile,
-        });
-      }
-    } catch (err) {
-      logger.error(
-        "Failed to update background profile on profile change:",
-        err
-      );
-    }
-  };
-
-  const handleProfileChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    await doProfileChange(e.target.value);
   };
 
   // import every icon currently listed as "not imported" in Desktop Files (icons from desktop_cache)
@@ -496,6 +469,35 @@ const DesktopProfile: React.FC = () => {
     }
   }, [activeTab]);
 
+  const saveProfileToBgJson = async () => {
+    if (!profile) {
+      logger.warn("No profile selected, skip saving bg.json");
+      return;
+    }
+
+    try {
+      const bgId = await window.electron.getSetting("background");
+      if (bgId) {
+        await window.electron.saveBgJson({
+          id: bgId,
+          localProfile: profile,
+        });
+      } else {
+        await window.electron.saveSettingsData({
+          noBgDesktopProfile: profile,
+        });
+      }
+      logger.info(`Saved profile ${profile} to bg.json`);
+    } catch (err) {
+      logger.error("Failed to save local profile to bg.json:", err);
+    }
+  };
+
+  const handleCloseManageModal = async () => {
+    await saveProfileToBgJson();
+    setShowManageModal(false);
+  };
+
   //TODO this needs a lot of testing with different size texts etc.
 
   return (
@@ -508,24 +510,17 @@ const DesktopProfile: React.FC = () => {
       {multipleProfiles && (
         <section className="desktop-profile-top">
           <label className="desktop-profile-label">Current Profile:</label>
-          <select
-            className="desktop-profile-select"
-            value={profile}
-            onChange={handleProfileChange}
-          >
-            {profiles.map((p) => (
-              <option key={p} value={p}>
-                {p === "default" ? "Default" : p}
-              </option>
-            ))}
-          </select>
           <button
             type="button"
-            className="button"
+            className="button profile-name-btn"
             onClick={() => setShowManageModal(true)}
-            title="Manage Profiles"
+            title="Open Manage Profiles"
           >
-            Manage Profiles
+            {profile
+              ? profile === "default"
+                ? "Default"
+                : profile
+              : "No profile"}
           </button>
         </section>
       )}
@@ -1140,7 +1135,7 @@ const DesktopProfile: React.FC = () => {
       {showManageModal && (
         <ManageProfiles
           currentProfile={profile}
-          onClose={() => setShowManageModal(false)}
+          onClose={() => handleCloseManageModal()}
           onSelectProfile={(p) => {
             doProfileChange(p);
           }}
