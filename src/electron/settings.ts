@@ -7,6 +7,7 @@ import {
   backupSettingsFile,
   canReadWriteDir,
   getBackgroundsJsonFilePath,
+  getMainWindow,
   getSettingsFilePath,
 } from "./utils/util.js";
 import { showSmallWindow } from "./windows/subWindowManager.js";
@@ -213,6 +214,10 @@ export const saveSettingsData = async (
     );
     logger.info("Settings data saved successfully.");
     ensureDefaultSettings(); // Add back any missing default settings
+    // Force reload bg to update profile if setting updated. (saved profile -> default or default -> saved profile)
+    if (data.multipleProfiles !== null) {
+      getMainWindow()?.webContents.send("reload-background");
+    }
     return true;
   } catch (error) {
     logger.error("Error saving settings data:", error);

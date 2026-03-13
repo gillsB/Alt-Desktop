@@ -133,11 +133,12 @@ type SettingsData = {
   // Do not appear in Settings window
   background?: string;
   newBackgroundID?: number;
-  noBgDesktopProfile?: string;
   bgSelectIconSize?: "tiny" | "small" | "medium" | "large" | "massive";
   publicCategories?: Record<string, boolean>;
   localCategories?: Record<string, boolean>;
   localTags?: LocalTag[];
+  // TODO marked for removal (not needed, use "default" instead)
+  noBgDesktopProfile?: string;
 };
 
 type SettingKey = keyof SettingsData;

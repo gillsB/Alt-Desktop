@@ -147,7 +147,7 @@ const Background: React.FC<BackgroundProps> = ({
       // Empty string to signal to fetch default profile from settings (see rendererStates.ts)
       let newProfile: string = "";
       if (loadedBgJson) {
-        newProfile = loadedBgJson?.local?.profile || "";
+        newProfile = await resolveProfile(loadedBgJson?.local?.profile);
       }
       await window.electron.setRendererStates({
         profile: newProfile,
@@ -225,6 +225,13 @@ const Background: React.FC<BackgroundProps> = ({
     return await window.electron.getInfoFromID(id, "backgroundPath");
   };
 
+  const resolveProfile = async (profile?: string): Promise<string> => {
+    if (!(await window.electron.getSetting("multipleProfiles")))
+      return "default";
+    const sanitized = profile?.trim();
+    return sanitized && sanitized !== "" ? sanitized : "default";
+  };
+
   useEffect(() => {
     const handlePreview = async (...args: unknown[]) => {
       const updates = args[1] as Partial<PreviewBackgroundUpdate>;
@@ -279,7 +286,7 @@ const Background: React.FC<BackgroundProps> = ({
       }
       if (updates.profile) {
         await window.electron.setRendererStates({
-          profile: updates.profile,
+          profile: await resolveProfile(updates.profile),
         });
       }
     };
