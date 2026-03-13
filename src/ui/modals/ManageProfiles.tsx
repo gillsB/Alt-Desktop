@@ -50,11 +50,33 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
     }
   }, [currentProfile, pinnedProfile]);
 
+  const handleRequestClose = async () => {
+    if (selectedProfile !== pinnedProfile) {
+      const confirm = await showSmallWindow(
+        "Discard changes?",
+        `You have selected profile: "${
+          selectedProfile === "default" ? "Default" : selectedProfile
+        }" \nDiscard profile change and return\n to profile: "${
+          pinnedProfile === "default" ? "Default" : pinnedProfile
+        }"?`,
+        ["Discard", "Cancel"]
+      );
+
+      if (confirm !== "Discard") {
+        return;
+      }
+
+      onSelectProfile(pinnedProfile || "default");
+    }
+
+    onClose();
+  };
+
   useEffect(() => {
     const handleEscapeKey = (e: KeyboardEvent) => {
       // If AddProfile is open, let it handle the escape key (otherwise it closes both)
       if (!showAddProfileModal && e.key === "Escape") {
-        onClose();
+        handleRequestClose();
         e.stopPropagation();
         e.preventDefault();
       }
@@ -64,7 +86,13 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [onClose, showAddProfileModal]);
+  }, [
+    showAddProfileModal,
+    selectedProfile,
+    pinnedProfile,
+    onClose,
+    onSelectProfile,
+  ]);
 
   useEffect(() => {
     fetchProfiles();
@@ -178,7 +206,7 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleRequestClose}>
       <div
         className="manage-profiles-modal-content"
         onClick={(e) => e.stopPropagation()}
@@ -273,7 +301,7 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
             Add New
           </button>
           <button className="button" onClick={onClose}>
-            Close
+            Save
           </button>
         </div>
       </div>
