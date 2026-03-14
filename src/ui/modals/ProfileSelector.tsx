@@ -20,6 +20,7 @@ const ProfileSelector: React.FC<ProfileSelectorProps> = ({
   const [searchText, setSearchText] = useState<string>("");
   const [selectedProfile, setSelectedProfile] =
     useState<string>(currentProfile);
+  const [pinnedProfile] = useState<string>(currentProfile);
 
   const fetchProfiles = useCallback(async () => {
     try {
@@ -27,13 +28,17 @@ const ProfileSelector: React.FC<ProfileSelectorProps> = ({
       if (!result) result = [];
 
       // sort alphabetically
-      result.sort((a, b) => a.localeCompare(b));
-      setProfiles(result);
-      setSelectedProfile(currentProfile);
+      const hasPinned = pinnedProfile && result.includes(pinnedProfile);
+      const others = hasPinned
+        ? result.filter((p) => p !== pinnedProfile)
+        : [...result];
+      others.sort((a, b) => a.localeCompare(b));
+      const ordered = hasPinned ? [pinnedProfile, ...others] : others;
+      setProfiles(ordered);
     } catch (e) {
       logger.error("Failed to fetch profiles", e);
     }
-  }, [currentProfile]);
+  }, [pinnedProfile]);
 
   const handleClose = () => {
     onClose(selectedProfile);
@@ -52,7 +57,7 @@ const ProfileSelector: React.FC<ProfileSelectorProps> = ({
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [selectedProfile]);
+  }, [selectedProfile, pinnedProfile]);
 
   useEffect(() => {
     fetchProfiles();
@@ -66,9 +71,30 @@ const ProfileSelector: React.FC<ProfileSelectorProps> = ({
     setSelectedProfile(profile);
   };
 
-  const filteredProfiles = profiles.filter((p) =>
+  let filteredProfiles = profiles.filter((p) =>
     p.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  if (searchText) {
+    filteredProfiles = filteredProfiles.filter(
+      (p) => p !== selectedProfile || p === pinnedProfile
+    );
+  }
+
+  const topProfiles: string[] = [];
+
+  if (pinnedProfile && filteredProfiles.includes(pinnedProfile)) {
+    topProfiles.push(pinnedProfile);
+  }
+  if (
+    selectedProfile &&
+    selectedProfile !== pinnedProfile &&
+    filteredProfiles.includes(selectedProfile)
+  ) {
+    topProfiles.push(selectedProfile);
+  }
+
+  const restProfiles = filteredProfiles.filter((p) => !topProfiles.includes(p));
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
@@ -88,15 +114,36 @@ const ProfileSelector: React.FC<ProfileSelectorProps> = ({
                   inputClassName="manage-profiles-search"
                 />
               </div>
+              <div className="manage-profiles-top-section">
+                <ul>
+                  {topProfiles.map((profile, idx) => (
+                    <li
+                      key={`top-${profile}-${idx}`}
+                      className={`profile-item${
+                        profile === selectedProfile ? " selected" : ""
+                      }`}
+                      onClick={() => handleProfileClick(profile)}
+                    >
+                      <span className="profile-text">
+                        {profile === "default" ? "Default" : profile}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {restProfiles.length > 0 && topProfiles.length > 0 && (
+                <div className="profile-separator-section" />
+              )}
 
               <div className="manage-profiles-list">
-                {filteredProfiles.length === 0 ? (
+                {restProfiles.length === 0 && filteredProfiles.length === 0 ? (
                   <div className="no-results">No profiles match</div>
                 ) : (
                   <ul>
-                    {filteredProfiles.map((profile, idx) => (
+                    {restProfiles.map((profile, idx) => (
                       <li
-                        key={`profile-${profile}-${idx}`}
+                        key={`rest-${profile}-${idx}`}
                         className={`profile-item${
                           profile === selectedProfile ? " selected" : ""
                         }`}
