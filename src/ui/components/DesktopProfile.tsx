@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import IconDifferenceViewer from "../modals/IconDifferenceViewer";
 import ManageProfiles from "../modals/ManageProfiles";
+import ProfileSelector from "../modals/ProfileSelector";
 import "../styles/DesktopProfile.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
@@ -42,6 +43,8 @@ const DesktopProfile: React.FC = () => {
   const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
   const [compareToProfile, setCompareToProfile] = useState<string>("");
   const [showManageModal, setShowManageModal] = useState<boolean>(false);
+  const [showProfileSelector, setShowProfileSelector] =
+    useState<boolean>(false);
   const [desktopCacheLoading, setDesktopCacheLoading] = useState(false);
   const [desktopCacheProgress, setDesktopCacheProgress] = useState<{
     imported: number;
@@ -521,6 +524,14 @@ const DesktopProfile: React.FC = () => {
                 ? "Default"
                 : profile
               : "No profile"}
+          </button>
+          <button
+            type="button"
+            className="button profile-name-btn"
+            onClick={() => setShowProfileSelector(true)}
+            title="Select Profile"
+          >
+            Select
           </button>
         </section>
       )}
@@ -1138,6 +1149,16 @@ const DesktopProfile: React.FC = () => {
           onClose={() => handleCloseManageModal()}
           onSelectProfile={(p) => {
             doProfileChange(p);
+          }}
+        />
+      )}
+
+      {showProfileSelector && (
+        <ProfileSelector
+          currentProfile={profile}
+          onClose={(selectedProfile) => {
+            logger.info(`Profile selected: ${selectedProfile}`);
+            setShowProfileSelector(false);
           }}
         />
       )}
