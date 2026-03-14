@@ -64,7 +64,7 @@
 
 .copy-list li.selected {
   background-color: rgb(var(--color-primary));
-  color: rgb(var(--color-textOnPrimary));
+  color: rgb(var(--color-textButton));
 }
 
 .copy-section {

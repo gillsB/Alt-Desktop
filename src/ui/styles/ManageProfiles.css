@@ -46,7 +46,7 @@
 
 .profile-item.selected {
   background-color: rgb(var(--color-primary));
-  color: rgb(var(--color-textOnPrimary));
+  color: rgb(var(--color-textButton));
 }
 
 .profile-text {

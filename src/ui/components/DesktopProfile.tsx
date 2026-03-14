@@ -43,7 +43,7 @@ const DesktopProfile: React.FC = () => {
   const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
   const [compareToProfile, setCompareToProfile] = useState<string>("");
   const [showManageModal, setShowManageModal] = useState<boolean>(false);
-  const [showProfileSelector, setShowProfileSelector] =
+  const [showCompareProfileSelector, setShowCompareProfileSelector] =
     useState<boolean>(false);
   const [desktopCacheLoading, setDesktopCacheLoading] = useState(false);
   const [desktopCacheProgress, setDesktopCacheProgress] = useState<{
@@ -88,11 +88,12 @@ const DesktopProfile: React.FC = () => {
   escapeHandlerRef.current = () => {
     if (contextMenu.visible) {
       hideContextMenu();
-    } else if (showManageModal) {
+    } else if (
+      showManageModal ||
+      showCompareProfileSelector ||
+      iconDifferenceViewer
+    ) {
       // sub-modals capture escape key (and close themselves))
-      return;
-    } else if (iconDifferenceViewer) {
-      // modal captures escape key so it can pass back saved state
       return;
     } else {
       handleClose();
@@ -525,14 +526,6 @@ const DesktopProfile: React.FC = () => {
                 : profile
               : "No profile"}
           </button>
-          <button
-            type="button"
-            className="button profile-name-btn"
-            onClick={() => setShowProfileSelector(true)}
-            title="Select Profile"
-          >
-            Select
-          </button>
         </section>
       )}
 
@@ -849,19 +842,18 @@ const DesktopProfile: React.FC = () => {
                   <label className="desktop-profile-label">
                     Compare to Profile:
                   </label>
-                  <select
-                    className="desktop-profile-select"
-                    value={compareToProfile}
-                    onChange={handleCompareProfiles}
+                  <button
+                    type="button"
+                    className="button profile-name-btn"
+                    onClick={() => setShowCompareProfileSelector(true)}
+                    title="Select Profile to Compare"
                   >
-                    {profiles
-                      .filter((p) => p !== profile)
-                      .map((p) => (
-                        <option key={p} value={p}>
-                          {p === "default" ? "Default" : p}
-                        </option>
-                      ))}
-                  </select>
+                    {compareToProfile
+                      ? compareToProfile === "default"
+                        ? "Default"
+                        : compareToProfile
+                      : "Select Profile"}
+                  </button>
                 </div>
                 <div className="header-right-group">
                   <button
@@ -1153,12 +1145,13 @@ const DesktopProfile: React.FC = () => {
         />
       )}
 
-      {showProfileSelector && (
+      {showCompareProfileSelector && (
         <ProfileSelector
-          currentProfile={profile}
+          currentProfile={compareToProfile}
           onClose={(selectedProfile) => {
-            logger.info(`Profile selected: ${selectedProfile}`);
-            setShowProfileSelector(false);
+            logger.info(`Compare profile selected: ${selectedProfile}`);
+            handleCompareProfiles(selectedProfile);
+            setShowCompareProfileSelector(false);
           }}
         />
       )}
