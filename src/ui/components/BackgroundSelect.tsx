@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { PUBLIC_TAG_CATEGORIES } from "../../electron/publicTags";
 import "../App.css";
+import ProfileSelector from "../modals/ProfileSelector";
 import "../styles/BackgroundSelect.css";
 import { createLogger } from "../util/uiLogger";
 import { fileNameNoExt, parseAdvancedSearch } from "../util/uiUtil";
@@ -88,6 +89,7 @@ const BackgroundSelect: React.FC = () => {
   const [isLoadingPage, setIsLoadingPage] = useState(false);
   const [editingSummary, setEditingSummary] =
     useState<BackgroundSummary | null>(null);
+  const [showProfileSelector, setShowProfileSelector] = useState(false);
 
   useEffect(() => {
     const fetchRendererStates = async () => {
@@ -224,18 +226,18 @@ const BackgroundSelect: React.FC = () => {
     return { page: bgPage, summary };
   };
 
-    useEffect(() => {
-      const fetchMultipleProfilesSetting = async () => {
-        try {
-          const value = await window.electron.getSetting("multipleProfiles");
-          setMultipleProfiles(Boolean(value));
-        } catch (error) {
-          logger.error("Error fetching multipleProfiles setting:", error);
-        }
-      };
-  
-      fetchMultipleProfilesSetting();
-    }, []);
+  useEffect(() => {
+    const fetchMultipleProfilesSetting = async () => {
+      try {
+        const value = await window.electron.getSetting("multipleProfiles");
+        setMultipleProfiles(Boolean(value));
+      } catch (error) {
+        logger.error("Error fetching multipleProfiles setting:", error);
+      }
+    };
+
+    fetchMultipleProfilesSetting();
+  }, []);
 
   useEffect(() => {
     const initializeBackgrounds = async () => {
@@ -1315,7 +1317,16 @@ const BackgroundSelect: React.FC = () => {
                   <div className="details-row">
                     <label>Desktop Profile</label>
                     <div className="details-value">
-                      {selectedBg.localProfile || "default"}
+                      <button
+                        type="button"
+                        className="button profile-name-btn"
+                        onClick={() => setShowProfileSelector(true)}
+                        title="Select profile"
+                      >
+                        {selectedBg.localProfile === "default"
+                          ? "Default"
+                          : selectedBg.localProfile}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -1438,6 +1449,22 @@ const BackgroundSelect: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+      {showProfileSelector && selectedBg && (
+        <ProfileSelector
+          currentProfile={selectedBg.localProfile ?? "default"}
+          onClose={async (selectedProfile) => {
+            setShowProfileSelector(false);
+            if (selectedProfile !== selectedBg.localProfile) {
+              updateSummary(selectedBg.id, { localProfile: selectedProfile });
+              await window.electron.saveBgJson({
+                id: selectedBg.id,
+                localProfile: selectedProfile,
+              });
+              window.electron.reloadBackground();
+            }
+          }}
+        />
       )}
     </div>
   );
