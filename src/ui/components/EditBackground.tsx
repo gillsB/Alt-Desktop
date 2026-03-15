@@ -10,6 +10,7 @@ import "../App.css";
 import AddProfileWindow from "../modals/AddProfile";
 import AddTagWindow, { RenameTagModal } from "../modals/AddTag";
 import EditCategories from "../modals/EditCategories";
+import ProfileSelector from "../modals/ProfileSelector";
 import "../styles/EditBackground.css";
 import { createLogger } from "../util/uiLogger";
 import { showSmallWindow } from "../util/uiUtil";
@@ -85,6 +86,7 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
     category: string;
   } | null>(null);
   const [showAddProfile, setShowAddProfile] = useState(false);
+  const [showProfileSelector, setShowProfileSelector] = useState(false);
 
   const [ids, setIds] = useState<Set<string>>(new Set<string>());
   const [isHoveringBgFile, setIsHoveringBgFile] = useState(false);
@@ -105,7 +107,6 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
 
   const [bgSaveProgress, setBgSaveProgress] = useState<number | null>(null);
 
-  const [profiles, setProfiles] = useState<string[]>([]);
   const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
 
   // Filtered public categories/tags
@@ -239,20 +240,6 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
   };
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const profileList = await window.electron.getProfiles();
-      if (!cancelled) {
-        // Sort profiles: "default" first (as "Default"), then alphabetically
-        const sortedProfiles = profileList.sort((a, b) => {
-          if (a === "default") return -1;
-          if (b === "default") return 1;
-          return a.localeCompare(b);
-        });
-        setProfiles(sortedProfiles);
-      }
-    })();
-
     const fetchMultipleProfilesSetting = async () => {
       try {
         const value = await window.electron.getSetting("multipleProfiles");
@@ -263,9 +250,6 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
     };
 
     fetchMultipleProfilesSetting();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   // handles toggle for individual categories
@@ -1075,25 +1059,6 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
     };
   }, []);
 
-  const handleAddProfileClick = () => {
-    setShowAddProfile(true);
-    logger.info("showing add profile modal");
-  };
-
-  const handleCloseAddProfile = () => {
-    setShowAddProfile(false);
-    // Refresh profiles after closing modal
-    (async () => {
-      const profileList = await window.electron.getProfiles();
-      const sortedProfiles = profileList.sort((a, b) => {
-        if (a === "default") return -1;
-        if (b === "default") return 1;
-        return a.localeCompare(b);
-      });
-      setProfiles(sortedProfiles);
-    })();
-  };
-
   return (
     <div className="edit-background-root">
       <SubWindowHeader title="Edit Background" onClose={handleClose} />
@@ -1302,32 +1267,15 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
             <div className="edit-bg-field">
               <label>Desktop Icon Profile</label>
               <div className="input-row" style={{ width: "90%" }}>
-                <div className="edit-bg-field dropdown-container">
-                  <select
-                    id="profile-select"
-                    value={summary.localProfile ?? "default"}
-                    onChange={(e) => {
-                      setSummary((prev) => ({
-                        ...prev,
-                        localProfile: e.target.value,
-                      }));
-                    }}
-                  >
-                    {profiles.map((profile) => (
-                      <option key={profile} value={profile}>
-                        {profile === "default" ? "Default" : profile}
-                      </option>
-                    ))}
-                  </select>
-                </div>
                 <button
                   type="button"
-                  className="button"
-                  onClick={handleAddProfileClick}
-                  title="Add new profile"
-                  tabIndex={-1}
+                  className="button profile-name-btn"
+                  onClick={() => setShowProfileSelector(true)}
+                  title="Select profile"
                 >
-                  +
+                  {summary.localProfile === "default"
+                    ? "Default"
+                    : summary.localProfile}
                 </button>
               </div>
             </div>
@@ -1747,6 +1695,15 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
         </div>
       )}
       {showAddProfile && <AddProfileWindow onClose={handleCloseAddProfile} />}
+      {showProfileSelector && (
+        <ProfileSelector
+          currentProfile={summary.localProfile ?? "default"}
+          onClose={(selectedProfile) => {
+            setSummary((prev) => ({ ...prev, localProfile: selectedProfile }));
+            setShowProfileSelector(false);
+          }}
+        />
+      )}
     </div>
   );
 };
