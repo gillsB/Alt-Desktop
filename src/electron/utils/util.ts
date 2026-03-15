@@ -897,7 +897,6 @@ export async function saveBgJsonFile(
       local: localData,
     };
 
-    logger.info("saving bg.json");
     await fs.promises.writeFile(
       bgJsonPath,
       JSON.stringify(bgJson, null, 2),

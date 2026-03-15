@@ -61,6 +61,8 @@ const BackgroundSelect: React.FC = () => {
   const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
   const editingBgId = useRef<string | null>(null);
 
+  const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
+
   // Volume Slider references
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSaveRef = useRef(false);
@@ -221,6 +223,19 @@ const BackgroundSelect: React.FC = () => {
 
     return { page: bgPage, summary };
   };
+
+    useEffect(() => {
+      const fetchMultipleProfilesSetting = async () => {
+        try {
+          const value = await window.electron.getSetting("multipleProfiles");
+          setMultipleProfiles(Boolean(value));
+        } catch (error) {
+          logger.error("Error fetching multipleProfiles setting:", error);
+        }
+      };
+  
+      fetchMultipleProfilesSetting();
+    }, []);
 
   useEffect(() => {
     const initializeBackgrounds = async () => {
@@ -1296,6 +1311,14 @@ const BackgroundSelect: React.FC = () => {
                     )}
                   </div>
                 </div>
+                {multipleProfiles && (
+                  <div className="details-row">
+                    <label>Desktop Profile</label>
+                    <div className="details-value">
+                      {selectedBg.localProfile || "default"}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (

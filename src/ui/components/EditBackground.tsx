@@ -7,7 +7,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { PUBLIC_TAG_CATEGORIES } from "../../electron/publicTags";
 import "../App.css";
-import AddProfileWindow from "../modals/AddProfile";
 import AddTagWindow, { RenameTagModal } from "../modals/AddTag";
 import EditCategories from "../modals/EditCategories";
 import ProfileSelector from "../modals/ProfileSelector";
@@ -1694,7 +1693,6 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
           </div>
         </div>
       )}
-      {showAddProfile && <AddProfileWindow onClose={handleCloseAddProfile} />}
       {showProfileSelector && (
         <ProfileSelector
           currentProfile={summary.localProfile ?? "default"}
