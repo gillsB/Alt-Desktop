@@ -381,9 +381,102 @@ export async function getNameIndex(): Promise<Record<string, string[]>> {
   return data.names || {};
 }
 
+//Attempts to create a bg.json for a folder if it contains suitable image/video files.
+async function createBgJsonIfPossible(
+  folderPath: string,
+  id: string
+): Promise<boolean> {
+  const bgJsonPath = path.join(folderPath, "bg.json");
+  if (fs.existsSync(bgJsonPath)) {
+    return false;
+  }
+
+  try {
+    const files = await fs.promises.readdir(folderPath);
+    const mediaFiles: { name: string; size: number; isVideo: boolean }[] = [];
+
+    const imageExts = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
+    const videoExts = [".mp4", ".avi", ".mkv", ".webm", ".mov", ".wmv"];
+
+    for (const file of files) {
+      const ext = path.extname(file).toLowerCase();
+      if (imageExts.includes(ext) || videoExts.includes(ext)) {
+        const filePath = path.join(folderPath, file);
+        const stat = fs.statSync(filePath);
+        mediaFiles.push({
+          name: file,
+          size: stat.size,
+          isVideo: videoExts.includes(ext),
+        });
+      }
+    }
+
+    if (mediaFiles.length === 0) {
+      return false; // no media files
+    }
+
+    // Sort by size descending
+    mediaFiles.sort((a, b) => b.size - a.size);
+
+    let iconFile: string | undefined;
+    let bgFile: string;
+
+    if (mediaFiles.length === 1) {
+      bgFile = mediaFiles[0].name;
+    } else {
+      // Find potential icon files
+      const iconCandidates = mediaFiles.filter((f) =>
+        /image|icon|preview/i.test(path.basename(f.name, path.extname(f.name)))
+      );
+
+      if (iconCandidates.length > 0) {
+        iconFile = iconCandidates[0].name;
+        // Remove icon from mediaFiles
+        const index = mediaFiles.findIndex((f) => f.name === iconFile);
+        if (index !== -1) mediaFiles.splice(index, 1);
+      } else {
+        // Use smallest as icon
+        iconFile = mediaFiles.pop()!.name;
+      }
+
+      // Use largest remaining as bgFile
+      bgFile = mediaFiles[0].name;
+    }
+
+    // Create bg.json
+    const bgJson: BgJson = {
+      public: {
+        name: path.basename(bgFile, path.extname(bgFile)),
+        bgFile: bgFile,
+      },
+      local: {
+        indexed: Date.now(),
+      },
+    };
+
+    if (iconFile) {
+      bgJson.public!.icon = iconFile;
+    }
+
+    await fs.promises.writeFile(
+      bgJsonPath,
+      JSON.stringify(bgJson, null, 2),
+      "utf-8"
+    );
+    logger.info(
+      `Created bg.json for ${id} with bgFile: ${bgFile}, icon: ${iconFile || "none"}`
+    );
+    return true;
+  } catch (e) {
+    logger.warn(`Failed to create bg.json for ${folderPath}:`, e);
+    return false;
+  }
+}
+
 /**
  * Indexes all background folders in the AppData/Roaming/AltDesktop/backgrounds directory.
  * It reads the directory, checks for subfolders containing a bg.json file, if found adds them to backgrounds.json.
+ * Also detects folders without bg.json and attempts to create one from image/video files (createBgJsonIfPossible)
  */
 export async function indexBackgrounds(options?: {
   newExternalPathAdded?: boolean;
@@ -401,14 +494,20 @@ export async function indexBackgrounds(options?: {
     withFileTypes: true,
   });
 
-  // Find subfolders with a bg.json file in the main backgrounds directory
-  const subfoldersWithBgJson: string[] = [];
+  // Find subfolders in the main backgrounds directory
+  const validIds: string[] = [];
   for (const entry of entries) {
     if (entry.isDirectory()) {
       const subfolderPath = path.join(backgroundsDir, entry.name);
       const bgJsonPath = path.join(subfolderPath, "bg.json");
       if (fs.existsSync(bgJsonPath)) {
-        subfoldersWithBgJson.push(entry.name);
+        validIds.push(entry.name);
+      } else {
+        // Try to create bg.json
+        const created = await createBgJsonIfPossible(subfolderPath, entry.name);
+        if (created) {
+          validIds.push(entry.name);
+        }
       }
     }
   }
@@ -424,9 +523,16 @@ export async function indexBackgrounds(options?: {
         if (entry.isDirectory()) {
           const subfolderPath = path.join(appDataBackgroundsDir, entry.name);
           const bgJsonPath = path.join(subfolderPath, "bg.json");
+          const id = `default::${entry.name}`;
           if (fs.existsSync(bgJsonPath)) {
             // Use a prefix to distinguish default folder backgrounds
-            subfoldersWithBgJson.push(`default::${entry.name}`);
+            validIds.push(id);
+          } else {
+            // Try to create bg.json
+            const created = await createBgJsonIfPossible(subfolderPath, id);
+            if (created) {
+              validIds.push(id);
+            }
           }
         }
       }
@@ -465,8 +571,15 @@ export async function indexBackgrounds(options?: {
         if (entry.isDirectory()) {
           const subfolderPath = path.join(extBase, entry.name);
           const bgJsonPath = path.join(subfolderPath, "bg.json");
+          const id = `ext::${i}::${entry.name}`;
           if (fs.existsSync(bgJsonPath)) {
-            subfoldersWithBgJson.push(`ext::${i}::${entry.name}`);
+            validIds.push(id);
+          } else {
+            // Try to create bg.json
+            const created = await createBgJsonIfPossible(subfolderPath, id);
+            if (created) {
+              validIds.push(id);
+            }
           }
         }
       }
@@ -475,7 +588,7 @@ export async function indexBackgrounds(options?: {
     }
   }
 
-  const validIds = new Set(subfoldersWithBgJson);
+  const validIdsSet = new Set(validIds);
 
   // Check if backgrounds.json exists
   if (!fs.existsSync(backgroundsJsonPath)) {
@@ -577,7 +690,7 @@ export async function indexBackgrounds(options?: {
   // Remove non-existent backgrounds
   const removedIds: { id: string; value: number }[] = [];
   for (const id of Object.keys(backgroundsData.backgrounds)) {
-    if (!validIds.has(id)) {
+    if (!validIdsSet.has(id)) {
       logger.info(`Removing non-existent background: ${id}`);
       removedIds.push({ id, value: backgroundsData.backgrounds[id] });
       delete backgroundsData.backgrounds[id];
