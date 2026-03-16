@@ -17,6 +17,7 @@ import {
   getAllowedUrls,
   showSmallWindow,
 } from "../windows/subWindowManager.js";
+import { bgPathToResolution } from "./bgPathToInfo.js";
 import { generateIcon } from "./generateIcon.js";
 import { idToBgJsonPath } from "./idToInfo.js";
 import { getRendererState, getRendererStates } from "./rendererStates.js";
@@ -393,6 +394,9 @@ async function createBgJsonIfPossible(
 
   try {
     const files = await fs.promises.readdir(folderPath);
+    const hasPkgFile = files.some(
+      (f) => path.extname(f).toLowerCase() === ".pkg"
+    );
     const mediaFiles: { name: string; size: number; isVideo: boolean }[] = [];
 
     const imageExts = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
@@ -413,6 +417,10 @@ async function createBgJsonIfPossible(
 
     if (mediaFiles.length === 0) {
       return false; // no media files
+    }
+
+    if (mediaFiles.length === 1 && hasPkgFile) {
+      return false; // ignore single media file if .pkg present (not supported)
     }
 
     // Sort by size descending
@@ -457,6 +465,55 @@ async function createBgJsonIfPossible(
     if (iconFile) {
       bgJson.public!.icon = iconFile;
     }
+
+    // Set default tags based on file type and resolution
+    const bgFilePath = path.join(folderPath, bgFile);
+    const resolution = await bgPathToResolution(bgFilePath);
+    const tags: string[] = [];
+
+    const ext = path.extname(bgFile).toLowerCase();
+    const isVideo = mediaFiles.find((m) => m.name === bgFile)?.isVideo;
+    if (isVideo) {
+      tags.push("Video");
+    } else if (ext === ".gif") {
+      tags.push("Animated");
+    } else {
+      tags.push("Image");
+    }
+
+    if (resolution && resolution[0] && resolution[1]) {
+      const width = resolution[0];
+      const height = resolution[1];
+      const smallerAxis = Math.min(width, height);
+
+      let resolutionTag = null;
+
+      if (width > 3800 || height > 3800) {
+        resolutionTag = "4K+";
+      } else if (smallerAxis >= 1440) {
+        resolutionTag = "1440";
+      } else if (smallerAxis >= 1080) {
+        resolutionTag = "1080";
+      }
+
+      if (resolutionTag) {
+        tags.push(resolutionTag);
+      }
+
+      // Aspect ratio
+      const aspect = width / height;
+      if (aspect >= 3.4) {
+        tags.push("32:9");
+      } else if (aspect >= 2.2) {
+        tags.push("21:9");
+      } else if (aspect >= 1.7) {
+        tags.push("16:9");
+      } else if (aspect < 1) {
+        tags.push("Portrait");
+      }
+    }
+
+    bgJson.public!.tags = tags;
 
     await fs.promises.writeFile(
       bgJsonPath,
