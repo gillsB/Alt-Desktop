@@ -496,12 +496,14 @@ export async function indexBackgrounds(options?: {
 
   // Find subfolders in the main backgrounds directory
   const validIds: string[] = [];
+  const preExistingBgJson = new Set<string>();
   for (const entry of entries) {
     if (entry.isDirectory()) {
       const subfolderPath = path.join(backgroundsDir, entry.name);
       const bgJsonPath = path.join(subfolderPath, "bg.json");
       if (fs.existsSync(bgJsonPath)) {
         validIds.push(entry.name);
+        preExistingBgJson.add(entry.name);
       } else {
         // Try to create bg.json
         const created = await createBgJsonIfPossible(subfolderPath, entry.name);
@@ -527,6 +529,7 @@ export async function indexBackgrounds(options?: {
           if (fs.existsSync(bgJsonPath)) {
             // Use a prefix to distinguish default folder backgrounds
             validIds.push(id);
+            preExistingBgJson.add(id);
           } else {
             // Try to create bg.json
             const created = await createBgJsonIfPossible(subfolderPath, id);
@@ -574,6 +577,7 @@ export async function indexBackgrounds(options?: {
           const id = `ext::${i}::${entry.name}`;
           if (fs.existsSync(bgJsonPath)) {
             validIds.push(id);
+            preExistingBgJson.add(id);
           } else {
             // Try to create bg.json
             const created = await createBgJsonIfPossible(subfolderPath, id);
@@ -627,7 +631,10 @@ export async function indexBackgrounds(options?: {
   let importWithSavedDate = false; // Default to "Import as New"
 
   for (const folderName of validIds) {
-    if (!(folderName in backgroundsData.backgrounds)) {
+    if (
+      !(folderName in backgroundsData.backgrounds) &&
+      preExistingBgJson.has(folderName)
+    ) {
       foundUnindexedBgJson = true;
     }
   }
