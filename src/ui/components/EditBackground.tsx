@@ -444,7 +444,11 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
       const newTags = (prev.tags || []).filter(
         (tag) => !["4K+", "1440", "1080"].includes(tag)
       );
-      newTags.push(resolutionTag || "");
+
+      if (resolutionTag) {
+        newTags.push(resolutionTag);
+      }
+
       return { ...prev, tags: newTags };
     });
   };
@@ -477,18 +481,20 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
         // Landscape
         const ratio = width / height;
 
-        if (ratio >= 3.55) {
+        if (ratio >= 3.4) {
           aspectRatioTag = "32:9";
-        } else if (ratio >= 2.33) {
+        } else if (ratio >= 2.2) {
           aspectRatioTag = "21:9";
-        } else if (ratio >= 1.77) {
+        } else if (ratio >= 1.7) {
           aspectRatioTag = "16:9";
         }
       } else if (height && width) {
         aspectRatioTag = "Portrait"; // Anything taller than wide
       }
 
-      newTags.push(aspectRatioTag);
+      if (aspectRatioTag !== "") {
+        newTags.push(aspectRatioTag);
+      }
 
       return { ...prev, tags: newTags };
     });
