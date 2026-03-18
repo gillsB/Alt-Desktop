@@ -13,6 +13,15 @@ interface BackgroundProps {
   logLevel?: "verbose" | "normal";
 }
 
+interface BackgroundStatusData {
+  visible: boolean;
+  status: "idle" | "swapping" | "loading" | "applied" | "error";
+  path: string;
+  message: string;
+  error?: string;
+  ffprobe?: VideoMetadata | null;
+}
+
 /**
  * A React component that renders a background with fallback options.
  * - First attempts to use a video background
@@ -42,6 +51,22 @@ const Background: React.FC<BackgroundProps> = ({
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [bgJson, setBgJson] = useState<BgJson | null>(null);
+  const [backgroundStatus, setBackgroundStatus] =
+    useState<BackgroundStatusData>({
+      visible: false,
+      status: "idle",
+      path: "",
+      message: "",
+      error: undefined,
+      ffprobe: null,
+    });
+
+  const [statusModalPosition, setStatusModalPosition] = useState({
+    x: 20,
+    y: 20,
+  });
+  const [isStatusModalDragging, setIsStatusModalDragging] = useState(false);
+  const statusModalDragOffsetRef = useRef({ x: 0, y: 0 });
 
   // Performance tracking states
   const [suspendCount, setSuspendCount] = useState(0);
@@ -138,6 +163,14 @@ const Background: React.FC<BackgroundProps> = ({
       const loadedBgJson = await window.electron.getBgJson(id);
       setBgJson(loadedBgJson);
       setBackgroundPath(filePath || "");
+      updateBackgroundStatus({
+        visible: true,
+        status: "swapping",
+        path: filePath || "",
+        message: "Background swap initiated",
+        error: undefined,
+        ffprobe: null,
+      });
       logger.info("Background reloaded with path:", filePath);
       if (!showVideoControlsRef.current) {
         setVolumeFromDefault(id);
@@ -181,10 +214,90 @@ const Background: React.FC<BackgroundProps> = ({
     setVolume(newVol);
   };
 
+  const updateBackgroundStatus = async (
+    status: Partial<BackgroundStatusData>
+  ) => {
+    setBackgroundStatus((prev) => ({
+      ...prev,
+      ...status,
+      visible: status.visible ?? true,
+    }));
+  };
+
+  const clearBackgroundStatus = () => {
+    setBackgroundStatus({
+      visible: false,
+      status: "idle",
+      path: "",
+      message: "",
+      error: undefined,
+      ffprobe: null,
+    });
+  };
+
+  const summarizeFfprobe = (ffprobe: VideoMetadata) => {
+    const videoStream = ffprobe.streams.find((s) => s.codec_type === "video");
+
+    return [
+      `Codec: ${videoStream?.codec_name || "unknown"}`,
+      `Codec tag: ${videoStream?.codec_tag_string || videoStream?.codec_tag || "unknown"}`,
+      `Resolution: ${videoStream?.width || "?"}x${videoStream?.height || "?"}`,
+      `Duration: ${ffprobe.format.duration?.toFixed(2) || "?"}s`,
+      `Bitrate: ${ffprobe.format.bit_rate ? (ffprobe.format.bit_rate / 1000).toFixed(0) + " kbps" : "?"}`,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+  };
+
+  const copyStatusDetails = async () => {
+    const ffprobeSummary =
+      backgroundStatus.ffprobe && backgroundStatus.ffprobe.format
+        ? summarizeFfprobe(backgroundStatus.ffprobe)
+        : "";
+
+    const payload = `Status: ${backgroundStatus.status}\nPath: ${backgroundStatus.path}\nMessage: ${backgroundStatus.message}${
+      backgroundStatus.error ? `\nError: ${backgroundStatus.error}` : ""
+    }${ffprobeSummary ? `\nFFprobe: ${ffprobeSummary}` : ""}`;
+
+    try {
+      await navigator.clipboard.writeText(payload);
+      return "Copied";
+    } catch (err) {
+      logger.error("Failed to copy background status details:", err);
+      return "Copy failed";
+    }
+  };
+
   // TODO debug logger, remove later
   useEffect(() => {
     videoLogger.info("Volume update, set to :", volume);
   }, [volume]);
+
+  useEffect(() => {
+    if (!isStatusModalDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const newX = e.clientX - statusModalDragOffsetRef.current.x;
+      const newY = e.clientY - statusModalDragOffsetRef.current.y;
+
+      const boundedX = Math.max(0, Math.min(window.innerWidth - 380, newX));
+      const boundedY = Math.max(0, Math.min(window.innerHeight - 220, newY));
+
+      setStatusModalPosition({ x: boundedX, y: boundedY });
+    };
+
+    const handleMouseUp = () => {
+      setIsStatusModalDragging(false);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isStatusModalDragging]);
 
   const lastEventRef = useRef<string>("");
   useEffect(() => {
@@ -271,6 +384,14 @@ const Background: React.FC<BackgroundProps> = ({
             setBgJson(await window.electron.getBgJson(updates.id));
           }
           setBackgroundPath(filePath || "");
+          updateBackgroundStatus({
+            visible: true,
+            status: "swapping",
+            path: filePath || "",
+            message: "Background swap initiated",
+            error: undefined,
+            ffprobe: null,
+          });
         }
       }
 
@@ -305,19 +426,45 @@ const Background: React.FC<BackgroundProps> = ({
       setVideoSrc(null);
       setImageSrc(null);
 
-      if (!backgroundPath) return;
+      if (!backgroundPath) {
+        updateBackgroundStatus({
+          visible: true,
+          status: "error",
+          path: "",
+          message: "No background path available",
+          error: "backgroundPath is empty",
+        });
+        return;
+      }
+
+      updateBackgroundStatus({
+        visible: true,
+        status: "loading",
+        path: backgroundPath,
+        message: "Determining background type",
+      });
 
       const fileType = await window.electron.getFileType(backgroundPath);
       logger.info("File type:", fileType);
 
       if (fileType.startsWith("video")) {
         setIsVideo(true);
+        updateBackgroundStatus({
+          status: "loading",
+          path: backgroundPath,
+          message: "Loading video background",
+        });
         const videoFilePath =
           await window.electron.convertToVideoFileUrl(backgroundPath);
         setVideoSrc(`${videoFilePath}?nocache=${Date.now()}`);
         logger.info("Video source set");
       } else if (fileType.startsWith("image")) {
         setIsVideo(false);
+        updateBackgroundStatus({
+          status: "loading",
+          path: backgroundPath,
+          message: "Loading image background",
+        });
         const imageFilePath =
           await window.electron.getBackgroundImagePath(backgroundPath);
         setImageSrc(`${imageFilePath}?nocache=${Date.now()}`);
@@ -328,6 +475,12 @@ const Background: React.FC<BackgroundProps> = ({
         setImageSrc(null);
         setVideoSrc(null);
         setIsLoading(false);
+        updateBackgroundStatus({
+          status: "error",
+          path: backgroundPath,
+          message: "Invalid background path or unsupported type",
+          error: `Detected file type: ${fileType}`,
+        });
         logger.warn("Invalid background path:", backgroundPath);
         videoLogger.warn("Invalid background path:", backgroundPath);
       }
@@ -386,13 +539,31 @@ const Background: React.FC<BackgroundProps> = ({
     const video = videoRef.current;
     if (!video || !videoSrc || !isVideo) return;
 
-    const handleCanPlay = () => {
+    const handleCanPlay = async () => {
       setIsLoading(false);
       setPerformanceMetrics((prev) => ({
         ...prev,
         playbackStartTime: Date.now(),
       }));
       hasLoggedSuspendsRef.current = false;
+
+      try {
+        const metadata = await window.electron.getVideoMetadata(backgroundPath);
+        updateBackgroundStatus({
+          status: "applied",
+          path: backgroundPath,
+          message: "Video background applied",
+          ffprobe: metadata,
+        });
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        updateBackgroundStatus({
+          status: "applied",
+          path: backgroundPath,
+          message: "Video background applied (ffprobe failed)",
+          error: errMsg,
+        });
+      }
     };
 
     const handleSuspend = () => {
@@ -480,7 +651,14 @@ const Background: React.FC<BackgroundProps> = ({
       video.removeEventListener("suspend", handleSuspend);
       video.removeEventListener("waiting", handleWaiting);
     };
-  }, [videoSrc, isVideo, logLevel, suspendCount, performanceMetrics]);
+  }, [
+    videoSrc,
+    isVideo,
+    logLevel,
+    suspendCount,
+    performanceMetrics,
+    backgroundPath,
+  ]);
 
   // Helper function to calculate buffer length
   const getBufferLength = (video: HTMLVideoElement): number => {
@@ -553,6 +731,12 @@ const Background: React.FC<BackgroundProps> = ({
 
     setVideoError(true);
     setIsLoading(false);
+    updateBackgroundStatus({
+      status: "error",
+      path: backgroundPath,
+      message: `Video error occurred during ${context}`,
+      error: video.error?.message || `Code: ${video.error?.code || "unknown"}`,
+    });
     logger.warn(
       `Video error occurred during ${context}, falling back to image or color.`
     );
@@ -580,9 +764,63 @@ const Background: React.FC<BackgroundProps> = ({
     backgroundColor: fallbackColor,
   };
 
+  const statusModal = backgroundStatus.visible ? (
+    <div
+      className={`background-error-modal ${
+        isStatusModalDragging ? "dragging" : ""
+      }`}
+      style={{
+        left: statusModalPosition.x,
+        top: statusModalPosition.y,
+        cursor: isStatusModalDragging ? "grabbing" : "grab",
+      }}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        statusModalDragOffsetRef.current = {
+          x: e.clientX - statusModalPosition.x,
+          y: e.clientY - statusModalPosition.y,
+        };
+        setIsStatusModalDragging(true);
+      }}
+    >
+      <div className="header">
+        <span style={{ fontWeight: "bold" }}>
+          Background status: {backgroundStatus.status}
+        </span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            clearBackgroundStatus();
+          }}
+        >
+          ×
+        </button>
+      </div>
+      <div style={{ marginTop: 8, fontSize: 12, whiteSpace: "pre-wrap" }}>
+        {`Path: ${backgroundStatus.path || "<unknown>"}`}
+        {backgroundStatus.error ? `\nError: ${backgroundStatus.error}` : ""}
+        {backgroundStatus.ffprobe && backgroundStatus.ffprobe.format
+          ? `\n${summarizeFfprobe(backgroundStatus.ffprobe)}`
+          : null}
+      </div>
+      <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+        <button
+          onClick={async (e) => {
+            e.stopPropagation();
+            const copyStatus = await copyStatusDetails();
+            logger.info("Copy status result:", copyStatus);
+          }}
+        >
+          Copy background status details to clipboard
+        </button>
+      </div>
+    </div>
+  ) : null;
+
   if (isVideo && videoSrc && !videoError) {
     return (
       <>
+        {statusModal}
         <div className="video-background">
           <video
             id="video-bg"
@@ -622,21 +860,45 @@ const Background: React.FC<BackgroundProps> = ({
 
   if (!isVideo && imageSrc && !imageError) {
     return (
-      <div className="image-background">
-        <img
-          id="image-bg"
-          ref={imageRef}
-          src={imageSrc}
-          style={imageStyle}
-          onLoad={() => setIsLoading(false)}
-          onError={handleImageError}
-          alt="Background"
-        />
-      </div>
+      <>
+        {statusModal}
+        <div className="image-background">
+          <img
+            id="image-bg"
+            ref={imageRef}
+            src={imageSrc}
+            style={imageStyle}
+            onLoad={() => {
+              setIsLoading(false);
+              updateBackgroundStatus({
+                status: "applied",
+                path: backgroundPath,
+                message: "Image background applied",
+              });
+            }}
+            onError={(ev) => {
+              handleImageError();
+              const errorTx = (ev.currentTarget as HTMLImageElement).src;
+              updateBackgroundStatus({
+                status: "error",
+                path: backgroundPath,
+                message: "Image failed to load",
+                error: `Image URL: ${errorTx}`,
+              });
+            }}
+            alt="Background"
+          />
+        </div>
+      </>
     );
   }
 
-  return <div className="fallback" style={fallbackStyle}></div>;
+  return (
+    <>
+      {statusModal}
+      <div className="fallback" style={fallbackStyle}></div>
+    </>
+  );
 };
 
 export default Background;

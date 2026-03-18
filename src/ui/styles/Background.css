@@ -188,3 +188,36 @@
 .volume-slider:active::-webkit-slider-thumb {
   background: rgba(var(--color-primary), 0.95);
 }
+
+.background-error-modal {
+  position: fixed;
+  z-index: 9999;
+  min-width: 280px;
+  max-width: 380px;
+  background-color: rgba(30, 30, 30, 0.95);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  padding: 10px;
+  cursor: grab;
+}
+
+.background-error-modal.dragging {
+  cursor: grabbing !important;
+}
+
+.background-error-modal .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.background-error-modal button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 4px;
+  padding: 1px 6px;
+  cursor: pointer;
+}

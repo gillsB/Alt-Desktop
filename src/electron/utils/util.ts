@@ -430,6 +430,12 @@ async function createBgJsonIfPossible(
     let bgFile: string;
 
     if (mediaFiles.length === 1) {
+      // If single media file and is image, set icon image to it.
+      if (
+        imageExts.some((ext) => mediaFiles[0].name.toLowerCase().endsWith(ext))
+      ) {
+        iconFile = mediaFiles[0].name;
+      }
       bgFile = mediaFiles[0].name;
     } else {
       // Find potential icon files
