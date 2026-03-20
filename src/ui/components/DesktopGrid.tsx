@@ -76,6 +76,7 @@ const DesktopGrid: React.FC = () => {
   const [allHighlightsOffset, setAllHighlightsOffset] = useState(true);
   const [allHighlightsOversized, setAllHighlightsOversized] = useState(true);
   const [allHighlightsBoth, setAllHighlightsBoth] = useState(true);
+  const [showVideoStatus, setShowVideoStatus] = useState<boolean>(false);
 
   const [backgroundType, setBackgroundType] = useState<string>("image");
   const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
@@ -191,6 +192,7 @@ const DesktopGrid: React.FC = () => {
       setHideIcons(rendererStates.hideIcons || false);
       setHideIconNames(rendererStates.hideIconNames || false);
       setShowVideoControls(rendererStates.showVideoControls || false);
+      setShowVideoStatus(rendererStates.showBackgroundDebug || false);
       setProfile(rendererStates.profile || "");
     };
     fetchRendererStates();
@@ -202,6 +204,9 @@ const DesktopGrid: React.FC = () => {
       const state = args[1] as Partial<RendererStates>;
       if ("showVideoControls" in state) {
         setShowVideoControls(!!state.showVideoControls);
+      }
+      if ("showBackgroundDebug" in state) {
+        setShowVideoStatus(!!state.showBackgroundDebug);
       }
       if ("hideIcons" in state) {
         setHideIcons(!!state.hideIcons);
@@ -2365,6 +2370,30 @@ const DesktopGrid: React.FC = () => {
                 />
                 <label htmlFor="legend-showgrid" style={{ cursor: "pointer" }}>
                   Show Grid
+                </label>
+              </span>
+              <span className="show-all-highlights-legend-item">
+                <input
+                  type="checkbox"
+                  checked={showVideoStatus}
+                  onChange={async () => {
+                    const newValue = !showVideoStatus;
+                    setShowVideoStatus(newValue);
+                    try {
+                      await window.electron.setRendererStates({
+                        showBackgroundDebug: newValue,
+                      });
+                    } catch (error) {
+                      logger.error("Failed to set showBackgroundDebug:", error);
+                    }
+                  }}
+                  id="legend-showvideostatus"
+                />
+                <label
+                  htmlFor="legend-showvideostatus"
+                  style={{ cursor: "pointer" }}
+                >
+                  Show Video status
                 </label>
               </span>
             </div>
