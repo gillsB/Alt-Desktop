@@ -42,6 +42,8 @@ const Background: React.FC<BackgroundProps> = ({
   const backgroundId = useRef<string>("");
   const [backgroundPath, setBackgroundPath] = useState<string>("");
   const [isVideo, setIsVideo] = useState<boolean>(false);
+  const [showBackgroundDebug, setShowBackgroundDebug] =
+    useState<boolean>(false);
   const [videoError, setVideoError] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
@@ -93,6 +95,11 @@ const Background: React.FC<BackgroundProps> = ({
     const fetchRendererStates = async () => {
       const rendererStates = await window.electron.getRendererStates();
       setShowVideoControls(rendererStates.showVideoControls || false);
+      setShowBackgroundDebug(rendererStates.showBackgroundDebug || false);
+      logger.info(
+        "Initial showBackgroundDebug:",
+        rendererStates.showBackgroundDebug
+      );
     };
     fetchRendererStates();
   }, []);
@@ -108,6 +115,13 @@ const Background: React.FC<BackgroundProps> = ({
           video.play();
         }
         setShowVideoControls(!!state.showVideoControls);
+      }
+      if ("showBackgroundDebug" in state) {
+        const newDebug = !!state.showBackgroundDebug;
+        setShowBackgroundDebug(newDebug);
+        logger.info(
+          `renderer-state-updated: showBackgroundDebug changed to ${newDebug}`
+        );
       }
     };
     window.electron.on("renderer-state-updated", updateStates);
@@ -764,58 +778,59 @@ const Background: React.FC<BackgroundProps> = ({
     backgroundColor: fallbackColor,
   };
 
-  const statusModal = backgroundStatus.visible ? (
-    <div
-      className={`background-error-modal ${
-        isStatusModalDragging ? "dragging" : ""
-      }`}
-      style={{
-        left: statusModalPosition.x,
-        top: statusModalPosition.y,
-        cursor: isStatusModalDragging ? "grabbing" : "grab",
-      }}
-      onMouseDown={(e) => {
-        e.stopPropagation();
-        statusModalDragOffsetRef.current = {
-          x: e.clientX - statusModalPosition.x,
-          y: e.clientY - statusModalPosition.y,
-        };
-        setIsStatusModalDragging(true);
-      }}
-    >
-      <div className="header">
-        <span style={{ fontWeight: "bold" }}>
-          Background status: {backgroundStatus.status}
-        </span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            clearBackgroundStatus();
-          }}
-        >
-          ×
-        </button>
+  const statusModal =
+    backgroundStatus.visible && showBackgroundDebug ? (
+      <div
+        className={`background-error-modal ${
+          isStatusModalDragging ? "dragging" : ""
+        }`}
+        style={{
+          left: statusModalPosition.x,
+          top: statusModalPosition.y,
+          cursor: isStatusModalDragging ? "grabbing" : "grab",
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          statusModalDragOffsetRef.current = {
+            x: e.clientX - statusModalPosition.x,
+            y: e.clientY - statusModalPosition.y,
+          };
+          setIsStatusModalDragging(true);
+        }}
+      >
+        <div className="header">
+          <span style={{ fontWeight: "bold" }}>
+            Background status: {backgroundStatus.status}
+          </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              clearBackgroundStatus();
+            }}
+          >
+            ×
+          </button>
+        </div>
+        <div style={{ marginTop: 8, fontSize: 12, whiteSpace: "pre-wrap" }}>
+          {`Path: ${backgroundStatus.path || "<unknown>"}`}
+          {backgroundStatus.error ? `\nError: ${backgroundStatus.error}` : ""}
+          {backgroundStatus.ffprobe && backgroundStatus.ffprobe.format
+            ? `\n${summarizeFfprobe(backgroundStatus.ffprobe)}`
+            : null}
+        </div>
+        <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              const copyStatus = await copyStatusDetails();
+              logger.info("Copy status result:", copyStatus);
+            }}
+          >
+            Copy background status details to clipboard
+          </button>
+        </div>
       </div>
-      <div style={{ marginTop: 8, fontSize: 12, whiteSpace: "pre-wrap" }}>
-        {`Path: ${backgroundStatus.path || "<unknown>"}`}
-        {backgroundStatus.error ? `\nError: ${backgroundStatus.error}` : ""}
-        {backgroundStatus.ffprobe && backgroundStatus.ffprobe.format
-          ? `\n${summarizeFfprobe(backgroundStatus.ffprobe)}`
-          : null}
-      </div>
-      <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-        <button
-          onClick={async (e) => {
-            e.stopPropagation();
-            const copyStatus = await copyStatusDetails();
-            logger.info("Copy status result:", copyStatus);
-          }}
-        >
-          Copy background status details to clipboard
-        </button>
-      </div>
-    </div>
-  ) : null;
+    ) : null;
 
   if (isVideo && videoSrc && !videoError) {
     return (
