@@ -10,6 +10,7 @@ let rendererStates: RendererStates = {
   hideIcons: false,
   hideIconNames: false,
   profile: "default", // will be updated below
+  showBackgroundDebug: false,
 };
 // Fetch saved background's profile to update "profile" state before renderers use it.
 // So when renderers are created they have the correct profile from the start. (prevents default profile flicker)

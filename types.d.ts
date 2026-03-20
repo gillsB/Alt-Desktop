@@ -228,6 +228,7 @@ type RendererStates = {
   profile?: string;
   visibleRows?: number;
   visibleCols?: number;
+  showBackgroundDebug?: boolean;
 };
 
 type ThemeName = "dark" | "light" | "system";
