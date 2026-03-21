@@ -122,7 +122,7 @@
   background: rgba(var(--color-highlightOffsetOversized), 0.85);
 }
 
-.show-all-highlights-legend {
+.debug-legend {
   position: fixed;
   bottom: 8px;
   left: 50%;
@@ -141,20 +141,20 @@
   user-select: none;
   white-space: nowrap;
 }
-.show-all-highlights-legend-row {
+.debug-legend-row {
   display: flex;
   flex-direction: row;
   gap: 18px;
   align-items: center;
 }
 
-.show-all-highlights-legend-item {
+.debug-legend-item {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.show-all-highlights-legend-circle {
+.debug-legend-circle {
   width: 18px;
   height: 18px;
   border-radius: 4px;
@@ -166,22 +166,22 @@
   font-weight: bold;
 }
 
-.show-all-highlights-legend-circle.default {
+.debug-legend-circle.default {
   border: 2px solid rgb(var(--color-primary));
   background: rgba(var(--color-primary), 0.1);
 }
 
-.show-all-highlights-legend-circle.offset {
+.debug-legend-circle.offset {
   border: 2px solid rgb(var(--color-highlightOffset));
   background: rgba(var(--color-highlightOffset), 0.1);
 }
 
-.show-all-highlights-legend-circle.oversized {
+.debug-legend-circle.oversized {
   border: 2px solid rgb(var(--color-highlightOversized));
   background: rgba(var(--color-highlightOversized), 0.1);
 }
 
-.show-all-highlights-legend-circle.offset-oversized {
+.debug-legend-circle.offset-oversized {
   border: 2px solid rgb(var(--color-highlightOffsetOversized));
   background: rgba(var(--color-highlightOffsetOversized), 0.1);
 }

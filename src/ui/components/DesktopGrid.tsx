@@ -61,9 +61,9 @@ const DesktopGrid: React.FC = () => {
     visible: false,
     pulse: false,
   });
-  const [showAllHighlights, setShowAllHighlights] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
   const [showOffscreen, setShowOffscreen] = useState(true);
-  const showAllHighlightsRef = useRef(showAllHighlights);
+  const showDebugRef = useRef(showDebug);
   const [reloadTimestamps, setReloadTimestamps] =
     useState<IconReloadTimestamps>({});
   const [defaultFontSize, setDefaultFontSize] = useState<number>(16);
@@ -72,10 +72,10 @@ const DesktopGrid: React.FC = () => {
   const [defaultFontColor, setDefaultFontColor] = useState<string>("white");
 
   const [dimmerValue, setDimmerValue] = useState(50);
-  const [allHighlightsDefault, setAllHighlightsDefault] = useState(true);
-  const [allHighlightsOffset, setAllHighlightsOffset] = useState(true);
-  const [allHighlightsOversized, setAllHighlightsOversized] = useState(true);
-  const [allHighlightsBoth, setAllHighlightsBoth] = useState(true);
+  const [debugDefault, setDebugDefault] = useState(true);
+  const [debugOffset, setDebugOffset] = useState(true);
+  const [debugOversized, setDebugOversized] = useState(true);
+  const [debugBoth, setDebugBoth] = useState(true);
   const [showVideoStatus, setShowVideoStatus] = useState<boolean>(false);
 
   const [backgroundType, setBackgroundType] = useState<string>("image");
@@ -254,8 +254,8 @@ const DesktopGrid: React.FC = () => {
   };
 
   useEffect(() => {
-    showAllHighlightsRef.current = showAllHighlights;
-  }, [showAllHighlights]);
+    showDebugRef.current = showDebug;
+  }, [showDebug]);
 
   const toggleIcons = () => {
     // Always show icon names when toggled (only shows when icons show). So restoring icons shows names.
@@ -314,8 +314,8 @@ const DesktopGrid: React.FC = () => {
 
   useEffect(() => {
     const detectOffscreenIcons = () => {
-      // If showAllHighlights is false, return early
-      if (!showAllHighlights && !showOffscreen) {
+      // If showDebug is false, return early
+      if (!showDebug && !showOffscreen) {
         return;
       }
 
@@ -398,8 +398,8 @@ const DesktopGrid: React.FC = () => {
       });
     };
 
-    // Call detectOffscreenIcons whenever showAllHighlights is true
-    if (iconsById && (showAllHighlights || showOffscreen)) {
+    // Call detectOffscreenIcons whenever showDebug is true
+    if (iconsById && (showDebug || showOffscreen)) {
       detectOffscreenIcons();
     } else {
       setOffscreenIconsPanel((prev) => ({
@@ -408,20 +408,20 @@ const DesktopGrid: React.FC = () => {
         icons: [],
       }));
     }
-  }, [iconsById, showAllHighlights, iconBox, showOffscreen, viewportSize]);
+  }, [iconsById, showDebug, iconBox, showOffscreen, viewportSize]);
 
-  const toggleHighlightAllIcons = async () => {
-    const newShowAllHighlights = !showAllHighlights;
-    if (newShowAllHighlights) {
+  const toggleDebug = async () => {
+    const newShowDebug = !showDebug;
+    if (newShowDebug) {
       setOffscreenIconsPanel((prev) => ({
         ...prev,
         position: { x: 50, y: 50 },
       }));
     } else {
-      // Hide grid on toggling off highlights
+      // Hide grid on toggling off debug mode
       setShowGrid(false);
     }
-    setShowAllHighlights(newShowAllHighlights);
+    setShowDebug(newShowDebug);
 
     setContextMenu(null);
     hideHighlightBox();
@@ -2041,7 +2041,7 @@ const DesktopGrid: React.FC = () => {
         )}
 
         {/* Render all icons as highlighted if enabled */}
-        {showAllHighlights &&
+        {showDebug &&
           Array.from(iconsById.values()).map((icon) => {
             // Calculate Icon home position
             const homeLeft =
@@ -2070,13 +2070,13 @@ const DesktopGrid: React.FC = () => {
             // Determine which highlight to show
             let showHighlight = false;
             if (hasOffset && isOversized) {
-              showHighlight = allHighlightsBoth;
+              showHighlight = debugBoth;
             } else if (hasOffset) {
-              showHighlight = allHighlightsOffset;
+              showHighlight = debugOffset;
             } else if (isOversized) {
-              showHighlight = allHighlightsOversized;
+              showHighlight = debugOversized;
             } else {
-              showHighlight = allHighlightsDefault;
+              showHighlight = debugDefault;
             }
 
             let variant = "default";
@@ -2279,89 +2279,85 @@ const DesktopGrid: React.FC = () => {
             );
           })()}
 
-        {showAllHighlights && (
+        {showDebug && (
           <div
             className="background-dimmer"
             style={{ background: `rgba(0,0,0,${dimmerValue / 100})` }}
           />
         )}
 
-        {showAllHighlights && (
-          <div className="show-all-highlights-legend">
-            <div className="show-all-highlights-legend-row">
-              <span className="show-all-highlights-legend-item">
+        {showDebug && (
+          <div className="debug-legend">
+            <div className="debug-legend-row">
+              <span className="debug-legend-item">
                 <input
                   type="checkbox"
-                  checked={allHighlightsDefault}
-                  onChange={() =>
-                    setAllHighlightsDefault(!allHighlightsDefault)
-                  }
+                  checked={debugDefault}
+                  onChange={() => setDebugDefault(!debugDefault)}
                   style={{ display: "none" }}
                   id="legend-default"
                 />
                 <label htmlFor="legend-default" style={{ cursor: "pointer" }}>
-                  {allHighlightsDefault ? (
-                    <span className="show-all-highlights-legend-circle default" />
+                  {debugDefault ? (
+                    <span className="debug-legend-circle default" />
                   ) : (
-                    <span className="show-all-highlights-legend-circle legend-x" />
+                    <span className="debug-legend-circle legend-x" />
                   )}
                   Default
                 </label>
               </span>
-              <span className="show-all-highlights-legend-item">
+              <span className="debug-legend-item">
                 <input
                   type="checkbox"
-                  checked={allHighlightsOffset}
-                  onChange={() => setAllHighlightsOffset(!allHighlightsOffset)}
+                  checked={debugOffset}
+                  onChange={() => setDebugOffset(!debugOffset)}
                   style={{ display: "none" }}
                   id="legend-offset"
                 />
                 <label htmlFor="legend-offset" style={{ cursor: "pointer" }}>
-                  {allHighlightsOffset ? (
-                    <span className="show-all-highlights-legend-circle offset" />
+                  {debugOffset ? (
+                    <span className="debug-legend-circle offset" />
                   ) : (
-                    <span className="show-all-highlights-legend-circle legend-x" />
+                    <span className="debug-legend-circle legend-x" />
                   )}
                   Offset
                 </label>
               </span>
-              <span className="show-all-highlights-legend-item">
+              <span className="debug-legend-item">
                 <input
                   type="checkbox"
-                  checked={allHighlightsOversized}
-                  onChange={() =>
-                    setAllHighlightsOversized(!allHighlightsOversized)
-                  }
+                  checked={debugOversized}
+                  onChange={() => setDebugOversized(!debugOversized)}
                   style={{ display: "none" }}
                   id="legend-oversized"
                 />
                 <label htmlFor="legend-oversized" style={{ cursor: "pointer" }}>
-                  {allHighlightsOversized ? (
-                    <span className="show-all-highlights-legend-circle oversized" />
+                  {debugOversized ? (
+                    <span className="debug-legend-circle oversized" />
                   ) : (
-                    <span className="show-all-highlights-legend-circle legend-x" />
+                    <span className="debug-legend-circle legend-x" />
                   )}
                   Oversized
                 </label>
               </span>
-              <span className="show-all-highlights-legend-item">
+              <span className="debug-legend-item">
                 <input
                   type="checkbox"
-                  checked={allHighlightsBoth}
-                  onChange={() => setAllHighlightsBoth(!allHighlightsBoth)}
+                  checked={debugBoth}
+                  onChange={() => setDebugBoth(!debugBoth)}
                   style={{ display: "none" }}
                   id="legend-both"
                 />
                 <label htmlFor="legend-both" style={{ cursor: "pointer" }}>
-                  {allHighlightsBoth ? (
-                    <span className="show-all-highlights-legend-circle offset-oversized" />
+                  {debugBoth ? (
+                    <span className="debug-legend-circle offset-oversized" />
                   ) : (
-                    <span className="show-all-highlights-legend-circle legend-x" />
+                    <span className="debug-legend-circle legend-x" />
                   )}
                   Offset & Oversized
                 </label>
               </span>
-              <span className="show-all-highlights-legend-item">
+              <span className="debug-legend-item">
                 <input
                   type="checkbox"
                   checked={showGrid}
@@ -2372,7 +2368,7 @@ const DesktopGrid: React.FC = () => {
                   Show Grid
                 </label>
               </span>
-              <span className="show-all-highlights-legend-item">
+              <span className="debug-legend-item">
                 <input
                   type="checkbox"
                   checked={showVideoStatus}
@@ -2397,8 +2393,8 @@ const DesktopGrid: React.FC = () => {
                 </label>
               </span>
             </div>
-            <div className="show-all-highlights-legend-row">
-              <span className="show-all-highlights-legend-item">
+            <div className="debug-legend-row">
+              <span className="debug-legend-item">
                 <label htmlFor="dimmer-slider">Dim Background</label>
                 <input
                   id="dimmer-slider"
@@ -2466,14 +2462,14 @@ const DesktopGrid: React.FC = () => {
               <div className="menu-separator" />
               <label
                 className="menu-checkbox"
-                title="A variety of visual cues and tools to help manage your Desktop icons"
+                title="A variety of visual cues and tools to help identify problems in desktop or background"
               >
-                Icons Overview
+                Debug
                 <input
                   type="checkbox"
-                  checked={showAllHighlights}
-                  onChange={toggleHighlightAllIcons}
-                  title="A variety of visual cues and tools to help manage your Desktop icons"
+                  checked={showDebug}
+                  onChange={toggleDebug}
+                  title="A variety of visual cues and tools to help identify problems in desktop or background"
                 />
               </label>
               <label className="menu-checkbox">
@@ -2633,8 +2629,8 @@ const DesktopGrid: React.FC = () => {
             onMouseDown={handlePanelMouseDown}
           >
             <span>Off-screen Icons ({offscreenIconsPanel.icons.length})</span>
-            {/* Button only shows when showOffscreen is true and showAllHighlights is false */}
-            {showOffscreen && !showAllHighlights && (
+            {/* Button only shows when showOffscreen is true and showDebug is false */}
+            {showOffscreen && !showDebug && (
               <button
                 className="show-offscreen-close-button"
                 title="Hide Off-screen Icons Panel"

@@ -965,9 +965,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     const controlsWidth = componentWidth;
     const controlsHeight = componentHeight;
 
-    const legend = document.querySelector(
-      ".show-all-highlights-legend"
-    ) as HTMLElement;
+    const legend = document.querySelector(".debug-legend") as HTMLElement;
     const legendRect = legend ? legend.getBoundingClientRect() : null;
 
     let x = positionRef.current.x;
