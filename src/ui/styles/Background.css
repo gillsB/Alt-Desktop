@@ -52,7 +52,8 @@
 }
 
 .video-controls {
-  width: 370px;
+  box-sizing: border-box;
+  min-width: 370px; /* Changed from fixed width to min-width */
   height: 55px;
   position: fixed;
   z-index: 110;
@@ -71,13 +72,46 @@
   cursor: grabbing;
 }
 
+.video-controls.resizing {
+  cursor: ew-resize;
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.resize-handle-left {
+  left: -4px;
+}
+
+.resize-handle-right {
+  right: -4px;
+}
+
+.video-controls:hover .resize-handle {
+  opacity: 1;
+}
+
 .video-controls .time {
   color: rgb(var(--color-textPrimary));
   font-size: 14px;
 }
 
+.seek-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
 .seek-bar input[type="range"] {
-  width: 200px;
+  flex: 1; /* Changed from fixed width to flex to fill available space */
+  min-width: 100px; /* Minimum width to prevent it from getting too small */
 }
 .video-controls button {
   background: none;

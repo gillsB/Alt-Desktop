@@ -806,6 +806,7 @@ const Background: React.FC<BackgroundProps> = ({
             onClick={(e) => {
               e.stopPropagation();
               clearBackgroundStatus();
+              window.electron.setRendererStates({ showBackgroundDebug: false });
             }}
           >
             ×
@@ -944,9 +945,17 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   const [dragging, setDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [resizing, setResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState<
+    "left" | "right" | null
+  >(null);
+  const [componentWidth, setComponentWidth] = useState(385);
+  const resizeStartData = useRef<{
+    width: number;
+    mouseX: number;
+    x: number;
+  } | null>(null);
 
-  // Hard defined width and height for the controls
-  const componentWidth = 385;
   const componentHeight = 55;
 
   const defaultSpawnPosition = () => ({
@@ -959,11 +968,16 @@ const VideoControls: React.FC<VideoControlsProps> = ({
       const { x, y } = defaultSpawnPosition();
       positionRef.current = { x, y };
     }
-  }, []);
+  }, [componentWidth]);
 
   const clampOrResetControlsPosition = () => {
-    const controlsWidth = componentWidth;
     const controlsHeight = componentHeight;
+    const controlsElement = document.querySelector(
+      ".video-controls"
+    ) as HTMLElement;
+    const controlsWidth = controlsElement
+      ? controlsElement.getBoundingClientRect().width
+      : componentWidth;
 
     const legend = document.querySelector(".debug-legend") as HTMLElement;
     const legendRect = legend ? legend.getBoundingClientRect() : null;
@@ -972,7 +986,15 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     let y = positionRef.current.y;
     const minX = 0;
     const minY = 0;
-    const maxX = window.innerWidth - controlsWidth;
+
+    // If controls are wider than viewport, scale width down
+    if (controlsWidth > window.innerWidth) {
+      const newWidth = Math.max(385, window.innerWidth);
+      setComponentWidth(newWidth);
+    }
+
+    const currentControlsWidth = Math.min(controlsWidth, window.innerWidth);
+    const maxX = window.innerWidth - currentControlsWidth;
     const maxY = window.innerHeight - controlsHeight;
 
     // Check if offscreen
@@ -1000,9 +1022,6 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     }
 
     positionRef.current = { x, y };
-    const controlsElement = document.querySelector(
-      ".video-controls"
-    ) as HTMLElement;
     if (controlsElement) {
       controlsElement.style.left = `${x}px`;
       controlsElement.style.top = `${y}px`;
@@ -1016,7 +1035,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [VideoControls]);
+  }, [componentWidth]);
 
   // Sync play/pause state
   useEffect(() => {
@@ -1140,36 +1159,95 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     document.body.style.userSelect = "none";
   };
 
+  const handleResizeMouseDown = (
+    e: React.MouseEvent,
+    direction: "left" | "right"
+  ) => {
+    e.stopPropagation();
+    setResizing(true);
+    setResizeDirection(direction);
+    resizeStartData.current = {
+      width: componentWidth,
+      mouseX: e.clientX,
+      x: positionRef.current.x,
+    };
+    document.body.style.userSelect = "none";
+  };
+
   useEffect(() => {
-    if (!dragging) return;
+    if (!dragging && !resizing) return;
 
     const controlsElement = document.querySelector(
       ".video-controls"
     ) as HTMLElement;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const newX = e.clientX - dragOffset.current.x;
-      const newY = e.clientY - dragOffset.current.y;
+      if (dragging) {
+        const newX = e.clientX - dragOffset.current.x;
+        const newY = e.clientY - dragOffset.current.y;
 
-      // Ensure the controls stay within the viewport
-      const maxX = window.innerWidth - componentWidth;
-      const maxY = window.innerHeight - componentHeight;
+        // Ensure the controls stay within the viewport
+        const maxX = window.innerWidth - componentWidth;
+        const maxY = window.innerHeight - componentHeight;
 
-      // Prevent dragging off-screen
-      const boundedX = Math.max(0, Math.min(newX, maxX));
-      const boundedY = Math.max(0, Math.min(newY, maxY));
+        // Prevent dragging off-screen
+        const boundedX = Math.max(0, Math.min(newX, maxX));
+        const boundedY = Math.max(0, Math.min(newY, maxY));
 
-      positionRef.current = { x: boundedX, y: boundedY };
+        positionRef.current = { x: boundedX, y: boundedY };
 
-      // Update DOM directly for smooth dragging
-      if (controlsElement) {
-        controlsElement.style.left = `${boundedX}px`;
-        controlsElement.style.top = `${boundedY}px`;
+        // Update DOM directly for smooth dragging
+        if (controlsElement) {
+          controlsElement.style.left = `${boundedX}px`;
+          controlsElement.style.top = `${boundedY}px`;
+        }
+      } else if (resizing && resizeDirection && resizeStartData.current) {
+        const deltaX = e.clientX - resizeStartData.current.mouseX;
+        let newWidth = resizeStartData.current.width;
+        let newX = resizeStartData.current.x;
+
+        if (resizeDirection === "right") {
+          const proposedWidth = resizeStartData.current.width + deltaX;
+          const maxAllowedWidth = window.innerWidth - resizeStartData.current.x;
+          newWidth = Math.max(385, Math.min(proposedWidth, maxAllowedWidth));
+        } else if (resizeDirection === "left") {
+          const proposedWidth = resizeStartData.current.width - deltaX;
+          let adjustedWidth = Math.max(385, proposedWidth);
+
+          newX =
+            resizeStartData.current.x +
+            (resizeStartData.current.width - adjustedWidth);
+
+          // Keep left edge visible
+          if (newX < 0) {
+            adjustedWidth += newX; // newX negative, so this reduces width
+            newX = 0;
+          }
+
+          const maxAllowedWidth = window.innerWidth - newX;
+          newWidth = Math.min(adjustedWidth, maxAllowedWidth);
+        }
+
+        // Final bounds check for x position
+        const maxX = window.innerWidth - newWidth;
+        newX = Math.max(0, Math.min(newX, maxX));
+
+        positionRef.current.x = newX;
+        setComponentWidth(newWidth);
+
+        // Update DOM directly for smooth resizing
+        if (controlsElement) {
+          controlsElement.style.left = `${newX}px`;
+          controlsElement.style.width = `${newWidth}px`;
+        }
       }
     };
 
     const handleMouseUp = () => {
       setDragging(false);
+      setResizing(false);
+      setResizeDirection(null);
+      resizeStartData.current = null;
       clampOrResetControlsPosition();
       document.body.style.userSelect = "";
     };
@@ -1180,7 +1258,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [dragging]);
+  }, [dragging, resizing, resizeDirection, componentWidth]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -1190,13 +1268,24 @@ const VideoControls: React.FC<VideoControlsProps> = ({
 
   return (
     <div
-      className={`video-controls ${dragging ? "dragging" : ""}`}
+      className={`video-controls ${dragging ? "dragging" : ""} ${resizing ? "resizing" : ""}`}
       style={{
         left: positionRef.current.x,
         top: positionRef.current.y,
+        width: componentWidth,
       }}
       onMouseDown={handleMouseDown}
     >
+      <div
+        className="resize-handle resize-handle-left"
+        onMouseDown={(e) => handleResizeMouseDown(e, "left")}
+        title="Drag to resize"
+      />
+      <div
+        className="resize-handle resize-handle-right"
+        onMouseDown={(e) => handleResizeMouseDown(e, "right")}
+        title="Drag to resize"
+      />
       <button
         onClick={(e) => {
           e.stopPropagation();
