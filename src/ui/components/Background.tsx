@@ -89,6 +89,7 @@ const Background: React.FC<BackgroundProps> = ({
   const [showVideoControls, setShowVideoControls] = useState(false); // Required for update to draw VideoControls
   const showVideoControlsRef = useRef(showVideoControls); // Persists its state across redraws due to changing backgrounds
   const videoControlsPositionRef = useRef({ x: -100, y: -100 });
+  const [videoControlsWidth, setVideoControlsWidth] = useState(385);
   const previousVolumeRef = useRef<number>(1);
 
   useEffect(() => {
@@ -867,6 +868,8 @@ const Background: React.FC<BackgroundProps> = ({
             volume={volume}
             setVolume={setVolume}
             positionRef={videoControlsPositionRef}
+            componentWidth={videoControlsWidth}
+            setComponentWidth={setVideoControlsWidth}
             previousVolumeRef={previousVolumeRef}
           />
         )}
@@ -928,6 +931,8 @@ interface VideoControlsProps {
   volume: number;
   setVolume: (volume: number) => void;
   positionRef: React.RefObject<{ x: number; y: number }>;
+  componentWidth: number;
+  setComponentWidth: (width: number) => void;
   previousVolumeRef: React.RefObject<number>;
 }
 
@@ -940,6 +945,8 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   volume,
   setVolume,
   positionRef,
+  componentWidth,
+  setComponentWidth,
   previousVolumeRef,
 }) => {
   const [dragging, setDragging] = useState(false);
@@ -949,7 +956,6 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   const [resizeDirection, setResizeDirection] = useState<
     "left" | "right" | null
   >(null);
-  const [componentWidth, setComponentWidth] = useState(385);
   const resizeStartData = useRef<{
     width: number;
     mouseX: number;
@@ -1058,7 +1064,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
 
     const updateProgress = () => {
       if (!video.duration) return;
-      setProgress((video.currentTime / video.duration) * 100);
+      setProgress((video.currentTime / video.duration) * 10000);
     };
 
     video.addEventListener("timeupdate", updateProgress);
@@ -1119,9 +1125,9 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const video = videoRef.current;
     if (!video || !video.duration) return;
-    const newTime = (parseFloat(e.target.value) / 100) * video.duration;
+    const newTime = (parseFloat(e.target.value) / 10000) * video.duration;
     video.currentTime = newTime;
-    setProgress((newTime / video.duration) * 100);
+    setProgress((newTime / video.duration) * 10000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -1134,13 +1140,13 @@ const VideoControls: React.FC<VideoControlsProps> = ({
       const newTime = video.currentTime + 10;
       video.currentTime = Math.min(newTime, video.duration);
       e.preventDefault();
-      setProgress((video.currentTime / video.duration) * 100);
+      setProgress((video.currentTime / video.duration) * 10000);
     } else if (e.key === "ArrowLeft") {
       // Jump 10 seconds backward
       const newTime = video.currentTime - 10;
       video.currentTime = Math.max(newTime, 0);
       e.preventDefault();
-      setProgress((video.currentTime / video.duration) * 100);
+      setProgress((video.currentTime / video.duration) * 10000);
     }
   };
 
@@ -1261,9 +1267,14 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   }, [dragging, resizing, resizeDirection, componentWidth]);
 
   const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    if (hours > 0) {
+      return `${hours}:${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+    } else {
+      return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+    }
   };
 
   return (
@@ -1342,7 +1353,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
         <input
           type="range"
           min={0}
-          max={100}
+          max={10000}
           value={progress}
           onInput={handleSeek}
           onMouseDown={(e) => e.stopPropagation()}
