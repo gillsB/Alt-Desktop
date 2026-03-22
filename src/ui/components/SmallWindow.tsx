@@ -31,7 +31,7 @@ const SmallWindow: React.FC = () => {
       if (!closeable) {
         return;
       }
-      if (e.key === "Escape") {
+      if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
         window.electron.sendButtonResponse({
           windowId,
           buttonText: "Escape",

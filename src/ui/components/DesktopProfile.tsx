@@ -113,7 +113,7 @@ const DesktopProfile: React.FC = () => {
     };
 
     const handleEscapeKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
         escapeHandlerRef.current();
       }
     };

@@ -198,7 +198,7 @@ const EditIcon: React.FC = () => {
   };
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
         handleClose();
       }
     };
