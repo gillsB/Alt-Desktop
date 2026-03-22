@@ -29,6 +29,7 @@ const BackgroundSelect: React.FC = () => {
   const [summaries, setSummaries] = useState<BackgroundSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedBg, setSelectedBg] = useState<BackgroundSummary | null>(null);
+  const [selectionHistory, setSelectionHistory] = useState<string[]>([]);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -61,6 +62,7 @@ const BackgroundSelect: React.FC = () => {
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
   const editingBgId = useRef<string | null>(null);
+  const isUndoingRef = useRef(false);
 
   const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
 
@@ -90,6 +92,18 @@ const BackgroundSelect: React.FC = () => {
   const [editingSummary, setEditingSummary] =
     useState<BackgroundSummary | null>(null);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
+
+  useEffect(() => {
+    if (selectedBg && !isUndoingRef.current) {
+      setSelectionHistory((prev) => {
+        const last = prev[prev.length - 1];
+        if (last !== selectedBg.id) {
+          return [...prev, selectedBg.id];
+        }
+        return prev;
+      });
+    }
+  }, [selectedBg]);
 
   useEffect(() => {
     const fetchRendererStates = async () => {
@@ -321,6 +335,7 @@ const BackgroundSelect: React.FC = () => {
       if (shouldSetSummary) {
         setSelectedIds([targetSummary.id]);
         setSelectedBg(targetSummary);
+        setSelectionHistory([targetSummary.id]);
       }
 
       if (scrollTarget.shouldScroll) {
@@ -371,6 +386,41 @@ const BackgroundSelect: React.FC = () => {
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "BackgroundSelect");
   };
 
+  const handleUndo = async () => {
+    if (selectionHistory.length > 1) {
+      const newHistory = selectionHistory.slice(0, -1);
+      const previousId = newHistory[newHistory.length - 1];
+      let bg = summaries.find((b) => b.id === previousId);
+      if (!bg) {
+        // If not in current page, fetch directly
+        const response = await window.electron.getBackgroundSummaries({
+          offset: 0,
+          limit: 1,
+          search: "id:" + previousId,
+          includeTags: [],
+          excludeTags: [],
+        });
+        if (response.results.length > 0) {
+          bg = response.results[0];
+        }
+      }
+      if (bg) {
+        isUndoingRef.current = true;
+        setSelectedIds([previousId]);
+        setSelectedBg(bg);
+        setSelectionHistory(newHistory);
+        await window.electron.saveSettingsData({ background: previousId });
+        await window.electron.previewBackgroundUpdate({
+          id: previousId,
+          profile: bg.localProfile ?? "default",
+        });
+        setTimeout(() => {
+          isUndoingRef.current = false;
+        }, 0);
+      }
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
@@ -383,6 +433,9 @@ const BackgroundSelect: React.FC = () => {
           return;
         }
         handleClose();
+      } else if (e.ctrlKey && e.key === "z") {
+        e.preventDefault();
+        handleUndo();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
