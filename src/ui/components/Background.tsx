@@ -1130,25 +1130,34 @@ const VideoControls: React.FC<VideoControlsProps> = ({
     setProgress((newTime / video.duration) * 10000);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const video = videoRef.current;
-    if (!video) return;
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const video = videoRef.current;
+      if (!video) return;
 
-    // Check if the pressed key is the left or right arrow key
-    if (e.key === "ArrowRight") {
-      // Jump 10 seconds forward
-      const newTime = video.currentTime + 10;
-      video.currentTime = Math.min(newTime, video.duration);
-      e.preventDefault();
-      setProgress((video.currentTime / video.duration) * 10000);
-    } else if (e.key === "ArrowLeft") {
-      // Jump 10 seconds backward
-      const newTime = video.currentTime - 10;
-      video.currentTime = Math.max(newTime, 0);
-      e.preventDefault();
-      setProgress((video.currentTime / video.duration) * 10000);
-    }
-  };
+      if (e.key === "ArrowRight") {
+        // Jump 10 seconds forward
+        const newTime = video.currentTime + 10;
+        video.currentTime = Math.min(newTime, video.duration);
+        e.preventDefault();
+        setProgress((video.currentTime / video.duration) * 10000);
+      } else if (e.key === "ArrowLeft") {
+        // Jump 10 seconds backward
+        const newTime = video.currentTime - 10;
+        video.currentTime = Math.max(newTime, 0);
+        e.preventDefault();
+        setProgress((video.currentTime / video.duration) * 10000);
+      } else if (e.key === " ") {
+        handlePlayPause();
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -1358,7 +1367,6 @@ const VideoControls: React.FC<VideoControlsProps> = ({
           onInput={handleSeek}
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
-          onKeyDown={handleKeyDown}
         />
       </div>
 
