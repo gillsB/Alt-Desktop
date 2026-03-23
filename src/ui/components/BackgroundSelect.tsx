@@ -63,6 +63,7 @@ const BackgroundSelect: React.FC = () => {
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const gridItemRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
   const editingBgId = useRef<string | null>(null);
+  const gridContentRef = useRef<HTMLDivElement>(null);
 
   const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
 
@@ -366,6 +367,13 @@ const BackgroundSelect: React.FC = () => {
       fetchPage();
     }
   }, [filterOptions]);
+
+  useEffect(() => {
+    if (gridContentRef.current && page !== -1) {
+      // Scroll to top
+      gridContentRef.current.scrollTop = 0;
+    }
+  }, [page]);
 
   const handleClose = async () => {
     logger.info("BackgroundSelect window closed");
@@ -1098,7 +1106,10 @@ const BackgroundSelect: React.FC = () => {
             )}
           </div>
           <div className="background-select-content">
-            <div className={`background-grid ${iconSize}-icons`}>
+            <div
+              className={`background-grid ${iconSize}-icons`}
+              ref={gridContentRef}
+            >
               {summaries.map((bg) => (
                 <div
                   key={bg.id}
