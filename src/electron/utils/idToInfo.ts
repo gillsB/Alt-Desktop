@@ -37,11 +37,15 @@ export const idToBgJson = async (id: string): Promise<BgJson | null> => {
       return null;
     }
     const raw = await fs.promises.readFile(bgJsonPath, "utf-8");
+    if (!raw.trim()) {
+      logger.warn(`bg.json is empty for background id: ${id}`);
+      return null;
+    }
     const bg: BgJson = JSON.parse(raw);
-    // Return bj.json if it exists, else null
+    // Return bg.json if it exists, else null
     return bg;
   } catch (e) {
-    logger.error(`Failed to get background volume for id ${id}:`, e);
+    logger.error(`Failed to get background json for id ${id}:`, e);
     return null;
   }
 };

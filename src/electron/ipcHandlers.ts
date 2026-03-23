@@ -1410,77 +1410,82 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       includeTags = [],
       excludeTags = [],
     }: GetBackgroundSummariesRequest = {}) => {
-      const backgroundsFile = getBackgroundsJsonFilePath();
+      try {
+        const backgroundsFile = getBackgroundsJsonFilePath();
 
-      const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
-      const { backgrounds } = JSON.parse(raw);
+        const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
+        const { backgrounds } = JSON.parse(raw);
 
-      let entries: [string, number][] = Object.entries(backgrounds)
-        .sort(([, a], [, b]) => Number(b) - Number(a))
-        .map(([id, value]) => [id, Number(value)]);
+        let entries: [string, number][] = Object.entries(backgrounds)
+          .sort(([, a], [, b]) => Number(b) - Number(a))
+          .map(([id, value]) => [id, Number(value)]);
 
-      // Apply search filter
-      entries = await filterBackgroundEntries(
-        entries,
-        search,
-        includeTags,
-        excludeTags
-      );
+        // Apply search filter
+        entries = await filterBackgroundEntries(
+          entries,
+          search,
+          includeTags,
+          excludeTags
+        );
 
-      const total = entries.length;
-      entries = entries.slice(offset, offset + limit);
+        const total = entries.length;
+        entries = entries.slice(offset, offset + limit);
 
-      const results = [];
-      for (const [id] of entries) {
-        try {
-          const bgJson = await idToBgJson(id);
+        const results = [];
+        for (const [id] of entries) {
+          try {
+            const bgJson = await idToBgJson(id);
 
-          if (!bgJson) {
-            logger.error(`Failed to read bg.json for ${id}`);
+            if (!bgJson) {
+              logger.error(`Failed to read bg.json for ${id}`);
+              results.push({ id });
+              continue;
+            }
+
+            // Resolve icon and bgFile paths manually (saves two file reads compared to idToIconPath/idToBgFilePath)
+            const folderPath = await idToFolderPath(id);
+            let iconPath = null;
+            let bgFile = null;
+            if (bgJson.public?.icon) {
+              iconPath = path.join(folderPath, bgJson.public?.icon || "");
+            } else {
+              logger.warn(`No icon specified in bg.json for ${id}`);
+            }
+            if (bgJson.public?.bgFile) {
+              bgFile = path.join(folderPath, bgJson.public?.bgFile || "");
+            } else {
+              logger.warn(`No bgFile specified in bg.json for ${id}`);
+            }
+
+            results.push({
+              id,
+              name: bgJson.public?.name,
+              bgFile: bgFile || undefined,
+              description: bgJson.public?.description,
+              iconPath: iconPath || undefined,
+              tags: (bgJson.public?.tags ?? []).filter((t: string) =>
+                PUBLIC_TAGS_FLAT.includes(t)
+              ),
+              localProfile: bgJson.local?.profile,
+              localTags: (bgJson.local?.tags ?? []).filter((t: string) =>
+                (getSetting("localTags") as LocalTag[]).some(
+                  (tag) => tag.name === t
+                )
+              ),
+              localIndexed: bgJson.local?.indexed,
+              localVolume: bgJson.local?.volume,
+            });
+          } catch (e) {
+            logger.error(`Failed to process background ${id}:`, e);
             results.push({ id });
-            continue;
           }
-
-          // Resolve icon and bgFile paths manually (saves two file reads compared to idToIconPath/idToBgFilePath)
-          const folderPath = await idToFolderPath(id);
-          let iconPath = null;
-          let bgFile = null;
-          if (bgJson.public?.icon) {
-            iconPath = path.join(folderPath, bgJson.public?.icon || "");
-          } else {
-            logger.warn(`No icon specified in bg.json for ${id}`);
-          }
-          if (bgJson.public?.bgFile) {
-            bgFile = path.join(folderPath, bgJson.public?.bgFile || "");
-          } else {
-            logger.warn(`No bgFile specified in bg.json for ${id}`);
-          }
-
-          results.push({
-            id,
-            name: bgJson.public?.name,
-            bgFile: bgFile || undefined,
-            description: bgJson.public?.description,
-            iconPath: iconPath || undefined,
-            tags: (bgJson.public?.tags ?? []).filter((t: string) =>
-              PUBLIC_TAGS_FLAT.includes(t)
-            ),
-            localProfile: bgJson.local?.profile,
-            localTags: (bgJson.local?.tags ?? []).filter((t: string) =>
-              (getSetting("localTags") as LocalTag[]).some(
-                (tag) => tag.name === t
-              )
-            ),
-            localIndexed: bgJson.local?.indexed,
-            localVolume: bgJson.local?.volume,
-          });
-        } catch (e) {
-          logger.error(`Failed to process background ${id}:`, e);
-          results.push({ id });
         }
-      }
 
-      return { results, total };
+        return { results, total };
+      } catch (error) {
+        logger.error("Failed to get background summaries:", error);
+        return { results: [], total: 0 };
+      }
     }
   );
   ipcMainHandle(
@@ -1492,69 +1497,66 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       includeTags = [],
       excludeTags = [],
     }: GetBackgroundPageForIdRequest) => {
-      const backgroundsFile = getBackgroundsJsonFilePath();
-      const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
-      const { backgrounds } = JSON.parse(raw);
+      try {
+        const backgroundsFile = getBackgroundsJsonFilePath();
+        const raw = await fs.promises.readFile(backgroundsFile, "utf-8");
+        const { backgrounds } = JSON.parse(raw);
 
-      let entries: [string, number][] = Object.entries(backgrounds)
-        .sort(([, a], [, b]) => Number(b) - Number(a))
-        .map(([id, value]) => [id, Number(value)]);
+        let entries: [string, number][] = Object.entries(backgrounds)
+          .sort(([, a], [, b]) => Number(b) - Number(a))
+          .map(([id, value]) => [id, Number(value)]);
 
-      // Apply search filter
-      entries = await filterBackgroundEntries(
-        entries,
-        search,
-        includeTags,
-        excludeTags
-      );
+        // Apply search filter
+        entries = await filterBackgroundEntries(
+          entries,
+          search,
+          includeTags,
+          excludeTags
+        );
 
-      const idx = entries.findIndex(([bgId]) => bgId === id);
-      const page = idx !== -1 ? Math.floor(idx / pageSize) : -1;
+        const idx = entries.findIndex(([bgId]) => bgId === id);
+        const page = idx !== -1 ? Math.floor(idx / pageSize) : -1;
 
-      // Optionally, return the summary for that ID if found
-      let summary: BackgroundSummary | undefined;
-      if (idx !== -1) {
-        const baseDir = getBackgroundFilePath();
-        const folderPath = id.includes("/") ? path.join(...id.split("/")) : id;
-        const bgJsonPath = path.join(baseDir, folderPath, "bg.json");
-        try {
-          const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
-          const bg = JSON.parse(rawBg);
-          let iconPath = "";
-          let bgFile = "";
-          if (bg.public.icon) {
-            iconPath = path.join(
-              getBackgroundFilePath(),
-              folderPath,
-              bg.public.icon
-            );
+        // Optionally, return the summary for that ID if found
+        let summary: BackgroundSummary | undefined;
+        if (idx !== -1) {
+          const folderPath = await idToFolderPath(id);
+          const bgJsonPath = path.join(folderPath, "bg.json");
+          try {
+            const rawBg = await fs.promises.readFile(bgJsonPath, "utf-8");
+            const bg = rawBg.trim() ? JSON.parse(rawBg) : {};
+            let iconPath = "";
+            let bgFile = "";
+            if (bg.public?.icon) {
+              iconPath = path.join(folderPath, bg.public.icon);
+            }
+            if (bg.public?.bgFile) {
+              bgFile = path.join(folderPath, bg.public.bgFile);
+            }
+            summary = {
+              id,
+              name: bg.public?.name,
+              bgFile: bgFile,
+              description: bg.public?.description,
+              iconPath: iconPath,
+              tags: (bg.public?.tags ?? []).filter(
+                (
+                  t: string // Only return public tags.
+                ) => PUBLIC_TAGS_FLAT.includes(t)
+              ),
+              localTags: bg.local?.tags ?? [],
+            };
+          } catch (error) {
+            logger.error(`Failed to parse bg.json for ${id}:`, error);
+            summary = { id };
           }
-          if (bg.public.bgFile) {
-            bgFile = path.join(
-              getBackgroundFilePath(),
-              folderPath,
-              bg.public.bgFile
-            );
-          }
-          summary = {
-            id,
-            name: bg.public?.name,
-            bgFile: bgFile,
-            description: bg.public?.description,
-            iconPath: iconPath,
-            tags: (bg.public?.tags ?? []).filter(
-              (
-                t: string // Only return public tags.
-              ) => PUBLIC_TAGS_FLAT.includes(t)
-            ),
-            localTags: bg.local?.tags ?? [],
-          };
-        } catch {
-          summary = { id };
         }
-      }
 
-      return { page, summary };
+        return { page, summary };
+      } catch (error) {
+        logger.error("Failed to get background page for id:", error);
+        return { page: -1, summary: { id } };
+      }
     }
   );
 
