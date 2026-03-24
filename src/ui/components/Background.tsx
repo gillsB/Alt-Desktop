@@ -90,6 +90,9 @@ const Background: React.FC<BackgroundProps> = ({
   const showVideoControlsRef = useRef(showVideoControls); // Persists its state across redraws due to changing backgrounds
   const videoControlsPositionRef = useRef({ x: -100, y: -100 });
   const [videoControlsWidth, setVideoControlsWidth] = useState(385);
+  const [isVideoControlsMaximized, setIsVideoControlsMaximized] =
+    useState(false);
+  const videoControlsSavedStateRef = useRef({ x: 0, y: 0, width: 385 });
   const previousVolumeRef = useRef<number>(1);
 
   useEffect(() => {
@@ -114,6 +117,7 @@ const Background: React.FC<BackgroundProps> = ({
           setVolumeFromDefault();
           const video = videoRef.current;
           video.play();
+          setIsVideoControlsMaximized(false);
         }
         setShowVideoControls(!!state.showVideoControls);
       }
@@ -248,6 +252,45 @@ const Background: React.FC<BackgroundProps> = ({
       error: undefined,
       ffprobe: null,
     });
+  };
+
+  const toggleVideoControlsMaximize = (clickPoint: {
+    x: number;
+    y: number;
+  }) => {
+    if (!showVideoControls) return;
+
+    if (isVideoControlsMaximized) {
+      // On un-maximize, center around the where user double-clicked.
+      const width = videoControlsSavedStateRef.current.width;
+      const height = 55;
+
+      let x = clickPoint.x - width / 2;
+      let y = clickPoint.y - height / 4; // Not happy with this but this places component where user can click -> drag instead of click -> seek.
+
+      x = Math.max(0, Math.min(x, window.innerWidth - width));
+      y = Math.max(0, Math.min(y, window.innerHeight - height));
+
+      videoControlsPositionRef.current = { x, y };
+      setVideoControlsWidth(width);
+      setIsVideoControlsMaximized(false);
+      return;
+    }
+
+    videoControlsSavedStateRef.current = {
+      x: videoControlsPositionRef.current.x,
+      y: videoControlsPositionRef.current.y,
+      width: videoControlsWidth,
+    };
+
+    const newY = Math.max(
+      0,
+      Math.min(videoControlsPositionRef.current.y, window.innerHeight - 55)
+    );
+
+    videoControlsPositionRef.current = { x: 0, y: newY };
+    setVideoControlsWidth(window.innerWidth);
+    setIsVideoControlsMaximized(true);
   };
 
   const summarizeFfprobe = (ffprobe: VideoMetadata) => {
@@ -871,6 +914,8 @@ const Background: React.FC<BackgroundProps> = ({
             componentWidth={videoControlsWidth}
             setComponentWidth={setVideoControlsWidth}
             previousVolumeRef={previousVolumeRef}
+            onDoubleClickMaximize={toggleVideoControlsMaximize}
+            isMaximized={isVideoControlsMaximized}
           />
         )}
       </>
@@ -934,6 +979,8 @@ interface VideoControlsProps {
   componentWidth: number;
   setComponentWidth: (width: number) => void;
   previousVolumeRef: React.RefObject<number>;
+  onDoubleClickMaximize: (clickPosition: { x: number; y: number }) => void;
+  isMaximized: boolean;
 }
 
 const VideoControls: React.FC<VideoControlsProps> = ({
@@ -948,6 +995,8 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   componentWidth,
   setComponentWidth,
   previousVolumeRef,
+  onDoubleClickMaximize,
+  isMaximized,
 }) => {
   const [dragging, setDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -990,6 +1039,22 @@ const VideoControls: React.FC<VideoControlsProps> = ({
 
     let x = positionRef.current.x;
     let y = positionRef.current.y;
+
+    if (isMaximized) {
+      x = 0;
+      y = Math.max(
+        0,
+        Math.min(positionRef.current.y, window.innerHeight - controlsHeight)
+      );
+      positionRef.current = { x, y };
+      setComponentWidth(window.innerWidth);
+      if (controlsElement) {
+        controlsElement.style.left = `${x}px`;
+        controlsElement.style.top = `${y}px`;
+        controlsElement.style.width = `${window.innerWidth}px`;
+      }
+      return;
+    }
     const minX = 0;
     const minY = 0;
 
@@ -1166,12 +1231,31 @@ const VideoControls: React.FC<VideoControlsProps> = ({
 
   // Drag logic
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.detail === 2) {
+      e.preventDefault();
+      return;
+    }
+    // Only allow drag when user clicks on blank area
+    if (e.target !== e.currentTarget) {
+      return;
+    }
+
     setDragging(true);
     dragOffset.current = {
       x: e.clientX - positionRef.current.x,
       y: e.clientY - positionRef.current.y,
     };
     document.body.style.userSelect = "none";
+  };
+
+  const handleControlsDoubleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target !== e.currentTarget) {
+      // Ignore double-clicks on any child controls (pause/play, volume, seek, etc.)
+      return;
+    }
+    e.stopPropagation();
+    onDoubleClickMaximize({ x: e.clientX, y: e.clientY });
   };
 
   const handleResizeMouseDown = (
@@ -1295,6 +1379,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
         width: componentWidth,
       }}
       onMouseDown={handleMouseDown}
+      onDoubleClick={handleControlsDoubleClick}
     >
       <div
         className="resize-handle resize-handle-left"
