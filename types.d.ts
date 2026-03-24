@@ -212,6 +212,11 @@ type VideoMetadata = {
   }>;
 };
 
+interface TestProfileIconsResult {
+  id: string;
+  problems: string[];
+}
+
 interface BackgroundFileProgressEvent {
   progress: number;
   done: boolean;
@@ -373,6 +378,7 @@ interface EventParamMapping {
   transferIconImage: [string, string, string, string];
   importAllIconsToDesktopCache: [];
   hoverHighlightIcon: [id?: string];
+  testProfileIcons: [profile: string];
 }
 
 // The returns from the main process to the renderer
@@ -473,6 +479,7 @@ type EventPayloadMapping = {
   transferIconImage: string | null;
   importAllIconsToDesktopCache: boolean;
   hoverHighlightIcon: boolean;
+  testProfileIcons: TestProfileIconsResult[] | boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -671,5 +678,8 @@ interface Window {
     ) => Promise<string | null>;
     importAllIconsToDesktopCache: () => Promise<boolean>;
     hoverHighlightIcon: (id?: string) => Promise<boolean>;
+    testProfileIcons: (
+      profile: string
+    ) => Promise<TestProfileIconsResult[] | boolean>;
   };
 }

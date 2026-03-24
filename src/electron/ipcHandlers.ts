@@ -2470,4 +2470,25 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
     return sendHoverHighlightIcon();
   });
+  // No problems and no errors = true, errors = false, problems with icons = returns array TestProfileIconsResult
+  ipcMainHandle(
+    "testProfileIcons",
+    async (profile: string): Promise<TestProfileIconsResult[] | boolean> => {
+      try {
+        const iconsFolder = getIconsFolderPath(profile);
+        if (!fs.existsSync(iconsFolder)) {
+          logger.error(
+            `testProfileIcons: icons folder does not exist: ${iconsFolder}`
+          );
+          return false;
+        } else {
+          logger.info(`Testing icons in profile ${profile} at ${iconsFolder}`);
+          return true;
+        }
+      } catch (error) {
+        logger.error(`testProfileIcons failed: ${error}`);
+        return false;
+      }
+    }
+  );
 }
