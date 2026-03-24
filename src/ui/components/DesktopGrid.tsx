@@ -2371,6 +2371,20 @@ const DesktopGrid: React.FC = () => {
               <span className="debug-legend-item">
                 <input
                   type="checkbox"
+                  checked={showVideoControls}
+                  onChange={handleShowVideoControls}
+                  id="legend-showvideocontrols"
+                />
+                <label
+                  htmlFor="legend-showvideocontrols"
+                  style={{ cursor: "pointer" }}
+                >
+                  Show Video Controls
+                </label>
+              </span>
+              <span className="debug-legend-item">
+                <input
+                  type="checkbox"
                   checked={showVideoStatus}
                   onChange={async () => {
                     const newValue = !showVideoStatus;
