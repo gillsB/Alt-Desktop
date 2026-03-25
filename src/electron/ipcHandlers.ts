@@ -106,6 +106,7 @@ import {
   pendingSmallWindowResponses,
   showSmallWindow,
 } from "./windows/subWindowManager.js";
+import { transparentImageValues } from "./utils/constants.js";
 
 ffmpeg.setFfprobePath(ffprobeStatic.path);
 
@@ -2513,21 +2514,6 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
               iconProblems.push("programLink");
             }
           }
-
-          const transparentImageValues = new Set([
-            " ",
-            "none",
-            "blank",
-            "empty",
-            "null",
-            "undefined",
-            "transparent",
-            "invisible",
-            "noicon",
-            "false",
-            "0",
-            "n/a",
-          ]);
 
           // Test if image exists in icons folder (skip if blank)
           if (

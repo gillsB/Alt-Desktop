@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { transparentImageValues } from "../../electron/utils/constants";
 import "../styles/SafeImage.css";
 import { createLogger } from "../util/uiLogger";
 
@@ -20,20 +21,7 @@ const getImagePath = (
   timestamp?: number
 ) => {
   const imageLower = imagePath.toLowerCase();
-  const transparentImageValues = new Set([
-    " ",
-    "none",
-    "blank",
-    "empty",
-    "null",
-    "undefined",
-    "transparent",
-    "invisible",
-    "noicon",
-    "false",
-    "0",
-    "n/a",
-  ]);
+
   if (transparentImageValues.has(imageLower)) {
     return ""; // Return empty string for special cases
   }
