@@ -2476,7 +2476,9 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     async (profile: string): Promise<TestProfileIconsResult[] | boolean> => {
       try {
         const iconsFolder = getIconsFolderPath(profile);
-        if (!fs.existsSync(iconsFolder)) {
+        try {
+          await fs.promises.access(iconsFolder);
+        } catch {
           logger.error(
             `testProfileIcons: icons folder does not exist: ${iconsFolder}`
           );
@@ -2484,14 +2486,16 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         }
 
         const profileJsonPath = getProfileJsonPath(profile);
-        if (!fs.existsSync(profileJsonPath)) {
+        try {
+          await fs.promises.access(profileJsonPath);
+        } catch {
           logger.error(
             `testProfileIcons: profile json not found: ${profileJsonPath}`
           );
           return false;
         }
 
-        const raw = fs.readFileSync(profileJsonPath, "utf-8");
+        const raw = await fs.promises.readFile(profileJsonPath, "utf-8");
         const parsed: DesktopIconData = JSON.parse(raw);
         const icons: DesktopIcon[] = parsed.icons || [];
 
@@ -2501,12 +2505,41 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         for (const icon of icons) {
           const iconProblems: string[] = [];
 
-          // Test programLink if it's not blank
+          // Test if programLink file exists (skip if blank)
           if (icon.programLink && icon.programLink.trim() !== "") {
             try {
               await fs.promises.access(icon.programLink);
             } catch {
               iconProblems.push("programLink");
+            }
+          }
+
+          const transparentImageValues = new Set([
+            " ",
+            "none",
+            "blank",
+            "empty",
+            "null",
+            "undefined",
+            "transparent",
+            "invisible",
+            "noicon",
+            "false",
+            "0",
+            "n/a",
+          ]);
+
+          // Test if image exists in icons folder (skip if blank)
+          if (
+            icon.image &&
+            icon.image.trim() !== "" &&
+            !transparentImageValues.has(icon.image.toLowerCase())
+          ) {
+            const iconImagePath = path.join(iconsFolder, icon.id, icon.image);
+            try {
+              await fs.promises.access(iconImagePath);
+            } catch {
+              iconProblems.push("image");
             }
           }
 
