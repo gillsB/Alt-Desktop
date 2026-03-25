@@ -2481,10 +2481,50 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
             `testProfileIcons: icons folder does not exist: ${iconsFolder}`
           );
           return false;
-        } else {
-          logger.info(`Testing icons in profile ${profile} at ${iconsFolder}`);
-          return true;
         }
+
+        const profileJsonPath = getProfileJsonPath(profile);
+        if (!fs.existsSync(profileJsonPath)) {
+          logger.error(
+            `testProfileIcons: profile json not found: ${profileJsonPath}`
+          );
+          return false;
+        }
+
+        const raw = fs.readFileSync(profileJsonPath, "utf-8");
+        const parsed: DesktopIconData = JSON.parse(raw);
+        const icons: DesktopIcon[] = parsed.icons || [];
+
+        const results: TestProfileIconsResult[] = [];
+
+        // Test each icon
+        for (const icon of icons) {
+          const iconProblems: string[] = [];
+
+          // Test programLink if it's not blank
+          if (icon.programLink && icon.programLink.trim() !== "") {
+            try {
+              await fs.promises.access(icon.programLink);
+            } catch {
+              iconProblems.push("programLink");
+            }
+          }
+
+          // Push problems to result
+          if (iconProblems.length > 0) {
+            results.push({
+              id: icon.id,
+              problems: iconProblems,
+            });
+          }
+        }
+
+        logger.info(
+          `Testing icons in profile ${profile} at ${iconsFolder}: found ${results.length} icon(s) with problems: \n${JSON.stringify(results)}`
+        );
+
+        // Return true if no problems, otherwise return array of problems
+        return results.length === 0 ? true : results;
       } catch (error) {
         logger.error(`testProfileIcons failed: ${error}`);
         return false;
