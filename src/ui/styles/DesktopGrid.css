@@ -240,6 +240,23 @@
   z-index: -1;
 }
 
+.debug-problem-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ff2e2e;
+  border: 1px solid #fff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.65);
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.desktop-icon .debug-problem-dot {
+  top: 4px;
+  right: 4px;
+}
+
 .swap-highlight {
   border: 2px dashed rgb(var(--color-highlightSwap));
   box-shadow: 0 0 10px rgba(var(--color-highlightSwap), 0.5);

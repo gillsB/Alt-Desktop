@@ -82,6 +82,10 @@ const DesktopGrid: React.FC = () => {
   const [showVideoControls, setShowVideoControls] = useState<boolean>(false);
   const [multipleProfiles, setMultipleProfiles] = useState<boolean>(false);
 
+  const [profileIconProblems, setProfileIconProblems] = useState<
+    Record<string, string[]>
+  >({});
+
   const [editIconActive, setEditIconActive] = useState(false);
 
   const fetchMultipleProfilesSetting = async () => {
@@ -1838,6 +1842,46 @@ const DesktopGrid: React.FC = () => {
     return [Math.round(newOffsetX), Math.round(newOffsetY)];
   }
 
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadProfileTestResults() {
+      if (!showDebug || !profile) {
+        setProfileIconProblems({});
+        return;
+      }
+
+      try {
+        const result = await window.electron.testProfileIcons(profile);
+        if (!mounted) return;
+
+        if (Array.isArray(result)) {
+          const problemMap: Record<string, string[]> = {};
+          result.forEach((item) => {
+            if (
+              item?.id &&
+              Array.isArray(item.problems) &&
+              item.problems.length
+            )
+              problemMap[item.id] = item.problems;
+          });
+          setProfileIconProblems(problemMap);
+        } else {
+          setProfileIconProblems({});
+        }
+      } catch (error) {
+        console.error("Failed to run testProfileIcons:", error);
+        if (mounted) setProfileIconProblems({});
+      }
+    }
+
+    loadProfileTestResults();
+
+    return () => {
+      mounted = false;
+    };
+  }, [showDebug, profile]);
+
   // TODO add drag ctrl modifier which allows freely moving icons, syncs it to nearest icon home,
   // and when dropping saves it with the offsetX/Y values.
 
@@ -2091,6 +2135,9 @@ const DesktopGrid: React.FC = () => {
             const iconWidth = icon.width || defaultIconSize;
             const iconHeight = icon.height || defaultIconSize;
 
+            const problems = profileIconProblems[icon.id];
+            const problemTooltip = problems?.join(", ");
+
             return (
               <React.Fragment
                 key={`multi-highlight-${icon.id}-${icon.row}-${icon.col}`}
@@ -2150,6 +2197,28 @@ const DesktopGrid: React.FC = () => {
                               : "Icon in default position/size"
                       }
                     />
+                  </>
+                )}
+                {problems?.length > 0 && (
+                  <>
+                    <div
+                      className="debug-problem-dot"
+                      style={{
+                        left: homeLeft + iconBox - 8,
+                        top: homeTop + 4,
+                      }}
+                      title={problemTooltip}
+                    />
+                    {hasOffset && (
+                      <div
+                        className="debug-problem-dot"
+                        style={{
+                          left: actualLeft + iconWidth - 8,
+                          top: actualTop + 4,
+                        }}
+                        title={problemTooltip}
+                      />
+                    )}
                   </>
                 )}
               </React.Fragment>
