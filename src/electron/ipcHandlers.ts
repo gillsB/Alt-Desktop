@@ -22,6 +22,7 @@ import {
   bgPathToResolution,
   bgPathToVideoMetadata,
 } from "./utils/bgPathToInfo.js";
+import { transparentImageValues } from "./utils/constants.js";
 import { generateIcon } from "./utils/generateIcon.js";
 import {
   idToBackgroundFileType,
@@ -106,7 +107,6 @@ import {
   pendingSmallWindowResponses,
   showSmallWindow,
 } from "./windows/subWindowManager.js";
-import { transparentImageValues } from "./utils/constants.js";
 
 ffmpeg.setFfprobePath(ffprobeStatic.path);
 
@@ -1240,6 +1240,7 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       }
     }
   );
+  // Backgrounds always save full path for video, for now, so we can directly mime-test it.
   ipcMainHandle("convertToVideoFileUrl", async (filePath: string) => {
     try {
       // Check if the file exists and is a video
@@ -1247,11 +1248,10 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
         logger.warn(`Video file does not exist: ${filePath}`);
         return null;
       }
-      // Check file extension
-      const fileExt = path.extname(filePath).toLowerCase();
-      const allowedExtensions = [".mp4", ".webm", ".mov", ".ogg", ".mkv"];
-
-      if (!allowedExtensions.includes(fileExt)) {
+      // Check mime type (false if failed type test)
+      const mimeType = getMimeType(filePath);
+      // No type or not video
+      if (!mimeType || !mimeType.startsWith("video/")) {
         logger.warn(`Not a valid video file: ${filePath}`);
         return null;
       }
@@ -1265,23 +1265,13 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
       return null;
     }
   });
+  // Backgrounds always save full path for image, for now, so we can directly mime-test it.
   ipcMainHandle("getBackgroundImagePath", async (filePath: string) => {
     try {
-      // Check file extension
-      const fileExt = path.extname(filePath).toLowerCase();
-      const allowedExtensions = [
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".gif",
-        ".bmp",
-        ".svg",
-        ".webp",
-        ".lnk",
-        ".ico",
-      ];
+      // Check mime type (false if failed type test)
+      const mimeType = getMimeType(filePath);
 
-      if (!allowedExtensions.includes(fileExt)) {
+      if (!mimeType || !mimeType.startsWith("image/")) {
         logger.warn(`Not a valid image file: ${filePath}`);
         return null;
       }
