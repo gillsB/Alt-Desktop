@@ -399,20 +399,25 @@ async function createBgJsonIfPossible(
     );
     const mediaFiles: { name: string; size: number; isVideo: boolean }[] = [];
 
-    const imageExts = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
-    const videoExts = [".mp4", ".avi", ".mkv", ".webm", ".mov", ".wmv"];
-
     for (const file of files) {
-      const ext = path.extname(file).toLowerCase();
-      if (imageExts.includes(ext) || videoExts.includes(ext)) {
-        const filePath = path.join(folderPath, file);
-        const stat = fs.statSync(filePath);
-        mediaFiles.push({
-          name: file,
-          size: stat.size,
-          isVideo: videoExts.includes(ext),
-        });
+      const filePath = path.join(folderPath, file);
+      const mimeType = getMimeType(filePath);
+      if (!mimeType || typeof mimeType !== "string") {
+        continue;
       }
+
+      const isImage = mimeType.startsWith("image/");
+      const isVideo = mimeType.startsWith("video/");
+      if (!isImage && !isVideo) {
+        continue;
+      }
+
+      const stat = fs.statSync(filePath);
+      mediaFiles.push({
+        name: file,
+        size: stat.size,
+        isVideo,
+      });
     }
 
     if (mediaFiles.length === 0) {
@@ -430,10 +435,8 @@ async function createBgJsonIfPossible(
     let bgFile: string;
 
     if (mediaFiles.length === 1) {
-      // If single media file and is image, set icon image to it.
-      if (
-        imageExts.some((ext) => mediaFiles[0].name.toLowerCase().endsWith(ext))
-      ) {
+      // If only one media file and it is an image, use it as icon too.
+      if (!mediaFiles[0].isVideo) {
         iconFile = mediaFiles[0].name;
       }
       bgFile = mediaFiles[0].name;

@@ -1,6 +1,5 @@
 import { protocol } from "electron";
 import fs from "fs";
-import path from "path";
 import { URL } from "url";
 import { createVideoLoggerForFile } from "./logging.js";
 import { getMimeType } from "./utils/util.js";
@@ -106,10 +105,15 @@ export function registerVideoFileProtocol(
       }
 
       // Security check: File must be a valid video type
-      const ext = path.extname(decodedPath).toLowerCase();
-      const allowedExtensions = [".mp4", ".webm", ".mov", ".ogg", ".mkv"];
-      if (!allowedExtensions.includes(ext)) {
-        logger.warn(`Blocked non-video file request: "${decodedPath}"`);
+      const mimeType = getMimeType(decodedPath);
+      if (
+        !mimeType ||
+        typeof mimeType !== "string" ||
+        !mimeType.startsWith("video/")
+      ) {
+        logger.warn(
+          `Blocked file with unsupported MIME type: "${decodedPath}" (${mimeType})`
+        );
         performanceMetrics.errors++;
         return new Response("Forbidden: Only video files are allowed", {
           status: 403,
@@ -131,20 +135,12 @@ export function registerVideoFileProtocol(
       const stat = fs.statSync(decodedPath);
       const fileSize = stat.size;
 
-      // Get content type based on file extension
-      let contentType = getMimeType(ext) || "video/mp4";
-
-      // Ensure proper content type for common video formats
-      if (ext === ".mp4" || ext === ".m4v") contentType = "video/mp4";
-      if (ext === ".webm") contentType = "video/webm";
-      if (ext === ".mov") contentType = "video/quicktime";
-
       // Handle range requests
       const rangeHeader = req.headers.get("Range");
 
       // Add common headers for both range and non-range requests
       const commonHeaders = {
-        "Content-Type": contentType,
+        "Content-Type": mimeType,
         "Accept-Ranges": "bytes",
         "Cache-Control": `public, max-age=${options.cacheMaxAge}`,
         Connection: "keep-alive",
