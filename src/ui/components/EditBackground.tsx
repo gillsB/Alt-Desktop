@@ -699,7 +699,7 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
         if (!bgFileType) {
           await showSmallWindow(
             "Background File not found",
-            `Selected Background File Path does not exist: ${bgFilePath}` +
+            `Selected Background File Path does not exist: \n${updatedSummary.bgFile}` +
               "\nPlease select a valid image or video file.",
             ["OK"]
           );
@@ -727,6 +727,15 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
           true // icons always save file to background folder
         );
       } else {
+        if (!iconPathType) {
+          await showSmallWindow(
+            "File not found",
+            `Selected Preview Thumbnail file path does not exist: \n${updatedSummary.iconPath}` +
+              "\nPlease select a valid image file.",
+            ["OK"]
+          );
+          return;
+        }
         await showSmallWindow(
           "Invalid File Type",
           `Selected Icon File Path is not an image, it is a ${iconPathType} type` +
