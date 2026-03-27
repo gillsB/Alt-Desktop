@@ -3,6 +3,7 @@ import followRedirects from "follow-redirects";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import sharp from "sharp";
 import { createLoggerForFile } from "../logging.js";
 import { getScriptsPath } from "../pathResolver.js";
 import { getSetting } from "../settings.js";
@@ -157,30 +158,39 @@ async function fetchAndSaveFavicon(
     const { hostname } = new URL(url);
     const baseName = hostname.replace(/^www\./, "").replace(/\./g, "_");
     const sanitizedBaseName = baseName.replace(/[^a-zA-Z0-9_]/g, "");
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=${iconSize}`;
-    logger.info(faviconUrl);
+
+    // Always fetch 256, google only returns 16, 32, 64, 128, 256 generally
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=256`;
+
     const fileName = `favicon_${sanitizedBaseName}.png`;
     const savePath = path.join(targetDir, fileName);
 
-    await new Promise<void>((resolve, reject) => {
+    // Download into buffer instead of file
+    const imageBuffer = await new Promise<Buffer>((resolve, reject) => {
       https
         .get(faviconUrl, (res) => {
           if (res.statusCode !== 200) {
             reject(new Error(`Failed to get favicon: ${res.statusCode}`));
             return;
           }
-          const fileStream = fs.createWriteStream(savePath);
-          res.pipe(fileStream);
-          fileStream.on("finish", () => {
-            fileStream.close();
-            resolve();
-          });
-          fileStream.on("error", reject);
+
+          const chunks: Buffer[] = [];
+          res.on("data", (chunk) => chunks.push(chunk));
+          res.on("end", () => resolve(Buffer.concat(chunks)));
+          res.on("error", reject);
         })
         .on("error", reject);
     });
 
-    logger.info(`Favicon downloaded from Google API: ${savePath}`);
+    // Resize and save
+    await sharp(imageBuffer)
+      .resize(iconSize, iconSize, {
+        fit: "contain",
+      })
+      .png()
+      .toFile(savePath);
+
+    logger.info(`Favicon downloaded and resized: ${savePath}`);
     return savePath;
   } catch (err) {
     logger.warn(`Failed to download favicon from Google API: ${err}`);
