@@ -128,8 +128,9 @@ type SettingsData = {
   windowType?: WindowType;
   defaultBackgroundPath?: string; // location for saving new backgrounds and default:: location
   theme?: ThemeName;
-  // Not yet in settings menu
   multipleProfiles?: boolean;
+  // Not yet in settings menu
+  autoGenIconSize?: number;
   // Do not appear in Settings window
   background?: string;
   newBackgroundID?: number;

@@ -5,6 +5,7 @@ import os from "os";
 import path from "path";
 import { createLoggerForFile } from "../logging.js";
 import { getScriptsPath } from "../pathResolver.js";
+import { getSetting } from "../settings.js";
 import { resolveShortcut } from "./util.js";
 
 const logger = createLoggerForFile("generateIcon.ts");
@@ -20,6 +21,8 @@ export const generateIcon = async (
     programLink = resolveShortcut(programLink);
     logger.info(`directory for save path: ${savePath} `);
     logger.info(`Extracting file icons for: ${programLink}, ${webLink}`);
+
+    const iconSize = (getSetting("autoGenIconSize") as number) || 128;
 
     // Collect all found file paths
     const foundPaths: string[] = [];
@@ -48,7 +51,11 @@ export const generateIcon = async (
         webLink = `https://${webLink}`;
         logger.info(`Formatted website link to: ${webLink}`);
       }
-      const faviconPath = await fetchAndSaveFavicon(webLink, targetDir);
+      const faviconPath = await fetchAndSaveFavicon(
+        webLink,
+        targetDir,
+        iconSize
+      );
       if (faviconPath) foundPaths.push(path.basename(faviconPath));
     }
 
@@ -87,7 +94,6 @@ export const generateIcon = async (
       foundPaths.push(ensureInTargetDir(icoSource));
     });
 
-    const iconSize = 256;
     const iconFileName = `${path.basename(programLink, path.extname(programLink))}.png`;
     const outputPath = path.join(targetDir, iconFileName);
 
@@ -145,13 +151,13 @@ export const generateIcon = async (
 async function fetchAndSaveFavicon(
   url: string,
   targetDir: string,
-  size: number = 256
+  iconSize: number
 ): Promise<string | null> {
   try {
     const { hostname } = new URL(url);
     const baseName = hostname.replace(/^www\./, "").replace(/\./g, "_");
     const sanitizedBaseName = baseName.replace(/[^a-zA-Z0-9_]/g, "");
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=${size}`;
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=${iconSize}`;
     logger.info(faviconUrl);
     const fileName = `favicon_${sanitizedBaseName}.png`;
     const savePath = path.join(targetDir, fileName);
@@ -179,7 +185,7 @@ async function fetchAndSaveFavicon(
   } catch (err) {
     logger.warn(`Failed to download favicon from Google API: ${err}`);
     // Fallback: try to get browser icon
-    const browserIcon = await browserIconToImage(targetDir, size);
+    const browserIcon = await browserIconToImage(targetDir, iconSize);
     if (browserIcon) {
       logger.info(`Returned browser icon as fallback: ${browserIcon}`);
       return browserIcon;
@@ -190,7 +196,7 @@ async function fetchAndSaveFavicon(
 
 async function browserIconToImage(
   targetDir: string,
-  iconSize: number = 256
+  iconSize: number
 ): Promise<string | null> {
   const browserPath = getDefaultBrowserPath();
   if (!browserPath) return null;

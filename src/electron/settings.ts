@@ -37,6 +37,7 @@ export const defaultSettings: SettingsData = {
   localTags: [],
   theme: "system",
   multipleProfiles: false,
+  autoGenIconSize: 256,
 };
 
 const logger = createLoggerForFile("settings.ts");
