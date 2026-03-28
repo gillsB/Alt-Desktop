@@ -69,6 +69,7 @@ const Background: React.FC<BackgroundProps> = ({
   });
   const [isStatusModalDragging, setIsStatusModalDragging] = useState(false);
   const statusModalDragOffsetRef = useRef({ x: 0, y: 0 });
+  const lastVideoMetadataPathRef = useRef<string>("");
 
   // Performance tracking states
   const [suspendCount, setSuspendCount] = useState(0);
@@ -606,13 +607,23 @@ const Background: React.FC<BackgroundProps> = ({
       hasLoggedSuspendsRef.current = false;
 
       try {
-        const metadata = await window.electron.getVideoMetadata(backgroundPath);
-        updateBackgroundStatus({
-          status: "applied",
-          path: backgroundPath,
-          message: "Video background applied",
-          ffprobe: metadata,
-        });
+        if (lastVideoMetadataPathRef.current !== backgroundPath) {
+          const metadata =
+            await window.electron.getVideoMetadata(backgroundPath);
+          lastVideoMetadataPathRef.current = backgroundPath;
+          updateBackgroundStatus({
+            status: "applied",
+            path: backgroundPath,
+            message: "Video background applied",
+            ffprobe: metadata,
+          });
+        } else {
+          updateBackgroundStatus({
+            status: "applied",
+            path: backgroundPath,
+            message: "Video background applied",
+          });
+        }
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);
         updateBackgroundStatus({
@@ -1187,10 +1198,12 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   };
 
   // Seek bar change
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSeek = (e: React.FormEvent<HTMLInputElement>) => {
     const video = videoRef.current;
     if (!video || !video.duration) return;
-    const newTime = (parseFloat(e.target.value) / 10000) * video.duration;
+    const newTime =
+      (parseFloat((e.target as HTMLInputElement).value) / 10000) *
+      video.duration;
     video.currentTime = newTime;
     setProgress((newTime / video.duration) * 10000);
   };
