@@ -235,6 +235,34 @@ const EditIcon: React.FC = () => {
     try {
       const oldIcon = originalIcon.current ?? null;
 
+      // If id has suffix (_1 _2 etc.), check if base name or lesser _# available and use if so
+      const idSuffixMatch = icon.id?.match(/^(.*?)(?:_(\d+))$/);
+      if (idSuffixMatch) {
+        const baseId = idSuffixMatch[1];
+        try {
+          const candidateId = await window.electron.ensureUniqueIconId(
+            profile,
+            baseId
+          );
+
+          if (candidateId === baseId) {
+            logger.info(
+              `Icon ID '${icon.id}' can be reduced to base '${baseId}', applying before save.`
+            );
+            icon.id = baseId;
+          } else {
+            logger.info(
+              `Icon ID '${icon.id}' cannot be reduced to base '${baseId}' (candidate: '${candidateId}'), keeping existing ID.`
+            );
+          }
+        } catch (error) {
+          logger.warn(
+            `ensureUniqueIconId failed for base id '${baseId}', keeping current ID '${icon.id}':`,
+            error
+          );
+        }
+      }
+
       if (!icon.image && (icon.programLink || icon.websiteLink)) {
         logger.info("Attempting to generate icon for icon with no image.");
         const selectedIcon = await handleGenerateIcon();

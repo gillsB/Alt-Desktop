@@ -2800,19 +2800,16 @@ export async function saveIcon(
     let newId = newIcon.id;
     const baseOldId = (oldId || "").match(/^(.*?)(?:_\d+)?$/)?.[1] || oldId;
     const iconName = (newIcon.name || "").trim();
-    let nameChanged = false;
 
     // Determine new id if name changed or unnamed new icon
     if (oldIcon && !iconName) {
       const gen = await ensureUniqueIconId(useProfile, "unknownIcon");
       if (gen === null) return { success: false, error: "failed_read" };
       newId = gen;
-      nameChanged = true;
     } else if (iconName && baseOldId !== iconName) {
       const gen = await ensureUniqueIconId(useProfile, iconName);
       if (gen === null) return { success: false, error: "failed_read" };
       newId = gen;
-      nameChanged = true;
     }
 
     // Early field checks (currently only programLink)
@@ -2831,8 +2828,8 @@ export async function saveIcon(
       };
     }
 
-    // If name changed and id differs, attempt rename of folder to newId
-    if (nameChanged && newId !== oldId) {
+    // If id differs, attempt rename of folder to newId
+    if (newId !== oldId) {
       try {
         const dataFolder = getIconsFolderPath(useProfile);
         const oldPath = path.join(dataFolder, oldId);
@@ -2841,7 +2838,7 @@ export async function saveIcon(
           fs.renameSync(oldPath, newPath);
           logger.info(`Renamed data folder ${oldPath} -> ${newPath}`);
 
-          // Update image path to new folder if it was a full path inside old folder (changed name and selected file from inside folder).
+          // Update image path to new folder if it was a full path inside old folder.
           if (newIcon.image && newIcon.image.startsWith(oldPath + path.sep)) {
             newIcon.image = newIcon.image.replace(oldPath, newPath);
             logger.info(`Updated image path from old folder: ${newIcon.image}`);
