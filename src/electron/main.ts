@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, protocol } from "electron";
-import { ensureAppDataFiles } from "./appDataSetup.js";
+import { ensureAppDataFiles, genericFileCleanup } from "./appDataSetup.js";
 import { registerIpcHandlers } from "./ipcHandlers.js";
 import { createLoggerForFile } from "./logging.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
@@ -41,6 +41,7 @@ app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
 
 app.on("ready", async () => {
   ensureAppDataFiles();
+  await genericFileCleanup();
   logger.info("App is starting...");
 
   await initializeThemeManager();

@@ -290,3 +290,48 @@ async function migrateLegacyDataFolders() {
     logger.error(`Failed to delete legacy data folder:`, e);
   }
 }
+
+export const genericFileCleanup = async () => {
+  const profilesPath = getProfilesPath();
+
+  if (!fs.existsSync(profilesPath)) {
+    logger.info(
+      `Profiles path does not exist, skipping genericFileCleanup: ${profilesPath}`
+    );
+    return;
+  }
+
+  const profileEntries = fs.readdirSync(profilesPath, { withFileTypes: true });
+
+  for (const profileEntry of profileEntries) {
+    if (!profileEntry.isDirectory()) continue;
+
+    const iconsPath = path.join(profilesPath, profileEntry.name, "icons");
+    if (!fs.existsSync(iconsPath) || !fs.statSync(iconsPath).isDirectory()) {
+      logger.debug(
+        `No icons directory for profile '${profileEntry.name}', skipping: ${iconsPath}`
+      );
+      continue;
+    }
+
+    const iconEntries = fs.readdirSync(iconsPath, { withFileTypes: true });
+    for (const iconEntry of iconEntries) {
+      if (!iconEntry.isDirectory()) continue;
+
+      if (/^temp(?:_\d+)?$/i.test(iconEntry.name)) {
+        const iconFolderPath = path.join(iconsPath, iconEntry.name);
+        try {
+          await shell.trashItem(iconFolderPath);
+          logger.info(
+            `Removed temporary icon folder from profile '${profileEntry.name}': ${iconFolderPath}`
+          );
+        } catch (err) {
+          logger.error(
+            `Failed to remove temporary icon folder ${iconFolderPath}:`,
+            err
+          );
+        }
+      }
+    }
+  }
+};
