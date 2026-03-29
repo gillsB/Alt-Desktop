@@ -5,7 +5,7 @@
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  background: transparent;
+  background-color: rgba(var(--color-bgPrimary), var(--background-opacity, 1));
   z-index: -10;
 }
 #video-bg {
@@ -27,7 +27,7 @@
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  background: transparent;
+  background-color: rgba(var(--color-bgPrimary), var(--background-opacity, 1));
   z-index: -10;
 }
 #image-bg {

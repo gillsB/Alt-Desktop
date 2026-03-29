@@ -9,7 +9,6 @@ const videoLogger = createVideoLogger("Background.tsx");
 
 interface BackgroundProps {
   opacity?: number;
-  fallbackColor?: string;
   logLevel?: "verbose" | "normal";
 }
 
@@ -30,13 +29,11 @@ interface BackgroundStatusData {
  *
  * @component
  * @param {number} [opacity=1] - The opacity of the background.
- * @param {string} [fallbackColor="#2c2c2c"] - The fallback background color if both video and image fail.
- * @param {string} [logLevel="normal"] - Controls verbosity of video events logging.
+ * @param {string} [logLevel="verbose"] - Controls verbosity of video events logging.
  * @returns {JSX.Element} The Background component.
  */
 const Background: React.FC<BackgroundProps> = ({
   opacity = 1,
-  fallbackColor = "#2c2c2c",
   logLevel = "verbose",
 }) => {
   const backgroundId = useRef<string>("");
@@ -829,8 +826,16 @@ const Background: React.FC<BackgroundProps> = ({
     opacity: isLoading ? 0 : opacity,
   };
 
+  const backgroundBaseStyle: React.CSSProperties = {
+    "--background-opacity": opacity,
+  } as React.CSSProperties;
+
   const fallbackStyle: React.CSSProperties = {
-    backgroundColor: fallbackColor,
+    backgroundColor:
+      opacity === 0
+        ? "transparent"
+        : "rgba(44, 44, 44, var(--background-opacity))",
+    opacity,
   };
 
   const statusModal =
@@ -892,7 +897,7 @@ const Background: React.FC<BackgroundProps> = ({
     return (
       <>
         {statusModal}
-        <div className="video-background">
+        <div className="video-background" style={backgroundBaseStyle}>
           <video
             id="video-bg"
             ref={videoRef}
@@ -937,7 +942,7 @@ const Background: React.FC<BackgroundProps> = ({
     return (
       <>
         {statusModal}
-        <div className="image-background">
+        <div className="image-background" style={backgroundBaseStyle}>
           <img
             id="image-bg"
             ref={imageRef}
