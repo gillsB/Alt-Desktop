@@ -311,9 +311,14 @@ const Background: React.FC<BackgroundProps> = ({
         ? summarizeFfprobe(backgroundStatus.ffprobe)
         : "";
 
+    const ffprobeJson =
+      backgroundStatus.ffprobe != null
+        ? JSON.stringify(backgroundStatus.ffprobe, null, 2)
+        : "<no ffprobe data>";
+
     const payload = `Status: ${backgroundStatus.status}\nPath: ${backgroundStatus.path}\nMessage: ${backgroundStatus.message}${
       backgroundStatus.error ? `\nError: ${backgroundStatus.error}` : ""
-    }${ffprobeSummary ? `\nFFprobe: ${ffprobeSummary}` : ""}`;
+    }${ffprobeSummary ? `\nFFprobe: ${ffprobeSummary}` : ""}\n\n${ffprobeJson}`;
 
     try {
       await navigator.clipboard.writeText(payload);
