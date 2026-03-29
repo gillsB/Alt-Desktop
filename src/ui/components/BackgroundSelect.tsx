@@ -423,50 +423,6 @@ const BackgroundSelect: React.FC = () => {
     });
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
-        if (showFilterPanelRef.current) {
-          setShowFilterPanel(false);
-          return;
-        }
-        if (contextMenu) {
-          setContextMenu(null);
-          return;
-        }
-        handleClose();
-      } else if (e.ctrlKey && e.key === "z" && !e.shiftKey) {
-        e.preventDefault();
-        handleUndo();
-      } else if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "z") {
-        e.preventDefault();
-        logger.info("Redo triggered");
-        handleRedo();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleClose]); // Not required, but added in case handleClose is updated to use things like states.
-
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setContextMenu(null);
-    };
-
-    if (contextMenu) {
-      document.addEventListener("click", handleClickOutside);
-      return () => document.removeEventListener("click", handleClickOutside);
-    }
-  }, [contextMenu]);
-
-  useEffect(() => {
-    if (selectedBg && undoStack.length === 0) {
-      setUndoStack([selectedBg.id]);
-    }
-  }, [selectedBg]);
-
   const handleSelect = async (id: string, e?: React.MouseEvent) => {
     // Used for selecting multiple files, not sure if this will be allowed or what to do with this.
     if (e && (e.ctrlKey || e.metaKey)) {
@@ -528,6 +484,107 @@ const BackgroundSelect: React.FC = () => {
       });
     }
   };
+
+  const moveSelection = (offset: number) => {
+    if (!selectedBg || summaries.length === 0) return;
+    const currentIndex = summaries.findIndex((bg) => bg.id === selectedBg.id);
+    if (currentIndex === -1) return;
+    let nextIndex = currentIndex + offset;
+    if (nextIndex < 0) nextIndex = 0;
+    if (nextIndex >= summaries.length) nextIndex = summaries.length - 1;
+    const nextBg = summaries[nextIndex];
+    if (nextBg) {
+      handleSelect(nextBg.id);
+      const el = gridItemRefs.current[nextBg.id];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  };
+
+  useEffect(() => {
+    const minSizeMap: Record<string, number> = {
+      tiny: 64,
+      small: 90,
+      medium: 128,
+      large: 180,
+      massive: 256,
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      logger.info(
+        "Key down event:",
+        e.key,
+        "Ctrl:",
+        e.ctrlKey,
+        "Shift:",
+        e.shiftKey
+      );
+      // Avoid interfering with text inputs
+      const target = e.target as HTMLElement;
+      const tag = target?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || target?.isContentEditable)
+        return;
+
+      if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
+        if (showFilterPanelRef.current) {
+          setShowFilterPanel(false);
+          return;
+        }
+        if (contextMenu) {
+          setContextMenu(null);
+          return;
+        }
+        handleClose();
+      } else if (e.ctrlKey && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        logger.info("Redo triggered");
+        handleRedo();
+      } else if (
+        ["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].includes(e.key)
+      ) {
+        e.preventDefault();
+
+        if (e.key === "ArrowRight") {
+          moveSelection(1);
+        } else if (e.key === "ArrowLeft") {
+          moveSelection(-1);
+        } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          const grid = gridContentRef.current;
+          const cols = grid
+            ? Math.max(1, Math.floor(grid.clientWidth / minSizeMap[iconSize]))
+            : 1;
+          const delta = e.key === "ArrowDown" ? cols : -cols;
+          moveSelection(delta);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleClose, contextMenu, selectedBg, summaries, iconSize, handleSelect]); // Not required, but added in case handleClose is updated to use things like states.
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setContextMenu(null);
+    };
+
+    if (contextMenu) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [contextMenu]);
+
+  useEffect(() => {
+    if (selectedBg && undoStack.length === 0) {
+      setUndoStack([selectedBg.id]);
+    }
+  }, [selectedBg]);
 
   const handleEditBackground = async (backgroundId?: string) => {
     // remember right clicked background for restoring page/scroll location after edit
