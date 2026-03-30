@@ -997,10 +997,18 @@ const BackgroundSelect: React.FC = () => {
           }
         }
 
-        // If the save & apply return from EditBackground, fully select it
-        if (applied && updated) {
+        const shouldUpdateSelection =
+          updated &&
+          (applied ||
+            selectedBg?.id === updated.id ||
+            selectedIds.includes(updated.id));
+
+        if (shouldUpdateSelection && updated) {
           setSelectedIds([updated.id]);
           setSelectedBg(updated);
+        }
+
+        if (applied && updated) {
           await window.electron.previewBackgroundUpdate({
             id: updated.id,
             profile: updated.localProfile ?? "default",
@@ -1025,11 +1033,18 @@ const BackgroundSelect: React.FC = () => {
       if (targetId) {
         try {
           const { page: bgPage } = await getBackgroundPage(targetId);
+          const shouldRestoreSummary =
+            saved &&
+            updatedId === targetId &&
+            (applied ||
+              selectedBg?.id === targetId ||
+              selectedIds.includes(targetId));
+
           if (bgPage !== -1) {
             setScrollTarget({
               backgroundId: targetId,
               shouldScroll: true,
-              setSummary: false,
+              setSummary: shouldRestoreSummary,
             });
             setPage(bgPage);
           } else {
@@ -1037,7 +1052,7 @@ const BackgroundSelect: React.FC = () => {
             setScrollTarget({
               backgroundId: targetId,
               shouldScroll: true,
-              setSummary: false,
+              setSummary: shouldRestoreSummary,
             });
           }
         } catch (e) {
