@@ -60,6 +60,8 @@ const Background: React.FC<BackgroundProps> = ({
       ffprobe: null,
     });
 
+  const [backgroundReloadTrigger, setBackgroundReloadTrigger] = useState(0);
+
   const [statusModalPosition, setStatusModalPosition] = useState({
     x: 20,
     y: 20,
@@ -180,6 +182,7 @@ const Background: React.FC<BackgroundProps> = ({
       const loadedBgJson = await window.electron.getBgJson(id);
       setBgJson(loadedBgJson);
       setBackgroundPath(filePath || "");
+      setBackgroundReloadTrigger((prev) => prev + 1);
       updateBackgroundStatus({
         visible: true,
         status: "swapping",
@@ -445,6 +448,7 @@ const Background: React.FC<BackgroundProps> = ({
             setBgJson(await window.electron.getBgJson(updates.id));
           }
           setBackgroundPath(filePath || "");
+          setBackgroundReloadTrigger((prev) => prev + 1);
           updateBackgroundStatus({
             visible: true,
             status: "swapping",
@@ -547,7 +551,7 @@ const Background: React.FC<BackgroundProps> = ({
       }
     };
     detectAndSet();
-  }, [backgroundPath]);
+  }, [backgroundPath, backgroundReloadTrigger]);
 
   // Reset performance metrics when video source changes
   useEffect(() => {
