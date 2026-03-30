@@ -624,10 +624,21 @@ const BackgroundSelect: React.FC = () => {
 
   const handleContextMenu = (e: React.MouseEvent, backgroundId: string) => {
     e.preventDefault();
+    e.stopPropagation();
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
       backgroundId,
+    });
+  };
+
+  const handleGridContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      backgroundId: "",
     });
   };
 
@@ -1181,6 +1192,7 @@ const BackgroundSelect: React.FC = () => {
             <div
               className={`background-grid ${iconSize}-icons`}
               ref={gridContentRef}
+              onContextMenu={handleGridContextMenu}
             >
               {summaries.map((bg) => (
                 <div
@@ -1513,27 +1525,31 @@ const BackgroundSelect: React.FC = () => {
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div
-            className="menu-item"
-            onClick={() => handleEditBackground(contextMenu.backgroundId)}
-          >
-            Edit Background
-          </div>
-          <div className="menu-separator" />
-          <div
-            className="menu-item"
-            onClick={() => handleOpenFolder(contextMenu.backgroundId)}
-          >
-            Open Folder
-          </div>
-          <div className="menu-separator" />
-          <div
-            className="menu-item"
-            onClick={() => handleDeleteBackground(contextMenu.backgroundId)}
-          >
-            Delete Background
-          </div>
-          <div className="menu-separator" />
+          {contextMenu.backgroundId ? (
+            <>
+              <div
+                className="menu-item"
+                onClick={() => handleEditBackground(contextMenu.backgroundId)}
+              >
+                Edit Background
+              </div>
+              <div className="menu-separator" />
+              <div
+                className="menu-item"
+                onClick={() => handleOpenFolder(contextMenu.backgroundId)}
+              >
+                Open Folder
+              </div>
+              <div className="menu-separator" />
+              <div
+                className="menu-item"
+                onClick={() => handleDeleteBackground(contextMenu.backgroundId)}
+              >
+                Delete Background
+              </div>
+              <div className="menu-separator" />
+            </>
+          ) : null}
           <div
             className="menu-item has-submenu"
             onMouseEnter={() => setShowViewSubmenu(true)}
