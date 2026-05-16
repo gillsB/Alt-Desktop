@@ -1100,6 +1100,7 @@ const BackgroundSelect: React.FC = () => {
             <ClearableInput
               value={search}
               placeholder="Search backgrounds..."
+              autoFocus
               onChange={(e) => {
                 const value = e.target.value;
                 setPage(0);

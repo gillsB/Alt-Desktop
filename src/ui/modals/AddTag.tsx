@@ -97,6 +97,7 @@ const AddTagWindow: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 onChange={handleInputChange}
                 placeholder="Enter new tag"
                 className="create-tag-input"
+                autoFocus
               />
             </div>
             <div className="subwindow-field">

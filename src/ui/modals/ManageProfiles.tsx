@@ -221,6 +221,7 @@ const ManageProfiles: React.FC<ManageProfilesProps> = ({
                   onClear={() => setSearchText("")}
                   placeholder="Search profiles"
                   inputClassName="manage-profiles-search"
+                  autoFocus
                 />
               </div>
               <div className="manage-profiles-top-section">

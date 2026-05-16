@@ -319,6 +319,7 @@ const EditCategories: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 onChange={handleInputChange}
                 placeholder="Enter new category name"
                 className="create-tag-input"
+                autoFocus
               />
               <button className="button" onClick={handleAddCategory}>
                 Add Category

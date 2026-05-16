@@ -568,6 +568,7 @@ const EditIcon: React.FC = () => {
                 id="icon-name"
                 flex={true}
                 value={icon.name}
+                autoFocus
                 onChange={(e) => {
                   const sanitized = e.target.value.replace(
                     INVALID_FOLDER_CHARS,

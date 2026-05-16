@@ -1100,6 +1100,7 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
                 setSummary((prev) => ({ ...prev, name: sanitized }));
               }}
               placeholder="Enter background name"
+              autoFocus
             />
           </div>
           {bgFileType?.startsWith("video") && (
