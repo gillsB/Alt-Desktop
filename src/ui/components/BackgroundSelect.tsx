@@ -377,7 +377,7 @@ const BackgroundSelect: React.FC = () => {
 
   const handleClose = async () => {
     logger.info("BackgroundSelect window closed");
-    await window.electron.reloadBackground();
+    //await window.electron.reloadBackground(); // removed, it should not be needed to reload on close as it should already be previewed.
     window.electron.sendSubWindowAction("CLOSE_SUBWINDOW", "BackgroundSelect");
   };
 
