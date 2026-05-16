@@ -523,8 +523,6 @@ const BackgroundSelect: React.FC = () => {
       // Avoid interfering with text inputs
       const target = e.target as HTMLElement;
       const tag = target?.tagName?.toLowerCase();
-      if (tag === "input" || tag === "textarea" || target?.isContentEditable)
-        return;
 
       if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
         if (showFilterPanelRef.current) {
