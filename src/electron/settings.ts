@@ -174,6 +174,7 @@ export const getSetting = (key: keyof typeof defaultSettings): unknown => {
 export const saveSettingsData = async (
   data: Partial<SettingsData>
 ): Promise<boolean> => {
+  logger.info("Saving settings data:", JSON.stringify(data));
   try {
     if (data.defaultBackgroundPath) {
       const ok = await canReadWriteDir(data.defaultBackgroundPath);
@@ -216,7 +217,7 @@ export const saveSettingsData = async (
     logger.info("Settings data saved successfully.");
     ensureDefaultSettings(); // Add back any missing default settings
     // Force reload bg to update profile if setting updated. (saved profile -> default or default -> saved profile)
-    if (data.multipleProfiles !== null) {
+    if (data.multipleProfiles) {
       getMainWindow()?.webContents.send("reload-background");
     }
     return true;
