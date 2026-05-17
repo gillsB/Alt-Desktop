@@ -36,7 +36,7 @@ const BackgroundSelect: React.FC = () => {
     y: number;
     backgroundId: string;
   } | null>(null);
-  const fetching = useRef(false);
+  const latestFetchIdRef = useRef(0);
 
   const [isDragging, setIsDragging] = useState(false);
   const [page, setPage] = useState(-1);
@@ -181,7 +181,10 @@ const BackgroundSelect: React.FC = () => {
 
   const fetchPage = async () => {
     if (page === -1) return; // Prevent fetching page before initial page load.
-    logger.info(`Fetching page ${page + 1} with search "${search}"`);
+    const fetchId = ++latestFetchIdRef.current;
+    logger.info(
+      `Fetching page ${page + 1} with search "${search}" (fetchId=${fetchId})`
+    );
 
     setIsLoadingPage(true);
 
@@ -201,15 +204,19 @@ const BackgroundSelect: React.FC = () => {
       excludeTags: newExcludeTags,
     });
 
+    if (fetchId !== latestFetchIdRef.current) {
+      return;
+    }
+
     setSummaries(results);
     setTotal(total);
 
     // Brief delay to let images start loading before removing overlay
     setTimeout(() => {
-      setIsLoadingPage(false);
+      if (fetchId === latestFetchIdRef.current) {
+        setIsLoadingPage(false);
+      }
     }, 100);
-
-    fetching.current = false;
   };
 
   const getBackgroundPage = async (id: string) => {
@@ -520,9 +527,6 @@ const BackgroundSelect: React.FC = () => {
         "Shift:",
         e.shiftKey
       );
-      // Avoid interfering with text inputs
-      const target = e.target as HTMLElement;
-      const tag = target?.tagName?.toLowerCase();
 
       if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
         if (showFilterPanelRef.current) {
