@@ -1299,27 +1299,29 @@ const EditBackground: React.FC<EditBackgroundProps> = ({
 
         {/* Right: Tag management */}
         <div className="edit-background-tags-panel">
-          <div className="search-header">
-            <ClearableInput
-              placeholder="Search tags..."
-              value={localTagSearch}
-              onChange={(e) => setLocalTagSearch(e.target.value)}
-              flex={true}
-            />
-            <button
-              type="button"
-              className="button"
-              onClick={handleAddTagClick}
-            >
-              Add Tag
-            </button>
-            <button
-              type="button"
-              className="button"
-              onClick={handleCategoriesClick}
-            >
-              Categories
-            </button>
+          <div className="edit-bg-field">
+            <div className="search-header">
+              <ClearableInput
+                placeholder="Search tags..."
+                value={localTagSearch}
+                onChange={(e) => setLocalTagSearch(e.target.value)}
+                flex={true}
+              />
+              <button
+                type="button"
+                className="button"
+                onClick={handleAddTagClick}
+              >
+                Add Tag
+              </button>
+              <button
+                type="button"
+                className="button"
+                onClick={handleCategoriesClick}
+              >
+                Categories
+              </button>
+            </div>
           </div>
           {/* --- Public Tags --- */}
           <div className="edit-bg-field">

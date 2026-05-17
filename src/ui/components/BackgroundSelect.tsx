@@ -608,6 +608,7 @@ const BackgroundSelect: React.FC = () => {
     }
     const bg = summaries.find((bg) => bg.id === backgroundId);
     logger.info("background = ", bg);
+    setContextMenu(null);
     if (bg) {
       setEditingSummary(bg);
     } else {
