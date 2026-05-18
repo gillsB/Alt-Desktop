@@ -380,6 +380,7 @@ interface EventParamMapping {
   importAllIconsToDesktopCache: [];
   hoverHighlightIcon: [id?: string];
   testProfileIcons: [profile: string];
+  inspectAtCursor: [];
 }
 
 // The returns from the main process to the renderer
@@ -481,6 +482,7 @@ type EventPayloadMapping = {
   importAllIconsToDesktopCache: boolean;
   hoverHighlightIcon: boolean;
   testProfileIcons: TestProfileIconsResult[] | boolean;
+  inspectAtCursor: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -682,5 +684,6 @@ interface Window {
     testProfileIcons: (
       profile: string
     ) => Promise<TestProfileIconsResult[] | boolean>;
+    inspectAtCursor: () => Promise<boolean>;
   };
 }

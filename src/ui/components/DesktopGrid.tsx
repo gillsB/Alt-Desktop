@@ -8,6 +8,8 @@ import { SafeImage } from "./SafeImage";
 
 const logger = createLogger("DesktopGrid.tsx");
 
+const devMode = process.env.NODE_ENV === "development";
+
 interface ContextMenu {
   x: number;
   y: number;
@@ -668,6 +670,11 @@ const DesktopGrid: React.FC = () => {
         hideContextMenu();
         // Focuses subwindow if open
         window.electron.getSubWindowTitle();
+      }
+      // Handle inspect element keybind (Ctrl+Shift+I or Cmd+Shift+I on Mac)
+      if (devMode && (e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "I") {
+        e.preventDefault();
+        window.electron.inspectAtCursor();
       }
     };
 
