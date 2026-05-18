@@ -565,6 +565,7 @@ const BackgroundSelect: React.FC = () => {
           moveSelection(delta);
         }
       } else if (
+        // DevMode: Ctrl+Shift+I to inspect element, this also covers EditBackground.tsx
         devMode &&
         (e.ctrlKey || e.metaKey) &&
         e.shiftKey &&

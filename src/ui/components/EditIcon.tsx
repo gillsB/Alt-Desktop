@@ -15,6 +15,8 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("EditIcon.tsx");
 
+const devMode = process.env.NODE_ENV === "development";
+
 const EditIcon: React.FC = () => {
   const INVALID_FOLDER_CHARS = /[<>:"/\\|?*]/g; // Sanitize folder names
   const location = useLocation();
@@ -200,6 +202,14 @@ const EditIcon: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
         handleClose();
+      } else if (
+        devMode &&
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "i"
+      ) {
+        e.preventDefault();
+        window.electron.subWindowInspectAtCursor();
       }
     };
     window.addEventListener("keydown", handleKeyDown);

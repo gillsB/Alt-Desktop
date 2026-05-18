@@ -7,6 +7,8 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("Settings.tsx");
 
+const devMode = process.env.NODE_ENV === "development";
+
 const Settings: React.FC = () => {
   const [settings, setSettings] = useState<SettingsData | null>(null);
   const [initialSettings, setInitialSettings] = useState<SettingsData | null>(
@@ -82,6 +84,14 @@ const Settings: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
         handleClose();
+      } else if (
+        devMode &&
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "i"
+      ) {
+        e.preventDefault();
+        window.electron.subWindowInspectAtCursor();
       }
     };
     window.addEventListener("keydown", handleKeyDown);

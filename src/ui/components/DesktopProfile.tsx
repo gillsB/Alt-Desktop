@@ -10,6 +10,8 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("DesktopProfile.tsx");
 
+const devMode = process.env.NODE_ENV === "development";
+
 const TABS = [
   { key: "desktop", label: "Desktop Files" },
   { key: "other", label: "Other Profiles" },
@@ -112,17 +114,25 @@ const DesktopProfile: React.FC = () => {
       }
     };
 
-    const handleEscapeKey = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" || (e.ctrlKey && e.key === "w")) {
         escapeHandlerRef.current();
+      } else if (
+        devMode &&
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "i"
+      ) {
+        e.preventDefault();
+        window.electron.subWindowInspectAtCursor();
       }
     };
 
     document.addEventListener("click", handleClickOutside);
-    document.addEventListener("keydown", handleEscapeKey, true);
+    document.addEventListener("keydown", handleKeyDown, true);
     return () => {
       document.removeEventListener("click", handleClickOutside);
-      document.removeEventListener("keydown", handleEscapeKey, true);
+      document.removeEventListener("keydown", handleKeyDown, true);
     };
   }, []);
 
