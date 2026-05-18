@@ -381,6 +381,7 @@ interface EventParamMapping {
   hoverHighlightIcon: [id?: string];
   testProfileIcons: [profile: string];
   inspectAtCursor: [];
+  subWindowInspectAtCursor: [];
 }
 
 // The returns from the main process to the renderer
@@ -483,6 +484,7 @@ type EventPayloadMapping = {
   hoverHighlightIcon: boolean;
   testProfileIcons: TestProfileIconsResult[] | boolean;
   inspectAtCursor: boolean;
+  subWindowInspectAtCursor: boolean;
 };
 
 type UnsubscribeFunction = () => void;
@@ -685,5 +687,6 @@ interface Window {
       profile: string
     ) => Promise<TestProfileIconsResult[] | boolean>;
     inspectAtCursor: () => Promise<boolean>;
+    subWindowInspectAtCursor: () => Promise<boolean>;
   };
 }

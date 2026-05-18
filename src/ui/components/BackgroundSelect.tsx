@@ -14,6 +14,8 @@ import { SubWindowHeader } from "./SubWindowHeader";
 
 const logger = createLogger("BackgroundSelect.tsx");
 
+const devMode = process.env.NODE_ENV === "development";
+
 const PAGE_SIZE = 60;
 let includeTags: string[] = [];
 const excludeTags: string[] = [];
@@ -562,6 +564,14 @@ const BackgroundSelect: React.FC = () => {
           const delta = e.key === "ArrowDown" ? cols : -cols;
           moveSelection(delta);
         }
+      } else if (
+        devMode &&
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "i"
+      ) {
+        e.preventDefault();
+        window.electron.subWindowInspectAtCursor();
       }
     };
 

@@ -209,6 +209,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   hoverHighlightIcon: (id?: string) => ipcInvoke("hoverHighlightIcon", id),
   testProfileIcons: (profile: string) => ipcInvoke("testProfileIcons", profile),
   inspectAtCursor: () => ipcInvoke("inspectAtCursor"),
+  subWindowInspectAtCursor: () => ipcInvoke("subWindowInspectAtCursor"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

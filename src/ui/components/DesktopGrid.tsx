@@ -672,7 +672,12 @@ const DesktopGrid: React.FC = () => {
         window.electron.getSubWindowTitle();
       }
       // Handle inspect element keybind (Ctrl+Shift+I or Cmd+Shift+I on Mac)
-      if (devMode && (e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "I") {
+      if (
+        devMode &&
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "i"
+      ) {
         e.preventDefault();
         window.electron.inspectAtCursor();
       }

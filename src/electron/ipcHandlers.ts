@@ -253,6 +253,31 @@ export function registerIpcHandlers(mainWindow: Electron.BrowserWindow) {
     }
   });
 
+  ipcMainHandle("subWindowInspectAtCursor", async (): Promise<boolean> => {
+    try {
+      const cursor = screen.getCursorScreenPoint();
+      const subWindow = getActiveSubWindow();
+      if (!subWindow) return false;
+      // Use content bounds so we get coordinates relative to the webContents
+      const contentBounds = subWindow.getContentBounds();
+      const x = Math.round(cursor.x - contentBounds.x);
+      const y = Math.round(cursor.y - contentBounds.y);
+
+      logger.info(
+        `Inspect at cursor requested. screen=(${cursor.x},${cursor.y}) content=(${contentBounds.x},${contentBounds.y}) page=(${x},${y})`
+      );
+
+      if (!subWindow.webContents.isDevToolsOpened()) {
+        subWindow.webContents.openDevTools({ mode: "detach" });
+      }
+      subWindow.webContents.inspectElement(x, y);
+      return true;
+    } catch (err) {
+      logger.error("Failed to inspect at cursor:", err);
+      return false;
+    }
+  });
+
   ipcMainOn(
     "sendSubWindowAction",
     (payload: { action: SubWindowAction; title: string }) => {
